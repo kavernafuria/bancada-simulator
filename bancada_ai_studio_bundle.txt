@@ -1,0 +1,2664 @@
+﻿import teamsData from "@/data/bancada_teams.json";
+import alliancesData from "@/data/bancada_alliances.json";
+
+export interface TorcidaStats {
+  contingente: number;
+  pressao_bancada: number;
+  poder_pista: number;
+  caravana: number;
+  autonomia_financeira: number;
+}
+
+export interface StateTrackers {
+  moral: number;
+  risco_mp: number;
+  relacao_clube: number;
+  respeito_nacional: number;
+}
+
+export type ArchetypeId = "PADRAO" | "BARRA_BRAVA" | "BONDE_PISTA" | "COLETIVO_POPULAR";
+
+export interface ArchetypeDefinition {
+  id: ArchetypeId;
+  name: string;
+  subtitle: string;
+  description: string;
+  statModifiers: Partial<TorcidaStats>;
+  stateModifiers: Partial<StateTrackers>;
+}
+
+export interface OfficialTorcida {
+  clube: string;
+  torcida: string;
+  sigla: string;
+  tier: string;
+  contingente: number;
+  pressao_bancada: number;
+  poder_pista: number;
+  caravana: number;
+  autonomia_financeira: number;
+  perfil_predominante: string;
+  estado: string;
+  eixo_alianca: string;
+}
+
+export type PipelineStepType = "action" | "key_game";
+
+export interface PipelineStep {
+  stepIndex: number;
+  type: PipelineStepType;
+  title: string;
+  description: string;
+  isHomeGame?: boolean;
+  isLongDistance?: boolean;
+  isAllyGame?: boolean;
+  opponentName?: string;
+  opponentClub?: string;
+  actionData?: DynamicEventOption;
+}
+
+export type ClubStatus = "DISPUTANDO_TITULO" | "MEIO_TABELA" | "CRISE_REBAIXAMENTO" | "LUTANDO_ACESSO";
+
+export interface FormattedDelta {
+  label: string;
+  value: string;
+  isPositive: boolean;
+}
+
+export interface DynamicChoice {
+  text: string;
+  cost: number;
+  statEffects: Partial<TorcidaStats>;
+  stateEffects: Partial<StateTrackers>;
+  log: string;
+  formattedDeltas: FormattedDelta[];
+}
+
+export interface DynamicEventOption {
+  id: number;
+  category: "POOL_A_FINANCAS" | "POOL_B_CLUBE" | "POOL_C_SOCIAL" | "POOL_D_DIPLOMACIA";
+  title: string;
+  description: string;
+  choices: DynamicChoice[];
+}
+
+export interface TacticalDilemmaChoice {
+  text: string;
+  pistaBonus: number;
+  delayMinutes: number;
+  medicalRisk: number;
+  moralEffect: number;
+  log: string;
+  formattedDeltas: FormattedDelta[];
+}
+
+export interface TacticalDilemma {
+  scoutAlertTitle: string;
+  description: string;
+  choices: TacticalDilemmaChoice[];
+}
+
+export interface HomeGameSetup {
+  visualParty: "MOSAICO_3D" | "RUAS_DE_FOGO" | "BOBINAS_PAPEL" | "APENAS_BATERIA";
+  security: "LINHA_FRENTE_PORTAO" | "CONCENTRADOS_SEDE";
+  hospitality: "CHURRASCO_ALIADOS" | "RECEPCAO_SIMPLES";
+}
+
+export interface AwayGameSetup {
+  distanceType: "SHORT" | "LONG";
+  shortTransport?: "BONDE_TREM_METRO" | "ARRANCADA_CAMINHADA" | "VANS_RATEADAS";
+  longTransport?: "CARAVANA_RATEIO" | "FRETADO_BARATO" | "ONIBUS_EXECUTIVO";
+  armaments: "SINALIZADORES_BATEDORES" | "ARMAS_CONTENCAO" | "ENTRADA_PACIFICA";
+  tactic: "ESCOLTA_POLICIAL" | "ROTA_SEM_ESCOLTA";
+}
+
+export interface KeyGameResult {
+  effectiveForcePlayer: number;
+  effectiveForceRival: number;
+  scorePlayer: number;
+  scoreRival: number;
+  isVictory: boolean;
+  isAllyGame: boolean;
+  statusTitle: string;
+  memberDesertion: number;
+  medicalExpenses: number;
+  bannerLost: boolean;
+  extraCost: number;
+  mpPenalty: number;
+  moralChange: number;
+  chronicleText: string;
+  formattedDeltas: FormattedDelta[];
+}
+
+// Export Archetypes Definitions
+export const ARCHETYPES: Record<ArchetypeId, ArchetypeDefinition> = {
+  PADRAO: {
+    id: "PADRAO",
+    name: "1. Torcida Organizada PadrÃ£o",
+    subtitle: "Perfil Equilibrado",
+    description: "Foco em confecÃ§Ã£o prÃ³pria, bateria de samba, sedes e caravanas de Ã´nibus.",
+    statModifiers: { contingente: 5, caravana: 5, autonomia_financeira: 5 },
+    stateModifiers: { moral: 5, risco_mp: 0 },
+  },
+  BARRA_BRAVA: {
+    id: "BARRA_BRAVA",
+    name: "2. Barra Brava / Movimento",
+    subtitle: "Perfil Musical & Festa",
+    description: "Foco em canto contÃ­nuo, murgas/sopros, tirantes. Pouco foco em sede e loja.",
+    statModifiers: { pressao_bancada: 15, contingente: 5, poder_pista: -10, autonomia_financeira: -15 },
+    stateModifiers: { moral: 10, risco_mp: -5 },
+  },
+  BONDE_PISTA: {
+    id: "BONDE_PISTA",
+    name: "3. Bonde de Pista / Linha de Frente",
+    subtitle: "Perfil Combate & Escolta",
+    description: "Foco em linha de frente e respeito de rua. Alta vigilÃ¢ncia policial.",
+    statModifiers: { poder_pista: 25, pressao_bancada: -20, autonomia_financeira: -15 },
+    stateModifiers: { risco_mp: 15, respeito_nacional: 10 },
+  },
+  COLETIVO_POPULAR: {
+    id: "COLETIVO_POPULAR",
+    name: "4. Coletivo Popular AutÃ´nomo",
+    subtitle: "Perfil ComunitÃ¡rio & Ingressos",
+    description: "Foco em ingressos populares e resistÃªncia polÃ­tica. Sem estrutura bÃ©lica.",
+    statModifiers: { contingente: 10, poder_pista: -15 },
+    stateModifiers: { moral: 10, risco_mp: -10, relacao_clube: 15 },
+  },
+};
+
+// Export List of Official Torcidas
+export function getOfficialTorcidas(): OfficialTorcida[] {
+  return teamsData as OfficialTorcida[];
+}
+
+// Export Annual Pipeline
+export function getAnnualPipeline(): PipelineStep[] {
+  return [
+    {
+      stepIndex: 0,
+      type: "action",
+      title: "AÃ§Ã£o 01 - PrÃ©-Temporada & Fardamento",
+      description: "ConfecÃ§Ã£o das camisas, agasalhos e regatas que vestirÃ£ a bancada no ano.",
+    },
+    {
+      stepIndex: 1,
+      type: "action",
+      title: "AÃ§Ã£o 02 - SÃ³cios & Mensalidade",
+      description: "Campanha de anuidade e recadastramento de quadra.",
+    },
+    {
+      stepIndex: 2,
+      type: "key_game",
+      title: "ðŸ”¥ JOGO CHAVE 1 - FORA DE CASA (Curta DistÃ¢ncia)",
+      description: "Deslocamento metropolitano para o clÃ¡ssico regional.",
+      isHomeGame: false,
+      isLongDistance: false,
+    },
+    {
+      stepIndex: 3,
+      type: "action",
+      title: "AÃ§Ã£o 03 - AÃ§Ã£o Social ComunitÃ¡ria",
+      description: "Campanha do agasalho e doaÃ§Ã£o de sangue (reduz fiscalizaÃ§Ã£o do MP).",
+    },
+    {
+      stepIndex: 4,
+      type: "action",
+      title: "AÃ§Ã£o 04 - ReuniÃ£o de Alinhamento com Choque/PM",
+      description: "DefiniÃ§Ã£o de trajetos de comboio e liberaÃ§Ã£o de adereÃ§os de arquibancada.",
+    },
+    {
+      stepIndex: 5,
+      type: "key_game",
+      title: "ðŸ”¥ JOGO CHAVE 2 - EM CASA (Defesa de Sede & Mosaico)",
+      description: "Confronto decisivo no estÃ¡dio local com festa visual.",
+      isHomeGame: true,
+    },
+    {
+      stepIndex: 6,
+      type: "action",
+      title: "AÃ§Ã£o 05 - Festa de AniversÃ¡rio na Quadra",
+      description: "ComemoraÃ§Ã£o da data de fundaÃ§Ã£o da torcida.",
+    },
+    {
+      stepIndex: 7,
+      type: "action",
+      title: "AÃ§Ã£o 06 - GestÃ£o de PatrimÃ´nio & Bateria",
+      description: "AquisiÃ§Ã£o de instrumentos de percussÃ£o e faixas oficiais.",
+    },
+    {
+      stepIndex: 8,
+      type: "key_game",
+      title: "ðŸ”¥ JOGO CHAVE 3 - FORA DE CASA (Longa DistÃ¢ncia)",
+      description: "Viagem interestadual pela rodovia para o jogo decisivo.",
+      isHomeGame: false,
+      isLongDistance: true,
+    },
+    {
+      stepIndex: 9,
+      type: "action",
+      title: "AÃ§Ã£o 07 - IntervenÃ§Ã£o de Crise / Fase do Time",
+      description: "Posicionamento da torcida diante dos resultados em campo.",
+    },
+    {
+      stepIndex: 10,
+      type: "action",
+      title: "AÃ§Ã£o 08 - Diplomacia de Pista & Aliados",
+      description: "RecepÃ§Ã£o e confraternizaÃ§Ã£o com bondes de torcidas aliadas.",
+    },
+    {
+      stepIndex: 11,
+      type: "key_game",
+      title: "ðŸ”¥ JOGO CHAVE 4 - EM CASA (DecisÃ£o / Festa MÃ¡xima)",
+      description: "Ãšltimo jogo em casa disputando o acesso ou tÃ­tulo da temporada.",
+      isHomeGame: true,
+    },
+    {
+      stepIndex: 12,
+      type: "action",
+      title: "AÃ§Ã£o 09 e 10 - BalanÃ§o Anual, EleiÃ§Ãµes e TransiÃ§Ã£o",
+      description: "Assembleia geral de prestaÃ§Ã£o de contas do ano e planejamento futuro.",
+    },
+  ];
+}
+
+// 2. Diminishing Returns Curve Math
+export function applyDiminishingReturns(currentVal: number, delta: number): number {
+  if (delta <= 0) return Math.max(0, currentVal + delta);
+
+  if (currentVal < 70) {
+    return Math.min(100, currentVal + delta);
+  } else if (currentVal < 85) {
+    return Math.min(100, Math.round(currentVal + delta * 0.6));
+  } else if (currentVal < 95) {
+    return Math.min(100, Math.round(currentVal + delta * 0.35));
+  } else {
+    return Math.min(100, Math.round(currentVal + delta * 0.15));
+  }
+}
+
+// 3. Create Custom Torcida with Archetype & Inheritance
+export function createCustomTorcidaWithArchetype(
+  torcidaName: string,
+  sigla: string,
+  clubName: string,
+  archetypeId: ArchetypeId
+): { torcida: OfficialTorcida; state: StateTrackers } {
+  const normName = torcidaName.trim() || "Torcida Organizada";
+  const normSigla = sigla.trim().toUpperCase() || "TOC";
+  const arch = ARCHETYPES[archetypeId] || ARCHETYPES.PADRAO;
+
+  const mapped = (teamsData as OfficialTorcida[]).find(
+    (t) => t.clube.toLowerCase() === clubName.trim().toLowerCase()
+  );
+
+  let baseStats: TorcidaStats = mapped
+    ? {
+        contingente: mapped.contingente,
+        pressao_bancada: mapped.pressao_bancada,
+        poder_pista: mapped.poder_pista,
+        caravana: mapped.caravana,
+        autonomia_financeira: mapped.autonomia_financeira,
+      }
+    : {
+        contingente: 60,
+        pressao_bancada: 65,
+        poder_pista: 60,
+        caravana: 55,
+        autonomia_financeira: 50,
+      };
+
+  Object.entries(arch.statModifiers).forEach(([key, mod]) => {
+    const k = key as keyof TorcidaStats;
+    baseStats[k] = Math.min(100, Math.max(10, baseStats[k] + (mod || 0)));
+  });
+
+  const stateTrackers: StateTrackers = {
+    moral: 70 + (arch.stateModifiers.moral || 0),
+    risco_mp: Math.max(0, 10 + (arch.stateModifiers.risco_mp || 0)),
+    relacao_clube: 0 + (arch.stateModifiers.relacao_clube || 0),
+    respeito_nacional: 50 + (arch.stateModifiers.respeito_nacional || 0),
+  };
+
+  const torcida: OfficialTorcida = {
+    clube: mapped ? mapped.clube : clubName || "Clube Independente",
+    torcida: normName,
+    sigla: normSigla,
+    tier: mapped ? mapped.tier : "B",
+    contingente: baseStats.contingente,
+    pressao_bancada: baseStats.pressao_bancada,
+    poder_pista: baseStats.poder_pista,
+    caravana: baseStats.caravana,
+    autonomia_financeira: baseStats.autonomia_financeira,
+    perfil_predominante: `${arch.subtitle} â€¢ ${mapped ? mapped.perfil_predominante : "Nova Torcida"}`,
+    estado: mapped ? mapped.estado : "SP",
+    eixo_alianca: mapped ? mapped.eixo_alianca : "NEUTRO",
+  };
+
+  return { torcida, state: stateTrackers };
+}
+
+// 4. Dynamic Contextual Event Pools (Pools A, B, C, D)
+export function getSeasonalContextualEvents(status: ClubStatus): DynamicEventOption[] {
+  const events: DynamicEventOption[] = [
+    {
+      id: 101,
+      category: "POOL_A_FINANCAS",
+      title: "Planejamento de ColeÃ§Ã£o de Fardamento",
+      description: "DefiniÃ§Ã£o do modelo e malha das regatas e agasalhos de quadra.",
+      choices: [
+        {
+          text: "ColeÃ§Ã£o Fardamento RetrÃ´ com bordado pesado em algodÃ£o (-R$ 15.000)",
+          cost: 15000,
+          statEffects: { pressao_bancada: 5, autonomia_financeira: 8 },
+          stateEffects: { moral: 5 },
+          log: "LanÃ§ou fardamento retrÃ´ premium com alta margem na loja da sede.",
+          formattedDeltas: [
+            { label: "Bancada", value: "+5", isPositive: true },
+            { label: "FinanÃ§as", value: "+8", isPositive: true },
+            { label: "Moral", value: "+5", isPositive: true },
+            { label: "Caixa", value: "-R$ 15.000", isPositive: false },
+          ],
+        },
+        {
+          text: "Linha casual de rua no rateio direto dos sÃ³cios (Custo R$ 0)",
+          cost: 0,
+          statEffects: { contingente: 6 },
+          stateEffects: { moral: 3 },
+          log: "LanÃ§ou regata casual popular no rateio entre a massa.",
+          formattedDeltas: [
+            { label: "SÃ³cios (Massa)", value: "+85 sÃ³cios (+6)", isPositive: true },
+            { label: "Moral", value: "+3", isPositive: true },
+            { label: "Caixa", value: "R$ 0", isPositive: true },
+          ],
+        },
+      ],
+    },
+    {
+      id: 102,
+      category: "POOL_B_CLUBE",
+      title: "Posicionamento sobre PolÃ­tica do Clube",
+      description: "DiscussÃ£o referente ao preÃ§o de ingressos e polÃ­tica da diretoria.",
+      choices: [
+        {
+          text: "CobranÃ§a firme por cota de ingresso popular no setor visitante (Custo R$ 0)",
+          cost: 0,
+          statEffects: { contingente: 5, caravana: 4 },
+          stateEffects: { relacao_clube: -5, moral: 6 },
+          log: "Liderou cobranÃ§a por ingresso popular conquistando cota no setor.",
+          formattedDeltas: [
+            { label: "SÃ³cios (Massa)", value: "+5", isPositive: true },
+            { label: "Caravana", value: "+4", isPositive: true },
+            { label: "Moral", value: "+6", isPositive: true },
+            { label: "RelaÃ§Ã£o Clube", value: "-5", isPositive: false },
+            { label: "Caixa", value: "R$ 0", isPositive: true },
+          ],
+        },
+        {
+          text: "Nota oficial com boicote de canto nos primeiros 15 min de jogo (Custo R$ 0)",
+          cost: 0,
+          statEffects: { pressao_bancada: -4 },
+          stateEffects: { relacao_clube: -15, respeito_nacional: 8, moral: 4 },
+          log: "Fez silÃªncio de protesto nos primeiros 15 min gerando repercussÃ£o nacional.",
+          formattedDeltas: [
+            { label: "Respeito Nacional", value: "+8", isPositive: true },
+            { label: "Moral", value: "+4", isPositive: true },
+            { label: "Bancada", value: "-4", isPositive: false },
+            { label: "RelaÃ§Ã£o Clube", value: "-15", isPositive: false },
+          ],
+        },
+      ],
+    },
+    {
+      id: 103,
+      category: "POOL_C_SOCIAL",
+      title: "AÃ§Ã£o Social ComunitÃ¡ria e JurÃ­dico",
+      description: "Atividade social nas periferias e negociaÃ§Ã£o institucional com o MP.",
+      choices: [
+        {
+          text: "Campanha do Agasalho e doaÃ§Ã£o de sangue no hemocentro (-R$ 5.000)",
+          cost: 5000,
+          statEffects: { contingente: 5 },
+          stateEffects: { risco_mp: -15, moral: 8 },
+          log: "Realizou mutirÃ£o social com grande repercussÃ£o na mÃ­dia local.",
+          formattedDeltas: [
+            { label: "SÃ³cios (Massa)", value: "+5", isPositive: true },
+            { label: "Moral", value: "+8", isPositive: true },
+            { label: "Risco MP", value: "-15%", isPositive: true },
+            { label: "Caixa", value: "-R$ 5.000", isPositive: false },
+          ],
+        },
+        {
+          text: "ContrataÃ§Ã£o de assessoria jurÃ­dica para liberar faixas suspensas (-R$ 4.000)",
+          cost: 4000,
+          statEffects: { pressao_bancada: 6 },
+          stateEffects: { risco_mp: -8, moral: 5 },
+          log: "Conquistou liberaÃ§Ã£o de faixas suspensas perante o tribunal.",
+          formattedDeltas: [
+            { label: "Bancada", value: "+6", isPositive: true },
+            { label: "Moral", value: "+5", isPositive: true },
+            { label: "Risco MP", value: "-8%", isPositive: true },
+            { label: "Caixa", value: "-R$ 4.000", isPositive: false },
+          ],
+        },
+      ],
+    },
+    {
+      id: 104,
+      category: "POOL_D_DIPLOMACIA",
+      title: "Diplomacia de Bloco & ConfraternizaÃ§Ã£o",
+      description: "RecepÃ§Ã£o de lideranÃ§as aliadas e manutenÃ§Ã£o do bloco interestadual.",
+      choices: [
+        {
+          text: "RecepÃ§Ã£o completa com feijoada e comboio de escolta (-R$ 10.000)",
+          cost: 10000,
+          statEffects: { poder_pista: 6, caravana: 6 },
+          stateEffects: { respeito_nacional: 10, moral: 8 },
+          log: "Recebeu a diretoria aliada com feijoada de honra na quadra.",
+          formattedDeltas: [
+            { label: "Respeito Nacional", value: "+10", isPositive: true },
+            { label: "Poder de Pista", value: "+6", isPositive: true },
+            { label: "Caravana", value: "+6", isPositive: true },
+            { label: "Moral", value: "+8", isPositive: true },
+            { label: "Caixa", value: "-R$ 10.000", isPositive: false },
+          ],
+        },
+        {
+          text: "Envio de comissÃ£o de bandeiras para apoiar torcida irmÃ£ em outro UF (Custo R$ 0)",
+          cost: 0,
+          statEffects: { caravana: 4 },
+          stateEffects: { respeito_nacional: 6, moral: 4 },
+          log: "Enviou bonde de apoio para a torcida aliada em jogo decisivo.",
+          formattedDeltas: [
+            { label: "Caravana", value: "+4", isPositive: true },
+            { label: "Respeito Nacional", value: "+6", isPositive: true },
+            { label: "Moral", value: "+4", isPositive: true },
+            { label: "Caixa", value: "R$ 0", isPositive: true },
+          ],
+        },
+      ],
+    },
+  ];
+
+  return events;
+}
+
+// 5. Real-Time Tactical Dilemma System
+export function getTacticalDilemma(isHome: boolean, isLongDistance: boolean): TacticalDilemma {
+  if (!isHome && isLongDistance) {
+    return {
+      scoutAlertTitle: "âš ï¸ ALERTA DOS BATEDORES (EMBOSCADA NA RODOVIA)",
+      description: "Nossos batedores de moto identificaram uma emboscada armada pela torcida rival com cerca de 50 integrantes armados no viaduto de acesso. Estamos com 40 membros na linha de frente.",
+      choices: [
+        {
+          text: "OpÃ§Ã£o 1: Desvio Preventivo por via alternativa (Evita confronto, atraso 20 min)",
+          pistaBonus: -2,
+          delayMinutes: 20,
+          medicalRisk: 0,
+          moralEffect: -3,
+          log: "Desviou da emboscada salvando a frota, mas atrasando a entrada no estÃ¡dio.",
+          formattedDeltas: [
+            { label: "Danos ao Ã”nibus", value: "Nenhum (R$ 0)", isPositive: true },
+            { label: "Hospitalizados", value: "0 feridos", isPositive: true },
+            { label: "Moral da Pista", value: "-3", isPositive: false },
+            { label: "Atraso", value: "20 min", isPositive: false },
+          ],
+        },
+        {
+          text: "OpÃ§Ã£o 2: Desembarque Antecipado & AvanÃ§o a PÃ© (Linha compacta de confronto)",
+          pistaBonus: 10,
+          delayMinutes: 0,
+          medicalRisk: 1200,
+          moralEffect: 8,
+          log: "Desembarcou a 400m para defender a frota e avanÃ§ou em linha compacta.",
+          formattedDeltas: [
+            { label: "VitÃ³ria na Rua", value: "+10 Pista", isPositive: true },
+            { label: "Moral", value: "+8", isPositive: true },
+            { label: "Gastos MÃ©dicos", value: "-R$ 1.200", isPositive: false },
+          ],
+        },
+        {
+          text: "OpÃ§Ã£o 3: Contra-Emboscada & Flanqueamento pelas Vans de Apoio",
+          pistaBonus: 15,
+          delayMinutes: 5,
+          medicalRisk: 2000,
+          moralEffect: 12,
+          log: "Flanqueou o rival com as vans de apoio surpreendendo a emboscada.",
+          formattedDeltas: [
+            { label: "Respeito Nacional", value: "+15", isPositive: true },
+            { label: "Moral", value: "+12", isPositive: true },
+            { label: "Gastos de Guincho", value: "-R$ 2.000", isPositive: false },
+          ],
+        },
+      ],
+    };
+  }
+
+  return {
+    scoutAlertTitle: "âš ï¸ TENSÃƒO DE PLATAFORMA / ENTORNO DO ESTÃDIO",
+    description: "Grupo rival se aproximou das vias de acesso principais gerando tumulto nas catracas.",
+    choices: [
+      {
+        text: "Manter postura de contenÃ§Ã£o nos portÃµes com a linha de frente",
+        pistaBonus: 8,
+        delayMinutes: 0,
+        medicalRisk: 500,
+        moralEffect: 5,
+        log: "Garantiu a seguranÃ§a dos portÃµes de entrada com a linha de frente.",
+        formattedDeltas: [
+          { label: "Poder de Pista", value: "+8", isPositive: true },
+          { label: "Moral", value: "+5", isPositive: true },
+        ],
+      },
+      {
+        text: "Recuar a concentraÃ§Ã£o para dentro da quadra/sede sem provocaÃ§Ãµes",
+        pistaBonus: 0,
+        delayMinutes: 10,
+        medicalRisk: 0,
+        moralEffect: -2,
+        log: "Concentrou a torcida dentro da sede evitando bombas de efeito moral.",
+        formattedDeltas: [
+          { label: "Risco MP", value: "-10%", isPositive: true },
+          { label: "Moral", value: "-2", isPositive: false },
+        ],
+      },
+    ],
+  };
+}
+
+// 6. Dynamic Game Schedule
+export function generateGameSchedule(currentTorcida: OfficialTorcida): {
+  game1: { title: string; isAlly: boolean; opponent: string };
+  game2: { title: string; isAlly: boolean; opponent: string };
+  game3: { title: string; isAlly: boolean; opponent: string };
+  game4: { title: string; isAlly: boolean; opponent: string };
+} {
+  const all = teamsData as OfficialTorcida[];
+  const sameStateRivals = all.filter((t) => t.estado === currentTorcida.estado && t.torcida !== currentTorcida.torcida);
+  const allies = all.filter((t) => t.eixo_alianca === currentTorcida.eixo_alianca && t.torcida !== currentTorcida.torcida);
+
+  const rival1 = sameStateRivals[0] || all[0];
+  const rival2 = sameStateRivals[1] || all[1];
+  const ally1 = allies[0] || all[2];
+
+  return {
+    game1: {
+      title: `ðŸ”¥ JOGO CHAVE 1 - FORA (ClÃ¡ssico de Rivalidade vs ${rival1.torcida})`,
+      isAlly: false,
+      opponent: `${rival1.torcida} (${rival1.clube})`,
+    },
+    game2: {
+      title: `ðŸ¤ JOGO CHAVE 2 - EM CASA (Festa de AlianÃ§a vs ${ally1.torcida})`,
+      isAlly: true,
+      opponent: `${ally1.torcida} (${ally1.clube})`,
+    },
+    game3: {
+      title: `ðŸ”¥ JOGO CHAVE 3 - FORA (Caravana de DecisÃ£o vs ${rival2.torcida})`,
+      isAlly: false,
+      opponent: `${rival2.torcida} (${rival2.clube})`,
+    },
+    game4: {
+      title: `ðŸ”¥ JOGO CHAVE 4 - EM CASA (Jogo do Acesso / TÃ­tulo)`,
+      isAlly: false,
+      opponent: `Rival da Final`,
+    },
+  };
+}
+
+// 7. Formula-Based Math Engine for Home and Away Games
+export function calculateFormulaHomeGame(
+  stats: TorcidaStats,
+  state: StateTrackers,
+  setup: HomeGameSetup
+): KeyGameResult {
+  let partyBonus = 40;
+  let cost = 0;
+  let mpPenalty = 0;
+
+  if (setup.visualParty === "MOSAICO_3D") {
+    partyBonus += 30;
+    cost += 15000;
+  } else if (setup.visualParty === "RUAS_DE_FOGO") {
+    partyBonus += 20;
+    cost += 8000;
+    mpPenalty += 10;
+  } else if (setup.visualParty === "BOBINAS_PAPEL") {
+    partyBonus += 15;
+    cost += 3000;
+  }
+
+  if (setup.security === "LINHA_FRENTE_PORTAO") {
+    cost += 5000;
+  }
+
+  if (setup.hospitality === "CHURRASCO_ALIADOS") {
+    cost += 10000;
+  }
+
+  const rngPlayer = (Math.random() - 0.5) * 30;
+  const effectivePlayer = Math.round(
+    stats.poder_pista * 0.35 +
+      stats.caravana * 0.15 +
+      state.moral * 0.2 +
+      partyBonus * 0.15 +
+      rngPlayer
+  );
+
+  const effectiveRival = Math.round(65 + (Math.random() - 0.5) * 30);
+  const isVictory = effectivePlayer >= effectiveRival;
+
+  const scorePower = stats.pressao_bancada * 0.5 + state.moral * 0.3 + partyBonus * 0.2 + (Math.random() - 0.5) * 20;
+  const scorePlayer = scorePower > 50 ? Math.floor(Math.random() * 2 + 1) : Math.floor(Math.random() * 2);
+  const scoreRival = isVictory ? Math.floor(Math.random() * scorePlayer) : Math.floor(Math.random() * 2 + scorePlayer);
+
+  const desertion = isVictory ? Math.floor(Math.random() * 20) : Math.floor(Math.random() * 60 + 30);
+  const medical = isVictory ? 0 : Math.floor(Math.random() * 2000 + 800);
+
+  const deltas: FormattedDelta[] = [
+    { label: "Resultado", value: isVictory ? "VitÃ³ria Plena" : "Empate Tenso", isPositive: isVictory },
+    { label: "ForÃ§a Efetiva", value: `${effectivePlayer} vs ${effectiveRival}`, isPositive: isVictory },
+    { label: "Moral", value: isVictory ? "+6 Moral" : "-5 Moral", isPositive: isVictory },
+    { label: "Despesas Gastas", value: `R$ ${cost.toLocaleString()}`, isPositive: cost === 0 },
+    { label: "DeserÃ§Ã£o de SÃ³cios", value: `-${desertion} sÃ³cios`, isPositive: desertion < 30 },
+  ];
+
+  return {
+    effectiveForcePlayer: effectivePlayer,
+    effectiveForceRival: effectiveRival,
+    scorePlayer,
+    scoreRival,
+    isVictory,
+    isAllyGame: false,
+    statusTitle: isVictory ? "FESTA E DOMÃNIO ABSOLUTO EM CASA" : "PRESSÃƒO E ATRITO DE ENTORNO",
+    memberDesertion: desertion,
+    medicalExpenses: medical,
+    bannerLost: false,
+    extraCost: cost,
+    mpPenalty,
+    moralChange: isVictory ? 6 : -5,
+    chronicleText: `A bateria ditou o ritmo ininterrupto do primeiro ao Ãºltimo minuto. O setor local vibrou com a recepÃ§Ã£o de fumaÃ§a e as faixas estendidas, sustentando o espetÃ¡culo visual e a seguranÃ§a dos portÃµes de acesso.`,
+    formattedDeltas: deltas,
+  };
+}
+
+export function calculateFormulaAwayGame(
+  stats: TorcidaStats,
+  state: StateTrackers,
+  setup: AwayGameSetup
+): KeyGameResult {
+  let logisticsBonus = 40;
+  let cost = 0;
+  let mpPenalty = 5;
+
+  if (setup.distanceType === "SHORT") {
+    if (setup.shortTransport === "BONDE_TREM_METRO") {
+      logisticsBonus += 20;
+      mpPenalty += 15;
+    } else if (setup.shortTransport === "ARRANCADA_CAMINHADA") {
+      logisticsBonus += 25;
+      mpPenalty += 10;
+    }
+  } else {
+    if (setup.longTransport === "FRETADO_BARATO") {
+      cost += 6000;
+      logisticsBonus += 15;
+    } else if (setup.longTransport === "ONIBUS_EXECUTIVO") {
+      cost += 14000;
+      logisticsBonus += 35;
+    }
+  }
+
+  if (setup.armaments === "SINALIZADORES_BATEDORES") {
+    cost += 4000;
+    logisticsBonus += 20;
+  }
+
+  if (setup.tactic === "ROTA_SEM_ESCOLTA") {
+    logisticsBonus += 15;
+    mpPenalty += 20;
+  }
+
+  const rngPlayer = (Math.random() - 0.5) * 30;
+  const effectivePlayer = Math.round(
+    stats.poder_pista * 0.35 +
+      stats.caravana * 0.15 +
+      state.moral * 0.2 +
+      logisticsBonus * 0.15 +
+      rngPlayer
+  );
+
+  const effectiveRival = Math.round(70 + (Math.random() - 0.5) * 30);
+  const isVictory = effectivePlayer >= effectiveRival;
+
+  const scorePlayer = isVictory ? Math.floor(Math.random() * 2 + 1) : Math.floor(Math.random() * 2);
+  const scoreRival = isVictory ? Math.floor(Math.random() * scorePlayer) : scorePlayer + 1;
+
+  const desertion = isVictory ? Math.floor(Math.random() * 30 + 10) : Math.floor(Math.random() * 80 + 40);
+  const medical = isVictory ? 500 : Math.floor(Math.random() * 3000 + 1200);
+  const bannerLost = !isVictory && Math.random() < 0.15;
+
+  const deltas: FormattedDelta[] = [
+    { label: "Status Pista", value: isVictory ? "VitÃ³ria na Rua" : "Recuo EstratÃ©gico", isPositive: isVictory },
+    { label: "ForÃ§a Pista", value: `${effectivePlayer} vs ${effectiveRival}`, isPositive: isVictory },
+    { label: "Moral", value: isVictory ? "+8 Moral" : "-8 Moral", isPositive: isVictory },
+    { label: "Avarias / MÃ©dicos", value: `R$ ${(cost + medical).toLocaleString()}`, isPositive: cost + medical === 0 },
+    { label: "DeserÃ§Ã£o de SÃ³cios", value: `-${desertion} sÃ³cios`, isPositive: desertion < 30 },
+  ];
+
+  return {
+    effectiveForcePlayer: effectivePlayer,
+    effectiveForceRival: effectiveRival,
+    scorePlayer,
+    scoreRival,
+    isVictory,
+    isAllyGame: false,
+    statusTitle: isVictory ? "VITÃ“RIA DE PISTA & INVASÃƒO CONCLUÃDA" : "RECUO ESTRATÃ‰GICO NA ESTRADA",
+    memberDesertion: desertion,
+    medicalExpenses: medical,
+    bannerLost,
+    extraCost: cost,
+    mpPenalty,
+    moralChange: isVictory ? 8 : -8,
+    chronicleText: `O comboio avanÃ§ou com batedores na linha de frente e fardamento padronizado. Diante do cerco nas rodovias, o bonde manteve a postura de pista e garantiu a ocupaÃ§Ã£o total do setor visitante.`,
+    formattedDeltas: deltas,
+  };
+}
+
+// 8. Gemini AI Live Chronicle Generator (with Fallback)
+export async function generateGeminiChronicle(payload: any): Promise<string> {
+  const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+
+  if (apiKey) {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: `VocÃª Ã© um cronista histÃ³rico de arquibancadas e cultura de torcida no Brasil. Com base no JSON abaixo, redija uma crÃ´nica crua, visceral, cinematogrÃ¡fica e autÃªntica de 3 a 4 parÃ¡grafos. Utilize jargÃµes de pista brasileiros (bonde, linha de frente, batedores, trapos, mastro, choque, pavilhÃ£o, caravana, fumaÃ§a, murga, velha guarda) e dÃª peso humano aos fatos:\n\n${JSON.stringify(payload)}`,
+                  },
+                ],
+              },
+            ],
+          }),
+        }
+      );
+
+      const data = await response.json();
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (text) return text;
+    } catch (e) {
+      console.warn("Gemini API error, falling back to local generator:", e);
+    }
+  }
+
+  const victoryIntro = [
+    "O comboio cortou as vias de acesso com os batedores impondo a cadÃªncia na linha de frente.",
+    "A massa ocupou as estaÃ§Ãµes e rodovias com o pavilhÃ£o estendido no topo dos Ã´nibus.",
+  ];
+
+  const defeatIntro = [
+    "A travessia na estrada enfrentou forte retenÃ§Ã£o policial e atrito nas vias de acesso.",
+    "O deslocamento sofreu emboscada no trajeto exigindo manobra de recuo estritamente alinhada.",
+  ];
+
+  const intro = payload.isVictory
+    ? victoryIntro[Math.floor(Math.random() * victoryIntro.length)]
+    : defeatIntro[Math.floor(Math.random() * defeatIntro.length)];
+
+  return `${intro} No estÃ¡dio, a bateria ditou o ritmo ininterrupto durante os 90 minutos de partida. A diretoria contabilizou despesas de R$ ${payload.extraCost.toLocaleString()} e o suporte a sÃ³cios hospitalizados, mantendo o compromisso de honra da bancada.`;
+}
+"use client";
+
+import React, { useState, useEffect } from "react";
+import {
+  Drum,
+  Shield,
+  Users,
+  Wallet,
+  Scale,
+  Trophy,
+  Flame,
+  Bus,
+  Sparkles,
+  RefreshCw,
+  Share2,
+  Check,
+  ChevronRight,
+  Swords,
+  Layers,
+  FileText,
+  AlertTriangle,
+  Building2,
+  X,
+  TrendingDown,
+  Activity,
+  HeartHandshake,
+  AlertOctagon,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
+import confetti from "canvas-confetti";
+import {
+  getOfficialTorcidas,
+  createCustomTorcidaWithArchetype,
+  getAnnualPipeline,
+  getSeasonalContextualEvents,
+  getTacticalDilemma,
+  generateGameSchedule,
+  calculateFormulaHomeGame,
+  calculateFormulaAwayGame,
+  applyDiminishingReturns,
+  generateGeminiChronicle,
+  ARCHETYPES,
+  ArchetypeId,
+  OfficialTorcida,
+  TorcidaStats,
+  StateTrackers,
+  PipelineStep,
+  ClubStatus,
+  HomeGameSetup,
+  AwayGameSetup,
+  KeyGameResult,
+  DynamicChoice,
+  TacticalDilemma,
+  TacticalDilemmaChoice,
+  FormattedDelta,
+} from "@/lib/bancada_engine";
+
+export default function BancadaPage() {
+  // Game Setup State
+  const [isStarted, setIsStarted] = useState<boolean>(false);
+  const [torcidaName, setTorcidaName] = useState<string>("FÃºria Alvinegra");
+  const [sigla, setSigla] = useState<string>("TFA");
+  const [selectedClub, setSelectedClub] = useState<string>("Corinthians");
+  const [customClub, setCustomClub] = useState<string>("");
+  const [selectedArchetype, setSelectedArchetype] = useState<ArchetypeId>("PADRAO");
+
+  // Torcida Stats & Hidden State Trackers
+  const [currentTorcida, setCurrentTorcida] = useState<OfficialTorcida | null>(null);
+  const [season, setSeason] = useState<number>(1);
+  const [bankBalance, setBankBalance] = useState<number>(25000);
+  const [clubStatus, setClubStatus] = useState<ClubStatus>("LUTANDO_ACESSO");
+
+  const [stats, setStats] = useState<TorcidaStats>({
+    contingente: 75,
+    pressao_bancada: 75,
+    poder_pista: 75,
+    caravana: 75,
+    autonomia_financeira: 75,
+  });
+
+  const [stateTrackers, setStateTrackers] = useState<StateTrackers>({
+    moral: 70,
+    risco_mp: 10,
+    relacao_clube: 0,
+    respeito_nacional: 50,
+  });
+
+  // MP Ban Flag & Opposition Threat
+  const [isBannedByMP, setIsBannedByMP] = useState<boolean>(false);
+  const [debtYears, setDebtYears] = useState<number>(0);
+
+  // Annual Pipeline State
+  const [pipelineIndex, setPipelineIndex] = useState<number>(0);
+  const pipeline = getAnnualPipeline();
+
+  // Dynamic Contextual Events Pool
+  const [contextualEvents, setContextualEvents] = useState<ReturnType<typeof getSeasonalContextualEvents>>([]);
+
+  // Home & Away Game Setup
+  const [homeSetup, setHomeSetup] = useState<HomeGameSetup>({
+    visualParty: "APENAS_BATERIA",
+    security: "CONCENTRADOS_SEDE",
+    hospitality: "RECEPCAO_SIMPLES",
+  });
+
+  const [awaySetup, setAwaySetup] = useState<AwayGameSetup>({
+    distanceType: "SHORT",
+    shortTransport: "BONDE_TREM_METRO",
+    longTransport: "CARAVANA_RATEIO",
+    armaments: "ENTRADA_PACIFICA",
+    tactic: "ESCOLTA_POLICIAL",
+  });
+
+  // Tactical Dilemma State during Key Games
+  const [activeTacticalDilemma, setActiveTacticalDilemma] = useState<TacticalDilemma | null>(null);
+  const [chosenTacticalChoice, setChosenTacticalChoice] = useState<TacticalDilemmaChoice | null>(null);
+
+  // EXPLICIT ACTION FEEDBACK MODAL STATE
+  const [actionFeedback, setActionFeedback] = useState<{
+    title: string;
+    logText: string;
+    deltas: FormattedDelta[];
+  } | null>(null);
+
+  // Active Match Result Modal & Gemini AI Processing
+  const [activeMatchResult, setActiveMatchResult] = useState<KeyGameResult | null>(null);
+  const [isGeneratingChronicle, setIsGeneratingChronicle] = useState<boolean>(false);
+
+  // History Log & Sub-Tab
+  const [historyLog, setHistoryLog] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<"pipeline" | "profile" | "history">("pipeline");
+  const [isGameOver, setIsGameOver] = useState<boolean>(false);
+  const [copied, setCopied] = useState<boolean>(false);
+
+  const officialList = getOfficialTorcidas();
+  const mappedClubsList = Array.from(new Set(officialList.map((t) => t.clube))).sort();
+
+  // Load saved state from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("kavers_bancada_sys_save");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.isStarted && parsed.currentTorcida) {
+          setIsStarted(parsed.isStarted);
+          setCurrentTorcida(parsed.currentTorcida);
+          setSeason(parsed.season);
+          setBankBalance(parsed.bankBalance);
+          setClubStatus(parsed.clubStatus || "LUTANDO_ACESSO");
+          setStats(parsed.stats);
+          setStateTrackers(parsed.stateTrackers);
+          setIsBannedByMP(parsed.isBannedByMP || false);
+          setDebtYears(parsed.debtYears || 0);
+          setPipelineIndex(parsed.pipelineIndex || 0);
+          setHistoryLog(parsed.historyLog || []);
+          if (parsed.season >= 30 && parsed.pipelineIndex >= pipeline.length - 1) {
+            setIsGameOver(true);
+          }
+        }
+      } catch (e) {
+        console.error("Erro ao carregar save bancada sys:", e);
+      }
+    }
+  }, []);
+
+  // Save game state
+  useEffect(() => {
+    if (isStarted && currentTorcida) {
+      localStorage.setItem(
+        "kavers_bancada_sys_save",
+        JSON.stringify({
+          isStarted,
+          currentTorcida,
+          season,
+          bankBalance,
+          clubStatus,
+          stats,
+          stateTrackers,
+          isBannedByMP,
+          debtYears,
+          pipelineIndex,
+          historyLog,
+        })
+      );
+    }
+  }, [
+    isStarted,
+    currentTorcida,
+    season,
+    bankBalance,
+    clubStatus,
+    stats,
+    stateTrackers,
+    isBannedByMP,
+    debtYears,
+    pipelineIndex,
+    historyLog,
+  ]);
+
+  // Load contextual event pool when season or status changes
+  useEffect(() => {
+    if (isStarted) {
+      setContextualEvents(getSeasonalContextualEvents(clubStatus));
+    }
+  }, [isStarted, season, clubStatus]);
+
+  // Start Career Game with Archetype & Inheritance
+  const handleStartCareer = () => {
+    const club = selectedClub === "OUTRO" ? customClub : selectedClub;
+    if (!club.trim()) return;
+
+    const { torcida, state } = createCustomTorcidaWithArchetype(torcidaName, sigla, club, selectedArchetype);
+    setCurrentTorcida(torcida);
+    setStats({
+      contingente: torcida.contingente,
+      pressao_bancada: torcida.pressao_bancada,
+      poder_pista: torcida.poder_pista,
+      caravana: torcida.caravana,
+      autonomia_financeira: torcida.autonomia_financeira,
+    });
+    setStateTrackers(state);
+
+    setBankBalance(torcida.autonomia_financeira * 450);
+    setIsBannedByMP(false);
+    setDebtYears(0);
+    setSeason(1);
+    setPipelineIndex(0);
+    setHistoryLog([
+      `Fundada a torcida ${torcida.torcida} (${torcida.sigla}) no arquÃ©tipo ${ARCHETYPES[selectedArchetype].name} apoiando o ${torcida.clube}.`,
+    ]);
+    setIsGameOver(false);
+    setIsStarted(true);
+  };
+
+  // Process Action Choice -> Opens EXPLICIT FEEDBACK MODAL with numeric deltas
+  const handleMakeActionChoice = (choice: DynamicChoice) => {
+    setBankBalance((prev) => prev - choice.cost);
+
+    if (choice.statEffects) {
+      setStats((prev) => {
+        const updated = { ...prev };
+        Object.entries(choice.statEffects).forEach(([key, val]) => {
+          const k = key as keyof TorcidaStats;
+          if (val) {
+            updated[k] = applyDiminishingReturns(updated[k], val);
+          }
+        });
+        return updated;
+      });
+    }
+
+    if (choice.stateEffects) {
+      setStateTrackers((prev) => {
+        const updated = { ...prev };
+        Object.entries(choice.stateEffects).forEach(([key, val]) => {
+          const k = key as keyof StateTrackers;
+          if (val !== undefined) {
+            updated[k] = Math.min(100, Math.max(0, updated[k] + val));
+          }
+        });
+        if (updated.risco_mp >= 100) setIsBannedByMP(true);
+        return updated;
+      });
+    }
+
+    if (choice.log) {
+      setHistoryLog((prev) => [`[Ano ${season} - Passo ${pipelineIndex + 1}] ${choice.log}`, ...prev]);
+    }
+
+    // Open EXPLICIT FEEDBACK MODAL
+    setActionFeedback({
+      title: "DESFECHO DA DECISÃƒO",
+      logText: choice.log,
+      deltas: choice.formattedDeltas,
+    });
+  };
+
+  // Close Feedback Modal and advance step
+  const handleConfirmFeedback = () => {
+    setActionFeedback(null);
+    advancePipeline();
+  };
+
+  // Trigger Tactical Dilemma for Key Game
+  const handleStartKeyGamePreparation = (step: PipelineStep) => {
+    const dilemma = getTacticalDilemma(!!step.isHomeGame, !!step.isLongDistance);
+    setActiveTacticalDilemma(dilemma);
+  };
+
+  // Process Tactical Choice and execute match resolution
+  const handleExecuteTacticalMatch = async (tChoice: TacticalDilemmaChoice) => {
+    setChosenTacticalChoice(tChoice);
+    setActiveTacticalDilemma(null);
+
+    const step = pipeline[pipelineIndex];
+    let res: KeyGameResult;
+
+    if (step.isHomeGame) {
+      res = calculateFormulaHomeGame(stats, stateTrackers, homeSetup);
+    } else {
+      const setup = { ...awaySetup, distanceType: step.isLongDistance ? ("LONG" as const) : ("SHORT" as const) };
+      res = calculateFormulaAwayGame(stats, stateTrackers, setup);
+    }
+
+    // Generate AI Live Chronicle
+    setIsGeneratingChronicle(true);
+    const chronicle = await generateGeminiChronicle({
+      clube: currentTorcida?.clube,
+      torcida: currentTorcida?.torcida,
+      isHome: step.isHomeGame,
+      isVictory: res.isVictory,
+      score: `${res.scorePlayer} x ${res.scoreRival}`,
+      force: `${res.effectiveForcePlayer} vs ${res.effectiveForceRival}`,
+      extraCost: res.extraCost,
+      medical: res.medicalExpenses,
+      desertion: res.memberDesertion,
+      tacticalChoice: tChoice.log,
+    });
+    res.chronicleText = chronicle;
+    setIsGeneratingChronicle(false);
+
+    setActiveMatchResult(res);
+
+    setBankBalance((prev) => prev - res.extraCost - res.medicalExpenses - tChoice.medicalRisk);
+    setStateTrackers((prev) => {
+      const newMP = Math.min(100, Math.max(0, prev.risco_mp + res.mpPenalty));
+      if (newMP >= 100) setIsBannedByMP(true);
+      return {
+        ...prev,
+        moral: Math.min(100, Math.max(0, prev.moral + res.moralChange + tChoice.moralEffect)),
+        risco_mp: newMP,
+      };
+    });
+
+    setStats((prev) => ({
+      ...prev,
+      contingente: Math.max(10, prev.contingente - Math.floor(res.memberDesertion / 100)),
+      poder_pista: res.isVictory
+        ? applyDiminishingReturns(prev.poder_pista, 2 + tChoice.pistaBonus)
+        : Math.max(0, prev.poder_pista - 3),
+    }));
+
+    setHistoryLog((prev) => [
+      `[Ano ${season} - ${step.title}] ${res.statusTitle}. Placar: ${res.scorePlayer}x${res.scoreRival}. Tactica: ${tChoice.log}`,
+      ...prev,
+    ]);
+
+    advancePipeline();
+  };
+
+  // Advance pipeline
+  const advancePipeline = () => {
+    if (pipelineIndex + 1 < pipeline.length) {
+      setPipelineIndex((prev) => prev + 1);
+    } else {
+      const annualDues = Math.floor(stats.contingente * 400);
+      const merchRevenue = Math.floor(stats.autonomia_financeira * 300);
+      const totalRevenue = annualDues + merchRevenue;
+
+      setBankBalance((prev) => {
+        const newBal = prev + totalRevenue;
+        if (newBal < 0) {
+          setDebtYears((d) => d + 1);
+          setStateTrackers((st) => ({ ...st, moral: Math.max(0, st.moral - 10) }));
+        } else {
+          setDebtYears(0);
+        }
+        return newBal;
+      });
+
+      if (isBannedByMP) {
+        setIsBannedByMP(false);
+        setStateTrackers((st) => ({ ...st, risco_mp: 40 }));
+      }
+
+      const statuses: ClubStatus[] = ["DISPUTANDO_TITULO", "MEIO_TABELA", "CRISE_REBAIXAMENTO", "LUTANDO_ACESSO"];
+      setClubStatus(statuses[Math.floor(Math.random() * statuses.length)]);
+
+      if (season >= 30) {
+        setIsGameOver(true);
+        confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 } });
+      } else {
+        setSeason((prev) => prev + 1);
+        setPipelineIndex(0);
+      }
+    }
+  };
+
+  // Honorary Title Calculator for 30-Year Memorial
+  const getHonoraryTitle = () => {
+    if (stats.contingente >= 90 && stats.pressao_bancada >= 90) return "SUPERPOTÃŠNCIA NACIONAL DE ARQUIBANCADA ðŸ‘‘";
+    if (stats.poder_pista >= 90) return "A LENDA DAS RODOVIAS & PISTAS ðŸ¥Š";
+    if (stats.caravana >= 90) return "OS INVASORES DE COMBOIO ðŸšŒ";
+    if (stats.autonomia_financeira >= 90) return "O IMPÃ‰RIO COMERCIAL DA SEDE ðŸ’°";
+    return "A RESISTÃŠNCIA DA BANCADA ðŸ¥";
+  };
+
+  // Reset Career
+  const handleRestartGame = () => {
+    localStorage.removeItem("kavers_bancada_sys_save");
+    setIsStarted(false);
+    setIsGameOver(false);
+    setActiveMatchResult(null);
+    setActionFeedback(null);
+  };
+
+  // Share Legacy
+  const handleShareHistory = () => {
+    const text = `ðŸ¥ Minha torcida "${currentTorcida?.torcida}" (${currentTorcida?.sigla}) concluiu a carreira de 30 Anos no "Bancada: Simulador de Torcida" da Kavers Games!\n\nTÃ­tulo HonorÃ¡rio: ${getHonoraryTitle()}\nContingente: ${stats.contingente}/100 | Poder de Pista: ${stats.poder_pista}/100\n\nJogue em: eloperdido.com/bancada\n#KaversGames`;
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const currentStep = pipeline[pipelineIndex] || pipeline[0];
+  const activeEvent = contextualEvents[pipelineIndex % contextualEvents.length] || contextualEvents[0];
+
+  // ONBOARDING & ARCHETYPE SELECTION SCREEN
+  if (!isStarted) {
+    return (
+      <div className="flex-1 max-w-md w-full mx-auto p-4 flex flex-col justify-center min-h-[85vh] pb-24">
+        <div className="glass-panel-glow rounded-3xl p-6 text-center shadow-2xl border border-kavers-purple/50">
+          <div className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 flex items-center justify-center text-black shadow-xl mb-3 animate-pulse">
+            <Drum className="w-7 h-7 stroke-[2.5]" />
+          </div>
+
+          <span className="text-[10px] font-black tracking-widest text-amber-500 uppercase block mb-1">
+            ENGENHARIA DE ARQUIBANCADA (30 ANOS)
+          </span>
+
+          <h1 className="text-xl font-black text-zinc-900 dark:text-white tracking-tight uppercase">
+            BANCADA & CULTURA DE PISTA
+          </h1>
+
+          <p className="text-xs text-zinc-600 dark:text-zinc-300 mt-1 font-semibold leading-relaxed">
+            Fund sua torcida com arquÃ©tipos de sistemas interdependentes e inteligÃªncia artificial generativa.
+          </p>
+
+          <div className="my-4 text-left space-y-3">
+            <div>
+              <label className="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block mb-1">
+                Nome da Torcida Customizada
+              </label>
+              <input
+                type="text"
+                value={torcidaName}
+                onChange={(e) => setTorcidaName(e.target.value)}
+                placeholder="Ex: Camisa 10, FÃºria Alvinegra, Comando Verde"
+                className="w-full bg-paper-card dark:bg-kavers-card border border-paper-border dark:border-kavers-border text-zinc-900 dark:text-white rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block mb-1">
+                  Sigla Oficial
+                </label>
+                <input
+                  type="text"
+                  maxLength={4}
+                  value={sigla}
+                  onChange={(e) => setSigla(e.target.value)}
+                  placeholder="Ex: TFA, TCA"
+                  className="w-full bg-paper-card dark:bg-kavers-card border border-paper-border dark:border-kavers-border text-zinc-900 dark:text-white rounded-xl px-3.5 py-2.5 text-xs font-bold uppercase focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block mb-1">
+                  Clube de CoraÃ§Ã£o
+                </label>
+                <select
+                  value={selectedClub}
+                  onChange={(e) => setSelectedClub(e.target.value)}
+                  className="w-full bg-paper-card dark:bg-kavers-card border border-paper-border dark:border-kavers-border text-zinc-900 dark:text-white rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none"
+                >
+                  {mappedClubsList.map((club, idx) => (
+                    <option key={idx} value={club}>
+                      {club}
+                    </option>
+                  ))}
+                  <option value="OUTRO">Outro Clube</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block mb-1.5">
+                ArquÃ©tipo / Identidade de FundaÃ§Ã£o
+              </label>
+              <div className="space-y-1.5">
+                {Object.values(ARCHETYPES).map((arch) => (
+                  <button
+                    key={arch.id}
+                    type="button"
+                    onClick={() => setSelectedArchetype(arch.id)}
+                    className={`w-full p-2.5 rounded-xl border text-left text-xs transition-all ${
+                      selectedArchetype === arch.id
+                        ? "bg-amber-500 text-black border-amber-500 font-black shadow-md scale-[1.01]"
+                        : "bg-paper-card dark:bg-kavers-card border-paper-border dark:border-kavers-border text-zinc-700 dark:text-zinc-300 font-medium"
+                    }`}
+                  >
+                    <div className="font-black flex items-center justify-between">
+                      <span>{arch.name}</span>
+                      <span className="text-[9px] opacity-80 uppercase">{arch.subtitle}</span>
+                    </div>
+                    <p className="text-[10px] opacity-80 mt-0.5 leading-tight">{arch.description}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={handleStartCareer}
+            className="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl active:scale-95 transition-all cursor-pointer"
+          >
+            Fundar Torcida e Iniciar Carreira <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 30-YEAR MEMORIAL HALL OF FAME
+  if (isGameOver) {
+    return (
+      <div className="flex-1 max-w-md w-full mx-auto p-4 flex flex-col justify-center min-h-[85vh] pb-24">
+        <div className="glass-panel-glow rounded-3xl p-6 text-center shadow-2xl border border-amber-500/50">
+          <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 flex items-center justify-center text-black shadow-xl mb-4 animate-bounce">
+            <Trophy className="w-8 h-8" />
+          </div>
+
+          <span className="text-[10px] font-black tracking-widest text-amber-500 uppercase block mb-1">
+            CARREIRA DE 30 ANOS CONCLUÃDA
+          </span>
+
+          <h2 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight uppercase">
+            HALL DA FAMA DA BANCADA
+          </h2>
+
+          <div className="mt-2 mb-4 inline-block bg-amber-500/20 text-amber-500 dark:text-amber-400 border border-amber-500/40 px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider">
+            {getHonoraryTitle()}
+          </div>
+
+          <div className="space-y-2.5">
+            <button
+              onClick={handleShareHistory}
+              className="w-full py-3.5 px-4 rounded-xl bg-amber-500 text-black font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-4 h-4" /> Legado Copiado!
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-4 h-4" /> Compartilhar Legado (#KaversGames)
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={handleRestartGame}
+              className="w-full py-3 px-4 rounded-xl bg-kavers-light-border/60 dark:bg-kavers-card text-zinc-800 dark:text-zinc-200 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-colors border border-kavers-light-border dark:border-kavers-border"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-amber-500" /> Iniciar Nova Carreira de 30 Anos
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // MAIN GAMEPLAY DASHBOARD
+  return (
+    <div className="flex-1 max-w-md w-full mx-auto p-4 flex flex-col pb-24">
+      {/* Header Bar */}
+      <div className="glass-panel rounded-3xl p-3.5 mb-3 shadow-xl border border-kavers-light-border dark:border-kavers-border flex items-center justify-between">
+        <div>
+          <span className="text-[10px] font-black tracking-widest text-amber-500 uppercase block">
+            {currentTorcida?.torcida} ({currentTorcida?.sigla}) â€¢ {currentTorcida?.clube}
+          </span>
+          <h2 className="text-sm font-black text-zinc-900 dark:text-white uppercase flex items-center gap-1.5">
+            ANO {season} / 30 â€¢ ETAPA {pipelineIndex + 1}/{pipeline.length}
+          </h2>
+        </div>
+
+        <div className="text-right">
+          <span className="text-[8px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400 font-bold block">
+            Caixa da Torcida
+          </span>
+          <span className={`text-xs font-black ${bankBalance >= 0 ? "text-emerald-500" : "text-red-500 animate-pulse"}`}>
+            R$ {bankBalance.toLocaleString()}
+          </span>
+        </div>
+      </div>
+
+      {/* MP Ban Modal / Alert Banner */}
+      {isBannedByMP && (
+        <div className="mb-3 p-3 rounded-2xl bg-red-500 text-black text-xs font-black text-center shadow-lg animate-bounce flex items-center justify-center gap-2">
+          <AlertOctagon className="w-5 h-5" /> BANIDO PELO MINISTÃ‰RIO PÃšBLICO (1 TEMPORADA SEM FAIXAS/BATERIA)
+        </div>
+      )}
+
+      {/* 5 VITAL ATTRIBUTES DISPLAY */}
+      <div className="grid grid-cols-5 gap-1 mb-2">
+        <div className="bg-paper-card dark:bg-kavers-card p-1.5 rounded-2xl border border-paper-border dark:border-kavers-border text-center shadow-md">
+          <span className="text-[8px] font-black text-zinc-500 dark:text-zinc-400 block uppercase truncate">ðŸ‘¥ Massa</span>
+          <span className="text-xs font-black text-kavers-purple dark:text-purple-300">{stats.contingente}</span>
+        </div>
+
+        <div className="bg-paper-card dark:bg-kavers-card p-1.5 rounded-2xl border border-paper-border dark:border-kavers-border text-center shadow-md">
+          <span className="text-[8px] font-black text-zinc-500 dark:text-zinc-400 block uppercase truncate">ðŸ¥ Bancada</span>
+          <span className="text-xs font-black text-amber-500">{stats.pressao_bancada}</span>
+        </div>
+
+        <div className="bg-paper-card dark:bg-kavers-card p-1.5 rounded-2xl border border-paper-border dark:border-kavers-border text-center shadow-md">
+          <span className="text-[8px] font-black text-zinc-500 dark:text-zinc-400 block uppercase truncate">ðŸ¥Š Pista</span>
+          <span className="text-xs font-black text-kavers-magenta">{stats.poder_pista}</span>
+        </div>
+
+        <div className="bg-paper-card dark:bg-kavers-card p-1.5 rounded-2xl border border-paper-border dark:border-kavers-border text-center shadow-md">
+          <span className="text-[8px] font-black text-zinc-500 dark:text-zinc-400 block uppercase truncate">ðŸšŒ Caravana</span>
+          <span className="text-xs font-black text-indigo-400">{stats.caravana}</span>
+        </div>
+
+        <div className="bg-paper-card dark:bg-kavers-card p-1.5 rounded-2xl border border-paper-border dark:border-kavers-border text-center shadow-md">
+          <span className="text-[8px] font-black text-zinc-500 dark:text-zinc-400 block uppercase truncate">ðŸ’° FinanÃ§as</span>
+          <span className="text-xs font-black text-emerald-500">{stats.autonomia_financeira}</span>
+        </div>
+      </div>
+
+      {/* STATE TRACKERS BAR */}
+      <div className="grid grid-cols-4 gap-1 mb-3">
+        <div className="bg-paper-card dark:bg-kavers-card p-1.5 rounded-xl border border-paper-border dark:border-kavers-border text-center">
+          <span className="text-[7px] font-black text-zinc-400 block uppercase">ðŸ”¥ Moral</span>
+          <span className="text-[11px] font-black text-amber-500">{stateTrackers.moral}%</span>
+        </div>
+        <div className="bg-paper-card dark:bg-kavers-card p-1.5 rounded-xl border border-paper-border dark:border-kavers-border text-center">
+          <span className="text-[7px] font-black text-zinc-400 block uppercase">âš–ï¸ Risco MP</span>
+          <span className={`text-[11px] font-black ${stateTrackers.risco_mp > 70 ? "text-red-500 animate-pulse" : "text-amber-400"}`}>
+            {stateTrackers.risco_mp}%
+          </span>
+        </div>
+        <div className="bg-paper-card dark:bg-kavers-card p-1.5 rounded-xl border border-paper-border dark:border-kavers-border text-center">
+          <span className="text-[7px] font-black text-zinc-400 block uppercase">ðŸŸï¸ Clube</span>
+          <span className="text-[11px] font-black text-indigo-400">{stateTrackers.relacao_clube}</span>
+        </div>
+        <div className="bg-paper-card dark:bg-kavers-card p-1.5 rounded-xl border border-paper-border dark:border-kavers-border text-center">
+          <span className="text-[7px] font-black text-zinc-400 block uppercase">â­ Respeito</span>
+          <span className="text-[11px] font-black text-kavers-purple dark:text-purple-300">{stateTrackers.respeito_nacional}</span>
+        </div>
+      </div>
+
+      {/* Sub-Tabs */}
+      <div className="grid grid-cols-3 gap-1.5 mb-3">
+        <button
+          onClick={() => setActiveTab("pipeline")}
+          className={`py-1.5 px-2 rounded-2xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all ${
+            activeTab === "pipeline"
+              ? "bg-amber-500 text-black shadow-md"
+              : "bg-paper-card dark:bg-kavers-card text-zinc-500 border border-paper-border dark:border-kavers-border"
+          }`}
+        >
+          <Sparkles className="w-3 h-3" /> Ciclo Anual
+        </button>
+
+        <button
+          onClick={() => setActiveTab("profile")}
+          className={`py-1.5 px-2 rounded-2xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all ${
+            activeTab === "profile"
+              ? "bg-amber-500 text-black shadow-md"
+              : "bg-paper-card dark:bg-kavers-card text-zinc-500 border border-paper-border dark:border-kavers-border"
+          }`}
+        >
+          <Shield className="w-3 h-3" /> Perfil & AlianÃ§a
+        </button>
+
+        <button
+          onClick={() => setActiveTab("history")}
+          className={`py-1.5 px-2 rounded-2xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all ${
+            activeTab === "history"
+              ? "bg-amber-500 text-black shadow-md"
+              : "bg-paper-card dark:bg-kavers-card text-zinc-500 border border-paper-border dark:border-kavers-border"
+          }`}
+        >
+          <FileText className="w-3 h-3" /> CrÃ´nica
+        </button>
+      </div>
+
+      {/* TAB 1: PIPELINE STEP */}
+      {activeTab === "pipeline" && currentStep && (
+        <div className="glass-panel-glow rounded-3xl p-4 shadow-2xl border border-amber-500/40 flex-1 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="bg-amber-500/20 text-amber-500 dark:text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider">
+                ANO {season} â€¢ ETAPA {pipelineIndex + 1} DE {pipeline.length}
+              </span>
+              <span className="text-[9px] font-bold text-zinc-400">
+                {currentStep.type === "action" ? "AÃ‡ÃƒO DE GESTÃƒO" : "ðŸ”¥ JOGO CHAVE"}
+              </span>
+            </div>
+
+            <h3 className="text-base font-black text-zinc-900 dark:text-white tracking-tight uppercase mb-1">
+              {currentStep.title}
+            </h3>
+
+            <p className="text-xs text-zinc-700 dark:text-zinc-300 font-medium leading-relaxed mb-4">
+              {currentStep.description}
+            </p>
+          </div>
+
+          {/* STEP TYPE A: DYNAMIC CONTEXTUAL ACTION CHOICES */}
+          {currentStep.type === "action" && activeEvent && (
+            <div className="space-y-2 mt-auto">
+              {activeEvent.choices.map((choice, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleMakeActionChoice(choice)}
+                  className="w-full text-left p-3 rounded-2xl bg-paper-card dark:bg-kavers-card border-2 border-paper-border dark:border-kavers-border hover:border-amber-500 text-zinc-900 dark:text-white transition-all active:scale-[0.98] shadow-md group flex items-start gap-2 cursor-pointer"
+                >
+                  <span className="w-4 h-4 rounded-full bg-amber-500/20 text-amber-500 font-black text-[9px] flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-amber-500 group-hover:text-black">
+                    {idx + 1}
+                  </span>
+                  <div className="flex-1">
+                    <div className="text-xs font-bold leading-tight">{choice.text}</div>
+                    {choice.cost > 0 ? (
+                      <span className="text-[9px] font-black text-red-500 block mt-0.5">
+                        Custo: R$ {choice.cost.toLocaleString()}
+                      </span>
+                    ) : (
+                      <span className="text-[9px] font-black text-emerald-500 block mt-0.5">
+                        OpÃ§Ã£o Gratuita (R$ 0)
+                      </span>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* STEP TYPE B: KEY GAME PREPARATION */}
+          {currentStep.type === "key_game" && (
+            <div className="space-y-2.5 mt-auto">
+              <button
+                onClick={() => handleStartKeyGamePreparation(currentStep)}
+                className="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all cursor-pointer"
+              >
+                <Swords className="w-4 h-4" /> Preparar ConduÃ§Ã£o & Consultar Batedores
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 1. EXPLICIT ACTION FEEDBACK MODAL (UI/UX) */}
+      {actionFeedback && (
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="glass-panel-glow rounded-3xl max-w-md w-full p-5 text-center border border-amber-500/50 shadow-2xl relative">
+            <div className="mx-auto w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-500 flex items-center justify-center mb-3">
+              <CheckCircle2 className="w-6 h-6" />
+            </div>
+
+            <span className="text-[9px] font-black text-amber-500 uppercase block mb-0.5">FEEDBACK EXPLÃCITO</span>
+            <h3 className="text-base font-black text-zinc-900 dark:text-white uppercase mb-2">
+              {actionFeedback.title}
+            </h3>
+
+            <p className="text-xs text-zinc-700 dark:text-zinc-300 font-medium leading-relaxed mb-4 bg-paper-card dark:bg-kavers-card p-3 rounded-2xl border border-paper-border dark:border-kavers-border">
+              {actionFeedback.logText}
+            </p>
+
+            <div className="mb-4 text-left space-y-1.5 bg-kavers-light/60 dark:bg-kavers-dark/60 p-3 rounded-2xl border border-kavers-light-border dark:border-kavers-border">
+              <span className="text-[9px] font-black text-amber-500 uppercase block mb-1">Deltas NumÃ©ricos Obtidos:</span>
+              <div className="grid grid-cols-2 gap-2 text-xs font-black">
+                {actionFeedback.deltas.map((d, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-1.5 rounded-xl bg-paper-card dark:bg-kavers-card border border-paper-border dark:border-kavers-border">
+                    <span className="text-zinc-400 font-medium text-[10px]">{d.label}</span>
+                    <span className={d.isPositive ? "text-emerald-500" : "text-red-500"}>{d.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={handleConfirmFeedback}
+              className="w-full py-3 rounded-xl bg-amber-500 text-black font-black text-xs uppercase tracking-wider shadow-lg active:scale-95 transition-all"
+            >
+              Continuar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 2. REAL-TIME TACTICAL DILEMMA MODAL */}
+      {activeTacticalDilemma && (
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="glass-panel-glow rounded-3xl max-w-md w-full p-5 text-center border border-amber-500/50 shadow-2xl relative">
+            <div className="mx-auto w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-500 flex items-center justify-center mb-3 animate-pulse">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+
+            <span className="text-[9px] font-black text-amber-500 uppercase block mb-0.5">{activeTacticalDilemma.scoutAlertTitle}</span>
+            <p className="text-xs text-zinc-700 dark:text-zinc-300 font-medium leading-relaxed mb-4 bg-paper-card dark:bg-kavers-card p-3 rounded-2xl border border-paper-border dark:border-kavers-border text-left">
+              {activeTacticalDilemma.description}
+            </p>
+
+            <div className="space-y-2 text-left">
+              {activeTacticalDilemma.choices.map((tChoice, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleExecuteTacticalMatch(tChoice)}
+                  className="w-full p-3 rounded-2xl bg-paper-card dark:bg-kavers-card border border-paper-border dark:border-kavers-border hover:border-amber-500 text-xs font-bold text-zinc-900 dark:text-white transition-all active:scale-[0.98] shadow-md"
+                >
+                  <div>{tChoice.text}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. MATCH RESULT MODAL WITH NARRATIVE CHRONICLE */}
+      {activeMatchResult && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="glass-panel-glow rounded-3xl max-w-md w-full p-5 text-center border border-amber-500/50 shadow-2xl relative">
+            <button
+              onClick={() => setActiveMatchResult(null)}
+              className="absolute top-4 right-4 text-zinc-400 hover:text-white p-1 rounded-full bg-paper-card dark:bg-kavers-card"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <span className="text-[9px] font-black text-amber-500 uppercase block mb-0.5">RELATÃ“RIO PÃ“S-JOGO (GEMINI AI)</span>
+            <h3 className="text-base font-black text-zinc-900 dark:text-white uppercase mb-1">
+              {activeMatchResult.statusTitle}
+            </h3>
+
+            <div className="my-3 grid grid-cols-2 gap-2 bg-paper-card dark:bg-kavers-card p-2.5 rounded-2xl border border-paper-border dark:border-kavers-border text-left text-xs font-bold">
+              {activeMatchResult.formattedDeltas.map((d, idx) => (
+                <div key={idx}>
+                  <span className="text-[8px] text-zinc-500 dark:text-zinc-400 block font-black uppercase">{d.label}</span>
+                  <span className={d.isPositive ? "text-emerald-500" : "text-red-500"}>{d.value}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="text-left bg-kavers-light/60 dark:bg-kavers-dark/60 p-3 rounded-2xl border border-kavers-light-border dark:border-kavers-border text-xs text-zinc-700 dark:text-zinc-300 font-medium leading-relaxed max-h-48 overflow-y-auto mb-3">
+              <span className="text-[9px] font-black text-amber-500 block mb-1 uppercase">CrÃ´nica de Arquibancada:</span>
+              {activeMatchResult.chronicleText}
+            </div>
+
+            <button
+              onClick={() => setActiveMatchResult(null)}
+              className="w-full py-2.5 rounded-xl bg-amber-500 text-black font-black text-xs uppercase tracking-wider shadow-lg active:scale-95 transition-all"
+            >
+              Continuar Carreira
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2: PROFILE & ALLIANCE STATS */}
+      {activeTab === "profile" && currentTorcida && (
+        <div className="glass-panel rounded-3xl p-4 shadow-xl border border-kavers-light-border dark:border-kavers-border space-y-3 text-left">
+          <div>
+            <span className="text-[9px] font-black text-amber-500 uppercase block">CADASTRO DA TORCIDA</span>
+            <h3 className="text-base font-black text-zinc-900 dark:text-white uppercase">
+              {currentTorcida.torcida} ({currentTorcida.sigla})
+            </h3>
+            <span className="text-xs text-zinc-500 dark:text-zinc-400 font-semibold">
+              Clube: {currentTorcida.clube} â€¢ UF: {currentTorcida.estado} [{currentTorcida.tier}]
+            </span>
+          </div>
+
+          <div className="p-3 rounded-2xl bg-paper-card dark:bg-kavers-card border border-paper-border dark:border-kavers-border text-xs text-zinc-700 dark:text-zinc-300 font-medium">
+            <span className="font-bold block text-zinc-900 dark:text-white mb-0.5">Bloco de AlianÃ§a GeopolÃ­tica:</span>
+            <span className="text-amber-500 font-black">{currentTorcida.eixo_alianca}</span>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: HISTORY CHRONICLE LOG */}
+      {activeTab === "history" && (
+        <div className="glass-panel rounded-3xl p-4 shadow-xl border border-kavers-light-border dark:border-kavers-border">
+          <div className="text-xs text-zinc-500 dark:text-zinc-400 font-black uppercase tracking-wider mb-2">
+            CrÃ´nica e Registro da Carreira
+          </div>
+
+          <div className="max-h-96 overflow-y-auto space-y-2 text-xs font-semibold text-left">
+            {historyLog.length > 0 ? (
+              historyLog.map((log, idx) => (
+                <div
+                  key={idx}
+                  className="p-2.5 rounded-xl bg-paper-card dark:bg-kavers-card border border-paper-border dark:border-kavers-border text-zinc-800 dark:text-zinc-200"
+                >
+                  {log}
+                </div>
+              ))
+            ) : (
+              <div className="text-zinc-400 text-center py-6">
+                Nenhum registro histÃ³rico ainda.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+[
+  {
+    "clube": "Corinthians",
+    "torcida": "GaviÃµes da Fiel",
+    "sigla": "TGF",
+    "tier": "S",
+    "contingente": 95,
+    "pressao_bancada": 95,
+    "poder_pista": 92,
+    "caravana": 95,
+    "autonomia_financeira": 95,
+    "perfil_predominante": "SuperpotÃªncia de Massa, Caravana & Samba",
+    "estado": "SP",
+    "eixo_alianca": "PUNHO_CRUZADO"
+  },
+  {
+    "clube": "Palmeiras",
+    "torcida": "Mancha Alvi-Verde",
+    "sigla": "MAV",
+    "tier": "S",
+    "contingente": 93,
+    "pressao_bancada": 90,
+    "poder_pista": 95,
+    "caravana": 95,
+    "autonomia_financeira": 95,
+    "perfil_predominante": "PotÃªncia MÃ¡xima de Estrada & Pista",
+    "estado": "SP",
+    "eixo_alianca": "DPA"
+  },
+  {
+    "clube": "SÃ£o Paulo",
+    "torcida": "Torcida Tricolor Indep.",
+    "sigla": "TTI",
+    "tier": "S",
+    "contingente": 94,
+    "pressao_bancada": 88,
+    "poder_pista": 93,
+    "caravana": 95,
+    "autonomia_financeira": 90,
+    "perfil_predominante": "Comboios Pesados pelo Brasil",
+    "estado": "SP",
+    "eixo_alianca": "PC"
+  },
+  {
+    "clube": "Santos",
+    "torcida": "Torcida Jovem do Santos",
+    "sigla": "TJS",
+    "tier": "S",
+    "contingente": 90,
+    "pressao_bancada": 85,
+    "poder_pista": 90,
+    "caravana": 92,
+    "autonomia_financeira": 88,
+    "perfil_predominante": "TradiÃ§Ã£o LitorÃ¢nea & PresenÃ§a na Capital",
+    "estado": "SP",
+    "eixo_alianca": "PC"
+  },
+  {
+    "clube": "Ponte Preta",
+    "torcida": "Torcida Jovem Ponte",
+    "sigla": "TJP",
+    "tier": "A",
+    "contingente": 80,
+    "pressao_bancada": 80,
+    "poder_pista": 80,
+    "caravana": 70,
+    "autonomia_financeira": 70,
+    "perfil_predominante": "Caravanas Tradicionais de Campinas",
+    "estado": "SP",
+    "eixo_alianca": "BLOCO_3"
+  },
+  {
+    "clube": "Corinthians",
+    "torcida": "Torcida Camisa 12",
+    "sigla": "C12",
+    "tier": "A",
+    "contingente": 80,
+    "pressao_bancada": 80,
+    "poder_pista": 80,
+    "caravana": 80,
+    "autonomia_financeira": 75,
+    "perfil_predominante": "PresenÃ§a Constante em Viagens",
+    "estado": "SP",
+    "eixo_alianca": "PUNHO_CRUZADO"
+  },
+  {
+    "clube": "SÃ£o Paulo",
+    "torcida": "DragÃµes da Real",
+    "sigla": "DDR",
+    "tier": "A",
+    "contingente": 75,
+    "pressao_bancada": 70,
+    "poder_pista": 65,
+    "caravana": 75,
+    "autonomia_financeira": 85,
+    "perfil_predominante": "Caravanas Estruturadas & Conforto",
+    "estado": "SP",
+    "eixo_alianca": "PC"
+  },
+  {
+    "clube": "Guarani",
+    "torcida": "FÃºria Indep. Guarani",
+    "sigla": "TFIG",
+    "tier": "A",
+    "contingente": 75,
+    "pressao_bancada": 80,
+    "poder_pista": 80,
+    "caravana": 60,
+    "autonomia_financeira": 75,
+    "perfil_predominante": "Eixo Forte na Estrada & UniÃ£o PC",
+    "estado": "SP",
+    "eixo_alianca": "PC"
+  },
+  {
+    "clube": "Palmeiras",
+    "torcida": "TUP",
+    "sigla": "TUP",
+    "tier": "A-",
+    "contingente": 55,
+    "pressao_bancada": 50,
+    "poder_pista": 50,
+    "caravana": 55,
+    "autonomia_financeira": 50,
+    "perfil_predominante": "Viagens Tradicionais Alviverdes",
+    "estado": "SP",
+    "eixo_alianca": "DPA"
+  },
+  {
+    "clube": "Corinthians",
+    "torcida": "PavilhÃ£o 9",
+    "sigla": "P9",
+    "tier": "A-",
+    "contingente": 70,
+    "pressao_bancada": 70,
+    "poder_pista": 70,
+    "caravana": 70,
+    "autonomia_financeira": 70,
+    "perfil_predominante": "PresenÃ§a Fiel em Caravanas",
+    "estado": "SP",
+    "eixo_alianca": "PUNHO_CRUZADO"
+  },
+  {
+    "clube": "Botafogo-SP",
+    "torcida": "Fiel ForÃ§a Tricolor",
+    "sigla": "FFT",
+    "tier": "A-",
+    "contingente": 50,
+    "pressao_bancada": 50,
+    "poder_pista": 35,
+    "caravana": 55,
+    "autonomia_financeira": 65,
+    "perfil_predominante": "Viagens pelo Interior & SÃ©rie B",
+    "estado": "SP",
+    "eixo_alianca": "BLOCO_3"
+  },
+  {
+    "clube": "Portuguesa",
+    "torcida": "LeÃµes da Fabulosa",
+    "sigla": "TLF",
+    "tier": "B+",
+    "contingente": 70,
+    "pressao_bancada": 75,
+    "poder_pista": 60,
+    "caravana": 70,
+    "autonomia_financeira": 60,
+    "perfil_predominante": "Caravanas Tradicionais pelo Interior",
+    "estado": "SP",
+    "eixo_alianca": "BLOCO_1"
+  },
+  {
+    "clube": "SÃ£o JosÃ© EC",
+    "torcida": "Torcida Mancha Azul",
+    "sigla": "TMA",
+    "tier": "B+",
+    "contingente": 65,
+    "pressao_bancada": 70,
+    "poder_pista": 70,
+    "caravana": 60,
+    "autonomia_financeira": 50,
+    "perfil_predominante": "InvasÃµes no Vale & Litoral",
+    "estado": "SP",
+    "eixo_alianca": "BLOCO_3"
+  },
+  {
+    "clube": "Santos",
+    "torcida": "Torcida Sangue Jovem",
+    "sigla": "TSJ",
+    "tier": "B+",
+    "contingente": 65,
+    "pressao_bancada": 70,
+    "poder_pista": 70,
+    "caravana": 65,
+    "autonomia_financeira": 60,
+    "perfil_predominante": "Linha de Frente na Estrada",
+    "estado": "SP",
+    "eixo_alianca": "PC"
+  },
+  {
+    "clube": "Comercial-RP",
+    "torcida": "Mancha Alvinegra",
+    "sigla": "TOMA",
+    "tier": "B+",
+    "contingente": 60,
+    "pressao_bancada": 70,
+    "poder_pista": 70,
+    "caravana": 60,
+    "autonomia_financeira": 55,
+    "perfil_predominante": "Bate-Volta no Interior",
+    "estado": "SP",
+    "eixo_alianca": "BLOCO_3"
+  },
+  {
+    "clube": "Santo AndrÃ©",
+    "torcida": "FÃºria Andreense",
+    "sigla": "TFA",
+    "tier": "B",
+    "contingente": 55,
+    "pressao_bancada": 65,
+    "poder_pista": 70,
+    "caravana": 65,
+    "autonomia_financeira": 60,
+    "perfil_predominante": "Caravana Pesada no Interior de SP",
+    "estado": "SP",
+    "eixo_alianca": "BLOCO_1"
+  },
+  {
+    "clube": "Rio Branco",
+    "torcida": "Malucos do Tigre",
+    "sigla": "TMT",
+    "tier": "B",
+    "contingente": 60,
+    "pressao_bancada": 65,
+    "poder_pista": 70,
+    "caravana": 60,
+    "autonomia_financeira": 50,
+    "perfil_predominante": "ForÃ§a Regional em Viagens",
+    "estado": "SP",
+    "eixo_alianca": "BLOCO_1"
+  },
+  {
+    "clube": "UniÃ£o Barbarense",
+    "torcida": "Sangue Barbarense",
+    "sigla": "TUSB",
+    "tier": "B",
+    "contingente": 60,
+    "pressao_bancada": 65,
+    "poder_pista": 70,
+    "caravana": 60,
+    "autonomia_financeira": 45,
+    "perfil_predominante": "PresenÃ§a Regional Forte",
+    "estado": "SP",
+    "eixo_alianca": "BLOCO_2"
+  },
+  {
+    "clube": "Paulista JundiaÃ­",
+    "torcida": "Torcida RaÃ§a Tricolor",
+    "sigla": "TRT",
+    "tier": "B",
+    "contingente": 55,
+    "pressao_bancada": 65,
+    "poder_pista": 60,
+    "caravana": 60,
+    "autonomia_financeira": 50,
+    "perfil_predominante": "Viagens Regionais de Acesso",
+    "estado": "SP",
+    "eixo_alianca": "PC"
+  },
+  {
+    "clube": "Corinthians",
+    "torcida": "Estopim da Fiel",
+    "sigla": "EEF",
+    "tier": "B",
+    "contingente": 60,
+    "pressao_bancada": 70,
+    "poder_pista": 55,
+    "caravana": 80,
+    "autonomia_financeira": 55,
+    "perfil_predominante": "PresenÃ§a Visual em Jogos Fora",
+    "estado": "SP",
+    "eixo_alianca": "PUNHO_CRUZADO"
+  },
+  {
+    "clube": "TaubatÃ©",
+    "torcida": "Os Jecas / DragÃµes Alvi Azul",
+    "sigla": "TMV",
+    "tier": "B",
+    "contingente": 50,
+    "pressao_bancada": 65,
+    "poder_pista": 65,
+    "caravana": 60,
+    "autonomia_financeira": 50,
+    "perfil_predominante": "PresenÃ§a Fiel no Interior",
+    "estado": "SP",
+    "eixo_alianca": "BLOCO_1"
+  },
+  {
+    "clube": "Palmeiras",
+    "torcida": "AcadÃªmicos da SavÃ³ia",
+    "sigla": "SAV",
+    "tier": "B",
+    "contingente": 55,
+    "pressao_bancada": 70,
+    "poder_pista": 50,
+    "caravana": 55,
+    "autonomia_financeira": 55,
+    "perfil_predominante": "Apoio em Jogos Fora",
+    "estado": "SP",
+    "eixo_alianca": "DPA"
+  },
+  {
+    "clube": "Noroeste",
+    "torcida": "Falange Vermelha",
+    "sigla": "TFV",
+    "tier": "B",
+    "contingente": 50,
+    "pressao_bancada": 60,
+    "poder_pista": 55,
+    "caravana": 50,
+    "autonomia_financeira": 45,
+    "perfil_predominante": "Viagens na Linha Paulista",
+    "estado": "SP",
+    "eixo_alianca": "BLOCO_1"
+  },
+  {
+    "clube": "SÃ£o Bernardo FC",
+    "torcida": "Guerreiros do Tigre",
+    "sigla": "TGT",
+    "tier": "B-",
+    "contingente": 45,
+    "pressao_bancada": 55,
+    "poder_pista": 50,
+    "caravana": 60,
+    "autonomia_financeira": 65,
+    "perfil_predominante": "Viagens Financiadas / Acesso",
+    "estado": "SP",
+    "eixo_alianca": "BLOCO_2"
+  },
+  {
+    "clube": "Corinthians",
+    "torcida": "CoringÃ£o Chopp",
+    "sigla": "CC",
+    "tier": "B-",
+    "contingente": 50,
+    "pressao_bancada": 65,
+    "poder_pista": 50,
+    "caravana": 50,
+    "autonomia_financeira": 50,
+    "perfil_predominante": "ConvivÃªncia em Viagens",
+    "estado": "SP",
+    "eixo_alianca": "PUNHO_CRUZADO"
+  },
+  {
+    "clube": "SÃ£o Bernardo FC",
+    "torcida": "Febre Amarela",
+    "sigla": "FA",
+    "tier": "C",
+    "contingente": 55,
+    "pressao_bancada": 65,
+    "poder_pista": 30,
+    "caravana": 60,
+    "autonomia_financeira": 70,
+    "perfil_predominante": "Ã”nibus Conforto / FamÃ­lia",
+    "estado": "SP",
+    "eixo_alianca": "BLOCO_2"
+  },
+  {
+    "clube": "EC SÃ£o Bernardo",
+    "torcida": "EsquadrÃ£o Alvinegro",
+    "sigla": "EEA",
+    "tier": "C+",
+    "contingente": 40,
+    "pressao_bancada": 55,
+    "poder_pista": 40,
+    "caravana": 50,
+    "autonomia_financeira": 35,
+    "perfil_predominante": "Viagens Locais no ABC & Litoral",
+    "estado": "SP",
+    "eixo_alianca": "BLOCO_1"
+  },
+  {
+    "clube": "SÃ£o Caetano",
+    "torcida": "Comando Azul",
+    "sigla": "TCA",
+    "tier": "C+",
+    "contingente": 40,
+    "pressao_bancada": 50,
+    "poder_pista": 35,
+    "caravana": 40,
+    "autonomia_financeira": 45,
+    "perfil_predominante": "PresenÃ§a Regional",
+    "estado": "SP",
+    "eixo_alianca": "BLOCO_2"
+  },
+  {
+    "clube": "SÃ£o Caetano",
+    "torcida": "Gladiadores",
+    "sigla": "GLA",
+    "tier": "C",
+    "contingente": 40,
+    "pressao_bancada": 10,
+    "poder_pista": 70,
+    "caravana": 35,
+    "autonomia_financeira": 25,
+    "perfil_predominante": "Escolta / Linha de Frente",
+    "estado": "SP",
+    "eixo_alianca": "BLOCO_2"
+  },
+  {
+    "clube": "Santo AndrÃ©",
+    "torcida": "DragÃ£o Andreense / TEA",
+    "sigla": "TUDA",
+    "tier": "C",
+    "contingente": 35,
+    "pressao_bancada": 40,
+    "poder_pista": 40,
+    "caravana": 40,
+    "autonomia_financeira": 35,
+    "perfil_predominante": "Viagens Curtas Locais",
+    "estado": "SP",
+    "eixo_alianca": "BLOCO_1"
+  },
+  {
+    "clube": "Flamengo",
+    "torcida": "Torcida Jovem do Fla",
+    "sigla": "TJF",
+    "tier": "S",
+    "contingente": 85,
+    "pressao_bancada": 60,
+    "poder_pista": 95,
+    "caravana": 85,
+    "autonomia_financeira": 85,
+    "perfil_predominante": "InvasÃµes Interestaduais de Pista",
+    "estado": "RJ",
+    "eixo_alianca": "PC"
+  },
+  {
+    "clube": "Vasco da Gama",
+    "torcida": "ForÃ§a Jovem do Vasco",
+    "sigla": "FJV",
+    "tier": "S",
+    "contingente": 88,
+    "pressao_bancada": 70,
+    "poder_pista": 95,
+    "caravana": 85,
+    "autonomia_financeira": 80,
+    "perfil_predominante": "TradiÃ§Ã£o Gigante em Rodovias",
+    "estado": "RJ",
+    "eixo_alianca": "DPA"
+  },
+  {
+    "clube": "Flamengo",
+    "torcida": "RaÃ§a Rubro-Negra",
+    "sigla": "RRN",
+    "tier": "A+",
+    "contingente": 90,
+    "pressao_bancada": 90,
+    "poder_pista": 80,
+    "caravana": 85,
+    "autonomia_financeira": 80,
+    "perfil_predominante": "ArrastÃ£o de Massa em Aeroportos/Estradas",
+    "estado": "RJ",
+    "eixo_alianca": "PC"
+  },
+  {
+    "clube": "Fluminense",
+    "torcida": "Torcida Young Flu",
+    "sigla": "TYF",
+    "tier": "A",
+    "contingente": 80,
+    "pressao_bancada": 85,
+    "poder_pista": 90,
+    "caravana": 85,
+    "autonomia_financeira": 75,
+    "perfil_predominante": "Caravanas Consolidadas no Brasil",
+    "estado": "RJ",
+    "eixo_alianca": "PC"
+  },
+  {
+    "clube": "Botafogo",
+    "torcida": "FÃºria Jovem do Botafogo",
+    "sigla": "FJB",
+    "tier": "A-",
+    "contingente": 80,
+    "pressao_bancada": 80,
+    "poder_pista": 92,
+    "caravana": 78,
+    "autonomia_financeira": 70,
+    "perfil_predominante": "Linha de Frente Interestadual",
+    "estado": "RJ",
+    "eixo_alianca": "PC"
+  },
+  {
+    "clube": "Flamengo",
+    "torcida": "Torcida Urubuzada",
+    "sigla": "TUZ",
+    "tier": "A-",
+    "contingente": 75,
+    "pressao_bancada": 85,
+    "poder_pista": 65,
+    "caravana": 70,
+    "autonomia_financeira": 70,
+    "perfil_predominante": "Festa e Canto Fora do Rio",
+    "estado": "RJ",
+    "eixo_alianca": "PC"
+  },
+  {
+    "clube": "Vasco da Gama",
+    "torcida": "Guerreiros do Almirante",
+    "sigla": "GDA",
+    "tier": "B+",
+    "contingente": 70,
+    "pressao_bancada": 90,
+    "poder_pista": 55,
+    "caravana": 70,
+    "autonomia_financeira": 65,
+    "perfil_predominante": "Canto Ininterrupto Fora de Casa",
+    "estado": "RJ",
+    "eixo_alianca": "DPA"
+  },
+  {
+    "clube": "Fluminense",
+    "torcida": "Bravo 52",
+    "sigla": "B52",
+    "tier": "B",
+    "contingente": 60,
+    "pressao_bancada": 85,
+    "poder_pista": 45,
+    "caravana": 60,
+    "autonomia_financeira": 55,
+    "perfil_predominante": "Apoio de Canto Interestadual",
+    "estado": "RJ",
+    "eixo_alianca": "PC"
+  },
+  {
+    "clube": "Bangu",
+    "torcida": "Torcida Banguzeiros",
+    "sigla": "TBZ",
+    "tier": "C",
+    "contingente": 35,
+    "pressao_bancada": 45,
+    "poder_pista": 35,
+    "caravana": 30,
+    "autonomia_financeira": 30,
+    "perfil_predominante": "Viagens Locais no Carioca",
+    "estado": "RJ",
+    "eixo_alianca": "NEUTRO"
+  },
+  {
+    "clube": "America-RJ",
+    "torcida": "Torcida Sangue Rubro",
+    "sigla": "TSR",
+    "tier": "C",
+    "contingente": 30,
+    "pressao_bancada": 40,
+    "poder_pista": 30,
+    "caravana": 25,
+    "autonomia_financeira": 25,
+    "perfil_predominante": "Deslocamentos Pequenos",
+    "estado": "RJ",
+    "eixo_alianca": "NEUTRO"
+  },
+  {
+    "clube": "AtlÃ©tico-MG",
+    "torcida": "Galoucura",
+    "sigla": "TOG",
+    "tier": "S",
+    "contingente": 90,
+    "pressao_bancada": 93,
+    "poder_pista": 93,
+    "caravana": 91,
+    "autonomia_financeira": 90,
+    "perfil_predominante": "Comboios Pesados & Eixo DPA",
+    "estado": "MG",
+    "eixo_alianca": "DPA"
+  },
+  {
+    "clube": "Cruzeiro",
+    "torcida": "MÃ¡fia Azul",
+    "sigla": "TMA",
+    "tier": "S",
+    "contingente": 90,
+    "pressao_bancada": 90,
+    "poder_pista": 93,
+    "caravana": 91,
+    "autonomia_financeira": 93,
+    "perfil_predominante": "InvasÃµes HistÃ³ricas & Eixo PC",
+    "estado": "MG",
+    "eixo_alianca": "PC"
+  },
+  {
+    "clube": "Cruzeiro",
+    "torcida": "PavilhÃ£o Independente",
+    "sigla": "TPI",
+    "tier": "A-",
+    "contingente": 70,
+    "pressao_bancada": 80,
+    "poder_pista": 85,
+    "caravana": 75,
+    "autonomia_financeira": 65,
+    "perfil_predominante": "Caravana Pesada de Pista",
+    "estado": "MG",
+    "eixo_alianca": "PC"
+  },
+  {
+    "clube": "AtlÃ©tico-MG",
+    "torcida": "Brigada 1908",
+    "sigla": "B08",
+    "tier": "B+",
+    "contingente": 60,
+    "pressao_bancada": 85,
+    "poder_pista": 60,
+    "caravana": 65,
+    "autonomia_financeira": 60,
+    "perfil_predominante": "Apoio em Viagens Longas",
+    "estado": "MG",
+    "eixo_alianca": "DPA"
+  },
+  {
+    "clube": "Cruzeiro",
+    "torcida": "Geral Celeste",
+    "sigla": "TGC",
+    "tier": "B",
+    "contingente": 55,
+    "pressao_bancada": 80,
+    "poder_pista": 45,
+    "caravana": 55,
+    "autonomia_financeira": 50,
+    "perfil_predominante": "Canto em Jogos Fora",
+    "estado": "MG",
+    "eixo_alianca": "PC"
+  },
+  {
+    "clube": "AmÃ©rica-MG",
+    "torcida": "Barra do Coelho",
+    "sigla": "BDC",
+    "tier": "C+",
+    "contingente": 45,
+    "pressao_bancada": 60,
+    "poder_pista": 35,
+    "caravana": 40,
+    "autonomia_financeira": 45,
+    "perfil_predominante": "Viagens Regionais no Mineiro",
+    "estado": "MG",
+    "eixo_alianca": "NEUTRO"
+  },
+  {
+    "clube": "URT (Patos)",
+    "torcida": "FÃºria TrovÃ£o",
+    "sigla": "TFT",
+    "tier": "C",
+    "contingente": 35,
+    "pressao_bancada": 50,
+    "poder_pista": 40,
+    "caravana": 35,
+    "autonomia_financeira": 35,
+    "perfil_predominante": "Viagens no TriÃ¢ngulo/Alto ParanaÃ­ba",
+    "estado": "MG",
+    "eixo_alianca": "NEUTRO"
+  },
+  {
+    "clube": "Tupi (JF)",
+    "torcida": "Tribo do Galo",
+    "sigla": "TTG",
+    "tier": "C",
+    "contingente": 35,
+    "pressao_bancada": 45,
+    "poder_pista": 45,
+    "caravana": 35,
+    "autonomia_financeira": 30,
+    "perfil_predominante": "Viagens na Zona da Mata",
+    "estado": "MG",
+    "eixo_alianca": "NEUTRO"
+  },
+  {
+    "clube": "MamorÃ© (Patos)",
+    "torcida": "PavilhÃ£o Sapo",
+    "sigla": "TIPS",
+    "tier": "C",
+    "contingente": 30,
+    "pressao_bancada": 45,
+    "poder_pista": 40,
+    "caravana": 30,
+    "autonomia_financeira": 30,
+    "perfil_predominante": "Deslocamentos no Interior",
+    "estado": "MG",
+    "eixo_alianca": "NEUTRO"
+  },
+  {
+    "clube": "Caldense",
+    "torcida": "FÃºria Verde",
+    "sigla": "TFV",
+    "tier": "C",
+    "contingente": 30,
+    "pressao_bancada": 40,
+    "poder_pista": 30,
+    "caravana": 30,
+    "autonomia_financeira": 30,
+    "perfil_predominante": "Viagens no Sul de Minas",
+    "estado": "MG",
+    "eixo_alianca": "NEUTRO"
+  },
+  {
+    "clube": "GrÃªmio",
+    "torcida": "Geral do GrÃªmio",
+    "sigla": "GDG",
+    "tier": "S-",
+    "contingente": 90,
+    "pressao_bancada": 95,
+    "poder_pista": 75,
+    "caravana": 85,
+    "autonomia_financeira": 85,
+    "perfil_predominante": "InvasÃµes na AmÃ©rica do Sul & BR",
+    "estado": "RS",
+    "eixo_alianca": "PUNHO_CRUZADO"
+  },
+  {
+    "clube": "Internacional",
+    "torcida": "Guarda Popular",
+    "sigla": "GPO",
+    "tier": "S-",
+    "contingente": 85,
+    "pressao_bancada": 95,
+    "poder_pista": 75,
+    "caravana": 85,
+    "autonomia_financeira": 80,
+    "perfil_predominante": "InvasÃµes de Murga & Libertadores",
+    "estado": "RS",
+    "eixo_alianca": "PC"
+  },
+  {
+    "clube": "Internacional",
+    "torcida": "Camisa 12 do Inter",
+    "sigla": "C12",
+    "tier": "A",
+    "contingente": 80,
+    "pressao_bancada": 85,
+    "poder_pista": 80,
+    "caravana": 82,
+    "autonomia_financeira": 75,
+    "perfil_predominante": "Comboios HistÃ³ricos de Estrada",
+    "estado": "RS",
+    "eixo_alianca": "PC"
+  },
+  {
+    "clube": "GrÃªmio",
+    "torcida": "Torcida Jovem do GrÃªmio",
+    "sigla": "TJG",
+    "tier": "A",
+    "contingente": 75,
+    "pressao_bancada": 80,
+    "poder_pista": 85,
+    "caravana": 80,
+    "autonomia_financeira": 70,
+    "perfil_predominante": "Pista & PresenÃ§a na Estrada",
+    "estado": "RS",
+    "eixo_alianca": "PUNHO_CRUZADO"
+  },
+  {
+    "clube": "Juventude",
+    "torcida": "Mancha Verde Juventude",
+    "sigla": "MVJ",
+    "tier": "B",
+    "contingente": 60,
+    "pressao_bancada": 65,
+    "poder_pista": 60,
+    "caravana": 60,
+    "autonomia_financeira": 50,
+    "perfil_predominante": "Viagens da Serra GaÃºcha",
+    "estado": "RS",
+    "eixo_alianca": "NEUTRO"
+  },
+  {
+    "clube": "Brasil de Pelotas",
+    "torcida": "MÃ¡fia Xavante",
+    "sigla": "MAX",
+    "tier": "B-",
+    "contingente": 55,
+    "pressao_bancada": 75,
+    "poder_pista": 55,
+    "caravana": 65,
+    "autonomia_financeira": 40,
+    "perfil_predominante": "InvasÃµes Xavantes / RaÃ§a Pura",
+    "estado": "RS",
+    "eixo_alianca": "NEUTRO"
+  },
+  {
+    "clube": "Caxias",
+    "torcida": "ForÃ§a GrenÃ¡",
+    "sigla": "FGR",
+    "tier": "B-",
+    "contingente": 55,
+    "pressao_bancada": 60,
+    "poder_pista": 65,
+    "caravana": 60,
+    "autonomia_financeira": 45,
+    "perfil_predominante": "Viagens Regionais da Serra",
+    "estado": "RS",
+    "eixo_alianca": "NEUTRO"
+  },
+  {
+    "clube": "Pelotas",
+    "torcida": "ForÃ§a Jovem Lobo",
+    "sigla": "FJL",
+    "tier": "C+",
+    "contingente": 45,
+    "pressao_bancada": 60,
+    "poder_pista": 50,
+    "caravana": 40,
+    "autonomia_financeira": 35,
+    "perfil_predominante": "Deslocamentos no Sul GaÃºcho",
+    "estado": "RS",
+    "eixo_alianca": "NEUTRO"
+  }
+]
+{
+  "eixos_nacionais": {
+    "DPA": {
+      "name": "UniÃ£o Dedo Pro Alto (DPA)",
+      "symbol": "ðŸ‘†",
+      "members": [
+        "Mancha Alvi-Verde",
+        "ForÃ§a Jovem do Vasco",
+        "Galoucura",
+        "ImpÃ©rio Alviverde",
+        "Os ImbatÃ­veis",
+        "Inferno Coral",
+        "ForÃ§a Jovem GoiÃ¡s",
+        "Mancha Azul (SC)",
+        "Mancha Alvinegra (RP)",
+        "Torcida Mancha Azul",
+        "Fiel ForÃ§a Tricolor"
+      ]
+    },
+    "PC": {
+      "name": "UniÃ£o Punho Colado (PC)",
+      "symbol": "ðŸ‘Š",
+      "members": [
+        "Torcida Tricolor Indep.",
+        "Torcida Jovem do Fla",
+        "MÃ¡fia Azul",
+        "Torcida Jovem do Sport",
+        "Torcida Bamor",
+        "LeÃµes da TUF",
+        "Jovem Garra Tricolor",
+        "Camisa 12 do Inter",
+        "FÃºria Indep. Guarani",
+        "FÃºria Independente (PR)",
+        "Torcida Young Flu",
+        "Torcida RaÃ§a Tricolor"
+      ]
+    },
+    "PUNHO_CRUZADO": {
+      "name": "UniÃ£o Punho Cruzado",
+      "symbol": "ðŸ™…â€â™‚ï¸",
+      "members": [
+        "GaviÃµes da Fiel",
+        "Geral do GrÃªmio",
+        "Torcida Jovem do GrÃªmio",
+        "Terror Bicolor",
+        "EsquadrÃ£o Vilanovense"
+      ]
+    }
+  },
+  "geopolitica_nordeste": {
+    "LADO_A": {
+      "name": "Nordeste Lado A (DPA)",
+      "members": [
+        "Inferno Coral",
+        "Os ImbatÃ­veis",
+        "Cearamor",
+        "Mancha Azul (AL)",
+        "MÃ¡fia Vermelha",
+        "TubarÃµes da Fiel",
+        "TrovÃ£o Azul",
+        "Jovem do Treze"
+      ]
+    },
+    "LADO_B": {
+      "name": "Nordeste Lado B (PC)",
+      "members": [
+        "Torcida Jovem do Sport",
+        "Torcida Bamor",
+        "LeÃµes da TUF",
+        "Comando Alvirrubro",
+        "Camisa 12 do ABC",
+        "Motofiel",
+        "EsquadrÃ£o Colorado",
+        "FÃºria Rubro-Negra"
+      ]
+    }
+  },
+  "blocos_interior_abc": {
+    "BLOCO_1": {
+      "name": "Rede Santo AndrÃ© / Lusa / Briosa",
+      "members": [
+        "FÃºria Andreense",
+        "EsquadrÃ£o Alvinegro",
+        "ForÃ§a Rubro-Verde",
+        "LeÃµes da Fabulosa",
+        "Os Jecas / DragÃµes Alvi Azul",
+        "Malucos do Tigre",
+        "Falange Azul",
+        "Falange Vermelha",
+        "TubarÃ£o Azul"
+      ]
+    },
+    "BLOCO_2": {
+      "name": "Rede Piracicaba / BernÃ´ / Gladiadores",
+      "members": [
+        "Gladiadores",
+        "Guerreiros do Tigre",
+        "Febre Amarela",
+        "Sangue Barbarense",
+        "FÃºria Amarela",
+        "EsquadrÃ£o XV",
+        "Inter-Ativa",
+        "Ju-Jovem",
+        "Guerreiros do LeÃ£o"
+      ]
+    },
+    "BLOCO_3": {
+      "name": "Rede Ponte / SÃ£o JosÃ© / Comercial / Ferrinha",
+      "members": [
+        "Torcida Jovem Ponte",
+        "Torcida Mancha Azul",
+        "Mancha Alvinegra",
+        "FÃºria MarcÃ­lia",
+        "AfeganistÃ£o"
+      ]
+    },
+    "BLOCO_4": {
+      "name": "Eixo Punho Colado Paulista",
+      "members": [
+        "FÃºria Indep. Guarani",
+        "Torcida RaÃ§a Tricolor"
+      ]
+    }
+  }
+}

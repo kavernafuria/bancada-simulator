@@ -1,0 +1,126 @@
+{
+  "eixos_nacionais": {
+    "DPA": {
+      "name": "União Dedo Pro Alto (DPA)",
+      "symbol": "👆",
+      "members": [
+        "Mancha Alvi-Verde",
+        "Força Jovem do Vasco",
+        "Galoucura",
+        "Império Alviverde",
+        "Os Imbatíveis",
+        "Inferno Coral",
+        "Força Jovem Goiás",
+        "Mancha Azul (SC)",
+        "Mancha Alvinegra (RP)",
+        "Torcida Mancha Azul",
+        "Fiel Força Tricolor",
+        "Cearamor"
+      ]
+    },
+    "PC": {
+      "name": "União Punho Colado (PC)",
+      "symbol": "👊",
+      "members": [
+        "Torcida Tricolor Indep.",
+        "Torcida Jovem do Fla",
+        "Máfia Azul",
+        "Torcida Jovem do Sport",
+        "Torcida Bamor",
+        "Leões da TUF",
+        "Camisa 12 do Inter",
+        "Fúria Indep. Guarani",
+        "Torcida Young Flu",
+        "Torcida Raça Tricolor"
+      ]
+    },
+    "PUNHO_CRUZADO": {
+      "name": "União Punho Cruzado",
+      "symbol": "🙅‍♂️",
+      "members": [
+        "Gaviões da Fiel",
+        "Geral do Grêmio",
+        "Torcida Jovem do Grêmio",
+        "Terror Bicolor",
+        "Esquadrão Vilanovense",
+        "Pavilhão 9",
+        "Torcida Camisa 12"
+      ]
+    }
+  },
+  "geopolitica_nordeste": {
+    "LADO_A": {
+      "name": "Nordeste Lado A (DPA)",
+      "members": [
+        "Inferno Coral",
+        "Os Imbatíveis",
+        "Cearamor",
+        "Mancha Azul (AL)",
+        "Máfia Vermelha",
+        "Tubarões da Fiel",
+        "Trovão Azul",
+        "Jovem do Treze"
+      ]
+    },
+    "LADO_B": {
+      "name": "Nordeste Lado B (PC)",
+      "members": [
+        "Torcida Jovem do Sport",
+        "Torcida Bamor",
+        "Leões da TUF",
+        "Comando Alvirrubro",
+        "Camisa 12 do ABC",
+        "Motofiel",
+        "Esquadrão Colorado",
+        "Fúria Rubro-Negra"
+      ]
+    }
+  },
+  "blocos_interior_abc": {
+    "BLOCO_1": {
+      "name": "Rede Santo André / Lusa / Briosa",
+      "members": [
+        "Fúria Andreense",
+        "Esquadrão Alvinegro",
+        "Força Rubro-Verde",
+        "Leões da Fabulosa",
+        "Os Jecas / Dragões Alvi Azul",
+        "Malucos do Tigre",
+        "Falange Azul",
+        "Falange Vermelha",
+        "Tubarão Azul"
+      ]
+    },
+    "BLOCO_2": {
+      "name": "Rede Piracicaba / Bernô / Gladiadores",
+      "members": [
+        "Gladiadores",
+        "Guerreiros do Tigre",
+        "Febre Amarela",
+        "Sangue Barbarense",
+        "Fúria Amarela",
+        "Esquadrão XV",
+        "Inter-Ativa",
+        "Ju-Jovem",
+        "Guerreiros do Leão"
+      ]
+    },
+    "BLOCO_3": {
+      "name": "Rede Ponte / São José / Comercial / Ferrinha",
+      "members": [
+        "Torcida Jovem Ponte",
+        "Torcida Mancha Azul",
+        "Mancha Alvinegra",
+        "Fúria Marcília",
+        "Afeganistão"
+      ]
+    },
+    "BLOCO_4": {
+      "name": "Eixo Punho Colado Paulista",
+      "members": [
+        "Fúria Indep. Guarani",
+        "Torcida Raça Tricolor"
+      ]
+    }
+  }
+}

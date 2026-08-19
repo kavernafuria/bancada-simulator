@@ -1,0 +1,186 @@
+[
+  {
+    "id": "mosaiaco_3d",
+    "title": "Mosaico 3D no Clássico",
+    "category": "FESTA",
+    "description": "O clássico decisivo da semifinal se aproxima. A comissão de festa propõe um mosaico 3D inédito cobrindo todo o setor da bancada, mas os custos com lona e cordas são elevados.",
+    "choices": [
+      {
+        "text": "Aprovar financiamento total com caixa da torcida (-R$ 15.000)",
+        "effects": { "bank_balance": -15000, "stadium_power": 15, "members": 350, "street_respect": 5 },
+        "log": "Financiou o maior mosaico 3D da história do clássico, emocionando o país."
+      },
+      {
+        "text": "Fazer vaquinha com os sócios e cobrir metade (-R$ 7.000)",
+        "effects": { "bank_balance": -7000, "stadium_power": 8, "members": 150 },
+        "log": "Organizou vaquinha popular para financiar o mosaico do clássico."
+      },
+      {
+        "text": "Cancelar o mosaico e fazer recepção apenas com sinalizadores",
+        "effects": { "stadium_power": 4, "legal_status": -5 },
+        "log": "Optou por recepção com fumaça e sinalizadores no corredor do ônibus."
+      }
+    ]
+  },
+  {
+    "id": "crise_ct",
+    "title": "Protesto na Porta do CT",
+    "category": "DIRETORIA",
+    "description": "O time acumula 5 derrotas seguidas e a zona de rebaixamento assusta. A liderança é pressionada a ir cobrar a diretoria e os jogadores na porta do centro de treinamento.",
+    "choices": [
+      {
+        "text": "Organizar protesto pacífico com faixa e cobrança à diretoria",
+        "effects": { "club_relation": -10, "street_respect": 5, "members": 100 },
+        "log": "Liderou protesto organizado na porta do CT cobrando profissionalismo."
+      },
+      {
+        "text": "Invadir o treino para exigir raça dos jogadores",
+        "effects": { "street_respect": 15, "legal_status": -20, "club_relation": -20 },
+        "log": "Pressionou o elenco com cobrança olho no olho dentro do treino."
+      },
+      {
+        "text": "Divulgar nota oficial de apoio e cobrar apenas no estádio",
+        "effects": { "club_relation": 15, "stadium_power": 5, "street_respect": -10 },
+        "log": "Emitiu nota de apoio incondicional para blindar o elenco antes do jogo."
+      }
+    ]
+  },
+  {
+    "id": "fiscalizacao_pm",
+    "title": "Proibição da Bateria e Bandeirões",
+    "category": "JURIDICO",
+    "description": "O Ministério Público proferiu medida restritiva proibindo bumbos, surdos e faixas identificadas no próximo jogo devido a incidentes na rodada anterior.",
+    "choices": [
+      {
+        "text": "Contratar banca de advogados especializados para recorrer (-R$ 10.000)",
+        "effects": { "bank_balance": -10000, "legal_status": 15, "stadium_power": 10 },
+        "log": "Derrubou a liminar do MP na justiça e garantiu o retorno da bateria."
+      },
+      {
+        "text": "Fazer protesto silencioso de 15 minutos e cantar à capela no estádio",
+        "effects": { "stadium_power": 5, "legal_status": 5, "members": 80 },
+        "log": "Protestou em silêncio antes de fazer o estádio pulsar à capela."
+      },
+      {
+        "text": "Burlar a fiscalização e colocar faixas escondidas",
+        "effects": { "street_respect": 10, "legal_status": -25, "stadium_power": 8 },
+        "log": "Burlou a proibição e estendeu as faixas históricas na arquibancada."
+      }
+    ]
+  },
+  {
+    "id": "emboscada_rival",
+    "title": "Tensão de Pista no Caminho do Estádio",
+    "category": "PISTA",
+    "description": "No trajeto de trem para a partida fora de casa, a escolta avista comboio da torcida rival se aproximando em atitude de confronto.",
+    "choices": [
+      {
+        "text": "Manter a tropa unida com disciplina de segurança e seguir com a escolta",
+        "effects": { "legal_status": 10, "street_respect": 5, "members": 50 },
+        "log": "Demonstrou disciplina operacional mantendo o comboio blindado."
+      },
+      {
+        "text": "Tomar a linha de frente para defender a bandeira e as faixas",
+        "effects": { "street_respect": 20, "legal_status": -20, "members": -100 },
+        "log": "Defendeu o patrimônio e a honra da torcida em confronto de pista."
+      },
+      {
+        "text": "Alterar a rota para evitar o confronto e focar na festa do estádio",
+        "effects": { "legal_status": 10, "street_respect": -10, "stadium_power": 10 },
+        "log": "Desviou da rota de risco e garantiu a festa completa nas arquibancadas."
+      }
+    ]
+  },
+  {
+    "id": "camisa_oficial",
+    "title": "Lançamento da Camisa da Temporada",
+    "category": "FINANCAS",
+    "description": "O departamento de produto desenhou uma linha exclusiva de regatas e agasalhos comemorativos da torcida para venda na sede.",
+    "choices": [
+      {
+        "text": "Produzir lote premium em grande quantidade (-R$ 20.000)",
+        "effects": { "bank_balance": 35000, "members": 400, "stadium_power": 5 },
+        "log": "Lançou lote histórico de vestuário esgotando o estoque na sede."
+      },
+      {
+        "text": "Produção moderada sob encomenda e venda na feira da sede (-R$ 8.000)",
+        "effects": { "bank_balance": 15000, "members": 200 },
+        "log": "Vendeu edição limitada de agasalhos para os sócios ativos."
+      },
+      {
+        "text": "Parceria com marca de streetwear esportivo local",
+        "effects": { "bank_balance": 10000, "members": 150, "street_respect": 5 },
+        "log": "Firmou collab de streetwear expandindo a presença da torcida nas ruas."
+      }
+    ]
+  },
+  {
+    "id": "eleicao_diretoria",
+    "title": "Eleições Presidenciais no Clube",
+    "category": "DIRETORIA",
+    "description": "Ano eleitoral no clube. O candidato da oposição promete reformar o setor da torcida e reduzir preços de ingressos, enquanto a situação oferece verba de viagem.",
+    "choices": [
+      {
+        "text": "Apoiador neutro: cobrar compromisso público de ingresso popular",
+        "effects": { "club_relation": 10, "members": 250, "legal_status": 5 },
+        "log": "Manteve postura independente exigindo ingresso popular nas eleições."
+      },
+      {
+        "text": "Fechar apoio com a Oposição em troca de setor sem cadeiras",
+        "effects": { "club_relation": 20, "stadium_power": 10, "bank_balance": -5000 },
+        "log": "Articulou com a oposição a criação do setor de pé na arquibancada."
+      },
+      {
+        "text": "Aceitar apoio logístico da Situação para viagens da temporada",
+        "effects": { "bank_balance": 20000, "club_relation": -15, "street_respect": -10 },
+        "log": "Fechou apoio logístico de transporte para a caravana do campeonato."
+      }
+    ]
+  },
+  {
+    "id": "caravana_internacional",
+    "title": "Caravana para a Copa Continental",
+    "category": "FESTA",
+    "description": "O time se classificou para a decisão da Copa Continental a 3.000 km de distância. É hora de organizar a frota de ônibus e voos fretados.",
+    "choices": [
+      {
+        "text": "Subsidiar passagens para os membros ativos da bateria (-R$ 25.000)",
+        "effects": { "bank_balance": -25000, "stadium_power": 25, "street_respect": 15 },
+        "log": "Financiou a maior caravana internacional da história do clube."
+      },
+      {
+        "text": "Organizar comboio popular de ônibus de longa distância",
+        "effects": { "bank_balance": -5000, "stadium_power": 15, "members": 300 },
+        "log": "Movimentou dezenas de ônibus cruzando fronteiras na raça."
+      },
+      {
+        "text": "Ponto de encontro com torcidas aliadas no país sede",
+        "effects": { "street_respect": 10, "stadium_power": 10, "club_relation": 5 },
+        "log": "Realizou união histórica com torcida aliada no continente."
+      }
+    ]
+  },
+  {
+    "id": "reforma_sede",
+    "title": "Expansão da Sede Social",
+    "category": "FINANCAS",
+    "description": "A sede da torcida está pequena para as reuniões de diretoria e encontros em dias de jogo. Arquitetos membros propõem reforma de ampliação.",
+    "choices": [
+      {
+        "text": "Construir lanchonete, loja e auditório na sede (-R$ 30.000)",
+        "effects": { "bank_balance": -30000, "members": 500, "street_respect": 10 },
+        "log": "Inaugurou nova sede social completa com loja e espaço de eventos."
+      },
+      {
+        "text": "Reforma simples da fachada e espaço da bateria (-R$ 12.000)",
+        "effects": { "bank_balance": -12000, "stadium_power": 8, "members": 200 },
+        "log": "Reformou o galpão da bateria e a pintura externa da sede."
+      },
+      {
+        "text": "Adiar reforma e aplicar verba em materiais de arquibancada",
+        "effects": { "stadium_power": 10, "bank_balance": 5000 },
+        "log": "Priorizou investimento em adereços de arquibancada e faixas."
+      }
+    ]
+  }
+]

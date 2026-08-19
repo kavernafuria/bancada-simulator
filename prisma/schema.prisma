@@ -1,0 +1,45 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Player {
+  id                 Int     @id
+  name               String
+  searchName         String  @map("search_name")
+  country            String?
+  currentTeam        String? @map("current_team")
+  photo              String?
+  totalGames         Int     @default(0) @map("total_games")
+  highestMarketValue Int     @default(0) @map("highest_market_value")
+  heightInCm         Int     @default(0) @map("height_in_cm")
+
+  @@map("players")
+}
+
+model Connection {
+  playerAId   Int     @map("player_a_id")
+  playerBId   Int     @map("player_b_id")
+  teamName    String? @map("team_name")
+  lastYear    Int?    @map("last_year")
+  sharedGames Int?    @map("shared_games")
+
+  @@id([playerAId, playerBId])
+  @@map("connections")
+}
+
+model DailyChallenge {
+  id             String @id
+  date           String
+  roundNumber    Int    @default(1) @map("round_number")
+  startPlayerId  Int    @map("start_player_id")
+  targetPlayerId Int    @map("target_player_id")
+  minDegrees     Int    @default(3) @map("min_degrees")
+
+  @@unique([date, roundNumber])
+  @@map("daily_challenges")
+}

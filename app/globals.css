@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply transition-colors duration-300 font-sans;
+  }
+}
+
+/* Dark Mode (Estádio Noturno / Kavers Dark) */
+html.dark body {
+  background-color: #0A0A0C;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.12) 0%, transparent 60%),
+    radial-gradient(circle at 100% 50%, rgba(245, 158, 11, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 0% 100%, rgba(236, 72, 153, 0.08) 0%, transparent 50%);
+  color: #F3F4F6;
+}
+
+/* Light Mode (Gazeta Esportiva / Kavers Linho Premium) */
+html:not(.dark) body {
+  background-color: #F4F2EC;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.08) 0%, transparent 60%),
+    radial-gradient(circle at 100% 100%, rgba(139, 92, 246, 0.06) 0%, transparent 50%);
+  color: #18181B;
+}
+
+/* Collectible Card Panels - Dark Mode */
+html.dark .glass-panel {
+  background: rgba(19, 23, 34, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
+}
+
+html.dark .glass-panel-glow {
+  background: rgba(19, 23, 34, 0.96);
+  backdrop-filter: blur(20px);
+  border: 1.5px solid rgba(245, 158, 11, 0.5);
+  box-shadow: 0 0 35px rgba(245, 158, 11, 0.2), inset 0 0 15px rgba(245, 158, 11, 0.05);
+}
+
+/* Collectible Card Panels - Light Mode */
+html:not(.dark) .glass-panel {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(217, 119, 6, 0.3);
+  box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.08);
+}
+
+html:not(.dark) .glass-panel-glow {
+  background: #FFFFFF;
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(217, 119, 6, 0.6);
+  box-shadow: 0 14px 40px rgba(217, 119, 6, 0.18), inset 0 0 20px rgba(245, 158, 11, 0.04);
+}
+
+/* Card Game Border Accents */
+.kavers-card-border {
+  border-radius: 1.25rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kavers-card-border:active {
+  transform: scale(0.97);
+}
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+  width: 6px;
+}
+html.dark ::-webkit-scrollbar-track {
+  background: #0A0A0C;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: #2A2F3D;
+  border-radius: 3px;
+}
+html:not(.dark) ::-webkit-scrollbar-track {
+  background: #F4F2EC;
+}
+html:not(.dark) ::-webkit-scrollbar-thumb {
+  background: #D1CBBF;
+  border-radius: 3px;
+}
