@@ -32,29 +32,30 @@ export async function POST(req: Request) {
     // Try Gemini API if key is configured
     if (apiKey) {
       try {
-        const prompt = `Você é um cronista especializado na cultura de arquibancadas e torcidas organizadas do futebol brasileiro. 
-Escreva uma crônica jornalística e apaixonada de 1 parágrafo vibrante (entre 4 a 6 frases) sobre o jogo ocorrido.
+        const prompt = `Você é um líder histórico e cronista de rua de uma torcida organizada do futebol brasileiro. 
+Escreva uma crônica empolgante, crua e visceral de 1 parágrafo vibrante (4 a 6 frases) sobre o jogo ocorrido.
 
-Dados da Partida:
+DADOS DA PARTIDA:
 - Ano/Temporada: ${season}
 - Competição: ${competition || "Campeonato"}
-- Torcida do Jogador: ${torcida} (${clube})
-- Torcida Oponente: ${rivalTorcida} (${rivalClub})
-- Estádio: ${stadium} em ${cityState}
-- Mando de campo: ${isHome ? "Mandante (Nossa Casa/Caldeirão)" : "Visitante (Caravana / Invasão)"}
-- Jogo de Aliança/Amizade: ${isAllyGame ? "SIM (Festa de Irmandade)" : "NÃO (Confronto Direto)"}
-- Placar Final no Campo: ${score}
-- Desfecho na Pista/Arquibancada: ${statusTitle || (isVictoryPista ? "Vitória e Domínio Total" : "Revés e Pressão")}
-- Tática Utilizada: ${tacticTitle}
-- Postura da Segurança/PM: ${policeStance}
-- Impacto Moral: ${moralChange >= 0 ? "+" + moralChange : moralChange}
-- Baixas/Feridos: ${desertion} integrantes
+- Nossa Torcida: ${torcida} (${clube})
+- Oponente: ${rivalTorcida} (${rivalClub})
+- Estádio: ${stadium} (${cityState})
+- Mando: ${isHome ? "Mandante (Nosso Caldeirão)" : "Visitante (Caravana / Invasão)"}
+- Tipo de Jogo: ${isAllyGame ? "FESTA DE ALIANÇA & UNIDADE" : "CONFRONTO DE PISTA & RIVALIDADE"}
+- Placar do Jogo: ${score}
+- Resultado de Pista: ${statusTitle || (isVictoryPista ? "Vitória e Domínio de Rua" : "Pressão e Revés Tático")}
+- Tática Usada: ${tacticTitle}
+- Postura da PM: ${policeStance}
+- Saldo Moral: ${moralChange >= 0 ? "+" + moralChange : moralChange}
+- Feridos/Baixas: ${desertion} integrantes
 
-Diretrizes:
-- Use vocabulário autêntico de bancada (ex: bateria, comboio, bandeirões, alçapão, linha de frente, cortejo, rua).
-- Nunca use siglas genéricas.
-- Se for jogo aliada, exalte o churrasco, a paz e a festa conjunta das baterias.
-- Não use marcações em markdown, retorne texto corrido num único parágrafo fluido.`;
+REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
+1. Use gírias autênticas das torcidas brasileiras como: "bonde", "pista", "caldeirão", "alçapão", "linha de frente", "bateria", "cortejo", "ruada", "disposição", "sem amarelada", "trocação", "panos", "bandeirões", "resenha na sede", "chopp gelado", "comboio de ônibus", "antenas", "respeito de rua".
+2. Se for JOGO DE ALIANÇA: Exalte o churrasco de costela no fogo de chão, o respeito entre as agremiações, as baterias tocando juntas o mesmo samba e a festa unificada sem divisórias.
+3. Se for RIVALIDADE: Exalte o empenho da massa, o grito ensurdecedor nos 90 minutos, a imponência dos nossos panos e a postura firme da linha de frente.
+4. NUNCA coloque siglas genéricas entre parênteses como (TGF), (FJV), (TJS).
+5. Retorne APENAS um parágrafo corrido de texto puro, sem tópicos ou markdown.`;
 
         const geminiRes = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
