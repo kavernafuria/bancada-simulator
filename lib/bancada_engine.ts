@@ -711,7 +711,7 @@ export function getDerbyForMatch(
       isHome: true,
       isLongDistance: false,
       isAllyGame: true,
-      importanceDescription: `Recepção de gala para a torcida irmã ${allyTorcida.torcida} (${allyTorcida.sigla}) do ${allyTorcida.clube} com churrasco farto de costela de chão na sede, chopp gelado, cortejo conjunto e festa de arquibancada com as duas baterias!`,
+      importanceDescription: `Recepção de gala para a torcida irmã ${allyTorcida.torcida} do ${allyTorcida.clube} com churrasco farto de costela de chão na sede, chopp gelado, cortejo conjunto e festa de arquibancada com as duas baterias!`,
     };
   } else if (gameIndex === 3) {
     // Game 3: Long distance away invasion

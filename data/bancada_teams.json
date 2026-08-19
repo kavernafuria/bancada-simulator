@@ -2,7 +2,7 @@
   {
     "clube": "Corinthians",
     "torcida": "Gaviões da Fiel",
-    "sigla": "TGF",
+    "sigla": "",
     "tier": "S",
     "contingente": 95,
     "pressao_bancada": 95,
@@ -16,7 +16,7 @@
   {
     "clube": "Palmeiras",
     "torcida": "Mancha Alvi-Verde",
-    "sigla": "MAV",
+    "sigla": "",
     "tier": "S",
     "contingente": 93,
     "pressao_bancada": 90,
@@ -30,7 +30,7 @@
   {
     "clube": "São Paulo",
     "torcida": "Torcida Tricolor Indep.",
-    "sigla": "TTI",
+    "sigla": "",
     "tier": "S",
     "contingente": 94,
     "pressao_bancada": 88,
@@ -44,7 +44,7 @@
   {
     "clube": "Santos",
     "torcida": "Torcida Jovem do Santos",
-    "sigla": "TJS",
+    "sigla": "",
     "tier": "S",
     "contingente": 90,
     "pressao_bancada": 85,
@@ -58,7 +58,7 @@
   {
     "clube": "Ponte Preta",
     "torcida": "Torcida Jovem Ponte",
-    "sigla": "TJP",
+    "sigla": "",
     "tier": "A",
     "contingente": 80,
     "pressao_bancada": 80,
@@ -72,7 +72,7 @@
   {
     "clube": "Corinthians",
     "torcida": "Torcida Camisa 12",
-    "sigla": "C12",
+    "sigla": "",
     "tier": "A",
     "contingente": 80,
     "pressao_bancada": 80,
@@ -86,7 +86,7 @@
   {
     "clube": "São Paulo",
     "torcida": "Dragões da Real",
-    "sigla": "DDR",
+    "sigla": "",
     "tier": "A",
     "contingente": 75,
     "pressao_bancada": 70,
@@ -100,7 +100,7 @@
   {
     "clube": "Guarani",
     "torcida": "Fúria Indep. Guarani",
-    "sigla": "TFIG",
+    "sigla": "",
     "tier": "A",
     "contingente": 75,
     "pressao_bancada": 80,
@@ -114,7 +114,7 @@
   {
     "clube": "Palmeiras",
     "torcida": "TUP",
-    "sigla": "TUP",
+    "sigla": "",
     "tier": "A-",
     "contingente": 55,
     "pressao_bancada": 50,
@@ -128,7 +128,7 @@
   {
     "clube": "Corinthians",
     "torcida": "Pavilhão 9",
-    "sigla": "P9",
+    "sigla": "",
     "tier": "A-",
     "contingente": 70,
     "pressao_bancada": 70,
@@ -142,7 +142,7 @@
   {
     "clube": "Botafogo-SP",
     "torcida": "Fiel Força Tricolor",
-    "sigla": "FFT",
+    "sigla": "",
     "tier": "A-",
     "contingente": 50,
     "pressao_bancada": 50,
@@ -156,7 +156,7 @@
   {
     "clube": "Portuguesa",
     "torcida": "Leões da Fabulosa",
-    "sigla": "TLF",
+    "sigla": "",
     "tier": "B+",
     "contingente": 70,
     "pressao_bancada": 75,
@@ -170,7 +170,7 @@
   {
     "clube": "São José EC",
     "torcida": "Torcida Mancha Azul",
-    "sigla": "TMA",
+    "sigla": "",
     "tier": "B+",
     "contingente": 65,
     "pressao_bancada": 70,
@@ -184,7 +184,7 @@
   {
     "clube": "Santos",
     "torcida": "Torcida Sangue Jovem",
-    "sigla": "TSJ",
+    "sigla": "",
     "tier": "B+",
     "contingente": 65,
     "pressao_bancada": 70,
@@ -198,7 +198,7 @@
   {
     "clube": "Comercial-RP",
     "torcida": "Mancha Alvinegra",
-    "sigla": "TOMA",
+    "sigla": "",
     "tier": "B+",
     "contingente": 60,
     "pressao_bancada": 70,
@@ -212,7 +212,7 @@
   {
     "clube": "Santo André",
     "torcida": "Fúria Andreense",
-    "sigla": "TFA",
+    "sigla": "",
     "tier": "B",
     "contingente": 55,
     "pressao_bancada": 65,
@@ -226,7 +226,7 @@
   {
     "clube": "São Caetano",
     "torcida": "Torcida Gladiadores",
-    "sigla": "GLA",
+    "sigla": "",
     "tier": "B",
     "contingente": 52,
     "pressao_bancada": 62,
@@ -240,7 +240,7 @@
   {
     "clube": "São Bernardo",
     "torcida": "Febre Amarela",
-    "sigla": "TFA",
+    "sigla": "",
     "tier": "B",
     "contingente": 52,
     "pressao_bancada": 62,
@@ -254,7 +254,7 @@
   {
     "clube": "Rio Branco",
     "torcida": "Malucos do Tigre",
-    "sigla": "TMT",
+    "sigla": "",
     "tier": "B",
     "contingente": 60,
     "pressao_bancada": 65,
@@ -268,7 +268,7 @@
   {
     "clube": "União Barbarense",
     "torcida": "Sangue Barbarense",
-    "sigla": "TUSB",
+    "sigla": "",
     "tier": "B",
     "contingente": 60,
     "pressao_bancada": 65,
@@ -282,7 +282,7 @@
   {
     "clube": "Paulista Jundiaí",
     "torcida": "Torcida Raça Tricolor",
-    "sigla": "TRT",
+    "sigla": "",
     "tier": "B",
     "contingente": 55,
     "pressao_bancada": 65,
@@ -296,7 +296,7 @@
   {
     "clube": "Ferroviária",
     "torcida": "Torcida Afeganistão",
-    "sigla": "TAF",
+    "sigla": "",
     "tier": "B",
     "contingente": 50,
     "pressao_bancada": 65,
@@ -310,7 +310,7 @@
   {
     "clube": "XV de Piracicaba",
     "torcida": "Esquadrão XVzetas",
-    "sigla": "EXV",
+    "sigla": "",
     "tier": "B",
     "contingente": 55,
     "pressao_bancada": 70,
@@ -324,7 +324,7 @@
   {
     "clube": "São Bento",
     "torcida": "Torcida Falcão Azul",
-    "sigla": "TFA",
+    "sigla": "",
     "tier": "B",
     "contingente": 48,
     "pressao_bancada": 60,
@@ -338,7 +338,7 @@
   {
     "clube": "Noroeste",
     "torcida": "Fúria Noroestina",
-    "sigla": "TFN",
+    "sigla": "",
     "tier": "B",
     "contingente": 50,
     "pressao_bancada": 62,
@@ -352,7 +352,7 @@
   {
     "clube": "Marília",
     "torcida": "Torcida Mancha Azul",
-    "sigla": "MAM",
+    "sigla": "",
     "tier": "B",
     "contingente": 46,
     "pressao_bancada": 58,
@@ -366,7 +366,7 @@
   {
     "clube": "Inter de Limeira",
     "torcida": "Torcida Inter Beer",
-    "sigla": "TIB",
+    "sigla": "",
     "tier": "B",
     "contingente": 52,
     "pressao_bancada": 65,
@@ -380,7 +380,7 @@
   {
     "clube": "Corinthians",
     "torcida": "Estopim da Fiel",
-    "sigla": "EEF",
+    "sigla": "",
     "tier": "B",
     "contingente": 60,
     "pressao_bancada": 70,
@@ -394,7 +394,7 @@
   {
     "clube": "Flamengo",
     "torcida": "Torcida Jovem do Fla",
-    "sigla": "TJF",
+    "sigla": "",
     "tier": "S",
     "contingente": 85,
     "pressao_bancada": 60,
@@ -408,7 +408,7 @@
   {
     "clube": "Vasco da Gama",
     "torcida": "Força Jovem do Vasco",
-    "sigla": "FJV",
+    "sigla": "",
     "tier": "S",
     "contingente": 88,
     "pressao_bancada": 70,
@@ -422,7 +422,7 @@
   {
     "clube": "Flamengo",
     "torcida": "Raça Rubro-Negra",
-    "sigla": "RRN",
+    "sigla": "",
     "tier": "A+",
     "contingente": 90,
     "pressao_bancada": 90,
@@ -436,7 +436,7 @@
   {
     "clube": "Fluminense",
     "torcida": "Torcida Young Flu",
-    "sigla": "TYF",
+    "sigla": "",
     "tier": "A",
     "contingente": 80,
     "pressao_bancada": 85,
@@ -450,7 +450,7 @@
   {
     "clube": "Botafogo",
     "torcida": "Fúria Jovem do Botafogo",
-    "sigla": "FJB",
+    "sigla": "",
     "tier": "A-",
     "contingente": 80,
     "pressao_bancada": 80,
@@ -464,7 +464,7 @@
   {
     "clube": "Atlético-MG",
     "torcida": "Galoucura",
-    "sigla": "TOG",
+    "sigla": "",
     "tier": "S",
     "contingente": 90,
     "pressao_bancada": 93,
@@ -478,7 +478,7 @@
   {
     "clube": "Cruzeiro",
     "torcida": "Máfia Azul",
-    "sigla": "TMA",
+    "sigla": "",
     "tier": "S",
     "contingente": 90,
     "pressao_bancada": 90,
@@ -492,7 +492,7 @@
   {
     "clube": "Grêmio",
     "torcida": "Geral do Grêmio",
-    "sigla": "GDG",
+    "sigla": "",
     "tier": "S-",
     "contingente": 90,
     "pressao_bancada": 95,
@@ -506,7 +506,7 @@
   {
     "clube": "Internacional",
     "torcida": "Guarda Popular",
-    "sigla": "GPO",
+    "sigla": "",
     "tier": "S-",
     "contingente": 85,
     "pressao_bancada": 95,
@@ -520,7 +520,7 @@
   {
     "clube": "Internacional",
     "torcida": "Camisa 12 do Inter",
-    "sigla": "C12",
+    "sigla": "",
     "tier": "A",
     "contingente": 80,
     "pressao_bancada": 85,
@@ -534,7 +534,7 @@
   {
     "clube": "Grêmio",
     "torcida": "Torcida Jovem do Grêmio",
-    "sigla": "TJG",
+    "sigla": "",
     "tier": "A",
     "contingente": 75,
     "pressao_bancada": 80,
@@ -548,7 +548,7 @@
   {
     "clube": "Bahia",
     "torcida": "Torcida Bamor",
-    "sigla": "TOB",
+    "sigla": "",
     "tier": "A+",
     "contingente": 85,
     "pressao_bancada": 88,
@@ -562,7 +562,7 @@
   {
     "clube": "Vitória",
     "torcida": "Os Imbatíveis",
-    "sigla": "TUI",
+    "sigla": "",
     "tier": "A+",
     "contingente": 84,
     "pressao_bancada": 87,
@@ -576,7 +576,7 @@
   {
     "clube": "Sport",
     "torcida": "Torcida Jovem do Sport",
-    "sigla": "TJS",
+    "sigla": "",
     "tier": "A+",
     "contingente": 86,
     "pressao_bancada": 90,
@@ -590,7 +590,7 @@
   {
     "clube": "Santa Cruz",
     "torcida": "Inferno Coral",
-    "sigla": "TOIC",
+    "sigla": "",
     "tier": "A",
     "contingente": 85,
     "pressao_bancada": 92,
@@ -604,7 +604,7 @@
   {
     "clube": "Fortaleza",
     "torcida": "Leões da TUF",
-    "sigla": "TUF",
+    "sigla": "",
     "tier": "A+",
     "contingente": 85,
     "pressao_bancada": 92,
@@ -618,7 +618,7 @@
   {
     "clube": "Ceará",
     "torcida": "Cearamor",
-    "sigla": "TOC",
+    "sigla": "",
     "tier": "A+",
     "contingente": 85,
     "pressao_bancada": 90,
@@ -632,7 +632,7 @@
   {
     "clube": "Coritiba",
     "torcida": "Império Alviverde",
-    "sigla": "IAV",
+    "sigla": "",
     "tier": "A",
     "contingente": 80,
     "pressao_bancada": 85,
@@ -646,7 +646,7 @@
   {
     "clube": "Athletico-PR",
     "torcida": "Os Fanáticos",
-    "sigla": "TOF",
+    "sigla": "",
     "tier": "A",
     "contingente": 82,
     "pressao_bancada": 88,

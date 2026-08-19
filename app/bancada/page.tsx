@@ -377,7 +377,7 @@ export default function App() {
       const objectives = generateSeasonObjectives(1, torcidaWithColors, "LUTANDO_ACESSO");
       setSeasonObjectives(objectives);
       setHistoryLog([
-        `[Ano 1 - Liderança Histórica] Você assumiu a diretoria da consagrada ${selected.torcida} (${selected.sigla}) nas cores oficiais apoiando o ${selected.clube}.`,
+        `[Ano 1 - Liderança Histórica] Você assumiu a diretoria da consagrada ${selected.torcida} nas cores oficiais apoiando o ${selected.clube}.`,
       ]);
       setIsGameOver(false);
       setIsStarted(true);
@@ -414,7 +414,7 @@ export default function App() {
     const objectives = generateSeasonObjectives(1, torcida, "LUTANDO_ACESSO");
     setSeasonObjectives(objectives);
     setHistoryLog([
-      `[Ano 1 - Fundação] Fundada a nova torcida ${torcida.torcida} (${torcida.sigla}) com pavilhão nas cores ${primaryColor} e ${secondaryColor} no perfil "${ARCHETYPES[selectedArchetype].name}" apoiando o ${torcida.clube}.`,
+      `[Ano 1 - Fundação] Fundada a nova torcida ${torcida.torcida} com pavilhão nas cores ${primaryColor} e ${secondaryColor} no perfil "${ARCHETYPES[selectedArchetype].name}" apoiando o ${torcida.clube}.`,
     ]);
     setIsGameOver(false);
     setIsStarted(true);
@@ -713,7 +713,7 @@ export default function App() {
   };
 
   const handleShareHistory = () => {
-    const text = `🥁 Minha torcida "${currentTorcida?.torcida}" (${currentTorcida?.sigla}) concluiu os 30 Anos no Bancada: Simulador de Torcida!\n\nTítulo Honorário: ${getHonoraryTitle()}\nContingente: ${stats.contingente}/100 | Pista: ${stats.poder_pista}/100 | Bancada: ${stats.pressao_bancada}/100\nCaixa: R$ ${bankBalance.toLocaleString()}`;
+    const text = `🥁 Minha torcida "${currentTorcida?.torcida}" concluiu os 30 Anos no Bancada: Simulador de Torcida!\n\nTítulo Honorário: ${getHonoraryTitle()}\nContingente: ${stats.contingente}/100 | Pista: ${stats.poder_pista}/100 | Bancada: ${stats.pressao_bancada}/100\nCaixa: R$ ${bankBalance.toLocaleString()}`;
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
