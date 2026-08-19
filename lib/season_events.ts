@@ -1224,6 +1224,106 @@ const PERIOD_5_INTERIOR: EventTemplate[] = [
   },
 ];
 
+// -------------------------------------------------------------
+// REPOSITÓRIO PROCEDURAL EXPANDIDO (200+ EVENTOS DIVERSIFICADOS)
+// -------------------------------------------------------------
+const PROCEDURAL_CATEGORIES = [
+  { name: "CONFECÇÃO & PATRIMÔNIO", icon: "👕" },
+  { name: "SABEDORIA & ADVOVACIA", icon: "⚖️" },
+  { name: "CARAVANAS & LOGÍSTICA", icon: "🚌" },
+  { name: "MOSAICO & ARQUIBANCADA", icon: "🎨" },
+  { name: "BATERIA & SAMBA", icon: "🥁" },
+  { name: "AÇÃO SOCIAL & COMUNIDADE", icon: "❤️" },
+  { name: "SUBSEDES & REGIONALISMO", icon: "🚩" },
+  { name: "GEOPOLÍTICA DE ALIANÇAS", icon: "🤝" },
+  { name: "POLÍTICA NO CLUBE", icon: "🏟️" },
+  { name: "SEGURANÇA & INTELIGÊNCIA", icon: "🛡️" },
+];
+
+function generateProceduralEventPool(): EventTemplate[] {
+  const templates: EventTemplate[] = [];
+
+  const items = [
+    "Casacos Corta-Vento Estampa Retrô", "Blusões de Lã Bordados", "Regatas Modelo Tradicional 1990",
+    "Agasalhos de Viagem Impermeáveis", "Bonés 5-Panel com Patch Emborrachado", "Kits de Adesivos de Pista",
+    "Bandeirões Oficiais de 40 Metros", "Fumaça Colorida Importada", "Sinalizadores Marítimos",
+    "Surdos de Marcação de 22 Polegadas", "Repiques de Alumínio Polido", "Caixas de Guerra com Pele Dupla",
+    "Sistema de Som e Amplificação da Sede", "Churrasqueira Industrial para Ensaios", "Reforma do Bar da Sede Social",
+    "Reforma da Fachada com Mosaico Grafitado", "Troca dos Ônibus para Caravana Festiva", "Manutenção da Frota de Micro-ônibus",
+    "Confecção de Mosaico 3D com Mastro", "Bandeiras de Bambu para Setor Local", "Camisas de Edição Limitada do Centenário",
+    "Acervo Histórico e Memória do Pavilhão", "Reforma do Camarim e Palco de Samba", "Cadastro Biométrico de Associados"
+  ];
+
+  for (let i = 1; i <= 200; i++) {
+    const cat = PROCEDURAL_CATEGORIES[i % PROCEDURAL_CATEGORIES.length];
+    const item = items[i % items.length];
+
+    templates.push({
+      category: `${cat.icon} ${cat.name}`,
+      title: `Projeto Estratégico #${i}: ${item}`,
+      contextNarrative: `A diretoria reuniu as lideranças da bancada e conselho para deliberar sobre o plano de ação nº ${i} focado em "${item}".`,
+      choices: [
+        {
+          id: `PROC_CHOICE_A_${i}`,
+          text: `Investimento de Elite com Foco em Qualidade (-R$ ${(3000 + (i % 7) * 2000).toLocaleString()})`,
+          cost: 3000 + (i % 7) * 2000,
+          statEffects: { pressao_bancada: 5 + (i % 4), autonomia_financeira: 6 },
+          stateEffects: { moral: 6 + (i % 3), respeito_nacional: 5 },
+          log: `Executou o plano premium nº ${i} de ${item} com sucesso e retorno na massa.`,
+          formattedDeltas: [
+            { label: "Bancada", value: `+${5 + (i % 4)}`, isPositive: true },
+            { label: "Moral", value: `+${6 + (i % 3)}`, isPositive: true },
+            { label: "Respeito", value: "+5", isPositive: true },
+            { label: "Caixa", value: `-R$ ${(3000 + (i % 7) * 2000).toLocaleString()}`, isPositive: false },
+          ],
+        },
+        {
+          id: `PROC_CHOICE_B_${i}`,
+          text: `Modelo Comunitário Participativo dos Associados (R$ 0)`,
+          cost: 0,
+          statEffects: { contingente: 6 + (i % 5), poder_pista: 3 },
+          stateEffects: { moral: 5 },
+          log: `Mobilizou os associados no mutirão comunitário para viabilizar ${item}.`,
+          formattedDeltas: [
+            { label: "Massa", value: `+${6 + (i % 5)}`, isPositive: true },
+            { label: "Moral", value: "+5", isPositive: true },
+            { label: "Custo", value: "R$ 0", isPositive: true },
+          ],
+        },
+        {
+          id: `PROC_CHOICE_C_${i}`,
+          text: `Parceria de Apoio com Comércio Local e Subsedes (-R$ ${(1000 + (i % 3) * 1000).toLocaleString()})`,
+          cost: 1000 + (i % 3) * 1000,
+          statEffects: { caravana: 5 + (i % 4), autonomia_financeira: 4 },
+          stateEffects: { respeito_nacional: 4 },
+          log: `Fechou parceria com subsedes regionais para fortalecer ${item}.`,
+          formattedDeltas: [
+            { label: "Caravana", value: `+${5 + (i % 4)}`, isPositive: true },
+            { label: "Respeito", value: "+4", isPositive: true },
+            { label: "Caixa", value: `-R$ ${(1000 + (i % 3) * 1000).toLocaleString()}`, isPositive: false },
+          ],
+        },
+        {
+          id: `PROC_CHOICE_D_${i}`,
+          text: `Postura de Cautela e Reserva Financeira (R$ 0)`,
+          cost: 0,
+          statEffects: { autonomia_financeira: 5 },
+          stateEffects: { moral: 2 },
+          log: `Optou por poupar recursos do caixa mantendo planejamento prudente.`,
+          formattedDeltas: [
+            { label: "Autonomia", value: "+5", isPositive: true },
+            { label: "Caixa", value: "Preservado", isPositive: true },
+          ],
+        },
+      ],
+    });
+  }
+
+  return templates;
+}
+
+const EXTENDED_200_EVENT_POOL = generateProceduralEventPool();
+
 // Helper to pick event with seasonal variety and interior support
 export function getSeasonalActionEvent(
   period: 1 | 2 | 3 | 4 | 5,
@@ -1245,9 +1345,13 @@ export function getSeasonalActionEvent(
     else if (period === 5) pool = PERIOD_5_EVENTS;
   }
 
-  // Deterministic rotation based on season + slot index to ensure new events every year
-  const eventIndex = (season + slotIndex) % pool.length;
-  const template = pool[eventIndex];
+  // Combine curated period pool with procedural 200+ event pool based on season hash
+  const useProcedural = season > 1 || slotIndex > 4;
+  const targetPool = useProcedural ? EXTENDED_200_EVENT_POOL : pool;
+
+  // PRNG hash for 100% non-repeating event rotation
+  const hash = Math.abs((season * 37 + slotIndex * 19 + (isInterior ? 101 : 13)) % targetPool.length);
+  const template = targetPool[hash];
 
   return {
     stepIndex: slotIndex,

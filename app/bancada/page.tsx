@@ -219,6 +219,23 @@ export default function App() {
     deltas: FormattedDelta[];
   } | null>(null);
 
+  // BATTLE ANIMATION & HISTORY TRACKING
+  const [isBattleAnimating, setIsBattleAnimating] = useState<boolean>(false);
+  const [battleProgress, setBattleProgress] = useState<number>(0);
+  const [seasonHistory, setSeasonHistory] = useState<{
+    season: number;
+    powerScore: number;
+    rankPosition: number;
+    totalTeams: number;
+    contingente: number;
+    pressaoBancada: number;
+    poderPista: number;
+    caravana: number;
+    bankBalance: number;
+    moral: number;
+    riscoMP: number;
+  }[]>([]);
+
   const [historyLog, setHistoryLog] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<"pipeline" | "objectives" | "ranking" | "standings" | "profile" | "alliances" | "history">("pipeline");
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
@@ -509,23 +526,30 @@ export default function App() {
     if (!selectedTransport || !activeScoutIntel || !activeMatchDerby || !currentTorcida) return;
 
     setMatchModalPhase("CLOSED");
+    setIsBattleAnimating(true);
+    setBattleProgress(0);
 
-    const result = executeCompleteMatch(
-      stats,
-      stateTrackers,
-      selectedPoliceChoice,
-      selectedTransport,
-      activeScoutIntel,
-      tactic,
-      activeMatchDerby
-    );
+    if (soundEnabled) playStadiumSound("alert");
 
-    if (soundEnabled) {
-      if (result.isVictoryPista) playStadiumSound("victory");
-      else playStadiumSound("alert");
-    }
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 25;
+      setBattleProgress(progress);
+      if (progress >= 100) clearInterval(interval);
+    }, 450);
 
-    // Update Season Objectives based on match actions
+    setTimeout(async () => {
+      setIsBattleAnimating(false);
+
+      const result = executeCompleteMatch(
+        stats,
+        stateTrackers,
+        selectedPoliceChoice,
+        selectedTransport,
+        activeScoutIntel,
+        tactic,
+        activeMatchDerby
+      );
     setSeasonObjectives((prev) =>
       prev.map((obj) => {
         if (tactic.isMosaicTactic && (obj.category === "MOSAICO" || obj.category === "BANCADA")) {
@@ -613,12 +637,35 @@ export default function App() {
     ]);
 
     advancePipeline();
+    }, 2200);
   };
 
   const advancePipeline = () => {
     if (pipelineIndex + 1 < 13) {
       setPipelineIndex((prev) => prev + 1);
     } else {
+      // Record Season History Evolution
+      if (currentTorcida) {
+        const ranking = simulateNationalRanking(currentTorcida, stats, stateTrackers, season);
+        const playerRankEntry = ranking.find((r) => r.isPlayer);
+        setSeasonHistory((prev) => [
+          ...prev,
+          {
+            season,
+            powerScore: playerRankEntry?.powerScore || 500,
+            rankPosition: playerRankEntry?.rank || 10,
+            totalTeams: ranking.length,
+            contingente: stats.contingente,
+            pressaoBancada: stats.pressao_bancada,
+            poderPista: stats.poder_pista,
+            caravana: stats.caravana,
+            bankBalance,
+            moral: stateTrackers.moral,
+            riscoMP: stateTrackers.risco_mp,
+          },
+        ]);
+      }
+
       // Annual Season Closing & Objective Evaluation
       const annualDues = Math.floor(stats.contingente * 450);
       const merchRevenue = Math.floor(stats.autonomia_financeira * 350);
@@ -912,7 +959,7 @@ export default function App() {
 
                     <div className="flex items-center justify-between pt-1">
                       <div>
-                        <h4 className="text-xs font-black text-white">{current.torcida} ({current.sigla})</h4>
+                        <h4 className="text-xs font-black text-white">{current.torcida}</h4>
                         <span className="text-[10px] text-zinc-400 block font-medium">{current.clube} • {current.estado} (Tier {current.tier})</span>
                       </div>
                       <span className="text-[9px] font-black px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/30">
@@ -1440,12 +1487,19 @@ export default function App() {
           {currentStep.type === "key_game" && (
             <div className="space-y-3 mt-auto bg-zinc-950 p-4 rounded-2xl border border-zinc-800">
               <div className="space-y-1.5 text-xs">
-                <div className="flex items-center gap-1.5 text-amber-400 font-black">
-                  <MapPin className="w-4 h-4" />
-                  <span>{currentStep.derby?.stadium} ({currentStep.derby?.cityState})</span>
+                <div className="flex items-center justify-between flex-wrap gap-1">
+                  <div className="flex items-center gap-1.5 text-amber-400 font-black">
+                    <MapPin className="w-4 h-4" />
+                    <span>{currentStep.derby?.stadium} ({currentStep.derby?.cityState})</span>
+                  </div>
+                  {currentStep.derby?.competition && (
+                    <span className="text-[8px] font-black px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 uppercase">
+                      {currentStep.derby.competition}
+                    </span>
+                  )}
                 </div>
                 <div className="text-zinc-300 font-semibold text-[11px]">
-                  Rival de Pista: <span className="text-red-400 font-bold">{currentStep.derby?.rivalTorcida} ({currentStep.derby?.rivalSigla})</span>
+                  Rival de Pista: <span className="text-red-400 font-bold">{currentStep.derby?.rivalTorcida}</span>
                 </div>
                 <p className="text-[10px] text-zinc-400 leading-snug">
                   {currentStep.derby?.importanceDescription}
@@ -1802,15 +1856,57 @@ export default function App() {
         </div>
       )}
 
-      {/* TAB 5: CHRONICLES */}
+      {/* TAB 5: CHRONICLES & SCORE HISTORY */}
       {activeTab === "history" && (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 shadow-xl flex-1 flex flex-col relative z-10">
-          <div className="text-xs text-zinc-400 font-black uppercase tracking-wider mb-2 flex items-center justify-between">
-            <span>Registro Histórico da Carreira</span>
-            <span className="text-[10px] text-amber-400">{historyLog.length} registros</span>
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 shadow-xl flex-1 flex flex-col space-y-3 relative z-10">
+          <div className="text-xs text-zinc-400 font-black uppercase tracking-wider flex items-center justify-between">
+            <span>Histórico de Evolução & Crônicas</span>
+            <span className="text-[10px] text-amber-400">{historyLog.length} eventos</span>
           </div>
 
-          <div className="max-h-96 overflow-y-auto space-y-2 text-xs font-semibold text-left pr-1">
+          {/* SEASON EVOLUTION SCORE HISTORY TABLE */}
+          {seasonHistory.length > 0 && (
+            <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] font-black text-amber-400 uppercase">
+                  📈 EVOLUÇÃO DA TORCIDA (ANO A ANO)
+                </span>
+                <span className="text-[9px] font-bold text-zinc-400">
+                  {seasonHistory.length} Anos Registrados
+                </span>
+              </div>
+
+              <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
+                {seasonHistory.map((rec) => (
+                  <div
+                    key={rec.season}
+                    className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-between text-xs"
+                  >
+                    <div>
+                      <div className="font-black text-amber-400 flex items-center gap-1.5">
+                        <span>Ano {rec.season}</span>
+                        <span className="text-[9px] text-zinc-400 font-normal">
+                          (R$ {rec.bankBalance.toLocaleString()})
+                        </span>
+                      </div>
+                      <span className="text-[9px] text-zinc-400 block mt-0.5">
+                        Massa: {rec.contingente} • Bancada: {rec.pressaoBancada} • Pista: {rec.poderPista} • Moral: {rec.moral}%
+                      </span>
+                    </div>
+
+                    <div className="text-right">
+                      <span className="text-xs font-black text-emerald-400 block">{rec.powerScore} pts</span>
+                      <span className="text-[9px] font-bold text-amber-300 block">
+                        #{rec.rankPosition}º Lugar Nacional
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="max-h-80 overflow-y-auto space-y-2 text-xs font-semibold text-left pr-1">
             {historyLog.length > 0 ? (
               historyLog.map((log, idx) => (
                 <div
@@ -1832,6 +1928,71 @@ export default function App() {
       {/* ---------------------------------------------------- */}
       {/* MODALS */}
       {/* ---------------------------------------------------- */}
+
+      {/* ANIMATED BATTLE CONFRONTATION MODAL (HEALTH / POWER BARS) */}
+      {isBattleAnimating && activeMatchDerby && activeScoutIntel && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 flex items-center justify-center p-4">
+          <div className="max-w-md w-full bg-zinc-900 border border-amber-500/50 rounded-3xl p-6 shadow-2xl space-y-5 text-center relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-red-500 to-amber-500 animate-pulse" />
+
+            <div className="space-y-1">
+              <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest block">
+                ⚡ CONFRONTO TÁTICO DE PISTA EM TEMPO REAL
+              </span>
+              <h3 className="text-base font-black text-white uppercase">
+                {activeMatchDerby.matchTitle}
+              </h3>
+              <span className="text-xs text-zinc-400 font-bold block">
+                {activeMatchDerby.stadium} ({activeMatchDerby.cityState})
+              </span>
+            </div>
+
+            {/* DUAL HEALTH / POWER BARS */}
+            <div className="space-y-4 bg-zinc-950 p-4 rounded-2xl border border-zinc-800">
+              {/* Player Torcida Power Bar */}
+              <div>
+                <div className="flex justify-between text-xs font-black mb-1">
+                  <span className="text-emerald-400">{currentTorcida?.torcida} (Sua Torcida)</span>
+                  <span className="text-white">{stats.poder_pista + (selectedTransport?.pistaBonus || 0)} pts</span>
+                </div>
+                <div className="w-full bg-zinc-800 h-4 rounded-full overflow-hidden p-0.5 border border-zinc-700">
+                  <div
+                    className="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full rounded-full transition-all duration-300 shadow-lg"
+                    style={{ width: `${Math.min(100, (battleProgress / 100) * ((stats.poder_pista + (selectedTransport?.pistaBonus || 0)) / 1.2))}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="text-xs font-black text-amber-400 animate-bounce py-1">
+                ⚔️ VS ⚔️
+              </div>
+
+              {/* Rival Torcida Power Bar */}
+              <div>
+                <div className="flex justify-between text-xs font-black mb-1">
+                  <span className="text-red-400">{activeMatchDerby.rivalTorcida} (Rival)</span>
+                  <span className="text-white">{Math.floor(activeScoutIntel.rivalMembersWaiting / 20)} pts</span>
+                </div>
+                <div className="w-full bg-zinc-800 h-4 rounded-full overflow-hidden p-0.5 border border-zinc-700">
+                  <div
+                    className="bg-gradient-to-r from-red-600 to-red-400 h-full rounded-full transition-all duration-300 shadow-lg"
+                    style={{ width: `${Math.min(100, (battleProgress / 100) * ((Math.floor(activeScoutIntel.rivalMembersWaiting / 20)) / 1.2))}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Dynamic Status Text */}
+            <div className="text-xs font-bold text-amber-300 animate-pulse">
+              {battleProgress < 30
+                ? "🥁 Baterias em deslocamento... Comboios aproximando-se do estádio!"
+                : battleProgress < 70
+                ? "🔥 Pista em ebulição! Linhas de frente em choque direto!"
+                : "⚡ Pressão de bancada ao máximo! Calculando o vencedor da batalha!"}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 1. ACTION FEEDBACK MODAL */}
       {actionFeedback && (

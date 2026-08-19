@@ -188,6 +188,7 @@ export interface DerbyMatchInfo {
   isLongDistance: boolean;
   isAllyGame: boolean;
   importanceDescription: string;
+  competition?: string;
 }
 
 export interface PoliceMeetingChoice {
@@ -401,7 +402,8 @@ export function createCustomTorcidaWithArchetype(
 export function getDerbyForMatch(
   currentTorcida: OfficialTorcida,
   gameIndex: number, // 1, 2, 3, 4
-  clubStatus: ClubStatus
+  clubStatus: ClubStatus,
+  season: number = 1
 ): DerbyMatchInfo {
   const all = teamsData as OfficialTorcida[];
   const userClub = currentTorcida.clube.trim().toLowerCase();
@@ -666,9 +668,10 @@ export function getDerbyForMatch(
   const homeStadiumInfo = getStadium(currentTorcida.clube);
 
   if (gameIndex === 1) {
-    // Game 1: Regional Classic Away
+    // Game 1: Regional Classic (Paulistão / Campeonato Estadual)
     const rivalStadiumInfo = getStadium(mainRival.clube);
     const isHighway = isHighwayTrip(currentTorcida.clube, mainRival.clube);
+    const isHomeGame = season % 2 === 1;
 
     let derbyLabel = `Clássico Estadual: ${currentTorcida.clube} x ${mainRival.clube}`;
     const c1 = currentTorcida.clube.toLowerCase();
@@ -682,20 +685,21 @@ export function getDerbyForMatch(
     }
 
     return {
-      matchTitle: `${mainRival.clube} x ${currentTorcida.clube}`,
-      homeClub: mainRival.clube,
-      awayClub: currentTorcida.clube,
+      matchTitle: isHomeGame ? `${currentTorcida.clube} x ${mainRival.clube}` : `${mainRival.clube} x ${currentTorcida.clube}`,
+      homeClub: isHomeGame ? currentTorcida.clube : mainRival.clube,
+      awayClub: isHomeGame ? mainRival.clube : currentTorcida.clube,
       rivalTorcida: mainRival.torcida,
-      rivalSigla: mainRival.sigla,
-      stadium: rivalStadiumInfo.stadium,
-      cityState: rivalStadiumInfo.cityState,
+      rivalSigla: "",
+      stadium: isHomeGame ? homeStadiumInfo.stadium : rivalStadiumInfo.stadium,
+      cityState: isHomeGame ? homeStadiumInfo.cityState : rivalStadiumInfo.cityState,
       derbyName: derbyLabel,
-      isHome: false,
-      isLongDistance: isHighway,
+      isHome: isHomeGame,
+      isLongDistance: !isHomeGame && isHighway,
       isAllyGame: false,
-      importanceDescription: isHighway
-        ? `Caravana de estrada pela rodovia para invadir o setor visitante do ${mainRival.clube} em ${rivalStadiumInfo.cityState}.`
-        : `Deslocamento metropolitano de alta tensão para invadir o setor visitante do ${mainRival.clube}.`,
+      competition: "🏆 Paulistão / Campeonato Estadual",
+      importanceDescription: isHomeGame
+        ? `Recepção de alta pressão no nosso estádio (${homeStadiumInfo.stadium}) para defender o nosso caldeirão de arquibancada contra a torcida rival do ${mainRival.clube}.`
+        : `Deslocamento e invasão ao setor visitante do estádio ${rivalStadiumInfo.stadium} em ${rivalStadiumInfo.cityState} para apoiar o ${currentTorcida.clube}.`,
     };
   } else if (gameIndex === 2) {
     // Game 2: Home match & Alliance reception (Churrasco & Festa de Aliança)
@@ -704,17 +708,18 @@ export function getDerbyForMatch(
       homeClub: currentTorcida.clube,
       awayClub: allyTorcida.clube,
       rivalTorcida: allyTorcida.torcida,
-      rivalSigla: allyTorcida.sigla,
+      rivalSigla: "",
       stadium: homeStadiumInfo.stadium,
       cityState: homeStadiumInfo.cityState,
       derbyName: `Festa de Aliança & Confraternização (${currentTorcida.eixo_alianca})`,
       isHome: true,
       isLongDistance: false,
       isAllyGame: true,
-      importanceDescription: `Recepção de gala para a torcida irmã ${allyTorcida.torcida} do ${allyTorcida.clube} com churrasco farto de costela de chão na sede, chopp gelado, cortejo conjunto e festa de arquibancada com as duas baterias!`,
+      competition: "🤝 Amistoso Festivo de Aliança",
+      importanceDescription: `Recepção de gala no ${homeStadiumInfo.stadium} para a torcida irmã ${allyTorcida.torcida} do ${allyTorcida.clube} com churrasco farto de costela de chão na sede, chopp gelado, cortejo conjunto e festa de arquibancada com as duas baterias!`,
     };
   } else if (gameIndex === 3) {
-    // Game 3: Long distance away invasion
+    // Game 3: Long distance away invasion (Brasileirão)
     const rivalStadiumInfo = getStadium(secondRival.clube);
     const isHighway = isHighwayTrip(currentTorcida.clube, secondRival.clube);
     const isDiffState = currentTorcida.estado !== secondRival.estado;
@@ -727,29 +732,30 @@ export function getDerbyForMatch(
       homeClub: secondRival.clube,
       awayClub: currentTorcida.clube,
       rivalTorcida: secondRival.torcida,
-      rivalSigla: secondRival.sigla,
+      rivalSigla: "",
       stadium: rivalStadiumInfo.stadium,
       cityState: rivalStadiumInfo.cityState,
       derbyName: derbyLabel,
       isHome: false,
       isLongDistance: isHighway,
       isAllyGame: false,
+      competition: "🇧🇷 Brasileirão - Rodada de Fogo",
       importanceDescription: isHighway
-        ? `Caravana de estrada pelas rodovias com alto custo logístico e deslocamento em comboio protegido.`
-        : `Deslocamento regional estratégico para buscar pontos fora de casa contra o ${secondRival.clube}.`,
+        ? `Caravana de estrada pelas rodovias com alto custo logístico e deslocamento em comboio protegido para invadir o setor visitante do ${secondRival.clube} no estádio ${rivalStadiumInfo.stadium}.`
+        : `Deslocamento regional estratégico para buscar pontos fora de casa no estádio ${rivalStadiumInfo.stadium} contra o ${secondRival.clube}.`,
     };
   } else {
-    // Game 4: Season Finale / Title or Access / Relegation Fight
+    // Game 4: Copa do Brasil - Fase Decisiva / Season Finale
     const opponent = clubStatus === "LUTANDO_ACESSO" ? secondRival : mainRival;
     let derbyTitle = `Final de Temporada: ${currentTorcida.clube} x ${opponent.clube}`;
-    let importance = `Jogo decisivo da temporada contra o ${opponent.clube} valendo taça e hegemonia nas arquibancadas.`;
+    let importance = `Jogo decisivo no caldeirão do ${homeStadiumInfo.stadium} contra o ${opponent.clube} valendo a classificação e a taça!`;
 
     if (clubStatus === "CRISE_REBAIXAMENTO") {
       derbyTitle = `Batalha pela Sobrevivência: ${currentTorcida.clube} x ${opponent.clube}`;
-      importance = `O clube luta para não cair diante do ${opponent.clube}! A arquibancada precisa empurrar o time do início ao fim.`;
+      importance = `O clube luta para não cair no estádio ${homeStadiumInfo.stadium}! A arquibancada precisa empurrar o time do início ao fim.`;
     } else if (clubStatus === "LUTANDO_ACESSO") {
       derbyTitle = `Jogo do Acesso: ${currentTorcida.clube} x ${opponent.clube}`;
-      importance = `Casa cheia no caldeirão contra o ${opponent.clube} para garantir o retorno à elite do futebol brasileiro.`;
+      importance = `Casa cheia no caldeirão do ${homeStadiumInfo.stadium} contra o ${opponent.clube} para garantir a vaga de acesso.`;
     }
 
     return {
@@ -757,13 +763,14 @@ export function getDerbyForMatch(
       homeClub: currentTorcida.clube,
       awayClub: opponent.clube,
       rivalTorcida: opponent.torcida,
-      rivalSigla: opponent.sigla,
+      rivalSigla: "",
       stadium: homeStadiumInfo.stadium,
       cityState: homeStadiumInfo.cityState,
       derbyName: derbyTitle,
       isHome: true,
       isLongDistance: false,
       isAllyGame: false,
+      competition: "⚔️ Copa do Brasil - Mata-Mata Decisivo",
       importanceDescription: importance,
     };
   }
@@ -2015,10 +2022,10 @@ export function getActionStepEvents(status: ClubStatus, season: number = 1, curr
 // 13 PIPELINE STEPS (4 GAMES, 9 ACTIONS) WITH SEASONAL VARIETY
 export function getAnnualPipelineWithMatches(currentTorcida: OfficialTorcida, clubStatus: ClubStatus, season: number = 1) {
   const isInterior = isInteriorSP(currentTorcida);
-  const derby1 = getDerbyForMatch(currentTorcida, 1, clubStatus);
-  const derby2 = getDerbyForMatch(currentTorcida, 2, clubStatus);
-  const derby3 = getDerbyForMatch(currentTorcida, 3, clubStatus);
-  const derby4 = getDerbyForMatch(currentTorcida, 4, clubStatus);
+  const derby1 = getDerbyForMatch(currentTorcida, 1, clubStatus, season);
+  const derby2 = getDerbyForMatch(currentTorcida, 2, clubStatus, season);
+  const derby3 = getDerbyForMatch(currentTorcida, 3, clubStatus, season);
+  const derby4 = getDerbyForMatch(currentTorcida, 4, clubStatus, season);
 
   const act0 = getSeasonalActionEvent(1, season, 0, isInterior);
   const act1 = getSeasonalActionEvent(1, season, 1, isInterior);
