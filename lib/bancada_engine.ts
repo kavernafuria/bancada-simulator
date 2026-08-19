@@ -776,8 +776,60 @@ export function getDerbyForMatch(
   }
 }
 
-// 4 TRANSPORT OPTIONS WITH NUMERIC RETURN AND CAPACITY
-export function getTransportOptions(isLongDistance: boolean, isInterior: boolean = false): TransportChoice[] {
+// 4 TRANSPORT / CONCENTRATION OPTIONS WITH NUMERIC RETURN AND CAPACITY
+export function getTransportOptions(
+  isLongDistance: boolean,
+  isInterior: boolean = false,
+  isHome: boolean = false
+): TransportChoice[] {
+  if (isHome) {
+    return [
+      {
+        id: "CONCENTRACAO_SEDE_BAR",
+        name: "Concentração Massiva na Sede & Bar da Torcida",
+        description: "Sede social em ebulição desde cedo. Churrasco de costela no fogo de chão, chopp gelado, bateria aquecendo e cortejo a pé até o nosso caldeirão.",
+        costPerMember: 0,
+        fixedCost: 0,
+        capacityMultiplier: 1.3,
+        pistaBonus: 10,
+        mpRisk: 2,
+        speed: "MEDIO",
+      },
+      {
+        id: "EMBOSCADA_PORTAO_VISITANTE",
+        name: "Aguardar Escondido nos Arredores do Portão Visitante (Emboscada)",
+        description: "Lideranças e bonde de pista posicionados nas ruas escuras de acesso visitante aguardando a chegada dos comboios rivais.",
+        costPerMember: 10,
+        fixedCost: 1000,
+        capacityMultiplier: 1.1,
+        pistaBonus: 22,
+        mpRisk: 18,
+        speed: "RAPIDO",
+      },
+      {
+        id: "CORDAO_PORTAO_PRINCIPAL",
+        name: "Ficar na Porta Principal & Cordão de Segurança Local",
+        description: "Garantir a integridade dos portões locais e proteger associados, famílias e a recepção do ônibus do nosso time.",
+        costPerMember: 5,
+        fixedCost: 300,
+        capacityMultiplier: 1.2,
+        pistaBonus: 12,
+        mpRisk: 3,
+        speed: "MEDIO",
+      },
+      {
+        id: "CORTEJO_ONIBUS_TIME",
+        name: "Recepção do Ônibus do Time com Pirotecnia & Bateria (Ruada)",
+        description: "Ruada histórica com corredores de fumaça viva e bateria para empurrar o elenco do clube antes de entrar no caldeirão.",
+        costPerMember: 15,
+        fixedCost: 800,
+        capacityMultiplier: 1.35,
+        pistaBonus: 15,
+        mpRisk: 5,
+        speed: "LENTO",
+      },
+    ];
+  }
   if (isInterior) {
     if (isLongDistance) {
       return [

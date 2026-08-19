@@ -574,15 +574,18 @@ export default function App() {
 
     setIsGeneratingChronicle(true);
     const chronicle = await generateGeminiChronicle({
+      season: season,
       clube: currentTorcida.clube,
       torcida: currentTorcida.torcida,
       sigla: currentTorcida.sigla,
       stadium: activeMatchDerby.stadium,
       cityState: activeMatchDerby.cityState,
       rivalTorcida: activeMatchDerby.rivalTorcida,
-      rivalSigla: activeMatchDerby.rivalSigla,
+      rivalSigla: "",
       rivalClub: activeMatchDerby.homeClub === currentTorcida.clube ? activeMatchDerby.awayClub : activeMatchDerby.homeClub,
+      isHome: activeMatchDerby.isHome,
       isAllyGame: activeMatchDerby.isAllyGame,
+      competition: activeMatchDerby.competition,
       isVictory: result.isVictoryPista,
       isVictoryPista: result.isVictoryPista,
       isVictoryBancada: result.isVictoryBancada,
@@ -632,7 +635,7 @@ export default function App() {
     }));
 
     setHistoryLog((prev) => [
-      `[Ano ${season} - ${activeMatchDerby.matchTitle}] ${result.statusTitle}. Placar: ${result.scorePlayerClub}x${result.scoreRivalClub}. Tática: ${tactic.tacticalLog}`,
+      `[Ano ${season} - ${activeMatchDerby.competition || "Jogo"}] ${result.statusTitle}. Placar: ${result.scorePlayerClub}x${result.scoreRivalClub}. Tática: ${tactic.tacticalLog}`,
       ...prev,
     ]);
 
@@ -1499,7 +1502,15 @@ export default function App() {
                   )}
                 </div>
                 <div className="text-zinc-300 font-semibold text-[11px]">
-                  Rival de Pista: <span className="text-red-400 font-bold">{currentStep.derby?.rivalTorcida}</span>
+                  {currentStep.derby?.isAllyGame ? (
+                    <>
+                      🤝 Torcida Aliada / Amizade: <span className="text-emerald-400 font-bold">{currentStep.derby?.rivalTorcida}</span>
+                    </>
+                  ) : (
+                    <>
+                      Rival de Pista: <span className="text-red-400 font-bold">{currentStep.derby?.rivalTorcida}</span>
+                    </>
+                  )}
                 </div>
                 <p className="text-[10px] text-zinc-400 leading-snug">
                   {currentStep.derby?.importanceDescription}
@@ -2100,7 +2111,7 @@ export default function App() {
           <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-3 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest flex items-center gap-1">
-                <Bus className="w-3.5 h-3.5" /> FASE 2: CONDUÇÃO & TRANSPORTE
+                <Bus className="w-3.5 h-3.5" /> FASE 2: {activeMatchDerby.isHome ? "CONCENTRAÇÃO & POSICIONAMENTO LOCAL" : "CONDUÇÃO & TRANSPORTE"}
               </span>
               <button
                 onClick={() => setMatchModalPhase("CLOSED")}
@@ -2115,16 +2126,18 @@ export default function App() {
                 {activeMatchDerby.matchTitle}
               </h3>
               <p className="text-[11px] text-zinc-400 mt-0.5">
-                Estádio: {activeMatchDerby.stadium} • Rival: {activeMatchDerby.rivalTorcida} ({activeMatchDerby.rivalSigla})
+                Estádio: {activeMatchDerby.stadium} • {activeMatchDerby.isAllyGame ? "Torcida Aliada:" : "Rival:"} {activeMatchDerby.rivalTorcida}
               </p>
             </div>
 
             <div className="text-xs text-zinc-300 font-bold">
-              Selecione o Meio de Transporte e Condução da Massa:
+              {activeMatchDerby.isHome
+                ? "Selecione a Estratégia de Concentração da Torcida no Nosso Estádio:"
+                : "Selecione o Meio de Transporte e Condução da Massa:"}
             </div>
 
             <div className="space-y-2">
-              {getTransportOptions(activeMatchDerby.isLongDistance, isInteriorSP(currentTorcida)).map((tOption) => (
+              {getTransportOptions(activeMatchDerby.isLongDistance, isInteriorSP(currentTorcida), activeMatchDerby.isHome).map((tOption) => (
                 <button
                   key={tOption.id}
                   onClick={() => handleSelectTransport(tOption)}
@@ -2186,7 +2199,7 @@ export default function App() {
                 <span className={`text-xs font-black ${activeMatchDerby.isAllyGame ? "text-emerald-400" : "text-red-400"}`}>
                   ~{activeScoutIntel.rivalMembersWaiting.toLocaleString()}
                 </span>
-                <span className="text-[8px] text-zinc-500 block">{activeMatchDerby.rivalSigla}</span>
+                <span className="text-[8px] text-zinc-400 font-bold block">{activeMatchDerby.rivalTorcida}</span>
               </div>
 
               <div className="p-2 rounded-xl bg-zinc-900 border border-zinc-800">

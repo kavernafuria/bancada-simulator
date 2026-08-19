@@ -33,10 +33,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ chronicle: allyText });
     }
 
-    const matchTypeStr = isHome ? "jogando em casa como mandante" : "em caravana visitante";
+    const matchTypeStr = isHome ? "atuando em casa no nosso caldeirão como mandante" : "em caravana visitante";
     const outcomeStr = isVictoryPista ? "com domínio total de pista e vitória da nossa torcida" : "em um confronto tenso e adverso na pista";
 
-    const chronicle = `[Ano ${season} - ${competition || "Campeonato"}] No clássico contra o ${rivalClub} (${rivalTorcida}), a ${torcida} atuou ${matchTypeStr} no estádio ${stadium}. ${statusTitle || "Grande confronto"}. O placar no campo foi ${score}. A postura de segurança (${policeStance}) e a tática de ${tacticTitle} determinaram o rumo do dia, ${outcomeStr}. Moral da bancada: ${moralChange >= 0 ? "+" + moralChange : moralChange}. Baixas médicas: ${desertion} feridos.`;
+    const chronicle = `[Ano ${season || 1} - ${competition || "Campeonato"}] No clássico contra o ${rivalClub} (${rivalTorcida}), a ${torcida} esteve presente ${matchTypeStr} no estádio ${stadium}. ${statusTitle || "Confronto de alta tensão"}. O placar no campo foi ${score}. A postura de segurança (${policeStance}) e a escolha tática de ${tacticTitle} determinaram o rumo do dia, ${outcomeStr}. Moral da bancada: ${moralChange >= 0 ? "+" + moralChange : moralChange}. Baixas médicas: ${desertion} feridos.`;
 
     return NextResponse.json({ chronicle });
   } catch (error: any) {
