@@ -1603,6 +1603,14 @@ export function getTacticalBattleChoices(
   ];
 }
 
+export function getTierMultiplier(tier?: string): number {
+  const t = (tier || "B").toUpperCase().trim();
+  if (t === "S" || t === "S-") return 3.0;
+  if (t === "A+" || t === "A" || t === "A-") return 2.0;
+  if (t === "B+" || t === "B" || t === "B-") return 1.2;
+  return 0.6; // Tier C+, C, Locais
+}
+
 // RESOLVE COMPLETE MATCH MECHANICS & CALCULATION
 export function executeCompleteMatch(
   stats: TorcidaStats,
@@ -1611,7 +1619,8 @@ export function executeCompleteMatch(
   transport: TransportChoice,
   intel: MatchScoutReport,
   tactic: TacticalBattleChoice,
-  derby: DerbyMatchInfo
+  derby: DerbyMatchInfo,
+  currentTorcida?: OfficialTorcida
 ): MatchExecutionResult {
   const playerMembers = intel.playerMembersPresent;
   const rivalMembers = intel.rivalMembersWaiting;
@@ -1830,62 +1839,135 @@ export function executeCompleteMatch(
     }
   }
 
-  // STANDARD RIVAL MATCH COMBAT / DERBY LOGIC
-  const ratio = playerMembers / Math.max(1, rivalMembers);
-  const playerNumberScore = Math.min(70, Math.max(8, Math.round(40 * Math.pow(ratio, 0.85))));
-  const rivalNumberScore = Math.min(70, Math.max(8, Math.round(40 * Math.pow(1 / ratio, 0.85))));
-
-  // Quality of fighters & preparation
-  const playerQualityScore = Math.round(
-    stats.poder_pista * 0.35 +
-      transport.pistaBonus * 0.4 +
-      state.moral * 0.15 +
-      (police ? police.pistaMod * 0.5 : 0)
+  // ------------------------------------------------------------------------
+  // 1. TIER LOOKUP & EXPONENTIAL MULTIPLIER COEFICIENTS
+  // ------------------------------------------------------------------------
+  const allTorcidas = teamsData as OfficialTorcida[];
+  const rivalTorcidaObj = allTorcidas.find(
+    (t) => t.torcida.toLowerCase().trim() === derby.rivalTorcida.toLowerCase().trim()
   );
 
-  const rivalQualityScore = Math.round(
-    (derby.isHome ? 20 : 32) + (derby.derbyName.includes("Clássico") ? 10 : 0)
-  );
+  const playerTier = currentTorcida?.tier || "B";
+  const rivalTier = rivalTorcidaObj ? rivalTorcidaObj.tier : "B";
+  const rivalPoderPista = rivalTorcidaObj ? rivalTorcidaObj.poder_pista : (derby.isHome ? 45 : 75);
 
-  // Tactical bonuses and interaction checks
-  let tacticBonusPlayer = tactic.pistaMod;
-  let tacticBonusRival = 0;
+  const coefTierPlayer = getTierMultiplier(playerTier);
+  const coefTierRival = getTierMultiplier(rivalTier);
 
-  if (tactic.id === "ATAQUE_FRONTAL_LINHA_FRENTE") {
-    if (ratio >= 1.2) {
-      tacticBonusPlayer += 15;
-    } else if (ratio < 0.9) {
-      tacticBonusPlayer -= 18;
-      tacticBonusRival += 12;
-    }
-  } else if (tactic.id === "ATAQUE_SURPRESA_EMBOSCADA") {
-    tacticBonusPlayer += 12;
-    if (rivalNumberScore > playerNumberScore) {
-      tacticBonusPlayer += 8;
-    }
-  } else if (tactic.id === "GUERRA_ROJOES_MORTEIROS") {
-    tacticBonusPlayer += 15;
-    tacticBonusRival -= 6;
-  } else if (tactic.id === "CONFRONTO_BARRA_FERRO") {
-    tacticBonusPlayer += 12;
-  } else if (tactic.id === "BRIGA_NA_MAO_LIMPA") {
-    tacticBonusPlayer += stats.poder_pista > 60 ? 16 : 8;
-  } else if (tactic.id === "FESTA_MOSAICO_CALDEIRAO") {
-    tacticBonusPlayer += 6;
+  // ------------------------------------------------------------------------
+  // 3. COMPORTAMENTO ESPECÍFICO DE TORCIDAS DE PERFIL FAMÍLIA / BARRA (PISTA < 40)
+  // ------------------------------------------------------------------------
+  const isFamilyProfilePlayer = stats.poder_pista < 40 || playerTier === "C" || playerTier === "C+";
+  const isHeavyUltrasRival = rivalPoderPista >= 70 || rivalTier === "S" || rivalTier === "S-" || rivalTier === "A+";
+
+  if (isFamilyProfilePlayer && isHeavyUltrasRival && !derby.isAllyGame) {
+    const isPoliceIntervention = Math.random() < 0.5;
+    const scorePlayerClub = Math.floor(Math.random() * 2);
+    const scoreRivalClub = scorePlayerClub + 1;
+    const membersLost = isPoliceIntervention ? 1 : Math.floor(Math.random() * 8 + 6);
+    const medicalCost = isPoliceIntervention ? 300 : membersLost * 140;
+    const extraExpenses = transport.fixedCost + medicalCost + (police ? police.cost : 0);
+    const mpAdded = isPoliceIntervention ? 4 : 12;
+    const moralChange = isPoliceIntervention ? -4 : -10;
+
+    const statusTitle = isPoliceIntervention
+      ? `PROTEÇÃO DA MASSA & INTERVENÇÃO DA PM EM ${derby.stadium.toUpperCase()}`
+      : `RECUO ESTRATÉGICO PARA OS VEÍCULOS EM ${derby.stadium.toUpperCase()}`;
+
+    const chronicleText = isPoliceIntervention
+      ? `Diante da aproximação do bonde pesado da ${derby.rivalTorcida}, a diretoria priorizou a segurança das famílias e associados. O Batalhão de Choque interveio rapidamente com bombas de efeito moral, dispersando o cerco e evitando um confronto direto contra a linha de frente rival.`
+      : `Ao avistar o avanço da linha de frente adversária da ${derby.rivalTorcida}, o bonde local iniciou corrida de proteção em direção à frota de veículos. O recuo imediato evitou baixas graves contra uma superpotência de pista, registrando apenas pequenas escoriações e despesas médicas de R$ ${medicalCost.toLocaleString()}.`;
+
+    const deltas: FormattedDelta[] = [
+      { label: "Resultado de Pista", value: isPoliceIntervention ? "Intervenção da PM (Confronto Evitado)" : "Recuo e Proteção dos Veículos", isPositive: false },
+      { label: "Diretriz de Perfil", value: "Prioridade: Família & Massa (Pista < 40)", isPositive: true },
+      { label: "Efetivo Presente", value: `${playerMembers.toLocaleString()} vs ${rivalMembers.toLocaleString()}`, isPositive: false },
+      { label: "Placar do Jogo", value: `${scorePlayerClub} x ${scoreRivalClub}`, isPositive: false },
+      { label: "Moral da Torcida", value: `${moralChange}`, isPositive: false },
+      { label: "Custos Médicos & Frota", value: `R$ ${extraExpenses.toLocaleString()}`, isPositive: false },
+    ];
+
+    return {
+      scorePlayerClub,
+      scoreRivalClub,
+      effectiveForcePlayer: 20,
+      effectiveForceRival: 85,
+      isVictoryPista: false,
+      isVictoryBancada: false,
+      statusTitle,
+      membersLost,
+      medicalCost,
+      extraExpenses,
+      mpAdded,
+      moralChange,
+      chronicleText,
+      formattedDeltas: deltas,
+      bannerCaptured: false,
+    };
   }
 
-  // Final effective combat forces with RNG variance
-  const playerForce = Math.max(10, Math.round(playerNumberScore + playerQualityScore + tacticBonusPlayer + (Math.random() * 16 - 8)));
-  const rivalForce = Math.max(10, Math.round(rivalNumberScore + rivalQualityScore + tacticBonusRival + (Math.random() * 16 - 8)));
+  // ------------------------------------------------------------------------
+  // 1.B. FÓRMULA DE PODER EFETIVO DE COMBATE (PEC)
+  // ------------------------------------------------------------------------
+  // Força Base = (Poder Pista * Coeficiente Tier) * (Bonde Presente / 100)
+  const fuerzaBasePlayer = (stats.poder_pista * coefTierPlayer) * (playerMembers / 100);
+  const fuerzaBaseRival = (rivalPoderPista * coefTierRival) * (rivalMembers / 100);
 
-  const isVictoryPista = playerForce >= rivalForce;
+  // Modificadores = (Moral * 0.1) + (Bônus Armamento/Batedores * 0.15) - (Penalidade Emboscada Sofrida * 0.25)
+  const moralModPlayer = (state.moral / 100) * 0.10;
 
-  // Strict Banner Theft Rules:
-  // 1) Planned Tactical Ambush (ATAQUE_SURPRESA_EMBOSCADA) AND won combat
-  // OR 2) Overwhelming combat victory (playerForce >= rivalForce * 1.8) AND ratio >= 1.5 AND random chance (15%)
-  const isAmbushBannerCapture = isVictoryPista && tactic.id === "ATAQUE_SURPRESA_EMBOSCADA";
-  const isOverwhelmingVictoryCapture = isVictoryPista && playerForce >= rivalForce * 1.8 && ratio >= 1.5 && Math.random() < 0.15;
-  const bannerCaptured = isAmbushBannerCapture || isOverwhelmingVictoryCapture;
+  let weaponsModPlayer = 0;
+  if (tactic.id === "CONFRONTO_BARRA_FERRO" || tactic.id === "GUERRA_ROJOES_MORTEIROS" || tactic.id === "ATAQUE_FRONTAL_LINHA_FRENTE") {
+    weaponsModPlayer += 0.15;
+  }
+  if (transport.pistaBonus >= 14) weaponsModPlayer += 0.05;
+
+  let ambushModPlayer = 0;
+  let ambushModRival = 0;
+  if (tactic.id === "ATAQUE_SURPRESA_EMBOSCADA") {
+    ambushModPlayer += 0.15;
+    ambushModRival -= 0.25;
+  }
+  if (intel.twistTitle.includes("Emboscada") || intel.twistTitle.includes("Bloqueio")) {
+    ambushModPlayer -= 0.25;
+  }
+
+  const modTotalPlayer = moralModPlayer + weaponsModPlayer + ambushModPlayer;
+  const modTotalRival = 0.08 + ambushModRival;
+
+  // RNG Limitado (-5 a +5)
+  const rngPlayer = Math.random() * 10 - 5;
+  const rngRival = Math.random() * 10 - 5;
+
+  const playerForce = Math.max(5, Math.round(fuerzaBasePlayer * (1 + modTotalPlayer) + rngPlayer));
+  const rivalForce = Math.max(5, Math.round(fuerzaBaseRival * (1 + modTotalRival) + rngRival));
+
+  // ⚠️ REGRA DE OURO (TRAVA DE TIER E DESVANTAGEM NUMÉRICA 2 PARA 1):
+  let isVictoryPista = playerForce >= rivalForce;
+  const tierDiff = coefTierRival / coefTierPlayer; // ex: Tier S (3.0) / Tier C (0.6) = 5.0
+  const is2to1Disadvantage = rivalMembers >= playerMembers * 2.0;
+
+  // Se PEC Adversário > PEC Jogador * 1.5 OU desvantagem de mais de 2 Tiers / desvantagem 2:1, derrota é 100% GARANTIDA
+  if (rivalForce > playerForce * 1.5 || (tierDiff >= 2.5 && rivalForce > playerForce) || (is2to1Disadvantage && rivalForce > playerForce)) {
+    isVictoryPista = false;
+  }
+
+  // ------------------------------------------------------------------------
+  // 2. REGRAS RESTRITIVAS PARA CAPTURA E PERDA DE FAIXAS
+  // ------------------------------------------------------------------------
+  // 1) Vitória Esmagadora (PEC Jogador >= PEC Rival * 1.8)
+  // 2) Emboscada com batedores OU Desvantagem Numérica Crítica do Rival (playerMembers >= rivalMembers * 1.8)
+  // 3) Torcidas Tier C ou Pista < 50 NUNCA podem tomar faixa de Tier S/A
+  // 4) Chance base máxima: 5% a 8% (Math.random() < 0.08)
+  const isOverwhelmingVictory = playerForce >= rivalForce * 1.8;
+  const isRivalDisadvantaged = tactic.id === "ATAQUE_SURPRESA_EMBOSCADA" || playerMembers >= rivalMembers * 1.8;
+  const isTierEligible = !( (playerTier === "C" || playerTier === "C+" || stats.poder_pista < 50) && (rivalTier === "S" || rivalTier === "S-" || rivalTier === "A+" || rivalTier === "A") );
+
+  const bannerCaptured = isVictoryPista && isOverwhelmingVictory && isRivalDisadvantaged && isTierEligible && Math.random() < 0.08;
+
+  // Condição para PERDER FAIXA:
+  const isSeverePistaLoss = !isVictoryPista && (rivalForce >= playerForce * 1.8) && !derby.isHome && (coefTierRival > coefTierPlayer);
+  const bannerLost = isSeverePistaLoss && Math.random() < 0.12;
 
   // Football match result calculation based on Ultras Pressão de Bancada + Moral + Police alignment + Tactic
   const scorePower =
@@ -1901,8 +1983,8 @@ export function executeCompleteMatch(
 
   const isVictoryBancada = isVictoryPista || (tactic.isMosaicTactic ?? false);
   const membersLost = isVictoryPista
-    ? Math.floor(Math.random() * 6 + 1)
-    : Math.floor(Math.random() * 25 + 10);
+    ? Math.floor(Math.random() * 4 + 1)
+    : Math.floor(Math.random() * 22 + 8);
 
   const medicalCost = isVictoryPista
     ? tactic.costRisk
@@ -1918,10 +2000,6 @@ export function executeCompleteMatch(
   if (bannerCaptured) {
     moralChange += 10;
   }
-
-  // Rare High-Impact Banner Loss Event (-20 Moral)
-  const isSeverePistaLoss = !isVictoryPista && rivalForce - playerForce > 25 && tactic.id === "ATAQUE_FRONTAL_LINHA_FRENTE";
-  const bannerLost = isSeverePistaLoss && Math.random() < 0.35;
 
   let statusTitle = isVictoryPista
     ? `VITÓRIA & CONTROLE EM ${derby.stadium.toUpperCase()}`

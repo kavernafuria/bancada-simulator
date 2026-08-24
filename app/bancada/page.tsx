@@ -574,7 +574,8 @@ export default function App() {
         selectedTransport,
         activeScoutIntel,
         tactic,
-        activeMatchDerby
+        activeMatchDerby,
+        currentTorcida
       );
     setSeasonObjectives((prev) =>
       prev.map((obj) => {
