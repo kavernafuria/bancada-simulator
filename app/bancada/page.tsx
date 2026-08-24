@@ -257,6 +257,7 @@ export default function App() {
     stadium: string;
   } | null>(null);
   const [allyBonusMembers, setAllyBonusMembers] = useState<number>(0);
+  const [challengedRivalTorcida, setChallengedRivalTorcida] = useState<string | null>(null);
 
   const handleDownloadProjectZip = async () => {
     try {
@@ -306,6 +307,9 @@ export default function App() {
           setHistoryLog(parsed.historyLog || []);
           if (parsed.rivalryRecords) {
             setRivalryRecords(parsed.rivalryRecords);
+          }
+          if (parsed.challengedRivalTorcida) {
+            setChallengedRivalTorcida(parsed.challengedRivalTorcida);
           }
           if (parsed.seasonObjectives && parsed.seasonObjectives.length > 0) {
             setSeasonObjectives(parsed.seasonObjectives);
@@ -357,6 +361,7 @@ export default function App() {
           historyLog,
           seasonObjectives,
           rivalryRecords,
+          challengedRivalTorcida,
         })
       );
     }
@@ -374,10 +379,11 @@ export default function App() {
     historyLog,
     seasonObjectives,
     rivalryRecords,
+    challengedRivalTorcida,
   ]);
 
   const pipeline = currentTorcida
-    ? getAnnualPipelineWithMatches(currentTorcida, clubStatus, season)
+    ? getAnnualPipelineWithMatches(currentTorcida, clubStatus, season, challengedRivalTorcida)
     : [];
 
   const actionEvents = getActionStepEvents(clubStatus, season, currentTorcida);
@@ -786,6 +792,7 @@ export default function App() {
         const nextSeason = season + 1;
         setSeason(nextSeason);
         setPipelineIndex(0);
+        setChallengedRivalTorcida(null);
         if (currentTorcida) {
           const nextObjectives = generateSeasonObjectives(nextSeason, currentTorcida, nextStatus);
           setSeasonObjectives(nextObjectives);
@@ -843,6 +850,7 @@ export default function App() {
 
     switch (actionType) {
       case "MARCAR_TRETA":
+        setChallengedRivalTorcida(targetTorcida.torcida);
         setRivalryRecords((prev) => ({
           ...prev,
           [key]: { ...existingRec, isTretaChallenged: true },
@@ -854,10 +862,10 @@ export default function App() {
         }));
         setStats((s) => ({ ...s, poder_pista: applyDiminishingReturns(s.poder_pista, 4) }));
         setHistoryLog((prev) => [
-          `[Ano ${season} - Diplomacia] Marcou treta formal com a ${targetTorcida.torcida}. O clima para o próximo clássico é de guerra total!`,
+          `[Ano ${season} - Diplomacia] Marcou treta formal com a ${targetTorcida.torcida}. O grande confronto no final da temporada foi agendado contra eles!`,
           ...prev,
         ]);
-        setDiplomacyFeedback(`⚔️ Treta marcada com a ${targetTorcida.torcida}! (+5 Moral, +4 Pista, +15% Risco MP)`);
+        setDiplomacyFeedback(`⚔️ Treta marcada com a ${targetTorcida.torcida}! O grande clássico decisivo no final da temporada será contra eles! (+5 Moral, +4 Pista, +15% Risco MP)`);
         break;
 
       case "JOGO_PAZ":
@@ -1893,18 +1901,31 @@ export default function App() {
             })()}
           </div>
 
-          <p className="text-xs text-zinc-400">
-            Pontuação baseada em Contingente, Bancada, Pista, Caravana e Respeito. O ranking flutua a cada temporada. Quanto maior o nível (Top 5), maior a resistência para subir de posição!
-          </p>
+          {/* DIPLOMACY CENTRAL GUIDANCE BANNER */}
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-2.5 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2">
+              <span className="text-base">💡</span>
+              <span className="text-amber-300 font-medium text-[11px] leading-snug">
+                <strong>Central Diplomática:</strong> Clique em qualquer uma das <strong>58 torcidas</strong> abaixo para ver seu perfil completo, retrospecto histórico e abrir negociações diplomáticas (Pacto de Paz, Treta, Resgate de Faixa, etc.).
+              </span>
+            </div>
+          </div>
 
           <div className="max-h-96 overflow-y-auto space-y-1.5 pr-1">
             {simulateNationalRanking(currentTorcida, stats, stateTrackers, season).map((entry) => (
-              <div
+              <button
                 key={entry.rank}
-                className={`p-2.5 rounded-2xl border flex items-center justify-between text-xs transition-all ${
+                type="button"
+                onClick={() => {
+                  if (!entry.isPlayer) {
+                    setSelectedTorcidaForDiplomacy(entry.officialRef);
+                    setDiplomacyFeedback(null);
+                  }
+                }}
+                className={`w-full p-2.5 rounded-2xl border flex items-center justify-between text-xs transition-all ${
                   entry.isPlayer
                     ? "bg-amber-500/15 border-amber-500 text-white font-black shadow-md scale-[1.01]"
-                    : "bg-zinc-950/80 border-zinc-800/80 text-zinc-300"
+                    : "bg-zinc-950/80 border-zinc-800/80 text-zinc-300 hover:border-amber-500/60 hover:bg-zinc-900 cursor-pointer group"
                 }`}
               >
                 <div className="flex items-center gap-2.5">
@@ -1921,12 +1942,16 @@ export default function App() {
                   >
                     {entry.rank}
                   </span>
-                  <div>
+                  <div className="text-left">
                     <div className="font-bold flex items-center gap-1.5">
                       <span>{entry.torcida}</span>
-                      {entry.isPlayer && (
+                      {entry.isPlayer ? (
                         <span className="bg-amber-500 text-black px-1.5 py-0.2 rounded text-[8px] font-black uppercase">
                           VOCÊ
+                        </span>
+                      ) : (
+                        <span className="bg-zinc-900 group-hover:bg-amber-500/20 text-zinc-400 group-hover:text-amber-400 border border-zinc-800 group-hover:border-amber-500/40 px-1.5 py-0.2 rounded text-[8px] font-bold uppercase transition-all">
+                          🤝 Diplomacia
                         </span>
                       )}
                     </div>
@@ -1936,15 +1961,20 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="text-right">
-                  <span className="text-xs font-black text-amber-400 block">{entry.powerScore} pts</span>
-                  {entry.rankChange !== 0 && (
-                    <span className={`text-[8px] font-bold ${entry.rankChange > 0 ? "text-emerald-400" : "text-red-400"}`}>
-                      {entry.rankChange > 0 ? `▲ +${entry.rankChange}` : `▼ ${entry.rankChange}`}
-                    </span>
+                <div className="text-right flex items-center gap-2.5">
+                  <div>
+                    <span className="text-xs font-black text-amber-400 block">{entry.powerScore} pts</span>
+                    {entry.rankChange !== 0 && (
+                      <span className={`text-[8px] font-bold ${entry.rankChange > 0 ? "text-emerald-400" : "text-red-400"}`}>
+                        {entry.rankChange > 0 ? `▲ +${entry.rankChange}` : `▼ ${entry.rankChange}`}
+                      </span>
+                    )}
+                  </div>
+                  {!entry.isPlayer && (
+                    <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-amber-400 transition-all shrink-0" />
                   )}
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </div>

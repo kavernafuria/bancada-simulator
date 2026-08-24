@@ -417,7 +417,8 @@ export function getDerbyForMatch(
   currentTorcida: OfficialTorcida,
   gameIndex: number, // 1, 2, 3, 4
   clubStatus: ClubStatus,
-  season: number = 1
+  season: number = 1,
+  challengedRivalTorcida?: string | null
 ): DerbyMatchInfo {
   const all = teamsData as OfficialTorcida[];
   const userClub = currentTorcida.clube.trim().toLowerCase();
@@ -760,14 +761,32 @@ export function getDerbyForMatch(
     };
   } else {
     // Game 4: Copa do Brasil - Fase Decisiva / Season Finale
-    const opponent = clubStatus === "LUTANDO_ACESSO" ? secondRival : mainRival;
-    let derbyTitle = `Final de Temporada: ${currentTorcida.clube} x ${opponent.clube}`;
-    let importance = `Jogo decisivo no caldeirão do ${homeStadiumInfo.stadium} contra o ${opponent.clube} valendo a classificação e a taça!`;
+    let opponent = clubStatus === "LUTANDO_ACESSO" ? secondRival : mainRival;
 
-    if (clubStatus === "CRISE_REBAIXAMENTO") {
+    if (challengedRivalTorcida) {
+      const allTorcidas = teamsData as OfficialTorcida[];
+      const challengedObj = allTorcidas.find(
+        (t) => t.torcida.toLowerCase().trim() === challengedRivalTorcida.toLowerCase().trim() && t.clube.toLowerCase().trim() !== userClub
+      );
+      if (challengedObj) {
+        opponent = challengedObj;
+      }
+    }
+
+    const isTretaMatch = challengedRivalTorcida && opponent.torcida.toLowerCase().trim() === challengedRivalTorcida.toLowerCase().trim();
+
+    let derbyTitle = isTretaMatch
+      ? `⚔️ CONFRONTO DA TRETA MARCADA: ${currentTorcida.clube} x ${opponent.clube}`
+      : `Final de Temporada: ${currentTorcida.clube} x ${opponent.clube}`;
+
+    let importance = isTretaMatch
+      ? `Jogo de vida ou morte no caldeirão do ${homeStadiumInfo.stadium}! Confronto decisivo de fim de temporada contra a torcida desafiada na treta formal (${opponent.torcida}). O clima é de guerra total!`
+      : `Jogo decisivo no caldeirão do ${homeStadiumInfo.stadium} contra o ${opponent.clube} valendo a classificação e a taça!`;
+
+    if (clubStatus === "CRISE_REBAIXAMENTO" && !isTretaMatch) {
       derbyTitle = `Batalha pela Sobrevivência: ${currentTorcida.clube} x ${opponent.clube}`;
       importance = `O clube luta para não cair no estádio ${homeStadiumInfo.stadium}! A arquibancada precisa empurrar o time do início ao fim.`;
-    } else if (clubStatus === "LUTANDO_ACESSO") {
+    } else if (clubStatus === "LUTANDO_ACESSO" && !isTretaMatch) {
       derbyTitle = `Jogo do Acesso: ${currentTorcida.clube} x ${opponent.clube}`;
       importance = `Casa cheia no caldeirão do ${homeStadiumInfo.stadium} contra o ${opponent.clube} para garantir a vaga de acesso.`;
     }
@@ -784,7 +803,7 @@ export function getDerbyForMatch(
       isHome: true,
       isLongDistance: false,
       isAllyGame: false,
-      competition: "⚔️ Copa do Brasil - Mata-Mata Decisivo",
+      competition: isTretaMatch ? "⚔️ CLÁSSICO DE REVANCHE - TRETA FORMAL MARCADA" : "⚔️ Copa do Brasil - Mata-Mata Decisivo",
       importanceDescription: importance,
     };
   }
@@ -1532,7 +1551,7 @@ export function getTacticalBattleChoices(
     {
       id: "CONFRONTO_BARRA_FERRO",
       title: "4. Briga com Barra de Ferro & Contenção Armada",
-      description: "Linha armada com barras de ferro, canos e madeiramento para travar investidas pesadas e romper o cerco rival (Tática clássica da Gladiadores).",
+      description: "Linha armada com barras de ferro, canos e madeiramento para travar investidas pesadas e romper o cerco rival.",
       pistaMod: 17,
       moralMod: 10,
       mpPenalty: 18,
@@ -1549,7 +1568,7 @@ export function getTacticalBattleChoices(
     {
       id: "BRIGA_NA_MAO_LIMPA",
       title: "5. Briga na Mão Limpa (Disposição & Corpo a Corpo)",
-      description: "Trocação franca no soco, na raça e na pura disposição de arquibancada sem covardia de armas. (Se for Santo André contra Gladiadores, dispara o lendário Massacre Andreense!)",
+      description: "Trocação franca no soco, na raça e na pura disposição de arquibancada sem uso de armas.",
       pistaMod: 22,
       moralMod: 20,
       mpPenalty: 10,
@@ -1659,8 +1678,8 @@ export function executeCompleteMatch(
       const scorePlayerClub = 2;
       const scoreRivalClub = 0;
 
-      const statusTitle = "MASSACRE ANDREENSE HISTÓRICO: O BONDE DO SANTO ANDRÉ PEGOU A GLADIADORES NA MÃO LIMPA!";
-      const chronicleText = `O confronto no clássico do ABC entrou para os anais da cultura de arquibancada. A Gladiadores do São Caetano tentou armar sua habitual linha com barras de ferro e canos de contenção, mas o bonde da linha de frente do Santo André não recuou um milímetro. Partindo para a trocação franca na mão limpa e na mais pura disposição de rua, os andreenses quebraram a formação rival, tomaram as barras de ferro e aplicaram uma surra histórica que botou a torcida do Azulão para correr em debandada geral. O domínio andreense foi absoluto na pista e nas bancadas do ${derby.stadium}!`;
+      const statusTitle = "MASSACRE ANDREENSE HISTÓRICO: O BONDE DO SANTO ANDRÉ PEGOU O RIVAL NA MÃO LIMPA!";
+      const chronicleText = `O confronto no clássico do ABC entrou para os anais da cultura de arquibancada. A torcida do São Caetano tentou armar sua habitual linha com barras de ferro e canos de contenção, mas o bonde da linha de frente do Santo André não recuou um milímetro. Partindo para a trocação franca na mão limpa e na mais pura disposição de rua, os andreenses quebraram a formação rival, tomaram as barras de ferro e aplicaram uma surra histórica que botou a torcida rival para correr em debandada geral. O domínio andreense foi absoluto na pista e nas bancadas do ${derby.stadium}!`;
 
       const deltas: FormattedDelta[] = [
         { label: "Resultado de Pista", value: "Massacre Andreense Histórico", isPositive: true },
@@ -1704,7 +1723,7 @@ export function executeCompleteMatch(
     const scoreRivalClub = 2;
 
     const statusTitle = "PREJUÍZO HISTÓRICO NO ABC: O BONDE DO SANTO ANDRÉ VEIO NA DISPOSIÇÃO E ATROPELOU!";
-    const chronicleText = `Mesmo com a nossa linha armada tradicionalmente com barras de ferro e madeiramento pesado, o confronto contra a torcida do Santo André resultou em um revés duríssimo para a Gladiadores. A linha de frente andreense veio na pura disposição e na mão limpa, quebrou a nossa contenção no peito aberto e desarticulou completamente o nosso bloco. O prejuízo foi alto em baixas médicas, atendimento hospitalar e abalo moral no ABC.`;
+    const chronicleText = `Mesmo com a nossa linha armada tradicionalmente com barras de ferro e madeiramento pesado, o confronto contra a torcida do Santo André resultou em um revés duríssimo para a nossa torcida. A linha de frente andreense veio na pura disposição e na mão limpa, quebrou a nossa contenção no peito aberto e desarticulou completamente o nosso bloco. O prejuízo foi alto em baixas médicas, atendimento hospitalar e abalo moral no ABC.`;
 
     const deltas: FormattedDelta[] = [
       { label: "Resultado de Pista", value: "Revés e Debandada", isPositive: false },
@@ -2185,12 +2204,17 @@ export function getActionStepEvents(status: ClubStatus, season: number = 1, curr
 }
 
 // 13 PIPELINE STEPS (4 GAMES, 9 ACTIONS) WITH SEASONAL VARIETY
-export function getAnnualPipelineWithMatches(currentTorcida: OfficialTorcida, clubStatus: ClubStatus, season: number = 1) {
+export function getAnnualPipelineWithMatches(
+  currentTorcida: OfficialTorcida,
+  clubStatus: ClubStatus,
+  season: number = 1,
+  challengedRivalTorcida?: string | null
+) {
   const isInterior = isInteriorSP(currentTorcida);
-  const derby1 = getDerbyForMatch(currentTorcida, 1, clubStatus, season);
-  const derby2 = getDerbyForMatch(currentTorcida, 2, clubStatus, season);
-  const derby3 = getDerbyForMatch(currentTorcida, 3, clubStatus, season);
-  const derby4 = getDerbyForMatch(currentTorcida, 4, clubStatus, season);
+  const derby1 = getDerbyForMatch(currentTorcida, 1, clubStatus, season, challengedRivalTorcida);
+  const derby2 = getDerbyForMatch(currentTorcida, 2, clubStatus, season, challengedRivalTorcida);
+  const derby3 = getDerbyForMatch(currentTorcida, 3, clubStatus, season, challengedRivalTorcida);
+  const derby4 = getDerbyForMatch(currentTorcida, 4, clubStatus, season, challengedRivalTorcida);
 
   const act0 = getSeasonalActionEvent(1, season, 0, isInterior);
   const act1 = getSeasonalActionEvent(1, season, 1, isInterior);
@@ -2380,6 +2404,7 @@ export interface RankingEntry {
   powerScore: number;
   isPlayer: boolean;
   rankChange: number;
+  officialRef: OfficialTorcida;
 }
 
 export function simulateNationalRanking(
@@ -2459,13 +2484,14 @@ export function simulateNationalRanking(
     return {
       rank,
       torcida: item.torcida.torcida,
-      sigla: "",
+      sigla: item.torcida.sigla || "",
       clube: item.torcida.clube,
       estado: item.torcida.estado,
       tier: item.torcida.tier,
       powerScore: item.rawScore,
       isPlayer: item.isPlayer,
       rankChange,
+      officialRef: item.torcida,
     };
   });
 }
