@@ -75,6 +75,7 @@ import {
   MatchExecutionResult,
   FormattedDelta,
   SeasonObjective,
+  RivalryRecord,
   simulateNationalRanking,
   RankingEntry,
   generateLeagueTable,
@@ -243,6 +244,20 @@ export default function App() {
   const [showResetConfirm, setShowResetConfirm] = useState<boolean>(false);
   const [isDownloadingZip, setIsDownloadingZip] = useState<boolean>(false);
 
+  // RIVALRY & DIPLOMACY STATE
+  const [rivalryRecords, setRivalryRecords] = useState<Record<string, RivalryRecord>>({});
+  const [selectedTorcidaForDiplomacy, setSelectedTorcidaForDiplomacy] = useState<OfficialTorcida | null>(null);
+  const [diplomacyFeedback, setDiplomacyFeedback] = useState<string | null>(null);
+  const [alliedInvasionInvite, setAlliedInvasionInvite] = useState<{
+    allyTorcida: string;
+    allyClub: string;
+    targetRivalTorcida: string;
+    targetRivalClub: string;
+    city: string;
+    stadium: string;
+  } | null>(null);
+  const [allyBonusMembers, setAllyBonusMembers] = useState<number>(0);
+
   const handleDownloadProjectZip = async () => {
     try {
       setIsDownloadingZip(true);
@@ -289,12 +304,15 @@ export default function App() {
           setDebtYears(parsed.debtYears || 0);
           setPipelineIndex(parsed.pipelineIndex || 0);
           setHistoryLog(parsed.historyLog || []);
+          if (parsed.rivalryRecords) {
+            setRivalryRecords(parsed.rivalryRecords);
+          }
           if (parsed.seasonObjectives && parsed.seasonObjectives.length > 0) {
             setSeasonObjectives(parsed.seasonObjectives);
           } else {
             setSeasonObjectives(generateSeasonObjectives(parsed.season || 1, parsed.currentTorcida, parsed.clubStatus || "LUTANDO_ACESSO"));
           }
-          if (parsed.season >= 30 && parsed.pipelineIndex >= 12) {
+          if (parsed.season >= 15 && parsed.pipelineIndex >= 12) {
             setIsGameOver(true);
           }
         }
@@ -338,6 +356,7 @@ export default function App() {
           pipelineIndex,
           historyLog,
           seasonObjectives,
+          rivalryRecords,
         })
       );
     }
@@ -354,6 +373,7 @@ export default function App() {
     pipelineIndex,
     historyLog,
     seasonObjectives,
+    rivalryRecords,
   ]);
 
   const pipeline = currentTorcida
@@ -639,6 +659,42 @@ export default function App() {
       ...prev,
     ]);
 
+    // Update Rivalry & Banner History Record
+    if (activeMatchDerby && !activeMatchDerby.isAllyGame) {
+      const rKey = activeMatchDerby.rivalTorcida;
+      const bannerCaptured = result.bannerCaptured ?? false;
+      const bannerLost = result.statusTitle.includes("BANDEIRÃO") || result.statusTitle.includes("PATRIMÔNIO PERDIDO");
+
+      setRivalryRecords((prev) => {
+        const existing = prev[rKey] || {
+          rivalTorcida: rKey,
+          rivalClub: (activeMatchDerby.isHome ? activeMatchDerby.awayClub : activeMatchDerby.homeClub) || rKey,
+          totalConfrontos: 0,
+          vitoriasPista: 0,
+          derrotasPista: 0,
+          jogosDaPaz: 0,
+          faixasTomadas: 0,
+          faixasPerdidas: 0,
+          isPeacePactActive: false,
+          isTretaChallenged: false,
+        };
+
+        return {
+          ...prev,
+          [rKey]: {
+            ...existing,
+            totalConfrontos: existing.totalConfrontos + 1,
+            vitoriasPista: existing.vitoriasPista + (result.isVictoryPista ? 1 : 0),
+            derrotasPista: existing.derrotasPista + (result.isVictoryPista ? 0 : 1),
+            faixasTomadas: existing.faixasTomadas + (bannerCaptured ? 1 : 0),
+            faixasPerdidas: existing.faixasPerdidas + (bannerLost ? 1 : 0),
+            isPeacePactActive: false,
+            isTretaChallenged: false,
+          },
+        };
+      });
+    }
+
     advancePipeline();
     }, 2200);
   };
@@ -723,7 +779,7 @@ export default function App() {
       const nextStatus = statuses[Math.floor(Math.random() * statuses.length)];
       setClubStatus(nextStatus);
 
-      if (season >= 30) {
+      if (season >= 15) {
         setIsGameOver(true);
         confetti({ particleCount: 150, spread: 85, origin: { y: 0.5 } });
       } else {
@@ -734,8 +790,226 @@ export default function App() {
           const nextObjectives = generateSeasonObjectives(nextSeason, currentTorcida, nextStatus);
           setSeasonObjectives(nextObjectives);
         }
+
+        // Trigger Allied Convocation Event (~35% chance)
+        const alliesList = officialList.filter(
+          (t) => t.eixo_alianca === currentTorcida?.eixo_alianca && t.clube.toLowerCase() !== currentTorcida?.clube.toLowerCase()
+        );
+        const sameStateRivalsList = officialList.filter(
+          (t) => t.estado === currentTorcida?.estado && t.clube.toLowerCase() !== currentTorcida?.clube.toLowerCase()
+        );
+
+        if (alliesList.length > 0 && sameStateRivalsList.length > 0 && Math.random() < 0.35) {
+          const allyObj = alliesList[Math.floor(Math.random() * alliesList.length)];
+          const rivalObj = sameStateRivalsList[Math.floor(Math.random() * sameStateRivalsList.length)];
+
+          setAlliedInvasionInvite({
+            allyTorcida: allyObj.torcida,
+            allyClub: allyObj.clube,
+            targetRivalTorcida: rivalObj.torcida,
+            targetRivalClub: rivalObj.clube,
+            city: currentTorcida?.estado === "SP" ? "São Paulo" : "Região Metropolitana",
+            stadium: `Estádio do ${rivalObj.clube}`,
+          });
+        }
       }
     }
+  };
+
+  // DIPLOMACY ACTIONS RESOLUTION
+  const handleDiplomacyAction = (
+    actionType:
+      | "MARCAR_TRETA"
+      | "JOGO_PAZ"
+      | "RESGATAR_FAIXA"
+      | "DEVOLVER_FAIXA"
+      | "CHURRASCO_NEUTRA"
+      | "REUNIAO_ALIANCA"
+      | "SOLICITAR_APOIO_ALIADA"
+      | "ACAO_SOCIAL_CONJUNTA",
+    targetTorcida: OfficialTorcida
+  ) => {
+    const key = targetTorcida.torcida;
+    const existingRec = rivalryRecords[key] || {
+      rivalTorcida: targetTorcida.torcida,
+      rivalClub: targetTorcida.clube,
+      totalConfrontos: 0,
+      vitoriasPista: 0,
+      derrotasPista: 0,
+      jogosDaPaz: 0,
+      faixasTomadas: 0,
+      faixasPerdidas: 0,
+    };
+
+    switch (actionType) {
+      case "MARCAR_TRETA":
+        setRivalryRecords((prev) => ({
+          ...prev,
+          [key]: { ...existingRec, isTretaChallenged: true },
+        }));
+        setStateTrackers((st) => ({
+          ...st,
+          moral: Math.min(100, st.moral + 5),
+          risco_mp: Math.min(100, st.risco_mp + 15),
+        }));
+        setStats((s) => ({ ...s, poder_pista: applyDiminishingReturns(s.poder_pista, 4) }));
+        setHistoryLog((prev) => [
+          `[Ano ${season} - Diplomacia] Marcou treta formal com a ${targetTorcida.torcida}. O clima para o próximo clássico é de guerra total!`,
+          ...prev,
+        ]);
+        setDiplomacyFeedback(`⚔️ Treta marcada com a ${targetTorcida.torcida}! (+5 Moral, +4 Pista, +15% Risco MP)`);
+        break;
+
+      case "JOGO_PAZ":
+        if (bankBalance < 3000) {
+          setDiplomacyFeedback("❌ Caixa insuficiente! É necessário R$ 3.000 para negociação do Pacto da Paz.");
+          return;
+        }
+        setBankBalance((b) => b - 3000);
+        setRivalryRecords((prev) => ({
+          ...prev,
+          [key]: { ...existingRec, isPeacePactActive: true, jogosDaPaz: existingRec.jogosDaPaz + 1 },
+        }));
+        setStateTrackers((st) => ({ ...st, risco_mp: Math.max(0, st.risco_mp - 15) }));
+        setHistoryLog((prev) => [
+          `[Ano ${season} - Diplomacia] Firmado Pacto de Paz com a diretoria da ${targetTorcida.torcida}. Jogo sem armas nem emboscadas.`,
+          ...prev,
+        ]);
+        setDiplomacyFeedback(`🕊️ Pacto de Paz firmado com a ${targetTorcida.torcida}! (-15% Risco MP, -R$ 3.000)`);
+        break;
+
+      case "RESGATAR_FAIXA":
+        if (existingRec.faixasPerdidas <= 0) return;
+        if (bankBalance < 15000) {
+          setDiplomacyFeedback("❌ Caixa insuficiente! É necessário R$ 15.000 para resgatar o patrimônio.");
+          return;
+        }
+        setBankBalance((b) => b - 15000);
+        setRivalryRecords((prev) => ({
+          ...prev,
+          [key]: { ...existingRec, faixasPerdidas: Math.max(0, existingRec.faixasPerdidas - 1) },
+        }));
+        setStateTrackers((st) => ({ ...st, moral: Math.min(100, st.moral + 10) }));
+        setHistoryLog((prev) => [
+          `[Ano ${season} - Diplomacia] Resgatou faixa oficial perdida para a ${targetTorcida.torcida} mediante pagamento de R$ 15.000. Moral restaurada!`,
+          ...prev,
+        ]);
+        setDiplomacyFeedback(`🚩 Faixa oficial resgatada com sucesso! (+10 Moral, -R$ 15.000)`);
+        break;
+
+      case "DEVOLVER_FAIXA":
+        if (existingRec.faixasTomadas <= 0) return;
+        setBankBalance((b) => b + 20000);
+        setRivalryRecords((prev) => ({
+          ...prev,
+          [key]: { ...existingRec, faixasTomadas: Math.max(0, existingRec.faixasTomadas - 1) },
+        }));
+        setStateTrackers((st) => ({ ...st, risco_mp: Math.max(0, st.risco_mp - 10) }));
+        setHistoryLog((prev) => [
+          `[Ano ${season} - Diplomacia] Devolveu faixa tomada da ${targetTorcida.torcida} em acordo diplomático de alívio com o MP por R$ 20.000.`,
+          ...prev,
+        ]);
+        setDiplomacyFeedback(`🤝 Faixa negociada e devolvida sob termos diplomáticos! (+R$ 20.000, -10% Risco MP)`);
+        break;
+
+      case "CHURRASCO_NEUTRA":
+        if (bankBalance < 2000) {
+          setDiplomacyFeedback("❌ Caixa insuficiente! R$ 2.000 necessários para compra de suprimentos.");
+          return;
+        }
+        setBankBalance((b) => b + 6000);
+        setStats((s) => ({ ...s, contingente: applyDiminishingReturns(s.contingente, 5) }));
+        setStateTrackers((st) => ({ ...st, respeito_nacional: Math.min(100, st.respeito_nacional + 5) }));
+        setHistoryLog((prev) => [
+          `[Ano ${season} - Diplomacia] Churrasco de recepção na sede com a ${targetTorcida.torcida}. Lucro com cerveja e novos associados!`,
+          ...prev,
+        ]);
+        setDiplomacyFeedback(`🥩 Churrasco realizado com sucesso! (+R$ 6.000 lucro líquido, +5 Massa, +5 Respeito)`);
+        break;
+
+      case "REUNIAO_ALIANCA":
+        if (bankBalance < 5000) {
+          setDiplomacyFeedback("❌ Caixa insuficiente! R$ 5.000 necessários para banquete diplomático.");
+          return;
+        }
+        setBankBalance((b) => b - 5000);
+        setStateTrackers((st) => ({
+          ...st,
+          moral: Math.min(100, st.moral + 8),
+          respeito_nacional: Math.min(100, st.respeito_nacional + 10),
+        }));
+        setHistoryLog((prev) => [
+          `[Ano ${season} - Diplomacia] Reunião solene formalizou aliança e pacto de paz com a ${targetTorcida.torcida}. Novo aliado no eixo!`,
+          ...prev,
+        ]);
+        setDiplomacyFeedback(`🤝 Aliança formalizada com a ${targetTorcida.torcida}! (+8 Moral, +10 Respeito Nacional, -R$ 5.000)`);
+        break;
+
+      case "SOLICITAR_APOIO_ALIADA":
+        if (bankBalance < 4000) {
+          setDiplomacyFeedback("❌ Caixa insuficiente! R$ 4.000 necessários para custear transporte dos irmãos.");
+          return;
+        }
+        setBankBalance((b) => b - 4000);
+        setAllyBonusMembers(800);
+        setHistoryLog((prev) => [
+          `[Ano ${season} - Diplomacia] Convocou reforço de +800 integrantes da torcida aliada ${targetTorcida.torcida} para o próximo clássico!`,
+          ...prev,
+        ]);
+        setDiplomacyFeedback(`🚌 Bonde irmão da ${targetTorcida.torcida} convocado com sucesso! (+800 membros no próximo jogo, -R$ 4.000)`);
+        break;
+
+      case "ACAO_SOCIAL_CONJUNTA":
+        if (bankBalance < 3000) {
+          setDiplomacyFeedback("❌ Caixa insuficiente! R$ 3.000 necessários para cestas/insumos.");
+          return;
+        }
+        setBankBalance((b) => b - 3000);
+        setStateTrackers((st) => ({
+          ...st,
+          risco_mp: Math.max(0, st.risco_mp - 15),
+          moral: Math.min(100, st.moral + 8),
+        }));
+        setHistoryLog((prev) => [
+          `[Ano ${season} - Diplomacia] Ação social conjunta realizada entre as sedes da ${currentTorcida?.torcida} e ${targetTorcida.torcida}. O MP reduziu a fiscalização!`,
+          ...prev,
+        ]);
+        setDiplomacyFeedback(`💚 Ação social conjunta realizada com sucesso! (-15% Risco MP, +8 Moral, -R$ 3.000)`);
+        break;
+    }
+  };
+
+  const handleAcceptAlliedInvasionInvite = () => {
+    if (!alliedInvasionInvite) return;
+    if (bankBalance < 4000) {
+      alert("Caixa insuficiente (R$ 4.000 necessários para a logística de somar no bonde visitante).");
+      return;
+    }
+    setBankBalance((b) => b - 4000);
+    setAllyBonusMembers(800);
+    setStateTrackers((st) => ({
+      ...st,
+      moral: Math.min(100, st.moral + 10),
+      respeito_nacional: Math.min(100, st.respeito_nacional + 8),
+    }));
+    setHistoryLog((prev) => [
+      `[Ano ${season} - Convite Aliado] A torcida aceitou o convite e somou no bonde da ${alliedInvasionInvite.allyTorcida} contra o rival ${alliedInvasionInvite.targetRivalClub}! (+10 Moral, +8 Respeito)`,
+      ...prev,
+    ]);
+    setAlliedInvasionInvite(null);
+  };
+
+  const handleRejectAlliedInvasionInvite = () => {
+    if (!alliedInvasionInvite) return;
+    setStateTrackers((st) => ({
+      ...st,
+      moral: Math.max(0, st.moral - 3),
+    }));
+    setHistoryLog((prev) => [
+      `[Ano ${season} - Convite Aliado] A torcida declinou o convite da ${alliedInvasionInvite.allyTorcida} para focar nas atividades da sede. (-3 Moral)`,
+      ...prev,
+    ]);
+    setAlliedInvasionInvite(null);
   };
 
   const getHonoraryTitle = () => {
@@ -1839,7 +2113,7 @@ export default function App() {
         </div>
       )}
 
-      {/* TAB 4: ALLIANCES */}
+      {/* TAB 4: ALLIANCES & RIVALRY TROPHIES */}
       {activeTab === "alliances" && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 shadow-xl space-y-3 relative z-10">
           <div>
@@ -1847,7 +2121,7 @@ export default function App() {
             <h3 className="text-sm font-black text-white uppercase">Eixos Nacionais e Alianças de Pista</h3>
           </div>
 
-          <div className="space-y-2 text-xs max-h-96 overflow-y-auto pr-1">
+          <div className="space-y-2 text-xs max-h-48 overflow-y-auto pr-1">
             {Object.entries((alliances as any).eixos_nacionais).map(([key, axis]: [string, any]) => (
               <div key={key} className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 space-y-1">
                 <div className="flex items-center justify-between font-black text-amber-400">
@@ -1855,14 +2129,93 @@ export default function App() {
                   <span className="text-[9px] text-zinc-500 uppercase">{key}</span>
                 </div>
                 <div className="flex flex-wrap gap-1 mt-1">
-                  {axis.members.map((m: string, idx: number) => (
-                    <span key={idx} className="bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded-lg text-[9px] text-zinc-300 font-semibold">
-                      {m}
-                    </span>
-                  ))}
+                  {axis.members.map((m: string, idx: number) => {
+                    const matchingTorcida = officialList.find(
+                      (t) => t.torcida.toLowerCase() === m.toLowerCase() || t.clube.toLowerCase() === m.toLowerCase()
+                    );
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          if (matchingTorcida && matchingTorcida.clube !== currentTorcida?.clube) {
+                            setSelectedTorcidaForDiplomacy(matchingTorcida);
+                            setDiplomacyFeedback(null);
+                          }
+                        }}
+                        className="bg-zinc-900 hover:border-amber-500/50 border border-zinc-800 px-2 py-0.5 rounded-lg text-[9px] text-zinc-300 font-semibold cursor-pointer"
+                      >
+                        {m}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* TROFÉUS DE PISTA & HISTÓRICO DE RIVALIDADES */}
+          <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 space-y-3 pt-3 border-t border-zinc-800">
+            <div className="flex items-center justify-between">
+              <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest block">
+                🏆 ARMÁRIO DE TROFÉUS & HISTÓRICO DE RIVALIDADES
+              </span>
+              <span className="text-[9px] text-zinc-500 font-bold">
+                {Object.keys(rivalryRecords).length} Rivais Enfrentados
+              </span>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 text-center text-xs">
+              <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+                <span className="text-[8px] font-black text-emerald-400 block uppercase">Faixas Tomadas</span>
+                <span className="text-base font-black text-emerald-400">
+                  🏴‍☠️ {Object.values(rivalryRecords).reduce((acc, r) => acc + r.faixasTomadas, 0)}
+                </span>
+                <span className="text-[8px] text-emerald-400/80 block font-bold">+2 Moral Permanente</span>
+              </div>
+
+              <div className="p-2 rounded-xl bg-red-500/10 border border-red-500/30">
+                <span className="text-[8px] font-black text-red-400 block uppercase">Faixas Perdidas</span>
+                <span className="text-base font-black text-red-400">
+                  ⚠️ {Object.values(rivalryRecords).reduce((acc, r) => acc + r.faixasPerdidas, 0)}
+                </span>
+                <span className="text-[8px] text-red-400/80 block font-bold">-2 Moral Permanente</span>
+              </div>
+
+              <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/30">
+                <span className="text-[8px] font-black text-blue-400 block uppercase">Jogos da Paz</span>
+                <span className="text-base font-black text-blue-400">
+                  🕊️ {Object.values(rivalryRecords).reduce((acc, r) => acc + r.jogosDaPaz, 0)}
+                </span>
+                <span className="text-[8px] text-blue-400/80 block font-bold">Sem Incidentes</span>
+              </div>
+            </div>
+
+            {Object.keys(rivalryRecords).length > 0 && (
+              <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1 pt-1">
+                {Object.values(rivalryRecords).map((rec, idx) => (
+                  <div key={idx} className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-between text-xs">
+                    <div>
+                      <span className="font-bold text-white block">{rec.rivalTorcida}</span>
+                      <span className="text-[9px] text-zinc-400">
+                        {rec.totalConfrontos} jogos • {rec.vitoriasPista} vitórias • {rec.derrotasPista} derrotas • {rec.jogosDaPaz} paz
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[10px] font-black">
+                      {rec.faixasTomadas > 0 && (
+                        <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-1.5 py-0.5 rounded">
+                          +{rec.faixasTomadas} Faixas
+                        </span>
+                      )}
+                      {rec.faixasPerdidas > 0 && (
+                        <span className="bg-red-500/20 text-red-400 border border-red-500/40 px-1.5 py-0.5 rounded">
+                          -{rec.faixasPerdidas} Perdid.
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -2429,6 +2782,276 @@ export default function App() {
                 Cancelar
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 9. ALLIED INVASION INVITE MODAL */}
+      {alliedInvasionInvite && (
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-4 text-center">
+            <div className="mx-auto w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center animate-pulse border border-amber-500/30">
+              <Compass className="w-6 h-6" />
+            </div>
+
+            <div>
+              <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest block">
+                📢 CONVOCAÇÃO DA TORCIDA ALIADA DO EIXO
+              </span>
+              <h3 className="text-sm font-black text-white uppercase mt-0.5">
+                Invasão Conjunta no Território Rival!
+              </h3>
+            </div>
+
+            <div className="bg-zinc-950 p-3.5 rounded-2xl border border-zinc-800 text-left space-y-2 text-xs">
+              <p className="text-zinc-300 leading-relaxed">
+                A torcida aliada <strong className="text-amber-400">{alliedInvasionInvite.allyTorcida}</strong> ({alliedInvasionInvite.allyClub}) está descendo em caravana pesada para a região de {alliedInvasionInvite.city} para enfrentar o rival <strong className="text-red-400">{alliedInvasionInvite.targetRivalClub}</strong> ({alliedInvasionInvite.targetRivalTorcida}) no {alliedInvasionInvite.stadium}.
+              </p>
+              <div className="bg-zinc-900 p-2.5 rounded-xl border border-zinc-800 italic text-[11px] text-zinc-400">
+                "Irmãos, estamos descendo com comitiva de vários ônibus. Convocamos a linha de frente de vocês para somar no nosso setor visitante!"
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-xs font-black pt-1">
+              <button
+                onClick={handleAcceptAlliedInvasionInvite}
+                className="py-3 px-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black transition-all shadow cursor-pointer uppercase flex items-center justify-center gap-1 text-[11px]"
+              >
+                🚌 Somar no Bonde (R$ 4k)
+              </button>
+
+              <button
+                onClick={handleRejectAlliedInvasionInvite}
+                className="py-3 px-3 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition-all cursor-pointer uppercase flex items-center justify-center gap-1 text-[11px]"
+              >
+                🏠 Ficar na Sede (-3 Moral)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 10. INTERACTIVE TORCIDA PROFILE & DIPLOMACY MODAL */}
+      {selectedTorcidaForDiplomacy && currentTorcida && (
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+              <div>
+                <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest block">
+                  DIPLOMACIA DE ARQUIBANCADA
+                </span>
+                <h3 className="text-base font-black text-white uppercase">
+                  {selectedTorcidaForDiplomacy.torcida}
+                </h3>
+                <span className="text-[10px] text-zinc-400">
+                  {selectedTorcidaForDiplomacy.clube} • {selectedTorcidaForDiplomacy.estado} (Tier {selectedTorcidaForDiplomacy.tier})
+                </span>
+              </div>
+              <button
+                onClick={() => {
+                  setSelectedTorcidaForDiplomacy(null);
+                  setDiplomacyFeedback(null);
+                }}
+                className="w-7 h-7 rounded-full bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center font-black cursor-pointer text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Relationship Badge */}
+            {(() => {
+              const isAlly = selectedTorcidaForDiplomacy.eixo_alianca === currentTorcida.eixo_alianca;
+              const isSameState = selectedTorcidaForDiplomacy.estado === currentTorcida.estado;
+              const rec = rivalryRecords[selectedTorcidaForDiplomacy.torcida];
+
+              return (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between bg-zinc-950 p-3 rounded-2xl border border-zinc-800">
+                    <span className="text-xs font-bold text-zinc-400">Status Geopolítico:</span>
+                    {isAlly ? (
+                      <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-2.5 py-1 rounded-xl text-xs font-black uppercase flex items-center gap-1">
+                        🤝 Torcida Aliada (Eixo {selectedTorcidaForDiplomacy.eixo_alianca})
+                      </span>
+                    ) : isSameState ? (
+                      <span className="bg-red-500/20 text-red-400 border border-red-500/40 px-2.5 py-1 rounded-xl text-xs font-black uppercase flex items-center gap-1">
+                        ⚔️ Rival de Pista ({selectedTorcidaForDiplomacy.estado})
+                      </span>
+                    ) : (
+                      <span className="bg-blue-500/20 text-blue-400 border border-blue-500/40 px-2.5 py-1 rounded-xl text-xs font-black uppercase flex items-center gap-1">
+                        🏳️ Torcida Neutra
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Attributes Grid */}
+                  <div className="grid grid-cols-3 gap-2 text-center text-xs bg-zinc-950 p-3 rounded-2xl border border-zinc-800">
+                    <div className="p-2 rounded-xl bg-zinc-900 border border-zinc-800">
+                      <span className="text-[8px] font-black text-zinc-400 block uppercase">Contingente</span>
+                      <span className="text-xs font-black text-amber-400">{selectedTorcidaForDiplomacy.contingente}/100</span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-zinc-900 border border-zinc-800">
+                      <span className="text-[8px] font-black text-zinc-400 block uppercase">Pista</span>
+                      <span className="text-xs font-black text-amber-400">{selectedTorcidaForDiplomacy.poder_pista}/100</span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-zinc-900 border border-zinc-800">
+                      <span className="text-[8px] font-black text-zinc-400 block uppercase">Bancada</span>
+                      <span className="text-xs font-black text-amber-400">{selectedTorcidaForDiplomacy.pressao_bancada}/100</span>
+                    </div>
+                  </div>
+
+                  {/* Historical Record if Rival */}
+                  {rec && (
+                    <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 space-y-1 text-xs text-left">
+                      <span className="text-[9px] font-black text-amber-400 block uppercase">RETROSPECTO DIRETO</span>
+                      <p className="text-zinc-300 text-[11px]">
+                        {rec.totalConfrontos} jogos disputados • {rec.vitoriasPista} vitórias de pista • {rec.derrotasPista} derrotas • {rec.jogosDaPaz} jogos da paz
+                      </p>
+                      <div className="flex gap-2 pt-1 text-[10px] font-bold">
+                        <span className="text-emerald-400">Faixas Tomadas: {rec.faixasTomadas}</span>
+                        <span className="text-red-400">Faixas Perdidas: {rec.faixasPerdidas}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Feedback message */}
+                  {diplomacyFeedback && (
+                    <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold text-center">
+                      {diplomacyFeedback}
+                    </div>
+                  )}
+
+                  {/* DIPLOMACY ACTIONS */}
+                  <div className="space-y-2 pt-1 text-left">
+                    <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest block">
+                      PAINEL DE AÇÕES DIPLOMÁTICAS
+                    </span>
+
+                    {/* RIVAL ACTIONS */}
+                    {isSameState && !isAlly && (
+                      <div className="space-y-2">
+                        <button
+                          onClick={() => handleDiplomacyAction("MARCAR_TRETA", selectedTorcidaForDiplomacy)}
+                          className="w-full text-left p-3 rounded-2xl bg-red-950/60 border border-red-800/80 hover:border-red-500 transition-all cursor-pointer group"
+                        >
+                          <div className="flex items-center justify-between font-black text-xs text-red-400 group-hover:text-red-300">
+                            <span>⚔️ Marcar Treta / Desafio de Pista</span>
+                            <span className="text-[9px] text-red-400/80">+5 Moral • +15% MP</span>
+                          </div>
+                          <p className="text-[11px] text-zinc-300 mt-0.5 leading-snug">
+                            Intensifica a rivalidade de rua. Aumenta a força de pista e a moral da tropa para o próximo clássico.
+                          </p>
+                        </button>
+
+                        <button
+                          onClick={() => handleDiplomacyAction("JOGO_PAZ", selectedTorcidaForDiplomacy)}
+                          className="w-full text-left p-3 rounded-2xl bg-zinc-950 border border-zinc-800 hover:border-blue-500 transition-all cursor-pointer group"
+                        >
+                          <div className="flex items-center justify-between font-black text-xs text-blue-400 group-hover:text-blue-300">
+                            <span>🕊️ Combinar Jogo da Paz (-R$ 3.000)</span>
+                            <span className="text-[9px] text-emerald-400">-15% Risco MP</span>
+                          </div>
+                          <p className="text-[11px] text-zinc-300 mt-0.5 leading-snug">
+                            Pacto diplomático com as lideranças rivais proibindo armas e garantindo paz no entorno do estádio.
+                          </p>
+                        </button>
+
+                        {rec && rec.faixasPerdidas > 0 && (
+                          <button
+                            onClick={() => handleDiplomacyAction("RESGATAR_FAIXA", selectedTorcidaForDiplomacy)}
+                            className="w-full text-left p-3 rounded-2xl bg-zinc-950 border border-amber-500/50 hover:border-amber-400 transition-all cursor-pointer group"
+                          >
+                            <div className="flex items-center justify-between font-black text-xs text-amber-400">
+                              <span>🏴‍☠️ Resgatar Faixa Perdida (-R$ 15.000)</span>
+                              <span className="text-[9px] text-emerald-400">+10 Moral</span>
+                            </div>
+                            <p className="text-[11px] text-zinc-300 mt-0.5 leading-snug">
+                              Negociação diplomática para pagar resgate e recuperar 1 faixa oficial perdida (Possui {rec.faixasPerdidas} perdidas).
+                            </p>
+                          </button>
+                        )}
+
+                        {rec && rec.faixasTomadas > 0 && (
+                          <button
+                            onClick={() => handleDiplomacyAction("DEVOLVER_FAIXA", selectedTorcidaForDiplomacy)}
+                            className="w-full text-left p-3 rounded-2xl bg-zinc-950 border border-emerald-500/50 hover:border-emerald-400 transition-all cursor-pointer group"
+                          >
+                            <div className="flex items-center justify-between font-black text-xs text-emerald-400">
+                              <span>🤝 Negociar & Devolver Faixa Tomada (+R$ 20.000)</span>
+                              <span className="text-[9px] text-emerald-400">-10% MP</span>
+                            </div>
+                            <p className="text-[11px] text-zinc-300 mt-0.5 leading-snug">
+                              Devolver 1 faixa capturada em acordo diplomático com intermédio da polícia e MP (Possui {rec.faixasTomadas} tomadas).
+                            </p>
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {/* NEUTRAL ACTIONS */}
+                    {!isSameState && !isAlly && (
+                      <div className="space-y-2">
+                        <button
+                          onClick={() => handleDiplomacyAction("CHURRASCO_NEUTRA", selectedTorcidaForDiplomacy)}
+                          className="w-full text-left p-3 rounded-2xl bg-zinc-950 border border-zinc-800 hover:border-amber-500 transition-all cursor-pointer group"
+                        >
+                          <div className="flex items-center justify-between font-black text-xs text-amber-400">
+                            <span>🥩 Churrasco de Recepção (-R$ 2.000)</span>
+                            <span className="text-[9px] text-emerald-400">+R$ 6k Lucro</span>
+                          </div>
+                          <p className="text-[11px] text-zinc-300 mt-0.5 leading-snug">
+                            Recepcionar a torcida neutra com churrasco na sede (+5 Massa, +5 Respeito e lucro com bebidas).
+                          </p>
+                        </button>
+
+                        <button
+                          onClick={() => handleDiplomacyAction("REUNIAO_ALIANCA", selectedTorcidaForDiplomacy)}
+                          className="w-full text-left p-3 rounded-2xl bg-zinc-950 border border-zinc-800 hover:border-emerald-500 transition-all cursor-pointer group"
+                        >
+                          <div className="flex items-center justify-between font-black text-xs text-emerald-400">
+                            <span>🤝 Marcar Reunião para Alinhar Amizade (-R$ 5.000)</span>
+                            <span className="text-[9px] text-emerald-400">+10 Respeito</span>
+                          </div>
+                          <p className="text-[11px] text-zinc-300 mt-0.5 leading-snug">
+                            Iniciar tratativas formais de paz e união para incluir a torcida neutra no mesmo eixo nacional (+8 Moral).
+                          </p>
+                        </button>
+                      </div>
+                    )}
+
+                    {/* ALLIED ACTIONS */}
+                    {isAlly && (
+                      <div className="space-y-2">
+                        <button
+                          onClick={() => handleDiplomacyAction("SOLICITAR_APOIO_ALIADA", selectedTorcidaForDiplomacy)}
+                          className="w-full text-left p-3 rounded-2xl bg-emerald-950/60 border border-emerald-800/80 hover:border-emerald-500 transition-all cursor-pointer group"
+                        >
+                          <div className="flex items-center justify-between font-black text-xs text-emerald-400">
+                            <span>🚌 Solicitar Apoio de Bonde (-R$ 4.000)</span>
+                            <span className="text-[9px] text-emerald-400">+800 Membros</span>
+                          </div>
+                          <p className="text-[11px] text-zinc-300 mt-0.5 leading-snug">
+                            Convocar contingente reforçado da torcida irmã para somar no nosso setor no próximo clássico decisivo.
+                          </p>
+                        </button>
+
+                        <button
+                          onClick={() => handleDiplomacyAction("ACAO_SOCIAL_CONJUNTA", selectedTorcidaForDiplomacy)}
+                          className="w-full text-left p-3 rounded-2xl bg-zinc-950 border border-zinc-800 hover:border-emerald-500 transition-all cursor-pointer group"
+                        >
+                          <div className="flex items-center justify-between font-black text-xs text-emerald-400">
+                            <span>💚 Ação Social Conjunta (-R$ 3.000)</span>
+                            <span className="text-[9px] text-emerald-400">-15% MP</span>
+                          </div>
+                          <p className="text-[11px] text-zinc-300 mt-0.5 leading-snug">
+                            Evento de doação de alimentos entre as duas sedes, reduzindo fortemente a fiscalização do MP para ambas.
+                          </p>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
       )}

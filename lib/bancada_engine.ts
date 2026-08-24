@@ -255,6 +255,20 @@ export interface MatchExecutionResult {
   moralChange: number;
   chronicleText: string;
   formattedDeltas: FormattedDelta[];
+  bannerCaptured?: boolean;
+}
+
+export interface RivalryRecord {
+  rivalTorcida: string;
+  rivalClub: string;
+  totalConfrontos: number;
+  vitoriasPista: number;
+  derrotasPista: number;
+  jogosDaPaz: number;
+  faixasTomadas: number;
+  faixasPerdidas: number;
+  isPeacePactActive?: boolean;
+  isTretaChallenged?: boolean;
 }
 
 // Archetypes
@@ -1720,10 +1734,87 @@ export function executeCompleteMatch(
     };
   }
 
+  // CASE 3: Home Game without Combat Focus (1.C - Intimidation vs Unguarded Home Incident)
+  const isNonCombatHomeGame = derby.isHome && (tactic.isMosaicTactic || tactic.id === "FESTA_MOSAICO_CALDEIRAO" || tactic.id === "CHURRASCO_FARTO_CANTOS_INTERCALADOS");
+  if (isNonCombatHomeGame && !derby.isAllyGame) {
+    const localRatio = playerMembers / Math.max(1, rivalMembers);
+    
+    // Intimidation by Mass: Confrontation avoided automatically
+    if (localRatio >= 1.25) {
+      const scorePlayerClub = Math.floor(Math.random() * 2 + 1);
+      const scoreRivalClub = Math.floor(Math.random() * 2);
+      const statusTitle = `CASA INTIMIDADORA: RIVAL RECUOU DIANTE DA NOSSA MASSA NO CALDEIRÃO!`;
+      const chronicleText = `Foco 100% nas arquibancadas e na festa visual. Diante do contingente massivo da nossa torcida ocupando todas as vias no entorno do ${derby.stadium}, a comitiva visitante do ${derby.rivalTorcida} preferiu não arriscar investidas e manteve-se recolhida sob escolta. A massa impôs respeito por intimidação de número!`;
+      
+      const deltas: FormattedDelta[] = [
+        { label: "Resultado de Pista", value: "Paz por Intimidação de Massa", isPositive: true },
+        { label: "Efetivo em Casa", value: `${playerMembers.toLocaleString()} vs ${rivalMembers.toLocaleString()} visitantes (+${Math.round((localRatio - 1) * 100)}%)`, isPositive: true },
+        { label: "Placar do Jogo", value: `${scorePlayerClub} x ${scoreRivalClub}`, isPositive: scorePlayerClub >= scoreRivalClub },
+        { label: "Moral da Tropa", value: "+10", isPositive: true },
+        { label: "Baixas Médicas", value: "0 feridos", isPositive: true },
+        { label: "Risco MP", value: "-5%", isPositive: true },
+      ];
+
+      return {
+        scorePlayerClub,
+        scoreRivalClub,
+        effectiveForcePlayer: 80,
+        effectiveForceRival: 35,
+        isVictoryPista: true,
+        isVictoryBancada: true,
+        statusTitle,
+        membersLost: 0,
+        medicalCost: 0,
+        extraExpenses: transport.fixedCost,
+        mpAdded: Math.max(-5, transport.mpRisk - 5),
+        moralChange: 10,
+        chronicleText,
+        formattedDeltas: deltas,
+        bannerCaptured: false,
+      };
+    }
+    
+    // Unguarded Home Incident
+    if (localRatio < 0.9) {
+      const membersLost = Math.floor(Math.random() * 15 + 10);
+      const medicalCost = membersLost * 120;
+      const scorePlayerClub = 0;
+      const scoreRivalClub = Math.floor(Math.random() * 2 + 1);
+      const statusTitle = `INCIDENTE NO ENTORNO: BONDE VISITANTE APROVEITOU CASA DESGUARNECIDA!`;
+      const chronicleText = `Com a nossa diretoria concentrada apenas na montagem do mosaico interno, o bonde visitante do ${derby.rivalTorcida} chegou com contingente pesado nas imediações do estádio e causou um incidente grave com associados desprevenidos no entorno. Houve abalo moral e perdas materiais.`;
+      
+      const deltas: FormattedDelta[] = [
+        { label: "Resultado de Pista", value: "Incidente por Casa Desguarnecida", isPositive: false },
+        { label: "Baixas Médicas", value: `-${membersLost} feridos`, isPositive: false },
+        { label: "Moral da Tropa", value: "-12", isPositive: false },
+        { label: "Placar do Jogo", value: `${scorePlayerClub} x ${scoreRivalClub}`, isPositive: false },
+        { label: "Risco MP", value: "+15%", isPositive: false },
+      ];
+
+      return {
+        scorePlayerClub,
+        scoreRivalClub,
+        effectiveForcePlayer: 35,
+        effectiveForceRival: 75,
+        isVictoryPista: false,
+        isVictoryBancada: false,
+        statusTitle,
+        membersLost,
+        medicalCost,
+        extraExpenses: transport.fixedCost + medicalCost,
+        mpAdded: 15,
+        moralChange: -12,
+        chronicleText,
+        formattedDeltas: deltas,
+        bannerCaptured: false,
+      };
+    }
+  }
+
   // STANDARD RIVAL MATCH COMBAT / DERBY LOGIC
   const ratio = playerMembers / Math.max(1, rivalMembers);
-  const playerNumberScore = Math.min(65, Math.max(10, Math.round(40 * Math.pow(ratio, 0.65))));
-  const rivalNumberScore = Math.min(65, Math.max(10, Math.round(40 * Math.pow(1 / ratio, 0.65))));
+  const playerNumberScore = Math.min(70, Math.max(8, Math.round(40 * Math.pow(ratio, 0.85))));
+  const rivalNumberScore = Math.min(70, Math.max(8, Math.round(40 * Math.pow(1 / ratio, 0.85))));
 
   // Quality of fighters & preparation
   const playerQualityScore = Math.round(
@@ -1734,7 +1825,7 @@ export function executeCompleteMatch(
   );
 
   const rivalQualityScore = Math.round(
-    (derby.isHome ? 22 : 32) + (derby.derbyName.includes("Clássico") ? 8 : 0)
+    (derby.isHome ? 20 : 32) + (derby.derbyName.includes("Clássico") ? 10 : 0)
   );
 
   // Tactical bonuses and interaction checks
@@ -1742,11 +1833,11 @@ export function executeCompleteMatch(
   let tacticBonusRival = 0;
 
   if (tactic.id === "ATAQUE_FRONTAL_LINHA_FRENTE") {
-    if (ratio >= 1.15) {
-      tacticBonusPlayer += 14;
-    } else if (ratio < 0.85) {
-      tacticBonusPlayer -= 10;
-      tacticBonusRival += 8;
+    if (ratio >= 1.2) {
+      tacticBonusPlayer += 15;
+    } else if (ratio < 0.9) {
+      tacticBonusPlayer -= 18;
+      tacticBonusRival += 12;
     }
   } else if (tactic.id === "ATAQUE_SURPRESA_EMBOSCADA") {
     tacticBonusPlayer += 12;
@@ -1764,11 +1855,18 @@ export function executeCompleteMatch(
     tacticBonusPlayer += 6;
   }
 
-  // Final effective combat forces
-  const playerForce = Math.max(15, Math.round(playerNumberScore + playerQualityScore + tacticBonusPlayer + (Math.random() * 8 - 4)));
-  const rivalForce = Math.max(15, Math.round(rivalNumberScore + rivalQualityScore + tacticBonusRival + (Math.random() * 8 - 4)));
+  // Final effective combat forces with RNG variance
+  const playerForce = Math.max(10, Math.round(playerNumberScore + playerQualityScore + tacticBonusPlayer + (Math.random() * 16 - 8)));
+  const rivalForce = Math.max(10, Math.round(rivalNumberScore + rivalQualityScore + tacticBonusRival + (Math.random() * 16 - 8)));
 
   const isVictoryPista = playerForce >= rivalForce;
+
+  // Strict Banner Theft Rules:
+  // 1) Planned Tactical Ambush (ATAQUE_SURPRESA_EMBOSCADA) AND won combat
+  // OR 2) Overwhelming combat victory (playerForce >= rivalForce * 1.8) AND ratio >= 1.5 AND random chance (15%)
+  const isAmbushBannerCapture = isVictoryPista && tactic.id === "ATAQUE_SURPRESA_EMBOSCADA";
+  const isOverwhelmingVictoryCapture = isVictoryPista && playerForce >= rivalForce * 1.8 && ratio >= 1.5 && Math.random() < 0.15;
+  const bannerCaptured = isAmbushBannerCapture || isOverwhelmingVictoryCapture;
 
   // Football match result calculation based on Ultras Pressão de Bancada + Moral + Police alignment + Tactic
   const scorePower =
@@ -1798,6 +1896,10 @@ export function executeCompleteMatch(
     ? Math.min(15, Math.max(3, 7 + tactic.moralMod + (police ? police.moralMod : 0)))
     : Math.min(-2, -8 + tactic.moralMod + (police ? police.moralMod : 0));
 
+  if (bannerCaptured) {
+    moralChange += 10;
+  }
+
   // Rare High-Impact Banner Loss Event (-20 Moral)
   const isSeverePistaLoss = !isVictoryPista && rivalForce - playerForce > 25 && tactic.id === "ATAQUE_FRONTAL_LINHA_FRENTE";
   const bannerLost = isSeverePistaLoss && Math.random() < 0.35;
@@ -1806,13 +1908,15 @@ export function executeCompleteMatch(
     ? `VITÓRIA & CONTROLE EM ${derby.stadium.toUpperCase()}`
     : `CONFRONTO ADVERSO & CONTENÇÃO EM ${derby.stadium.toUpperCase()}`;
 
-  if (bannerLost) {
+  if (bannerCaptured) {
+    statusTitle = `🏴‍☠️ VITÓRIA COM FAIXA RIVAL CAPTURADA EM ${derby.stadium.toUpperCase()}!`;
+  } else if (bannerLost) {
     moralChange = -20;
     statusTitle = "PERDA DRAMÁTICA DE BANDEIRÃO & COBRANÇA VIOLENTA NA SEDE";
   }
 
   const deltas: FormattedDelta[] = [
-    { label: "Resultado de Pista", value: isVictoryPista ? "Vitória e Domínio" : "Contenção / Recuo", isPositive: isVictoryPista },
+    { label: "Resultado de Pista", value: isVictoryPista ? (bannerCaptured ? "Vitória & Faixa Capturada" : "Vitória e Domínio") : "Contenção / Recuo", isPositive: isVictoryPista },
     { label: "Efetivo na Rua", value: `${playerMembers.toLocaleString()} vs ${rivalMembers.toLocaleString()} (${ratio >= 1 ? `+${Math.round((ratio - 1) * 100)}%` : `-${Math.round((1 - ratio) * 100)}%`})`, isPositive: ratio >= 1 },
     { label: "Força de Pista", value: `${playerForce} pts vs ${rivalForce} pts`, isPositive: isVictoryPista },
     { label: "Placar do Jogo", value: `${scorePlayerClub} x ${scoreRivalClub}`, isPositive: scorePlayerClub >= scoreRivalClub },
@@ -1821,7 +1925,13 @@ export function executeCompleteMatch(
     { label: "Baixas Médicas", value: membersLost === 0 ? "0 feridos" : `-${membersLost} feridos`, isPositive: membersLost <= 4 },
   ];
 
-  if (bannerLost) {
+  if (bannerCaptured) {
+    deltas.unshift({
+      label: "🏴‍☠️ TROFÉU DE PISTA",
+      value: `FAIXA DO ${derby.rivalTorcida.toUpperCase()} TOMADA (+10 MORAL)`,
+      isPositive: true,
+    });
+  } else if (bannerLost) {
     deltas.unshift({
       label: "⚠️ PATRIMÔNIO PERDIDO",
       value: "BANDEIRÃO TOMADO DA LINHA (-20 MORAL)",
@@ -1829,7 +1939,9 @@ export function executeCompleteMatch(
     });
   }
 
-  const chronicleText = bannerLost
+  const chronicleText = bannerCaptured
+    ? `Jornada gloriosa registrada no patrimônio da torcida. Além da vitória na pista, a nossa linha de frente arrancou a faixa oficial do ${derby.rivalTorcida}, trazendo um troféu inestimável para o salão da sede (+10 Moral)!`
+    : bannerLost
     ? `Um dia fatídico gravado com dor na memória da torcida. A perda do bandeirão oficial na emboscada abalou a alma do pavilhão (-20 Moral), gerando cobrança pesada e reunião de emergência com a velha guarda na sede social.`
     : `O comboio ocupou as vias do ${derby.stadium} com aproximadamente ${intel.playerMembersPresent.toLocaleString()} integrantes. A postura de segurança (${police?.title || "alinhamento padrão"}) e a tática de ${tactic.title.toLowerCase()} definiram os acontecimentos. Nas arquibancadas, os cantos ecoaram sem parar até o apito final.`;
 
@@ -1848,6 +1960,7 @@ export function executeCompleteMatch(
     moralChange,
     chronicleText,
     formattedDeltas: deltas,
+    bannerCaptured,
   };
 }
 
