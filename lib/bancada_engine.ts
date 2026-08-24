@@ -1909,6 +1909,7 @@ export function executeCompleteMatch(
   // ------------------------------------------------------------------------
   // 1.B. FÓRMULA DE PODER EFETIVO DE COMBATE (PEC)
   // ------------------------------------------------------------------------
+  const ratio = playerMembers / Math.max(1, rivalMembers);
   // Força Base = (Poder Pista * Coeficiente Tier) * (Bonde Presente / 100)
   const fuerzaBasePlayer = (stats.poder_pista * coefTierPlayer) * (playerMembers / 100);
   const fuerzaBaseRival = (rivalPoderPista * coefTierRival) * (rivalMembers / 100);
