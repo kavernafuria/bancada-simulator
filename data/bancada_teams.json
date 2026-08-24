@@ -11,7 +11,7 @@
     "autonomia_financeira": 95,
     "perfil_predominante": "Superpotência de Massa, Caravana & Samba",
     "estado": "SP",
-    "eixo_alianca": "INDEPENDENTE / SEM BLOCO"
+    "eixo_alianca": "PUNHO_CRUZADO"
   },
   {
     "clube": "Palmeiras",
@@ -39,7 +39,7 @@
     "autonomia_financeira": 90,
     "perfil_predominante": "Comboios Pesados pelo Brasil",
     "estado": "SP",
-    "eixo_alianca": "PC"
+    "eixo_alianca": "PUNHO_CRUZADO"
   },
   {
     "clube": "Santos",
@@ -67,7 +67,7 @@
     "autonomia_financeira": 70,
     "perfil_predominante": "Caravanas Tradicionais de Campinas",
     "estado": "SP",
-    "eixo_alianca": "BLOCO_3"
+    "eixo_alianca": "IRMANDADE"
   },
   {
     "clube": "Corinthians",
@@ -95,7 +95,7 @@
     "autonomia_financeira": 85,
     "perfil_predominante": "Caravanas Estruturadas & Conforto",
     "estado": "SP",
-    "eixo_alianca": "PC"
+    "eixo_alianca": "PUNHO_CRUZADO"
   },
   {
     "clube": "Guarani",
@@ -151,7 +151,7 @@
     "autonomia_financeira": 65,
     "perfil_predominante": "Viagens pelo Interior & Série B",
     "estado": "SP",
-    "eixo_alianca": "BLOCO_3"
+    "eixo_alianca": "IRMANDADE"
   },
   {
     "clube": "Portuguesa",
@@ -165,7 +165,7 @@
     "autonomia_financeira": 60,
     "perfil_predominante": "Caravanas Tradicionais pelo Interior",
     "estado": "SP",
-    "eixo_alianca": "BLOCO_1"
+    "eixo_alianca": "FAMILIA_INTERIOR"
   },
   {
     "clube": "São José EC",
@@ -179,7 +179,7 @@
     "autonomia_financeira": 50,
     "perfil_predominante": "Invasões no Vale & Litoral",
     "estado": "SP",
-    "eixo_alianca": "BLOCO_3"
+    "eixo_alianca": "IRMANDADE"
   },
   {
     "clube": "Santos",
@@ -207,7 +207,7 @@
     "autonomia_financeira": 55,
     "perfil_predominante": "Bate-Volta no Interior",
     "estado": "SP",
-    "eixo_alianca": "BLOCO_3"
+    "eixo_alianca": "IRMANDADE"
   },
   {
     "clube": "Santo André",
@@ -221,7 +221,7 @@
     "autonomia_financeira": 60,
     "perfil_predominante": "Caravana Pesada no Interior de SP",
     "estado": "SP",
-    "eixo_alianca": "BLOCO_1"
+    "eixo_alianca": "FAMILIA_INTERIOR"
   },
   {
     "clube": "São Caetano",
@@ -235,7 +235,7 @@
     "autonomia_financeira": 55,
     "perfil_predominante": "Tradição de Barra de Ferro & Rivalidade Histórica do ABC",
     "estado": "SP",
-    "eixo_alianca": "BLOCO_3"
+    "eixo_alianca": "PUNHO_SEGURO"
   },
   {
     "clube": "São Bernardo",
@@ -249,7 +249,7 @@
     "autonomia_financeira": 52,
     "perfil_predominante": "Força do Bernô no ABC & Estrada",
     "estado": "SP",
-    "eixo_alianca": "BLOCO_2"
+    "eixo_alianca": "PUNHO_SEGURO"
   },
   {
     "clube": "Rio Branco",
@@ -263,7 +263,7 @@
     "autonomia_financeira": 50,
     "perfil_predominante": "Força Regional em Viagens",
     "estado": "SP",
-    "eixo_alianca": "BLOCO_1"
+    "eixo_alianca": "FAMILIA_INTERIOR"
   },
   {
     "clube": "União Barbarense",
@@ -277,7 +277,7 @@
     "autonomia_financeira": 45,
     "perfil_predominante": "Presença Regional Forte",
     "estado": "SP",
-    "eixo_alianca": "BLOCO_2"
+    "eixo_alianca": "PUNHO_SEGURO"
   },
   {
     "clube": "Paulista Jundiaí",
@@ -305,7 +305,7 @@
     "autonomia_financeira": 50,
     "perfil_predominante": "Tradição Grená da Fonte Luminosa",
     "estado": "SP",
-    "eixo_alianca": "BLOCO_3"
+    "eixo_alianca": "IRMANDADE"
   },
   {
     "clube": "XV de Piracicaba",
@@ -319,7 +319,7 @@
     "autonomia_financeira": 48,
     "perfil_predominante": "Raiz Caipira & Pressão do Barão",
     "estado": "SP",
-    "eixo_alianca": "BLOCO_2"
+    "eixo_alianca": "PUNHO_SEGURO"
   },
   {
     "clube": "São Bento",
@@ -333,7 +333,7 @@
     "autonomia_financeira": 45,
     "perfil_predominante": "Paixão de Sorocaba na Estrada",
     "estado": "SP",
-    "eixo_alianca": "BLOCO_1"
+    "eixo_alianca": "FAMILIA_INTERIOR"
   },
   {
     "clube": "Noroeste",
@@ -347,7 +347,7 @@
     "autonomia_financeira": 46,
     "perfil_predominante": "Caldeirão Vermelho de Bauru",
     "estado": "SP",
-    "eixo_alianca": "BLOCO_3"
+    "eixo_alianca": "FAMILIA_INTERIOR"
   },
   {
     "clube": "Marília",
@@ -361,7 +361,7 @@
     "autonomia_financeira": 42,
     "perfil_predominante": "Orgulho da Alta Paulista",
     "estado": "SP",
-    "eixo_alianca": "BLOCO_1"
+    "eixo_alianca": "FAMILIA_INTERIOR"
   },
   {
     "clube": "Inter de Limeira",
@@ -375,7 +375,7 @@
     "autonomia_financeira": 50,
     "perfil_predominante": "Força Regional do Limeirão",
     "estado": "SP",
-    "eixo_alianca": "BLOCO_2"
+    "eixo_alianca": "PUNHO_SEGURO"
   },
   {
     "clube": "Corinthians",
@@ -403,7 +403,7 @@
     "autonomia_financeira": 85,
     "perfil_predominante": "Invasões Interestaduais de Pista",
     "estado": "RJ",
-    "eixo_alianca": "PC"
+    "eixo_alianca": "PUNHO_CRUZADO"
   },
   {
     "clube": "Vasco da Gama",
@@ -431,7 +431,7 @@
     "autonomia_financeira": 80,
     "perfil_predominante": "Arrastão de Massa em Aeroportos/Estradas",
     "estado": "RJ",
-    "eixo_alianca": "PC"
+    "eixo_alianca": "PUNHO_CRUZADO"
   },
   {
     "clube": "Fluminense",
@@ -459,7 +459,7 @@
     "autonomia_financeira": 70,
     "perfil_predominante": "Linha de Frente Interestadual",
     "estado": "RJ",
-    "eixo_alianca": "PC"
+    "eixo_alianca": "DPA"
   },
   {
     "clube": "Atlético-MG",
@@ -485,9 +485,9 @@
     "poder_pista": 93,
     "caravana": 91,
     "autonomia_financeira": 93,
-    "perfil_predominante": "Invasões Históricas & Eixo PC",
+    "perfil_predominante": "Invasões Históricas & Eixo Punho Cruzado",
     "estado": "MG",
-    "eixo_alianca": "PC"
+    "eixo_alianca": "PUNHO_CRUZADO"
   },
   {
     "clube": "Grêmio",
@@ -501,7 +501,7 @@
     "autonomia_financeira": 85,
     "perfil_predominante": "Invasões na América do Sul & BR",
     "estado": "RS",
-    "eixo_alianca": "PUNHO_CRUZADO"
+    "eixo_alianca": "DPA"
   },
   {
     "clube": "Internacional",
@@ -529,7 +529,7 @@
     "autonomia_financeira": 75,
     "perfil_predominante": "Comboios Históricos de Estrada",
     "estado": "RS",
-    "eixo_alianca": "PC"
+    "eixo_alianca": "PUNHO_CRUZADO"
   },
   {
     "clube": "Grêmio",
@@ -543,7 +543,7 @@
     "autonomia_financeira": 70,
     "perfil_predominante": "Pista & Presença na Estrada",
     "estado": "RS",
-    "eixo_alianca": "PUNHO_CRUZADO"
+    "eixo_alianca": "DPA"
   },
   {
     "clube": "Bahia",
@@ -555,9 +555,9 @@
     "poder_pista": 88,
     "caravana": 82,
     "autonomia_financeira": 80,
-    "perfil_predominante": "Força Gigante no Nordeste & Eixo PC",
+    "perfil_predominante": "Força Gigante no Nordeste & Bamor Nova Era (DPA)",
     "estado": "BA",
-    "eixo_alianca": "PC"
+    "eixo_alianca": "DPA"
   },
   {
     "clube": "Vitória",
@@ -569,9 +569,9 @@
     "poder_pista": 89,
     "caravana": 80,
     "autonomia_financeira": 78,
-    "perfil_predominante": "Potência Rubro-Negra & Eixo DPA",
+    "perfil_predominante": "Potência Rubro-Negra & Pavilhão Jovem (Punho Cruzado)",
     "estado": "BA",
-    "eixo_alianca": "DPA"
+    "eixo_alianca": "PUNHO_CRUZADO"
   },
   {
     "clube": "Sport",
@@ -583,9 +583,9 @@
     "poder_pista": 92,
     "caravana": 83,
     "autonomia_financeira": 80,
-    "perfil_predominante": "Força Máxima de Pista em Recife",
+    "perfil_predominante": "Força Máxima de Pista em Recife & Torcida Jovem do Leão",
     "estado": "PE",
-    "eixo_alianca": "PC"
+    "eixo_alianca": "PUNHO_CRUZADO"
   },
   {
     "clube": "Santa Cruz",
@@ -597,7 +597,7 @@
     "poder_pista": 88,
     "caravana": 80,
     "autonomia_financeira": 70,
-    "perfil_predominante": "Massa Apaixonada no Arruda & Eixo DPA",
+    "perfil_predominante": "Massa Apaixonada no Arruda & Explosão Inferno Coral (DPA)",
     "estado": "PE",
     "eixo_alianca": "DPA"
   },
@@ -611,9 +611,9 @@
     "poder_pista": 85,
     "caravana": 82,
     "autonomia_financeira": 82,
-    "perfil_predominante": "Mosaicos Memoráveis no Castelão & Eixo PC",
+    "perfil_predominante": "Mosaicos Memoráveis no Castelão & Nordeste Lado A",
     "estado": "CE",
-    "eixo_alianca": "PC"
+    "eixo_alianca": "LADO_A"
   },
   {
     "clube": "Ceará",
@@ -655,6 +655,6 @@
     "autonomia_financeira": 80,
     "perfil_predominante": "Pressão de Caldeirão & Caveira",
     "estado": "PR",
-    "eixo_alianca": "NEUTRO"
+    "eixo_alianca": "INDEPENDENTE"
   }
 ]
