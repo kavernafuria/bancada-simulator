@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   Drum,
   Shield,
@@ -1691,6 +1692,13 @@ export default function App() {
             >
               {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-amber-400" /> : <VolumeX className="w-3.5 h-3.5" />}
             </button>
+            <Link
+              href="/bancada/minigames"
+              className="p-1.5 px-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition-colors flex items-center gap-1 text-[10px] font-bold cursor-pointer"
+              title="Testar Mini-Games Individuais"
+            >
+              🎮 <span className="hidden sm:inline">Mini-Games</span>
+            </Link>
             <button
               onClick={() => setShowResetConfirm(true)}
               className="p-1.5 px-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-amber-400 transition-colors flex items-center gap-1 text-[10px] font-bold cursor-pointer"
