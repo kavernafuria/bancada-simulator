@@ -43,6 +43,7 @@ import {
   Download,
 } from "lucide-react";
 import confetti from "canvas-confetti";
+import { MatchTacticalResolver, MatchContext } from "@/components/MatchTacticalResolver";
 import {
   getOfficialTorcidas,
   getAlliancesData,
@@ -207,10 +208,12 @@ export default function App() {
   const [pipelineIndex, setPipelineIndex] = useState<number>(0);
 
   // MATCH WORKFLOW STATE
-  // Phase: "CLOSED" | "POLICE_MEETING" | "TRANSPORT" | "SCOUT_INTEL" | "TACTICAL"
+  // Phase: "CLOSED" | "POLICE_MEETING" | "TRANSPORT" | "SCOUT_INTEL" | "TACTICAL" | "MINIGAME" | "RESULT"
   const [matchModalPhase, setMatchModalPhase] = useState<
-    "CLOSED" | "POLICE_MEETING" | "TRANSPORT" | "SCOUT_INTEL" | "TACTICAL"
+    "CLOSED" | "POLICE_MEETING" | "TRANSPORT" | "SCOUT_INTEL" | "TACTICAL" | "MINIGAME" | "RESULT"
   >("CLOSED");
+  const [activeMatchMiniGameContext, setActiveMatchMiniGameContext] = useState<MatchContext | null>(null);
+  const [activeSelectedTactic, setActiveSelectedTactic] = useState<TacticalBattleChoice | null>(null);
   const [activeMatchDerby, setActiveMatchDerby] = useState<DerbyMatchInfo | null>(null);
   const [selectedPoliceChoice, setSelectedPoliceChoice] = useState<PoliceMeetingChoice | null>(null);
   const [selectedTransport, setSelectedTransport] = useState<TransportChoice | null>(null);
@@ -586,9 +589,41 @@ export default function App() {
     setMatchModalPhase("TACTICAL");
   };
 
-  // 5. Execute Tactical Choice & Resolve Match
-  const handleExecuteTacticalChoice = async (tactic: TacticalBattleChoice) => {
+  // 5. Execute Tactical Choice & Trigger Mini-Game
+  const handleExecuteTacticalChoice = (tactic: TacticalBattleChoice) => {
     if (!selectedTransport || !activeScoutIntel || !activeMatchDerby || !currentTorcida) return;
+
+    let mappedChoice: MatchContext['tacticalChoice'] = 'front_charge';
+    if (tactic.id === "MOSAICO_3D_FESTA") mappedChoice = 'rhythm_mosaic';
+    else if (tactic.id === "GUERRA_ROJOES_MORTEIROS") mappedChoice = 'rojon_barrage';
+    else if (tactic.id === "DEFESA_COMBOIO_ESCOLTA") mappedChoice = 'caravan_escape';
+    else if (activeMatchDerby.isHome && (tactic.id === "CONFRONTO_BARRA_FERRO" || tactic.id === "DEFESA_PERIMETRO_LOCAL")) mappedChoice = 'gate_concentration';
+    else mappedChoice = 'front_charge';
+
+    const opponentTier: MatchContext['opponentTier'] = activeScoutIntel.rivalMembersWaiting > 3000 ? 'S' : activeScoutIntel.rivalMembersWaiting > 1500 ? 'A' : 'B';
+
+    setActiveSelectedTactic(tactic);
+    setActiveMatchMiniGameContext({
+      isHome: activeMatchDerby.isHome,
+      tacticalChoice: mappedChoice,
+      homeContingent: activeMatchDerby.isHome ? activeScoutIntel.playerMembersPresent : activeScoutIntel.rivalMembersWaiting,
+      awayContingent: activeMatchDerby.isHome ? activeScoutIntel.rivalMembersWaiting : activeScoutIntel.playerMembersPresent,
+      opponentTier,
+    });
+    setMatchModalPhase("MINIGAME");
+  };
+
+  // 6. Complete Mini-Game & Resolve Complete Match Mechanics
+  const handleMatchMiniGameComplete = (resultText: string, finalPECModifier: number, penaltyMP?: number) => {
+    const tactic = activeSelectedTactic;
+    if (!tactic || !selectedTransport || !activeScoutIntel || !activeMatchDerby || !currentTorcida) return;
+
+    if (penaltyMP && penaltyMP > 0) {
+      setStateTrackers((st) => ({
+        ...st,
+        risco_mp: Math.min(100, st.risco_mp + penaltyMP),
+      }));
+    }
 
     setMatchModalPhase("CLOSED");
     setIsBattleAnimating(true);
@@ -606,144 +641,150 @@ export default function App() {
     setTimeout(async () => {
       setIsBattleAnimating(false);
 
+      const modifiedTactic = {
+        ...tactic,
+        pistaMod: tactic.pistaMod + Math.round(finalPECModifier * 100),
+      };
+
       const result = executeCompleteMatch(
         stats,
         stateTrackers,
         selectedPoliceChoice,
         selectedTransport,
         activeScoutIntel,
-        tactic,
+        modifiedTactic,
         activeMatchDerby,
         currentTorcida,
         presidentProfile,
         bateriaDurability
       );
-    setSeasonObjectives((prev) =>
-      prev.map((obj) => {
-        if (tactic.isMosaicTactic && (obj.category === "MOSAICO" || obj.category === "BANCADA")) {
-          const newVal = obj.currentValue + 1;
-          return {
-            ...obj,
-            currentValue: newVal,
-            isCompleted: newVal >= obj.targetValue,
-          };
-        }
-        if (result.isVictoryPista && (obj.category === "PISTA" || obj.category === "CARAVANA")) {
-          const newVal = obj.currentValue + 1;
-          return {
-            ...obj,
-            currentValue: newVal,
-            isCompleted: newVal >= obj.targetValue,
-          };
-        }
-        return obj;
-      })
-    );
 
-    setIsGeneratingChronicle(true);
-    const chronicle = await generateGeminiChronicle({
-      season: season,
-      clube: currentTorcida.clube,
-      torcida: currentTorcida.torcida,
-      sigla: currentTorcida.sigla,
-      stadium: activeMatchDerby.stadium,
-      cityState: activeMatchDerby.cityState,
-      rivalTorcida: activeMatchDerby.rivalTorcida,
-      rivalSigla: "",
-      rivalClub: activeMatchDerby.homeClub === currentTorcida.clube ? activeMatchDerby.awayClub : activeMatchDerby.homeClub,
-      isHome: activeMatchDerby.isHome,
-      isAllyGame: activeMatchDerby.isAllyGame,
-      competition: activeMatchDerby.competition,
-      isVictory: result.isVictoryPista,
-      isVictoryPista: result.isVictoryPista,
-      isVictoryBancada: result.isVictoryBancada,
-      score: `${result.scorePlayerClub} x ${result.scoreRivalClub}`,
-      playerAttendance: activeScoutIntel.playerMembersPresent,
-      rivalAttendance: activeScoutIntel.rivalMembersWaiting,
-      tacticTitle: tactic.title,
-      tacticLog: tactic.tacticalLog,
-      policeStance: selectedPoliceChoice?.stance || "PADRÃO",
-      policeTitle: selectedPoliceChoice?.title || "Reunião de Segurança",
-      transportName: selectedTransport?.name || "Transporte",
-      twistTitle: activeScoutIntel.twistTitle,
-      twistDescription: activeScoutIntel.twistDescription,
-      extraCost: result.extraExpenses,
-      medical: result.medicalCost,
-      desertion: result.membersLost,
-      moralChange: result.moralChange,
-      mpAdded: result.mpAdded,
-      statusTitle: result.statusTitle,
-    });
-    result.chronicleText = chronicle;
-    setIsGeneratingChronicle(false);
+      setSeasonObjectives((prev) =>
+        prev.map((obj) => {
+          if (tactic.isMosaicTactic && (obj.category === "MOSAICO" || obj.category === "BANCADA")) {
+            const newVal = obj.currentValue + 1;
+            return {
+              ...obj,
+              currentValue: newVal,
+              isCompleted: newVal >= obj.targetValue,
+            };
+          }
+          if (result.isVictoryPista && (obj.category === "PISTA" || obj.category === "CARAVANA")) {
+            const newVal = obj.currentValue + 1;
+            return {
+              ...obj,
+              currentValue: newVal,
+              isCompleted: newVal >= obj.targetValue,
+            };
+          }
+          return obj;
+        })
+      );
 
-    setActiveMatchResult(result);
+      setIsGeneratingChronicle(true);
+      const chronicle = await generateGeminiChronicle({
+        season: season,
+        clube: currentTorcida.clube,
+        torcida: currentTorcida.torcida,
+        sigla: currentTorcida.sigla,
+        stadium: activeMatchDerby.stadium,
+        cityState: activeMatchDerby.cityState,
+        rivalTorcida: activeMatchDerby.rivalTorcida,
+        rivalSigla: "",
+        rivalClub: activeMatchDerby.homeClub === currentTorcida.clube ? activeMatchDerby.awayClub : activeMatchDerby.homeClub,
+        isHome: activeMatchDerby.isHome,
+        isAllyGame: activeMatchDerby.isAllyGame,
+        competition: activeMatchDerby.competition,
+        isVictory: result.isVictoryPista,
+        isVictoryPista: result.isVictoryPista,
+        isVictoryBancada: result.isVictoryBancada,
+        score: `${result.scorePlayerClub} x ${result.scoreRivalClub}`,
+        playerAttendance: activeScoutIntel.playerMembersPresent,
+        rivalAttendance: activeScoutIntel.rivalMembersWaiting,
+        tacticTitle: tactic.title,
+        tacticLog: `${tactic.tacticalLog} (${resultText})`,
+        policeStance: selectedPoliceChoice?.stance || "PADRÃO",
+        policeTitle: selectedPoliceChoice?.title || "Reunião de Segurança",
+        transportName: selectedTransport?.name || "Transporte",
+        twistTitle: activeScoutIntel.twistTitle,
+        twistDescription: activeScoutIntel.twistDescription,
+        extraCost: result.extraExpenses,
+        medical: result.medicalCost,
+        desertion: result.membersLost,
+        moralChange: result.moralChange,
+        mpAdded: result.mpAdded,
+        statusTitle: result.statusTitle,
+      });
+      result.chronicleText = chronicle;
+      setIsGeneratingChronicle(false);
 
-    // Apply financial & attribute consequences
-    setBankBalance((prev) => prev - result.extraExpenses);
-    setStateTrackers((prev) => {
-      const newMP = Math.min(100, Math.max(0, prev.risco_mp + result.mpAdded));
-      if (newMP >= 100) setIsBannedByMP(true);
-      return {
-        ...prev,
-        moral: Math.min(100, Math.max(0, prev.moral + result.moralChange)),
-        risco_mp: newMP,
-      };
-    });
+      setActiveMatchResult(result);
 
-    setStats((prev) => ({
-      ...prev,
-      contingente: Math.max(10, prev.contingente - Math.floor(result.membersLost / 10)),
-      poder_pista: result.isVictoryPista
-        ? applyDiminishingReturns(prev.poder_pista, 3 + tactic.pistaMod)
-        : Math.max(10, prev.poder_pista - 4),
-      pressao_bancada: tactic.isMosaicTactic
-        ? applyDiminishingReturns(prev.pressao_bancada, 8)
-        : prev.pressao_bancada,
-    }));
-
-    setHistoryLog((prev) => [
-      `[Ano ${season} - ${activeMatchDerby.competition || "Jogo"}] ${result.statusTitle}. Placar: ${result.scorePlayerClub}x${result.scoreRivalClub}. Tática: ${tactic.tacticalLog}`,
-      ...prev,
-    ]);
-
-    // Update Rivalry & Banner History Record
-    if (activeMatchDerby && !activeMatchDerby.isAllyGame) {
-      const rKey = activeMatchDerby.rivalTorcida;
-      const bannerCaptured = result.bannerCaptured ?? false;
-      const bannerLost = result.statusTitle.includes("BANDEIRÃO") || result.statusTitle.includes("PATRIMÔNIO PERDIDO");
-
-      setRivalryRecords((prev) => {
-        const existing = prev[rKey] || {
-          rivalTorcida: rKey,
-          rivalClub: (activeMatchDerby.isHome ? activeMatchDerby.awayClub : activeMatchDerby.homeClub) || rKey,
-          totalConfrontos: 0,
-          vitoriasPista: 0,
-          derrotasPista: 0,
-          jogosDaPaz: 0,
-          faixasTomadas: 0,
-          faixasPerdidas: 0,
-          isPeacePactActive: false,
-          isTretaChallenged: false,
-        };
-
+      // Apply financial & attribute consequences
+      setBankBalance((prev) => prev - result.extraExpenses);
+      setStateTrackers((prev) => {
+        const newMP = Math.min(100, Math.max(0, prev.risco_mp + result.mpAdded));
+        if (newMP >= 100) setIsBannedByMP(true);
         return {
           ...prev,
-          [rKey]: {
-            ...existing,
-            totalConfrontos: existing.totalConfrontos + 1,
-            vitoriasPista: existing.vitoriasPista + (result.isVictoryPista ? 1 : 0),
-            derrotasPista: existing.derrotasPista + (result.isVictoryPista ? 0 : 1),
-            faixasTomadas: existing.faixasTomadas + (bannerCaptured ? 1 : 0),
-            faixasPerdidas: existing.faixasPerdidas + (bannerLost ? 1 : 0),
-            isPeacePactActive: false,
-            isTretaChallenged: false,
-          },
+          moral: Math.min(100, Math.max(0, prev.moral + result.moralChange)),
+          risco_mp: newMP,
         };
       });
-    }
 
-    advancePipeline();
+      setStats((prev) => ({
+        ...prev,
+        contingente: Math.max(10, prev.contingente - Math.floor(result.membersLost / 10)),
+        poder_pista: result.isVictoryPista
+          ? applyDiminishingReturns(prev.poder_pista, 3 + tactic.pistaMod)
+          : Math.max(10, prev.poder_pista - 4),
+        pressao_bancada: tactic.isMosaicTactic
+          ? applyDiminishingReturns(prev.pressao_bancada, 8)
+          : prev.pressao_bancada,
+      }));
+
+      setHistoryLog((prev) => [
+        `[Ano ${season} - ${activeMatchDerby.competition || "Jogo"}] ${result.statusTitle}. Placar: ${result.scorePlayerClub}x${result.scoreRivalClub}. Tática: ${tactic.tacticalLog} (${resultText})`,
+        ...prev,
+      ]);
+
+      // Update Rivalry & Banner History Record
+      if (activeMatchDerby && !activeMatchDerby.isAllyGame) {
+        const rKey = activeMatchDerby.rivalTorcida;
+        const bannerCaptured = result.bannerCaptured ?? false;
+        const bannerLost = result.statusTitle.includes("BANDEIRÃO") || result.statusTitle.includes("PATRIMÔNIO PERDIDO");
+
+        setRivalryRecords((prev) => {
+          const existing = prev[rKey] || {
+            rivalTorcida: rKey,
+            rivalClub: (activeMatchDerby.isHome ? activeMatchDerby.awayClub : activeMatchDerby.homeClub) || rKey,
+            totalConfrontos: 0,
+            vitoriasPista: 0,
+            derrotasPista: 0,
+            jogosDaPaz: 0,
+            faixasTomadas: 0,
+            faixasPerdidas: 0,
+            isPeacePactActive: false,
+            isTretaChallenged: false,
+          };
+
+          return {
+            ...prev,
+            [rKey]: {
+              ...existing,
+              totalConfrontos: existing.totalConfrontos + 1,
+              vitoriasPista: existing.vitoriasPista + (result.isVictoryPista ? 1 : 0),
+              derrotasPista: existing.derrotasPista + (result.isVictoryPista ? 0 : 1),
+              faixasTomadas: existing.faixasTomadas + (bannerCaptured ? 1 : 0),
+              faixasPerdidas: existing.faixasPerdidas + (bannerLost ? 1 : 0),
+              isPeacePactActive: false,
+              isTretaChallenged: false,
+            },
+          };
+        });
+      }
+
+      advancePipeline();
     }, 2200);
   };
 
@@ -2798,6 +2839,35 @@ export default function App() {
                 </button>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 5.B. MINI-GAME RESOLUTION MODAL */}
+      {matchModalPhase === "MINIGAME" && activeMatchMiniGameContext && activeMatchDerby && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-4 text-center">
+            <div className="border-b border-zinc-800 pb-2 flex items-center justify-between">
+              <div>
+                <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest block text-left">
+                  🎮 MINI-GAME TÁTICO DE CONFRONTO DE BANCADA
+                </span>
+                <h3 className="text-xs font-black text-white uppercase text-left mt-0.5">
+                  {activeMatchDerby.matchTitle}
+                </h3>
+              </div>
+              <button
+                onClick={() => setMatchModalPhase("CLOSED")}
+                className="p-1 rounded-full text-zinc-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <MatchTacticalResolver
+              context={activeMatchMiniGameContext}
+              onMatchComplete={handleMatchMiniGameComplete}
+            />
           </div>
         </div>
       )}
