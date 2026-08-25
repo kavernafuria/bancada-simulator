@@ -1646,7 +1646,9 @@ export function executeCompleteMatch(
   intel: MatchScoutReport,
   tactic: TacticalBattleChoice,
   derby: DerbyMatchInfo,
-  currentTorcida?: OfficialTorcida
+  currentTorcida?: OfficialTorcida,
+  presidentProfile?: PresidentProfile | null,
+  bateriaDurability: number = 100
 ): MatchExecutionResult {
   const playerMembers = intel.playerMembersPresent;
   const rivalMembers = intel.rivalMembersWaiting;
@@ -1936,8 +1938,10 @@ export function executeCompleteMatch(
   // 1.B. FÓRMULA DE PODER EFETIVO DE COMBATE (PEC)
   // ------------------------------------------------------------------------
   const ratio = playerMembers / Math.max(1, rivalMembers);
+  const presidentCombatMult = presidentProfile === "LINHA_FRENTE" ? 1.15 : 1.0;
+
   // Força Base = (Poder Pista * Coeficiente Tier) * (Bonde Presente / 100)
-  const fuerzaBasePlayer = (stats.poder_pista * coefTierPlayer) * (playerMembers / 100);
+  const fuerzaBasePlayer = (stats.poder_pista * coefTierPlayer) * (playerMembers / 100) * presidentCombatMult;
   const fuerzaBaseRival = (rivalPoderPista * coefTierRival) * (rivalMembers / 100);
 
   // Modificadores = (Moral * 0.1) + (Bônus Armamento/Batedores * 0.15) - (Penalidade Emboscada Sofrida * 0.25)
@@ -2698,5 +2702,186 @@ export function generateLeagueTable(
       zone,
     };
   });
+}
+
+// -------------------------------------------------------------
+// 1. TRAÇOS DE PRESIDENTE (ELEIÇÕES A CADA 3 TEMPORADAS)
+// -------------------------------------------------------------
+export type PresidentProfile = "LINHA_FRENTE" | "GESTOR" | "MESTRE_BATERIA";
+
+export interface PresidentOption {
+  id: PresidentProfile;
+  title: string;
+  bonus: string;
+  penalty: string;
+  icon: string;
+  description: string;
+}
+
+export function getPresidentOptions(): PresidentOption[] {
+  return [
+    {
+      id: "LINHA_FRENTE",
+      title: "1. Perfil Linha de Frente / Pista",
+      bonus: "+15% no PEC de Combate e maior respeito em confrontos de rua.",
+      penalty: "+10% de Risco MP passivo e maior rigor da PM nas revistas.",
+      icon: "🥊",
+      description: "Liderança marcial e cascuda vinda das pistas e caravanas. Impõe respeito em qualquer território, mas atrai os holofotes do Ministério Público."
+    },
+    {
+      id: "GESTOR",
+      title: "2. Perfil Gestor / Comercial",
+      bonus: "+20% de Faturamento na Loja Oficial, eventos da quadra e anuidade.",
+      penalty: "-5 de Moral se a torcida recuar de confrontos ou adotar postura pacífica.",
+      icon: "💼",
+      description: "Administração executiva focada em superávit, licenciamento e expansão da sede social. Alavanca o caixa, mas sofre cobrança por postura militar."
+    },
+    {
+      id: "MESTRE_BATERIA",
+      title: "3. Perfil Mestre de Bateria / Barra Brava",
+      bonus: "+15 de Pressão de Bancada e taxa acelerada de atração de sócios locais.",
+      penalty: "Menor investimento na escolta de pista; vulnerabilidade em caravanas sem apoio.",
+      icon: "🥁",
+      description: "Liderança vinda das arquibancadas e da percussão. Transforma o estádio em um inferno sonoro, mas prioriza a festa em detrimento da escolta armada."
+    }
+  ];
+}
+
+// -------------------------------------------------------------
+// 2. PUNIÇÕES ESCALONADAS DO MINISTÉRIO PÚBLICO (MP)
+// -------------------------------------------------------------
+export interface MPStatusSummary {
+  faixaLevel: 0 | 1 | 2 | 3;
+  faixaName: string;
+  badgeColor: string;
+  restrictionsText: string;
+  pressaoPenalty: number;
+  bateriaBanned: boolean;
+  visualBanned: boolean;
+  isInstitutionalBan: boolean;
+}
+
+export function getMPStatusSummary(riscoMp: number): MPStatusSummary {
+  if (riscoMp >= 100) {
+    return {
+      faixaLevel: 3,
+      faixaName: "Faixa 3 — Banimento Institucional (100%)",
+      badgeColor: "bg-red-950 text-red-400 border-red-600",
+      restrictionsText: "Torcida 100% banida nos estádios. Proibido fardamento, bateria e faixas. Perda de 50% das receitas e deserção de 25% da massa.",
+      pressaoPenalty: 25,
+      bateriaBanned: true,
+      visualBanned: true,
+      isInstitutionalBan: true,
+    };
+  } else if (riscoMp >= 75) {
+    return {
+      faixaLevel: 2,
+      faixaName: "Faixa 2 — Alerta Laranja (>= 75%)",
+      badgeColor: "bg-orange-950 text-orange-400 border-orange-600",
+      restrictionsText: "Proibição total de faixas, mastros, bandeirões e camisas oficiais nos jogos. Mosaico 3D/Fogo bloqueado no Jogo 4. Presença de Choque Total.",
+      pressaoPenalty: 15,
+      bateriaBanned: true,
+      visualBanned: true,
+      isInstitutionalBan: false,
+    };
+  } else if (riscoMp >= 50) {
+    return {
+      faixaLevel: 1,
+      faixaName: "Faixa 1 — Alerta Amarelo (>= 50%)",
+      badgeColor: "bg-yellow-950 text-yellow-400 border-yellow-600",
+      restrictionsText: "Proibição de surdos e bumbos pesados nos estádios. Penalidade de -10 de Pressão de Bancada.",
+      pressaoPenalty: 10,
+      bateriaBanned: true,
+      visualBanned: false,
+      isInstitutionalBan: false,
+    };
+  } else {
+    return {
+      faixaLevel: 0,
+      faixaName: "Situação Regular (< 50%)",
+      badgeColor: "bg-emerald-950 text-emerald-400 border-emerald-600",
+      restrictionsText: "Sem restrições ativas. Mastros, baterias e bandeirões liberados pelo Choque.",
+      pressaoPenalty: 0,
+      bateriaBanned: false,
+      visualBanned: false,
+      isInstitutionalBan: false,
+    };
+  }
+}
+
+// -------------------------------------------------------------
+// 5. NOTICIÁRIO DE BANCADA (EVENTOS ALEATÓRIOS URGENTES)
+// -------------------------------------------------------------
+export interface NewsReelEvent {
+  id: string;
+  title: string;
+  category: string;
+  headline: string;
+  narrative: string;
+  deltas: FormattedDelta[];
+  cashEffect?: number;
+  moralEffect?: number;
+  riscoMpEffect?: number;
+  contingenteEffect?: number;
+}
+
+export function getRandomNewsReelEvent(): NewsReelEvent {
+  const pool: NewsReelEvent[] = [
+    {
+      id: "SALARIOS_ATRASADOS",
+      title: "⚠️ SALÁRIOS ATRASADOS NO CLUBE",
+      category: "CRISE INSTITUCIONAL",
+      headline: "Elenco ameaça greve por falta de pagamentos e direitos de imagem!",
+      narrative: "Notícia vazada pela imprensa revela 3 meses de salários atrasados no elenco. A diretoria da torcida precisa intervir na Ação 7 para exigir entrega ou cobrar a cartolagem.",
+      deltas: [
+        { label: "Relação Clube", value: "-15 pts", isPositive: false },
+        { label: "Pressão de Cobrança", value: "+10 pts", isPositive: true },
+      ],
+      moralEffect: -5,
+    },
+    {
+      id: "BLITZ_RODOVIARIA",
+      title: "🚔 BLITZ SURPRESA DA POLÍCIA RODOVIÁRIA",
+      category: "SEGURANÇA PÚBLICA",
+      headline: "Operação especial de fiscalização retém comboios de ônibus estaduais!",
+      narrative: "Batalhão Rodoviário e Polícia Federal apertaram a fiscalização nas rodovias na véspera do jogo. Exige despesas imediatas para liberação da frota.",
+      deltas: [
+        { label: "Risco MP", value: "+8%", isPositive: false },
+        { label: "Custo Operacional", value: "-R$ 1.500", isPositive: false },
+      ],
+      riscoMpEffect: 8,
+      cashEffect: -1500,
+    },
+    {
+      id: "CANTO_VIRAL",
+      title: "🎵 VIRAL NAS REDES: NOVO CANTO EXPLODE NA INTERNET",
+      category: "CULTURA ULTRAS",
+      headline: "Ritmo da bateria gravado na quadra alcança 5 milhões de visualizações!",
+      narrative: "Um novo canto de apoio composto pela ala musical viralizou nas redes sociais. Milhares de torcedores jovens procuram a quadra para comprar camisas e se associar.",
+      deltas: [
+        { label: "Novos Sócios", value: "+5 Contingente", isPositive: true },
+        { label: "Vendas na Loja", value: "+R$ 4.000", isPositive: true },
+        { label: "Moral da Torcida", value: "+8", isPositive: true },
+      ],
+      contingenteEffect: 5,
+      cashEffect: 4000,
+      moralEffect: 8,
+    },
+    {
+      id: "RIXA_BAIRRO",
+      title: "🚨 RIXA LOCAL EM ESTAÇÃO DE TREM",
+      category: "OCORRÊNCIA URBANA",
+      headline: "Embate isolado entre subsedes regionais é noticiado na TV!",
+      narrative: "Conflito pontual entre grupos rivais na estação de metrô mobilizou o Choque e virou pauta de jornais sensacionalistas, atraindo atenção do Ministério Público.",
+      deltas: [
+        { label: "Risco MP", value: "+8%", isPositive: false },
+        { label: "Moral da Tropa", value: "+3", isPositive: true },
+      ],
+      riscoMpEffect: 8,
+      moralEffect: 3,
+    },
+  ];
+
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 

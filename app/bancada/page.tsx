@@ -60,6 +60,11 @@ import {
   generateGeminiChronicle,
   getDefaultTorcidaColors,
   TORCIDA_COLOR_PALETTE,
+  getPresidentOptions,
+  getMPStatusSummary,
+  getRandomNewsReelEvent,
+  PresidentProfile,
+  NewsReelEvent,
   ARCHETYPES,
   ArchetypeId,
   OfficialTorcida,
@@ -259,6 +264,14 @@ export default function App() {
   const [allyBonusMembers, setAllyBonusMembers] = useState<number>(0);
   const [challengedRivalTorcida, setChallengedRivalTorcida] = useState<string | null>(null);
 
+  // 15-SEASON SYSTEMS STATE
+  const [presidentProfile, setPresidentProfile] = useState<PresidentProfile | null>(null);
+  const [showPresidentElectionModal, setShowPresidentElectionModal] = useState<boolean>(false);
+  const [hasOwnHeadquarters, setHasOwnHeadquarters] = useState<boolean>(false);
+  const [bateriaDurability, setBateriaDurability] = useState<number>(100);
+  const [pyroStockCount, setPyroStockCount] = useState<number>(0);
+  const [activeNewsReel, setActiveNewsReel] = useState<NewsReelEvent | null>(null);
+
   const handleDownloadProjectZip = async () => {
     try {
       setIsDownloadingZip(true);
@@ -305,6 +318,10 @@ export default function App() {
           setDebtYears(parsed.debtYears || 0);
           setPipelineIndex(parsed.pipelineIndex || 0);
           setHistoryLog(parsed.historyLog || []);
+          if (parsed.presidentProfile) setPresidentProfile(parsed.presidentProfile);
+          if (parsed.hasOwnHeadquarters !== undefined) setHasOwnHeadquarters(parsed.hasOwnHeadquarters);
+          if (parsed.bateriaDurability !== undefined) setBateriaDurability(parsed.bateriaDurability);
+          if (parsed.pyroStockCount !== undefined) setPyroStockCount(parsed.pyroStockCount);
           if (parsed.rivalryRecords) {
             setRivalryRecords(parsed.rivalryRecords);
           }
@@ -362,6 +379,10 @@ export default function App() {
           seasonObjectives,
           rivalryRecords,
           challengedRivalTorcida,
+          presidentProfile,
+          hasOwnHeadquarters,
+          bateriaDurability,
+          pyroStockCount,
         })
       );
     }
@@ -380,6 +401,10 @@ export default function App() {
     seasonObjectives,
     rivalryRecords,
     challengedRivalTorcida,
+    presidentProfile,
+    hasOwnHeadquarters,
+    bateriaDurability,
+    pyroStockCount,
   ]);
 
   const pipeline = currentTorcida
@@ -422,6 +447,10 @@ export default function App() {
       setHistoryLog([
         `[Ano 1 - Liderança Histórica] Você assumiu a diretoria da consagrada ${selected.torcida} nas cores oficiais apoiando o ${selected.clube}.`,
       ]);
+      setHasOwnHeadquarters(selected.tier === "S" || selected.tier === "S-");
+      setBateriaDurability(100);
+      setPyroStockCount(0);
+      setShowPresidentElectionModal(true);
       setIsGameOver(false);
       setIsStarted(true);
       return;
@@ -459,6 +488,10 @@ export default function App() {
     setHistoryLog([
       `[Ano 1 - Fundação] Fundada a nova torcida ${torcida.torcida} com pavilhão nas cores ${primaryColor} e ${secondaryColor} no perfil "${ARCHETYPES[selectedArchetype].name}" apoiando o ${torcida.clube}.`,
     ]);
+    setHasOwnHeadquarters(false);
+    setBateriaDurability(100);
+    setPyroStockCount(0);
+    setShowPresidentElectionModal(true);
     setIsGameOver(false);
     setIsStarted(true);
   };
@@ -575,7 +608,9 @@ export default function App() {
         activeScoutIntel,
         tactic,
         activeMatchDerby,
-        currentTorcida
+        currentTorcida,
+        presidentProfile,
+        bateriaDurability
       );
     setSeasonObjectives((prev) =>
       prev.map((obj) => {
@@ -794,6 +829,20 @@ export default function App() {
         setSeason(nextSeason);
         setPipelineIndex(0);
         setChallengedRivalTorcida(null);
+
+        // Bateria wear & tear per season
+        setBateriaDurability((prev) => Math.max(10, prev - 15));
+
+        // Rent deduction for non-owned headquarters
+        if (!hasOwnHeadquarters) {
+          setBankBalance((prev) => prev - 3500);
+        }
+
+        // Presidential Election trigger at Seasons 4, 7, 10, 13
+        if ([4, 7, 10, 13].includes(nextSeason)) {
+          setShowPresidentElectionModal(true);
+        }
+
         if (currentTorcida) {
           const nextObjectives = generateSeasonObjectives(nextSeason, currentTorcida, nextStatus);
           setSeasonObjectives(nextObjectives);
@@ -3083,6 +3132,117 @@ export default function App() {
                 </div>
               );
             })()}
+          </div>
+        </div>
+      )}
+
+      {/* PRESIDENTIAL ELECTION MODAL */}
+      {showPresidentElectionModal && (
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl p-6 max-w-xl w-full shadow-2xl space-y-5 animate-in fade-in zoom-in-95">
+            <div className="flex items-center gap-3 border-b border-zinc-800 pb-4">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500 flex items-center justify-center text-2xl">
+                🗳️
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-white tracking-tight uppercase">
+                  Eleições da Diretoria — Temporada {season}
+                </h3>
+                <p className="text-xs text-amber-400 font-semibold">
+                  Assembleia Geral dos Associados • Escolha o Perfil de Liderança (Mandato de 3 Anos)
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-zinc-300 leading-relaxed">
+              A cada 3 temporadas, a massa e os conselheiros se reúnem na quadra social para eleger o Presidente da Torcida. A escolha determina os bônus e penalidades operacionais da diretoria:
+            </p>
+
+            <div className="space-y-3">
+              {getPresidentOptions().map((option) => (
+                <button
+                  key={option.id}
+                  onClick={() => {
+                    setPresidentProfile(option.id);
+                    setShowPresidentElectionModal(false);
+                    setHistoryLog((prev) => [
+                      `[Ano ${season} - Eleição de Diretoria] Mandato iniciado sob comando do perfil "${option.title}".`,
+                      ...prev,
+                    ]);
+                  }}
+                  className="w-full text-left p-4 rounded-2xl bg-zinc-950 border border-zinc-800 hover:border-amber-500 hover:bg-amber-950/20 transition-all cursor-pointer group"
+                >
+                  <div className="flex items-center justify-between font-black text-sm text-white">
+                    <span className="flex items-center gap-2">
+                      <span className="text-xl">{option.icon}</span> {option.title}
+                    </span>
+                    <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">
+                      Eleger Presidente
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-400 mt-1">{option.description}</p>
+                  <div className="grid grid-cols-2 gap-2 mt-3 pt-2 border-t border-zinc-900 text-[11px]">
+                    <div className="text-emerald-400 font-medium">✓ {option.bonus}</div>
+                    <div className="text-rose-400 font-medium">✗ {option.penalty}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ULTRAS NEWS REEL MODAL */}
+      {activeNewsReel && (
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-rose-500/50 rounded-3xl p-6 max-w-lg w-full shadow-2xl space-y-4 animate-in fade-in zoom-in-95">
+            <div className="flex items-center gap-3 border-b border-zinc-800 pb-3">
+              <div className="w-10 h-10 rounded-2xl bg-rose-500/20 border border-rose-500 flex items-center justify-center text-xl animate-pulse">
+                📢
+              </div>
+              <div>
+                <span className="text-[10px] font-black tracking-widest text-rose-400 uppercase">
+                  {activeNewsReel.category}
+                </span>
+                <h3 className="text-base font-black text-white uppercase tracking-tight">
+                  {activeNewsReel.title}
+                </h3>
+              </div>
+            </div>
+
+            <div className="p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+              <h4 className="text-xs font-bold text-amber-300 leading-snug">
+                "{activeNewsReel.headline}"
+              </h4>
+              <p className="text-xs text-zinc-300 mt-2 leading-relaxed">
+                {activeNewsReel.narrative}
+              </p>
+            </div>
+
+            <div className="space-y-1.5 pt-1">
+              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Impacto Imediato:</span>
+              <div className="grid grid-cols-2 gap-2">
+                {activeNewsReel.deltas.map((d, i) => (
+                  <div key={i} className={`p-2 rounded-xl text-xs font-bold flex items-center justify-between ${d.isPositive ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-800/50' : 'bg-rose-950/60 text-rose-300 border border-rose-800/50'}`}>
+                    <span>{d.label}</span>
+                    <span>{d.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                if (activeNewsReel.cashEffect) setBankBalance((prev) => prev + activeNewsReel.cashEffect!);
+                if (activeNewsReel.moralEffect) setStateTrackers((prev) => ({ ...prev, moral: Math.min(100, Math.max(0, prev.moral + activeNewsReel.moralEffect!)) }));
+                if (activeNewsReel.riscoMpEffect) setStateTrackers((prev) => ({ ...prev, risco_mp: Math.min(100, Math.max(0, prev.risco_mp + activeNewsReel.riscoMpEffect!)) }));
+                if (activeNewsReel.contingenteEffect) setStats((prev) => ({ ...prev, contingente: Math.min(100, Math.max(10, prev.contingente + activeNewsReel.contingenteEffect!)) }));
+                setActiveNewsReel(null);
+              }}
+              className="w-full py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-black text-xs uppercase tracking-wider transition-all cursor-pointer"
+            >
+              ENTENDIDO! CONTINUAR JORNADA
+            </button>
           </div>
         </div>
       )}
