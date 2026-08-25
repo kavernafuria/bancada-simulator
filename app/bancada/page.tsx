@@ -261,6 +261,12 @@ export default function App() {
     city: string;
     stadium: string;
   } | null>(null);
+  const [allianceProposalInvite, setAllianceProposalInvite] = useState<{
+    proposingTorcida: string;
+    proposingClub: string;
+    proposingState: string;
+    narrative: string;
+  } | null>(null);
   const [allyBonusMembers, setAllyBonusMembers] = useState<number>(0);
   const [challengedRivalTorcida, setChallengedRivalTorcida] = useState<string | null>(null);
 
@@ -848,29 +854,99 @@ export default function App() {
           setSeasonObjectives(nextObjectives);
         }
 
-        // Trigger Allied Convocation Event (~35% chance)
-        const alliesList = officialList.filter(
-          (t) => t.eixo_alianca === currentTorcida?.eixo_alianca && t.clube.toLowerCase() !== currentTorcida?.clube.toLowerCase()
-        );
-        const sameStateRivalsList = officialList.filter(
-          (t) => t.estado === currentTorcida?.estado && t.clube.toLowerCase() !== currentTorcida?.clube.toLowerCase()
-        );
+        // Trigger Allied Convocation Event or Friendship Proposal Event (~35% chance)
+        if (currentTorcida) {
+          const isIndependentTorcida = currentTorcida.eixo_alianca === "INDEPENDENTE" || !currentTorcida.eixo_alianca;
 
-        if (alliesList.length > 0 && sameStateRivalsList.length > 0 && Math.random() < 0.35) {
-          const allyObj = alliesList[Math.floor(Math.random() * alliesList.length)];
-          const rivalObj = sameStateRivalsList[Math.floor(Math.random() * sameStateRivalsList.length)];
+          if (isIndependentTorcida) {
+            // Torcidas without pre-existing alliances MUST FIRST receive a diplomatic proposal meeting!
+            if (Math.random() < 0.35) {
+              const nonStateCandidates = officialList.filter(
+                (t) => t.clube.toLowerCase() !== currentTorcida.clube.toLowerCase()
+              );
+              if (nonStateCandidates.length > 0) {
+                const proposalObj = nonStateCandidates[Math.floor(Math.random() * nonStateCandidates.length)];
+                setAllianceProposalInvite({
+                  proposingTorcida: proposalObj.torcida,
+                  proposingClub: proposalObj.clube,
+                  proposingState: proposalObj.estado,
+                  narrative: `A diretoria da ${proposalObj.torcida} (${proposalObj.clube}/${proposalObj.estado}) solicitou formalmente uma reunião diplomática na nossa sede. Eles propõem um pacto de amizade e união para apoio mútuo nas viagens e proteção nas rodovias.`,
+                });
+              }
+            }
+          } else {
+            // Torcidas WITH established alliances trigger support convocations ONLY with their genuine allies!
+            const alliesList = officialList.filter(
+              (t) =>
+                t.eixo_alianca !== "INDEPENDENTE" &&
+                t.eixo_alianca === currentTorcida.eixo_alianca &&
+                t.clube.toLowerCase() !== currentTorcida.clube.toLowerCase()
+            );
+            const sameStateRivalsList = officialList.filter(
+              (t) => t.estado === currentTorcida.estado && t.clube.toLowerCase() !== currentTorcida.clube.toLowerCase()
+            );
 
-          setAlliedInvasionInvite({
-            allyTorcida: allyObj.torcida,
-            allyClub: allyObj.clube,
-            targetRivalTorcida: rivalObj.torcida,
-            targetRivalClub: rivalObj.clube,
-            city: currentTorcida?.estado === "SP" ? "São Paulo" : "Região Metropolitana",
-            stadium: `Estádio do ${rivalObj.clube}`,
-          });
+            if (alliesList.length > 0 && sameStateRivalsList.length > 0 && Math.random() < 0.35) {
+              const allyObj = alliesList[Math.floor(Math.random() * alliesList.length)];
+              const rivalObj = sameStateRivalsList[Math.floor(Math.random() * sameStateRivalsList.length)];
+
+              setAlliedInvasionInvite({
+                allyTorcida: allyObj.torcida,
+                allyClub: allyObj.clube,
+                targetRivalTorcida: rivalObj.torcida,
+                targetRivalClub: rivalObj.clube,
+                city: currentTorcida.estado === "SP" ? "São Paulo" : "Região Metropolitana",
+                stadium: `Estádio do ${rivalObj.clube}`,
+              });
+            }
+          }
         }
       }
     }
+  };
+
+  const handleAcceptAllianceProposal = () => {
+    if (!allianceProposalInvite) return;
+    const cost = 3000;
+    if (bankBalance < cost) {
+      alert("Saldo insuficiente no caixa para custear a reunião diplomática (Custo: R$ 3.000).");
+      return;
+    }
+    setBankBalance((prev) => prev - cost);
+    setStateTrackers((prev) => ({
+      ...prev,
+      moral: Math.min(100, prev.moral + 10),
+      respeito_nacional: Math.min(100, prev.respeito_nacional + 12),
+    }));
+    setRivalryRecords((prev) => ({
+      ...prev,
+      [allianceProposalInvite.proposingTorcida]: {
+        rivalTorcida: allianceProposalInvite.proposingTorcida,
+        rivalClub: allianceProposalInvite.proposingClub,
+        totalConfrontos: 0,
+        vitoriasPista: 0,
+        derrotasPista: 0,
+        jogosDaPaz: 1,
+        faixasTomadas: 0,
+        faixasPerdidas: 0,
+        isPeacePactActive: true,
+        isTretaChallenged: false,
+      },
+    }));
+    setHistoryLog((prev) => [
+      `[Ano ${season} - Reunião Diplomática] Selado novo pacto de amizade oficial na sede com a torcida ${allianceProposalInvite.proposingTorcida} do ${allianceProposalInvite.proposingClub}!`,
+      ...prev,
+    ]);
+    setAllianceProposalInvite(null);
+  };
+
+  const handleDeclineAllianceProposal = () => {
+    if (!allianceProposalInvite) return;
+    setHistoryLog((prev) => [
+      `[Ano ${season} - Reunião Diplomática] Recusada a proposta de aliança com a ${allianceProposalInvite.proposingTorcida}. A torcida mantém sua independência autônoma.`,
+      ...prev,
+    ]);
+    setAllianceProposalInvite(null);
   };
 
   // DIPLOMACY ACTIONS RESOLUTION
@@ -2905,6 +2981,51 @@ export default function App() {
                 className="py-3 px-3 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition-all cursor-pointer uppercase flex items-center justify-center gap-1 text-[11px]"
               >
                 🏠 Ficar na Sede (-3 Moral)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 9.B. ALLIANCE DIPLOMATIC PROPOSAL MODAL */}
+      {allianceProposalInvite && (
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="bg-zinc-900 border border-blue-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-4 text-center">
+            <div className="mx-auto w-12 h-12 rounded-2xl bg-blue-500/20 text-blue-400 flex items-center justify-center border border-blue-500/30">
+              <HeartHandshake className="w-6 h-6" />
+            </div>
+
+            <div>
+              <span className="text-[9px] font-black text-blue-400 uppercase tracking-widest block">
+                🤝 REUNIÃO DIPLOMÁTICA & PEDIDO DE AMIZADE
+              </span>
+              <h3 className="text-sm font-black text-white uppercase mt-0.5">
+                Proposta de União com a {allianceProposalInvite.proposingTorcida}
+              </h3>
+            </div>
+
+            <div className="bg-zinc-950 p-3.5 rounded-2xl border border-zinc-800 text-left space-y-2 text-xs">
+              <p className="text-zinc-300 leading-relaxed">
+                {allianceProposalInvite.narrative}
+              </p>
+              <div className="bg-zinc-900 p-2.5 rounded-xl border border-zinc-800 italic text-[11px] text-zinc-400">
+                "Como vocês atuam de forma independente, gostaríamos de agendar um churrasco na sede de vocês para discutir um pacto de amizade, união e apoio mútuo em caravanas."
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-xs font-black pt-1">
+              <button
+                onClick={handleAcceptAllianceProposal}
+                className="py-3 px-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black transition-all shadow cursor-pointer uppercase flex items-center justify-center gap-1 text-[11px]"
+              >
+                🤝 Aceitar & Selar Amizade (R$ 3k)
+              </button>
+
+              <button
+                onClick={handleDeclineAllianceProposal}
+                className="py-3 px-3 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition-all cursor-pointer uppercase flex items-center justify-center gap-1 text-[11px]"
+              >
+                🚫 Manter Independência
               </button>
             </div>
           </div>
