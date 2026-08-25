@@ -9,9 +9,9 @@
     "poder_pista": 92,
     "caravana": 95,
     "autonomia_financeira": 95,
-    "perfil_predominante": "Superpotência de Massa, Caravana & Samba",
+    "perfil_predominante": "Superpotência de Massa, Caravana & Samba • Amizade Alvinegra com Fúria Jovem",
     "estado": "SP",
-    "eixo_alianca": "PUNHO_CRUZADO"
+    "eixo_alianca": "ALIANCA_ALVINEGRA"
   },
   {
     "clube": "Palmeiras",
@@ -81,7 +81,7 @@
     "autonomia_financeira": 75,
     "perfil_predominante": "Presença Constante em Viagens",
     "estado": "SP",
-    "eixo_alianca": "PUNHO_CRUZADO"
+    "eixo_alianca": "INDEPENDENTE"
   },
   {
     "clube": "São Paulo",
@@ -137,7 +137,7 @@
     "autonomia_financeira": 70,
     "perfil_predominante": "Presença Fiel em Caravanas",
     "estado": "SP",
-    "eixo_alianca": "PUNHO_CRUZADO"
+    "eixo_alianca": "INDEPENDENTE"
   },
   {
     "clube": "Botafogo-SP",
@@ -389,7 +389,7 @@
     "autonomia_financeira": 55,
     "perfil_predominante": "Presença Visual em Jogos Fora",
     "estado": "SP",
-    "eixo_alianca": "PUNHO_CRUZADO"
+    "eixo_alianca": "INDEPENDENTE"
   },
   {
     "clube": "Flamengo",

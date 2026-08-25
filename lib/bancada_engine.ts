@@ -444,7 +444,11 @@ export function getDerbyForMatch(
     case "corinthians":
       mainRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "palmeiras");
       secondRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "são paulo") || rivalsOnly.find((t) => t.clube.toLowerCase() === "santos");
-      allyTorcida = rivalsOnly.find((t) => t.clube.toLowerCase() === "vasco da gama") || rivalsOnly.find((t) => t.clube.toLowerCase() === "grêmio");
+      if (currentTorcida.torcida.toLowerCase().includes("gaviões") || currentTorcida.torcida.toLowerCase().includes("gavioes")) {
+        allyTorcida = rivalsOnly.find((t) => t.torcida.toLowerCase().includes("fúria jovem do botafogo") || t.torcida.toLowerCase().includes("furia jovem do botafogo") || t.clube.toLowerCase() === "botafogo");
+      } else {
+        allyTorcida = undefined;
+      }
       break;
     case "palmeiras":
       mainRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "corinthians");
@@ -633,7 +637,9 @@ export function getDerbyForMatch(
   // Fallbacks ensuring rival is strictly different club
   if (!mainRival) mainRival = sameStateRivals[0] || otherStateRivals[0] || rivalsOnly[0];
   if (!secondRival) secondRival = sameStateRivals.find((r) => r.clube !== mainRival!.clube) || otherStateRivals[0] || rivalsOnly[1] || rivalsOnly[0];
-  if (!allyTorcida) allyTorcida = allies.find((a) => a.clube !== mainRival!.clube && a.clube !== secondRival!.clube) || rivalsOnly.find((r) => r.clube !== mainRival!.clube) || rivalsOnly[0];
+  if (!allyTorcida && currentTorcida.eixo_alianca !== "INDEPENDENTE") {
+    allyTorcida = allies.find((a) => a.clube !== mainRival!.clube && a.clube !== secondRival!.clube) || rivalsOnly.find((r) => r.clube !== mainRival!.clube) || rivalsOnly[0];
+  }
 
   // Helper for stadiums
   const getStadium = (club: string): { stadium: string; cityState: string } => {
@@ -718,21 +724,41 @@ export function getDerbyForMatch(
     };
   } else if (gameIndex === 2) {
     // Game 2: Home match & Alliance reception (Churrasco & Festa de Aliança)
-    return {
-      matchTitle: `${currentTorcida.clube} x ${allyTorcida.clube}`,
-      homeClub: currentTorcida.clube,
-      awayClub: allyTorcida.clube,
-      rivalTorcida: allyTorcida.torcida,
-      rivalSigla: "",
-      stadium: homeStadiumInfo.stadium,
-      cityState: homeStadiumInfo.cityState,
-      derbyName: `Festa de Aliança & Confraternização (${currentTorcida.eixo_alianca})`,
-      isHome: true,
-      isLongDistance: false,
-      isAllyGame: true,
-      competition: "🤝 Amistoso Festivo de Aliança",
-      importanceDescription: `Recepção de gala no ${homeStadiumInfo.stadium} para a torcida irmã ${allyTorcida.torcida} do ${allyTorcida.clube} com churrasco farto de costela de chão na sede, chopp gelado, cortejo conjunto e festa de arquibancada com as duas baterias!`,
-    };
+    const ally = allyTorcida;
+    if (ally) {
+      return {
+        matchTitle: `${currentTorcida.clube} x ${ally.clube}`,
+        homeClub: currentTorcida.clube,
+        awayClub: ally.clube,
+        rivalTorcida: ally.torcida,
+        rivalSigla: "",
+        stadium: homeStadiumInfo.stadium,
+        cityState: homeStadiumInfo.cityState,
+        derbyName: `Festa de Aliança & Confraternização (${currentTorcida.eixo_alianca})`,
+        isHome: true,
+        isLongDistance: false,
+        isAllyGame: true,
+        competition: "🤝 Amistoso Festivo de Aliança",
+        importanceDescription: `Recepção de gala no ${homeStadiumInfo.stadium} para a torcida irmã ${ally.torcida} do ${ally.clube} com churrasco farto de costela de chão na sede, chopp gelado, cortejo conjunto e festa de arquibancada com as duas baterias!`,
+      };
+    } else {
+      const homeMatchOpponent = secondRival || mainRival;
+      return {
+        matchTitle: `${currentTorcida.clube} x ${homeMatchOpponent.clube}`,
+        homeClub: currentTorcida.clube,
+        awayClub: homeMatchOpponent.clube,
+        rivalTorcida: homeMatchOpponent.torcida,
+        rivalSigla: "",
+        stadium: homeStadiumInfo.stadium,
+        cityState: homeStadiumInfo.cityState,
+        derbyName: `Rodada de Caldeirão em Casa: ${currentTorcida.clube} x ${homeMatchOpponent.clube}`,
+        isHome: true,
+        isLongDistance: false,
+        isAllyGame: false,
+        competition: "🇧🇷 Brasileirão - Rodada de Casa",
+        importanceDescription: `Jogo de alta pressão no estádio ${homeStadiumInfo.stadium} contra o ${homeMatchOpponent.clube}. Como a torcida atua de forma autônoma sem aliança fixa, o foco é 100% no apoio incondicional ao time!`,
+      };
+    }
   } else if (gameIndex === 3) {
     // Game 3: Long distance away invasion (Brasileirão)
     const rivalStadiumInfo = getStadium(secondRival.clube);

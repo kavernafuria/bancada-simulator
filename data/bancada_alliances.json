@@ -1,5 +1,13 @@
 {
   "eixos_nacionais": {
+    "ALIANCA_ALVINEGRA": {
+      "name": "Aliança Alvinegra (Gaviões & Fúria Jovem)",
+      "symbol": "🦅",
+      "members": [
+        "Gaviões da Fiel",
+        "Fúria Jovem do Botafogo"
+      ]
+    },
     "PUNHO_CRUZADO": {
       "name": "União Punho Cruzado",
       "symbol": "🙅‍♂️",
@@ -15,10 +23,6 @@
         "Facção Jovem",
         "Torcida Jovem do Leão",
         "Piratas Azulinos",
-        "Gaviões da Fiel",
-        "Torcida Camisa 12",
-        "Pavilhão 9",
-        "Estopim da Fiel",
         "Os Imbatíveis"
       ]
     },
