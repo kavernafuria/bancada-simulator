@@ -130,12 +130,14 @@ CREATE TABLE players (
     photo TEXT,
     total_games INTEGER DEFAULT 0,
     highest_market_value INTEGER DEFAULT 0,
-    height_in_cm INTEGER DEFAULT 0
+    height_in_cm INTEGER DEFAULT 0,
+    is_renowned INTEGER DEFAULT 0
 )
 """)
 cursor.execute("CREATE INDEX idx_players_search ON players(search_name)")
 cursor.execute("CREATE INDEX idx_players_games ON players(total_games)")
 cursor.execute("CREATE INDEX idx_players_market_val ON players(highest_market_value)")
+cursor.execute("CREATE INDEX idx_players_renowned ON players(is_renowned)")
 
 cursor.execute("""
 CREATE TABLE connections (

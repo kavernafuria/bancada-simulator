@@ -17,6 +17,7 @@ model Player {
   totalGames         Int     @default(0) @map("total_games")
   highestMarketValue Int     @default(0) @map("highest_market_value")
   heightInCm         Int     @default(0) @map("height_in_cm")
+  isRenowned         Boolean @default(false) @map("is_renowned")
 
   @@map("players")
 }
