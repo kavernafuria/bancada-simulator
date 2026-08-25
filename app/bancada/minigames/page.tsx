@@ -226,7 +226,7 @@ export default function MiniGamesTestPage() {
               <strong>Tática acionadora:</strong> <code className="bg-zinc-950 px-1.5 py-0.5 rounded text-amber-300">Guerra de Rojões & Morteiros</code>.
             </p>
             <p className="text-zinc-400 text-[11px]">
-              Segure o botão para carregar a barra de força e solte quando a mira estiver alinhada com o alvo central vermelho.
+              <strong>Novo Motor de Radar Balístico:</strong> Clique em 1️⃣ para travar a direção horizontal (Eixo X) e depois em 2️⃣ para disparar o morteiro na elevação vertical (Eixo Y) em cima do alvo vermelho! (3 Morteiros em 10 segundos).
             </p>
           </>
         )}
