@@ -22,7 +22,7 @@ export interface MatchContext {
 }
 
 // ==========================================
-// 2. MINI-GAME 1: BRIGA NA MÃO (WHACK-A-MOLE - 6 SLOTS, HIGH SPEED, 10s)
+// 2. MINI-GAME 1: BRIGA NA MÃO (WHACK-A-MOLE - 6 ALVOS, 10s, DIFICULDADE +20%)
 // ==========================================
 interface WhackCombatProps {
   opponentTier: 'S' | 'A' | 'B';
@@ -35,8 +35,8 @@ export const WhackCombat: React.FC<WhackCombatProps> = ({ opponentTier, onFinish
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
   const [isAlly, setIsAlly] = useState(false);
 
-  // Speed tuned for 10s duration and higher difficulty
-  const speed = opponentTier === 'S' ? 320 : opponentTier === 'A' ? 400 : 480;
+  // Speed tuned ~20% faster than base for comfortable challenge
+  const speed = opponentTier === 'S' ? 380 : opponentTier === 'A' ? 440 : 520;
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -51,7 +51,7 @@ export const WhackCombat: React.FC<WhackCombatProps> = ({ opponentTier, onFinish
 
     const spawner = setInterval(() => {
       const slot = Math.floor(Math.random() * 6);
-      const ally = Math.random() < 0.30; // 30% chance of being ally
+      const ally = Math.random() < 0.20; // 20% chance of being ally
       setActiveSlot(slot);
       setIsAlly(ally);
     }, speed);
@@ -64,11 +64,11 @@ export const WhackCombat: React.FC<WhackCombatProps> = ({ opponentTier, onFinish
 
   useEffect(() => {
     if (timeLeft === 0) {
-      if (score >= 110) {
+      if (score >= 70) {
         onFinish({ gameType: 'whack', modifier: 0.25, rank: 'S', description: 'Linha de frente atropelou o rival (+25% PEC)!' });
-      } else if (score >= 60) {
+      } else if (score >= 40) {
         onFinish({ gameType: 'whack', modifier: 0.10, rank: 'B', description: 'Confronto equilibrado na pista (+10% PEC).' });
-      } else if (score >= 30) {
+      } else if (score >= 20) {
         onFinish({ gameType: 'whack', modifier: 0.00, rank: 'C', description: 'Bonde manteve a posição sem avanços (0% PEC).' });
       } else {
         onFinish({ gameType: 'whack', modifier: -0.20, rank: 'F', description: 'Linha recuou em desordem sob pressão (-20% PEC).' });
@@ -79,7 +79,7 @@ export const WhackCombat: React.FC<WhackCombatProps> = ({ opponentTier, onFinish
   const handleClick = (index: number) => {
     if (index === activeSlot) {
       if (isAlly) {
-        setScore((s) => Math.max(0, s - 20)); // Penalty for hitting ally
+        setScore((s) => Math.max(0, s - 15)); // Penalty for hitting ally
       } else {
         setScore((s) => s + 10);
       }
@@ -128,7 +128,7 @@ export const WhackCombat: React.FC<WhackCombatProps> = ({ opponentTier, onFinish
 };
 
 // ==========================================
-// 3. NEW MINI-GAME 2: GUERRA DE ROJÕES (DISPARO DE RADAR BALÍSTICO DE PRECISÃO - 10s)
+// 3. MINI-GAME 2: GUERRA DE ROJÕES (DISPARO DE RADAR BALÍSTICO FLUIDO - 10s)
 // ==========================================
 interface RojonTargetProps {
   onFinish: (result: MiniGameResult) => void;
@@ -137,42 +137,42 @@ interface RojonTargetProps {
 export const RojonTarget: React.FC<RojonTargetProps> = ({ onFinish }) => {
   const [timeLeft, setTimeLeft] = useState(10);
   const [stage, setStage] = useState<'AZIMUTH' | 'ELEVATION' | 'RESULT'>('AZIMUTH');
-  const [azimuthX, setAzimuthX] = useState(10);
+  const [azimuthX, setAzimuthX] = useState(15);
   const [lockedX, setLockedX] = useState<number | null>(null);
-  const [elevationY, setElevationY] = useState(10);
+  const [elevationY, setElevationY] = useState(15);
   const [lockedY, setLockedY] = useState<number | null>(null);
-  const [scoreHits, setScoreHits] = useState<number>(0);
-  const [misses, setMisses] = useState<number>(0);
+  const [directHits, setDirectHits] = useState<number>(0);
+  const [proximityHits, setProximityHits] = useState<number>(0);
   const [rocketsLeft, setRocketsLeft] = useState<number>(3);
 
-  // Azimuth (X) sweep animation
+  // Azimuth (X) sweep animation - smooth & fluid
   useEffect(() => {
     let xInterval: NodeJS.Timeout;
     if (stage === 'AZIMUTH') {
       let dir = 1;
       xInterval = setInterval(() => {
         setAzimuthX((prev) => {
-          if (prev >= 90) dir = -1;
-          if (prev <= 10) dir = 1;
-          return prev + dir * 6;
+          if (prev >= 85) dir = -1;
+          if (prev <= 15) dir = 1;
+          return prev + dir * 3.5;
         });
       }, 25);
     }
     return () => clearInterval(xInterval);
   }, [stage]);
 
-  // Elevation (Y) sweep animation
+  // Elevation (Y) sweep animation - smooth & fluid
   useEffect(() => {
     let yInterval: NodeJS.Timeout;
     if (stage === 'ELEVATION') {
       let dir = 1;
       yInterval = setInterval(() => {
         setElevationY((prev) => {
-          if (prev >= 90) dir = -1;
-          if (prev <= 10) dir = 1;
-          return prev + dir * 7;
+          if (prev >= 85) dir = -1;
+          if (prev <= 15) dir = 1;
+          return prev + dir * 4.0;
         });
-      }, 20);
+      }, 25);
     }
     return () => clearInterval(yInterval);
   }, [stage]);
@@ -193,14 +193,14 @@ export const RojonTarget: React.FC<RojonTargetProps> = ({ onFinish }) => {
 
   useEffect(() => {
     if (timeLeft === 0 || rocketsLeft === 0) {
-      if (scoreHits >= 2) {
+      if (directHits >= 1 || proximityHits >= 2) {
         onFinish({
           gameType: 'rojon',
           modifier: 0.25,
           rank: 'S',
           description: 'Morteiros atingiram em cheio o comboio rival (+25% PEC)!',
         });
-      } else if (scoreHits >= 1) {
+      } else if (proximityHits >= 1) {
         onFinish({
           gameType: 'rojon',
           modifier: 0.10,
@@ -212,12 +212,12 @@ export const RojonTarget: React.FC<RojonTargetProps> = ({ onFinish }) => {
           gameType: 'rojon',
           modifier: -0.15,
           rank: 'F',
-          penaltyMP: 12,
-          description: 'Rojões disparados fora do alvo chamaram a polícia (+12% Risco MP, -15% PEC).',
+          penaltyMP: 10,
+          description: 'Rojões disparados fora do alvo chamaram a polícia (+10% Risco MP, -15% PEC).',
         });
       }
     }
-  }, [timeLeft, rocketsLeft, scoreHits, onFinish]);
+  }, [timeLeft, rocketsLeft, directHits, proximityHits, onFinish]);
 
   const handleLockAzimuth = () => {
     if (stage !== 'AZIMUTH') return;
@@ -236,10 +236,10 @@ export const RojonTarget: React.FC<RojonTargetProps> = ({ onFinish }) => {
     const distY = Math.abs(finalY - 50);
     const totalDist = Math.hypot(distX, distY);
 
-    if (totalDist <= 18) {
-      setScoreHits((h) => h + 1);
-    } else {
-      setMisses((m) => m + 1);
+    if (totalDist <= 24) {
+      setDirectHits((h) => h + 1);
+    } else if (totalDist <= 38) {
+      setProximityHits((p) => p + 1);
     }
 
     setTimeout(() => {
@@ -247,21 +247,21 @@ export const RojonTarget: React.FC<RojonTargetProps> = ({ onFinish }) => {
       setLockedX(null);
       setLockedY(null);
       setStage('AZIMUTH');
-    }, 700);
+    }, 600);
   };
 
   return (
     <div className="flex flex-col items-center bg-zinc-950 p-6 rounded-2xl border border-orange-700 text-white max-w-sm w-full select-none shadow-2xl space-y-3">
       <div className="flex justify-between w-full text-xs font-black tracking-wider uppercase border-b border-zinc-800 pb-2">
-        <span className="text-orange-500">Morteiros: Radar Balístico ({rocketsLeft} Morteiros)</span>
+        <span className="text-orange-500">Morteiros: Radar Balístico ({rocketsLeft} Disparos)</span>
         <span className="text-yellow-400 font-mono text-sm">{timeLeft}s</span>
       </div>
 
       <div className="relative w-full h-52 bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 flex items-center justify-center">
         {/* Target Zone Center */}
-        <div className="absolute w-20 h-20 rounded-full border-2 border-dashed border-red-500 bg-red-950/40 flex flex-col items-center justify-center animate-pulse">
-          <span className="text-[10px] font-black text-red-400 uppercase">COMBOIO</span>
-          <span className="text-xs">🎯</span>
+        <div className="absolute w-24 h-24 rounded-full border-2 border-dashed border-red-500 bg-red-950/40 flex flex-col items-center justify-center animate-pulse">
+          <span className="text-[10px] font-black text-red-400 uppercase">ALVO</span>
+          <span className="text-base">🎯</span>
         </div>
 
         {/* Horizontal Lock Line (Azimuth X) */}
@@ -298,7 +298,7 @@ export const RojonTarget: React.FC<RojonTargetProps> = ({ onFinish }) => {
           onClick={handleLockAzimuth}
           className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider transition-all shadow-lg cursor-pointer"
         >
-          1️⃣ TRAVAR MIRA DE DIREÇÃO (EIXO X)
+          1️⃣ TRAVAR DIREÇÃO HORIZONTAL (EIXO X)
         </button>
       )}
 
@@ -318,15 +318,15 @@ export const RojonTarget: React.FC<RojonTargetProps> = ({ onFinish }) => {
       )}
 
       <div className="flex justify-between items-center w-full text-xs text-zinc-400 border-t border-zinc-800 pt-2 font-semibold">
-        <span>Impactos Diretos: <strong className="text-emerald-400">{scoreHits}</strong></span>
-        <span>Erros: <strong className="text-red-400">{misses}</strong></span>
+        <span>Alvo Direto: <strong className="text-emerald-400">{directHits}</strong></span>
+        <span>Próximos: <strong className="text-amber-400">{proximityHits}</strong></span>
       </div>
     </div>
   );
 };
 
 // ==========================================
-// 4. MINI-GAME 3: MOSAICO & BATERIA (3 INSTRUMENT LANES, 10s)
+// 4. MINI-GAME 3: MOSAICO & BATERIA (3 COLUNAS DE INSTRUMENTOS, 10s)
 // ==========================================
 interface RhythmBannerProps {
   onFinish: (result: MiniGameResult) => void;
@@ -347,12 +347,12 @@ export const RhythmBanner: React.FC<RhythmBannerProps> = ({ onFinish }) => {
     const noteSpawner = setInterval(() => {
       const randomLane = Math.floor(Math.random() * 3);
       setNotes((prev) => [...prev, { id: Date.now() + Math.random(), lane: randomLane, pos: 0 }]);
-    }, 750);
+    }, 850);
 
     const moveNotes = () => {
       setNotes((prev) =>
         prev
-          .map((n) => ({ ...n, pos: n.pos + 3.2 }))
+          .map((n) => ({ ...n, pos: n.pos + 2.2 }))
           .filter((n) => n.pos <= 100)
       );
       animRef.current = requestAnimationFrame(moveNotes);
@@ -370,14 +370,14 @@ export const RhythmBanner: React.FC<RhythmBannerProps> = ({ onFinish }) => {
   useEffect(() => {
     if (timeLeft === 0) {
       const perfectHits = hits.filter((h) => h === 1).length;
-      if (perfectHits >= 7) {
+      if (perfectHits >= 5) {
         onFinish({
           gameType: 'rhythm',
           modifier: 0.25,
           rank: 'S',
           description: 'Mosaico 3D subiu perfeito em sintonia com a bateria (+25% Bancada/PEC)!',
         });
-      } else if (perfectHits >= 4) {
+      } else if (perfectHits >= 3) {
         onFinish({
           gameType: 'rhythm',
           modifier: 0.10,
@@ -396,7 +396,7 @@ export const RhythmBanner: React.FC<RhythmBannerProps> = ({ onFinish }) => {
   }, [timeLeft, hits, onFinish]);
 
   const handleHitLane = (targetLane: number) => {
-    const currentNote = notes.find((n) => n.lane === targetLane && n.pos >= 68 && n.pos <= 95);
+    const currentNote = notes.find((n) => n.lane === targetLane && n.pos >= 65 && n.pos <= 96);
     if (currentNote) {
       setHits((h) => [...h, 1]);
       setNotes((prev) => prev.filter((n) => n.id !== currentNote.id));
@@ -459,7 +459,7 @@ export const RhythmBanner: React.FC<RhythmBannerProps> = ({ onFinish }) => {
 };
 
 // ==========================================
-// 5. MINI-GAME 4: FUGA DA BLITZ (LANE RUNNER - 10s, FASTER OBSTACLES)
+// 5. MINI-GAME 4: FUGA DA BLITZ (LANE RUNNER - 10s, VELOCIDADE EQUILIBRADA)
 // ==========================================
 interface CaravanDodgeProps {
   onFinish: (result: MiniGameResult) => void;
@@ -484,13 +484,13 @@ export const CaravanDodge: React.FC<CaravanDodgeProps> = ({ onFinish }) => {
       const types = ['🚧', '🚔', '🛞', '🚓'];
       const randomType = types[Math.floor(Math.random() * types.length)];
       setObstacles((prev) => [...prev, { id: Date.now() + Math.random(), lane: randomLane, y: 0, type: randomType }]);
-    }, 600); // Faster obstacle spawn
+    }, 750);
 
     const moveInterval = setInterval(() => {
       setObstacles((prev) => {
         const next: typeof prev = [];
         for (const obs of prev) {
-          const nextY = obs.y + 12;
+          const nextY = obs.y + 8.5;
           if (nextY >= 68 && nextY <= 88 && obs.lane === lane) {
             setCollisions((c) => c + 1);
             continue;
@@ -501,7 +501,7 @@ export const CaravanDodge: React.FC<CaravanDodgeProps> = ({ onFinish }) => {
         }
         return next;
       });
-    }, 55);
+    }, 60);
 
     return () => {
       clearInterval(spawnInterval);
@@ -511,14 +511,14 @@ export const CaravanDodge: React.FC<CaravanDodgeProps> = ({ onFinish }) => {
 
   useEffect(() => {
     if (timeLeft === 0) {
-      if (collisions === 0) {
+      if (collisions <= 1) {
         onFinish({
           gameType: 'dodge',
           modifier: 0.25,
           rank: 'S',
           description: 'Caravana furou o bloqueio sem atrasos (+25% Caravana/PEC)!',
         });
-      } else if (collisions === 1) {
+      } else if (collisions === 2) {
         onFinish({
           gameType: 'dodge',
           modifier: 0.05,
@@ -541,7 +541,7 @@ export const CaravanDodge: React.FC<CaravanDodgeProps> = ({ onFinish }) => {
   return (
     <div className="flex flex-col items-center bg-zinc-950 p-6 rounded-2xl border border-yellow-700 text-white max-w-sm w-full select-none shadow-2xl space-y-3">
       <div className="flex justify-between w-full text-xs font-black tracking-wider uppercase border-b border-zinc-800 pb-2">
-        <span className="text-yellow-400">Caravana: Desvie dos Bloqueios (Alta Velocidade)</span>
+        <span className="text-yellow-400">Caravana: Desvie dos Bloqueios (10 Segundos)</span>
         <span className="text-red-400 font-mono text-sm">{timeLeft}s</span>
       </div>
 
