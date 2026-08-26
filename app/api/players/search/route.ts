@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json([]);
     }
 
-    let players = await prisma.player.findMany({
+    const players = await prisma.player.findMany({
       where: {
         searchName: {
           contains: query,
@@ -33,31 +33,6 @@ export async function GET(request: NextRequest) {
         isRenowned: true,
       },
     });
-
-    if (players.length < 3) {
-      const fallback = await prisma.player.findMany({
-        where: {
-          searchName: {
-            contains: query,
-          },
-          id: { notIn: players.map((p) => p.id) },
-        },
-        take: 8 - players.length,
-        orderBy: [
-          { highestMarketValue: "desc" },
-          { totalGames: "desc" },
-        ],
-        select: {
-          id: true,
-          name: true,
-          currentTeam: true,
-          country: true,
-          photo: true,
-          isRenowned: true,
-        },
-      });
-      players = [...players, ...fallback];
-    }
 
     const formatted = players.map((p) => ({
       id: String(p.id),

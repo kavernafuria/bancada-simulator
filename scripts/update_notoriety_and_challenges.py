@@ -52,18 +52,17 @@ for db_path in db_paths:
         is_major_club = any(k in team_lower for k in major_clubs_keywords)
 
         is_ren = 0
-        if val >= 1_500_000:
+        # World Champions / Champions League / Libertadores winners & top stars only
+        if is_major_club and (val >= 800_000 or games >= 15 or has_valid_photo):
             is_ren = 1
-        elif games >= 30:
+        elif val >= 3_500_000:
             is_ren = 1
-        elif is_major_club and (games >= 12 or val >= 400_000 or has_valid_photo):
-            is_ren = 1
-        elif has_valid_photo and (val >= 300_000 or games >= 15):
+        elif games >= 35 and has_valid_photo:
             is_ren = 1
 
         if is_ren == 1:
             renowned_ids.append(p_id)
-            if val >= 5_000_000 or games >= 40 or (is_major_club and val >= 2_000_000 and has_valid_photo):
+            if val >= 4_000_000 or games >= 35 or (is_major_club and val >= 1_500_000 and has_valid_photo):
                 famous_endpoint_ids.append(p_id)
 
     # Bulk update is_renowned
