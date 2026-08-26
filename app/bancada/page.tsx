@@ -65,6 +65,9 @@ import {
   getPresidentOptions,
   getMPStatusSummary,
   getRandomNewsReelEvent,
+  getSeasonalMilestoneEvent,
+  SeasonalMilestoneDefinition,
+  SeasonalOptionDefinition,
   PresidentProfile,
   NewsReelEvent,
   ARCHETYPES,
@@ -281,6 +284,8 @@ export default function App() {
   const [bateriaDurability, setBateriaDurability] = useState<number>(100);
   const [pyroStockCount, setPyroStockCount] = useState<number>(0);
   const [activeNewsReel, setActiveNewsReel] = useState<NewsReelEvent | null>(null);
+  const [activeMilestoneDecision, setActiveMilestoneDecision] = useState<SeasonalMilestoneDefinition | null>(null);
+  const [rivalPistaBonusMap, setRivalPistaBonusMap] = useState<Record<string, number>>({});
 
   const handleDownloadProjectZip = async () => {
     try {
@@ -891,6 +896,18 @@ export default function App() {
           setShowPresidentElectionModal(true);
         }
 
+        // Seasonal Milestone Decision trigger at Seasons 3, 6, 9, 12, 15
+        if ([3, 6, 9, 12, 15].includes(nextSeason)) {
+          const mainRivalName = activeMatchDerby?.rivalTorcida || "Rival Principal";
+          const rKey = (mainRivalName || "").trim().toUpperCase();
+          const rec = rivalryRecords[rKey] || { faixasTomadas: 0, faixasPerdidas: 0 };
+          const isPositive = rec.faixasTomadas > rec.faixasPerdidas;
+          const milestone = getSeasonalMilestoneEvent(nextSeason, stats, stateTrackers, mainRivalName, isPositive);
+          if (milestone) {
+            setActiveMilestoneDecision(milestone);
+          }
+        }
+
         if (currentTorcida) {
           const nextObjectives = generateSeasonObjectives(nextSeason, currentTorcida, nextStatus);
           setSeasonObjectives(nextObjectives);
@@ -1210,6 +1227,44 @@ export default function App() {
     setMatchModalPhase("CLOSED");
     setShowResetConfirm(false);
     setHistoryLog([]);
+  };
+
+  const handleSelectMilestoneOption = (option: SeasonalOptionDefinition) => {
+    if (!activeMilestoneDecision) return;
+
+    if (option.contingenteDelta) {
+      setStats((s) => ({ ...s, contingente: Math.max(10, applyDiminishingReturns(s.contingente, option.contingenteDelta!)) }));
+    }
+    if (option.pistaDelta) {
+      setStats((s) => ({ ...s, poder_pista: Math.min(100, Math.max(0, s.poder_pista + option.pistaDelta!)) }));
+    }
+    if (option.bancadaDelta) {
+      setStats((s) => ({ ...s, pressao_bancada: Math.min(100, Math.max(0, s.pressao_bancada + option.bancadaDelta!)) }));
+    }
+    if (option.riscoMpDelta) {
+      setStateTrackers((st) => ({ ...st, risco_mp: Math.min(100, Math.max(0, st.risco_mp + option.riscoMpDelta!)) }));
+    }
+    if (option.respeitoDelta) {
+      setStateTrackers((st) => ({ ...st, respeito_nacional: Math.min(100, Math.max(0, st.respeito_nacional + option.respeitoDelta!)) }));
+    }
+    if (option.cashDelta) {
+      setBankBalance((b) => b + option.cashDelta!);
+    }
+
+    if (option.rivalPistaBonus && activeMatchDerby) {
+      const rKey = (activeMatchDerby.rivalTorcida || "").trim().toUpperCase();
+      setRivalPistaBonusMap((prev) => ({
+        ...prev,
+        [rKey]: (prev[rKey] || 0) + option.rivalPistaBonus!,
+      }));
+    }
+
+    setHistoryLog((prev) => [
+      `[Ano ${season} - Decisão de Temporada] Opção aprovada: ${option.title} (${option.consequencesSummary}).`,
+      ...prev,
+    ]);
+
+    setActiveMilestoneDecision(null);
   };
 
   const handleShareHistory = () => {
@@ -2980,6 +3035,60 @@ export default function App() {
             >
               Iniciar Temporada {season}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* 7.B. SEASONAL MILESTONE DECISION MODAL (SEASONS 3, 6, 9, 12, 15) */}
+      {activeMilestoneDecision && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-4 text-center max-h-[90vh] overflow-y-auto relative">
+            <div className="border-b border-zinc-800 pb-3 text-left">
+              <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block">
+                {activeMilestoneDecision.title}
+              </span>
+              <h3 className="text-sm font-black text-white uppercase mt-0.5">
+                {activeMilestoneDecision.subtitle}
+              </h3>
+            </div>
+
+            <div className="bg-amber-950/40 border border-amber-500/40 p-3 rounded-2xl text-left space-y-1.5">
+              <span className="text-xs font-black text-amber-300 block">
+                {activeMilestoneDecision.newsHeadline}
+              </span>
+              <p className="text-xs text-zinc-300 leading-relaxed font-medium">
+                {activeMilestoneDecision.narrativeText}
+              </p>
+            </div>
+
+            <div className="space-y-2.5 pt-1">
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-wider block text-left">
+                Selecione a Rota Estratégica da Torcida (Escolha 1 de 3):
+              </span>
+
+              {activeMilestoneDecision.options.map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => handleSelectMilestoneOption(opt)}
+                  className="w-full text-left p-3.5 rounded-2xl bg-zinc-950 border border-zinc-800 hover:border-amber-500 transition-all active:scale-[0.98] shadow-lg group cursor-pointer space-y-1.5"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black text-white group-hover:text-amber-400">
+                      {opt.title}
+                    </span>
+                    <span className="text-[9px] font-black px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                      {opt.badge}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-zinc-300 leading-snug">
+                    {opt.description}
+                  </p>
+                  <div className="text-[9px] font-black text-emerald-400 bg-zinc-900 px-2 py-1 rounded-lg border border-zinc-800">
+                    Impacto: {opt.consequencesSummary}
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}

@@ -22,23 +22,29 @@ export interface MatchContext {
 }
 
 // ==========================================
-// 2. MINI-GAME 1: BRIGA NA MÃO (WHACK-A-MOLE - 6 ALVOS, 10s, DIFICULDADE +20%)
+// 2. MINI-GAME 1: COMBATE DE PUNHOS & BLOQUEIO (PUNCH FRONT COMBAT - 10s)
 // ==========================================
-interface WhackCombatProps {
+interface PunchFrontCombatProps {
   opponentTier: 'S' | 'A' | 'B';
   onFinish: (result: MiniGameResult) => void;
 }
 
-export const WhackCombat: React.FC<WhackCombatProps> = ({ opponentTier, onFinish }) => {
+export const PunchFrontCombat: React.FC<PunchFrontCombatProps> = ({ opponentTier, onFinish }) => {
+  const [isTutorial, setIsTutorial] = useState(true);
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(10);
-  const [activeSlot, setActiveSlot] = useState<number | null>(null);
-  const [isAlly, setIsAlly] = useState(false);
 
-  // Speed tuned ~20% faster than base for comfortable challenge
-  const speed = opponentTier === 'S' ? 380 : opponentTier === 'A' ? 440 : 520;
+  // 3 Lanes: 0 = Esquerda, 1 = Centro, 2 = Direita
+  const [rivalState, setRivalState] = useState<{
+    lane: number;
+    type: 'ATTACK' | 'GUARD_OPEN'; // ATTACK requires block 🛡️, GUARD_OPEN requires soco 👊
+  } | null>(null);
 
+  const speed = opponentTier === 'S' ? 450 : opponentTier === 'A' ? 550 : 680;
+
+  // Master 10s Timer (starts after tutorial)
   useEffect(() => {
+    if (isTutorial) return;
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
@@ -48,79 +54,148 @@ export const WhackCombat: React.FC<WhackCombatProps> = ({ opponentTier, onFinish
         return prev - 1;
       });
     }, 1000);
+    return () => clearInterval(timer);
+  }, [isTutorial]);
 
+  // Spawner for Rival Fists
+  useEffect(() => {
+    if (isTutorial) return;
     const spawner = setInterval(() => {
-      const slot = Math.floor(Math.random() * 6);
-      const ally = Math.random() < 0.20; // 20% chance of being ally
-      setActiveSlot(slot);
-      setIsAlly(ally);
+      const randomLane = Math.floor(Math.random() * 3);
+      const isAttack = Math.random() < 0.45; // 45% attack telegraph, 55% open guard
+      setRivalState({ lane: randomLane, type: isAttack ? 'ATTACK' : 'GUARD_OPEN' });
     }, speed);
 
-    return () => {
-      clearInterval(timer);
-      clearInterval(spawner);
-    };
-  }, [speed]);
+    return () => clearInterval(spawner);
+  }, [isTutorial, speed]);
 
+  // Finish Evaluation
   useEffect(() => {
-    if (timeLeft === 0) {
+    if (!isTutorial && timeLeft === 0) {
       if (score >= 70) {
-        onFinish({ gameType: 'whack', modifier: 0.25, rank: 'S', description: 'Linha de frente atropelou o rival (+25% PEC)!' });
+        onFinish({ gameType: 'whack', modifier: 0.25, rank: 'S', description: 'Linha de frente atropelou com combos de punho (+25% PEC)!' });
       } else if (score >= 40) {
-        onFinish({ gameType: 'whack', modifier: 0.10, rank: 'B', description: 'Confronto equilibrado na pista (+10% PEC).' });
+        onFinish({ gameType: 'whack', modifier: 0.10, rank: 'B', description: 'Confronto equilibrado de punhos na pista (+10% PEC).' });
       } else if (score >= 20) {
-        onFinish({ gameType: 'whack', modifier: 0.00, rank: 'C', description: 'Bonde manteve a posição sem avanços (0% PEC).' });
+        onFinish({ gameType: 'whack', modifier: 0.00, rank: 'C', description: 'Bonde manteve a guarda e travou a pista (0% PEC).' });
       } else {
-        onFinish({ gameType: 'whack', modifier: -0.20, rank: 'F', description: 'Linha recuou em desordem sob pressão (-20% PEC).' });
+        onFinish({ gameType: 'whack', modifier: -0.20, rank: 'F', description: 'Guarda furada pela linha rival (-20% PEC).' });
       }
     }
-  }, [timeLeft, score, onFinish]);
+  }, [timeLeft, score, isTutorial, onFinish]);
 
-  const handleClick = (index: number) => {
-    if (index === activeSlot) {
-      if (isAlly) {
-        setScore((s) => Math.max(0, s - 15)); // Penalty for hitting ally
-      } else {
-        setScore((s) => s + 10);
-      }
-      setActiveSlot(null);
+  const handlePunch = (targetLane: number) => {
+    if (isTutorial || !rivalState) return;
+    if (rivalState.type === 'GUARD_OPEN' && rivalState.lane === targetLane) {
+      setScore((s) => s + 10);
+      setRivalState(null);
+    } else if (rivalState.type === 'ATTACK' && rivalState.lane === targetLane) {
+      setScore((s) => Math.max(0, s - 10)); // Countered by rival punch
+      setRivalState(null);
     }
   };
+
+  const handleBlock = () => {
+    if (isTutorial || !rivalState) return;
+    if (rivalState.type === 'ATTACK') {
+      setScore((s) => s + 8); // Successful defense!
+      setRivalState(null);
+    } else {
+      setScore((s) => Math.max(0, s - 5)); // Unnecessary block
+    }
+  };
+
+  if (isTutorial) {
+    return (
+      <div className="flex flex-col items-center bg-zinc-950 p-6 rounded-2xl border border-red-800 text-white max-w-sm w-full select-none shadow-2xl space-y-4 text-center">
+        <div className="border-b border-zinc-800 pb-2 w-full">
+          <span className="text-[10px] font-black text-red-500 uppercase tracking-widest block">🥊 LINHA DE FRENTE</span>
+          <h3 className="text-sm font-black text-white uppercase mt-0.5">Combate de Punhos & Bloqueio</h3>
+        </div>
+
+        <p className="text-xs text-zinc-300 leading-relaxed text-left">
+          <strong>Como Jogar:</strong> A linha de frente rival avança em 3 pistas (Esquerda, Centro, Direita).
+        </p>
+        <ul className="text-[11px] text-zinc-400 text-left space-y-1.5 list-disc pl-4">
+          <li>Quando a guarda rival abrir (<span className="text-yellow-400 font-bold">🎯 Guarda Aberta</span>), clique no soco da pista correspondente!</li>
+          <li>Quando o rival telegravar um ataque (<span className="text-red-400 font-bold">⚠️ Golpe Pesado</span>), clique em <span className="text-blue-400 font-bold">🛡️ BLOQUEAR</span>!</li>
+        </ul>
+
+        <div className="bg-zinc-900 border border-zinc-800 p-2.5 rounded-xl text-[10px] font-mono text-amber-400 w-full text-left">
+          ⏱️ Duração: 10s • Meta Rank S: 70+ pts (+25% PEC)
+        </div>
+
+        <button
+          onClick={() => setIsTutorial(false)}
+          className="w-full py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer"
+        >
+          ▶️ INICIAR DESAFIO DE PUNHOS
+        </button>
+      </div>
+    );
+  }
+
+  const laneNames = ['ESQUERDA', 'CENTRO', 'DIREITA'];
 
   return (
     <div className="flex flex-col items-center bg-zinc-950 p-6 rounded-2xl border border-red-800 text-white max-w-sm w-full select-none shadow-2xl space-y-3">
       <div className="flex justify-between w-full text-xs font-black tracking-wider uppercase border-b border-zinc-800 pb-2">
-        <span className="text-red-500">Linha de Frente: Golpeie os Rivais (6 Alvos)</span>
+        <span className="text-red-500">Combate de Punhos: Reaja Rápido</span>
         <span className="text-yellow-400 font-mono text-sm">{timeLeft}s</span>
       </div>
 
-      <div className="grid grid-cols-3 gap-2.5 w-full h-52">
-        {[0, 1, 2, 3, 4, 5].map((slot) => (
-          <button
-            key={slot}
-            onClick={() => handleClick(slot)}
-            className={`rounded-xl flex flex-col items-center justify-center transition-all cursor-pointer ${
-              activeSlot === slot
-                ? isAlly
-                  ? 'bg-blue-600 border-2 border-blue-300 scale-95 shadow-lg shadow-blue-900/60'
-                  : 'bg-red-600 border-2 border-red-300 scale-95 shadow-lg shadow-red-900/60'
-                : 'bg-zinc-900 border border-zinc-800 hover:border-zinc-700'
-            }`}
+      <div className="relative w-full h-52 bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 flex flex-col justify-end">
+        {/* 3 Attack Lanes */}
+        <div className="absolute inset-0 grid grid-cols-3 divide-x divide-dashed divide-zinc-800 pointer-events-none" />
+
+        {/* Rival Fist Status */}
+        {rivalState && (
+          <div
+            className="absolute top-6 w-1/3 flex flex-col items-center justify-center transition-all duration-75"
+            style={{ left: `${rivalState.lane * 33.33}%` }}
           >
-            {activeSlot === slot && (
-              <>
-                <span className="text-2xl">{isAlly ? '🛡️' : '👊'}</span>
-                <span className="text-[9px] font-black uppercase mt-1">
-                  {isAlly ? 'Nossos!' : 'Rival!'}
+            {rivalState.type === 'ATTACK' ? (
+              <div className="flex flex-col items-center animate-bounce">
+                <span className="text-3xl">👊</span>
+                <span className="text-[9px] font-black bg-red-600 px-1.5 py-0.5 rounded text-white mt-1 shadow">
+                  ⚠️ ATAQUE!
                 </span>
-              </>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center animate-pulse">
+                <span className="text-3xl">🎯</span>
+                <span className="text-[9px] font-black bg-yellow-500 px-1.5 py-0.5 rounded text-black mt-1 shadow">
+                  GUARDA ABERTA!
+                </span>
+              </div>
             )}
+          </div>
+        )}
+      </div>
+
+      {/* 3 Punch Buttons */}
+      <div className="grid grid-cols-3 gap-2 w-full pt-1">
+        {[0, 1, 2].map((laneIdx) => (
+          <button
+            key={laneIdx}
+            onClick={() => handlePunch(laneIdx)}
+            className="py-2.5 rounded-xl bg-red-700 hover:bg-red-600 active:scale-95 text-white font-black text-[10px] uppercase transition-all shadow-md cursor-pointer text-center"
+          >
+            💥 SOCO {laneNames[laneIdx]}
           </button>
         ))}
       </div>
 
+      {/* Block Button */}
+      <button
+        onClick={handleBlock}
+        className="w-full py-2.5 rounded-xl bg-blue-700 hover:bg-blue-600 active:scale-95 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer text-center"
+      >
+        🛡️ BLOQUEAR GOLPE RIVAL
+      </button>
+
       <div className="flex justify-between items-center w-full text-xs text-zinc-400 border-t border-zinc-800 pt-2 font-semibold">
-        <span className="text-blue-400 text-[10px]">Cuidado: Escudo azul é aliado!</span>
+        <span>Pontuação de Combate:</span>
         <span className="text-yellow-400 font-bold font-mono text-sm">{score} pts</span>
       </div>
     </div>
@@ -128,13 +203,14 @@ export const WhackCombat: React.FC<WhackCombatProps> = ({ opponentTier, onFinish
 };
 
 // ==========================================
-// 3. MINI-GAME 2: GUERRA DE ROJÕES (DISPARO DE RADAR BALÍSTICO FLUIDO - 10s)
+// 3. MINI-GAME 2: GUERRA DE ROJÕES (RADAR BALÍSTICO X/Y - 10s)
 // ==========================================
 interface RojonTargetProps {
   onFinish: (result: MiniGameResult) => void;
 }
 
 export const RojonTarget: React.FC<RojonTargetProps> = ({ onFinish }) => {
+  const [isTutorial, setIsTutorial] = useState(true);
   const [timeLeft, setTimeLeft] = useState(10);
   const [stage, setStage] = useState<'AZIMUTH' | 'ELEVATION' | 'RESULT'>('AZIMUTH');
   const [azimuthX, setAzimuthX] = useState(15);
@@ -145,8 +221,9 @@ export const RojonTarget: React.FC<RojonTargetProps> = ({ onFinish }) => {
   const [proximityHits, setProximityHits] = useState<number>(0);
   const [rocketsLeft, setRocketsLeft] = useState<number>(3);
 
-  // Azimuth (X) sweep animation - smooth & fluid
+  // Azimuth (X) sweep animation
   useEffect(() => {
+    if (isTutorial) return;
     let xInterval: NodeJS.Timeout;
     if (stage === 'AZIMUTH') {
       let dir = 1;
@@ -159,10 +236,11 @@ export const RojonTarget: React.FC<RojonTargetProps> = ({ onFinish }) => {
       }, 25);
     }
     return () => clearInterval(xInterval);
-  }, [stage]);
+  }, [isTutorial, stage]);
 
-  // Elevation (Y) sweep animation - smooth & fluid
+  // Elevation (Y) sweep animation
   useEffect(() => {
+    if (isTutorial) return;
     let yInterval: NodeJS.Timeout;
     if (stage === 'ELEVATION') {
       let dir = 1;
@@ -175,10 +253,11 @@ export const RojonTarget: React.FC<RojonTargetProps> = ({ onFinish }) => {
       }, 25);
     }
     return () => clearInterval(yInterval);
-  }, [stage]);
+  }, [isTutorial, stage]);
 
   // 10s master timer
   useEffect(() => {
+    if (isTutorial) return;
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
@@ -189,10 +268,10 @@ export const RojonTarget: React.FC<RojonTargetProps> = ({ onFinish }) => {
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [isTutorial]);
 
   useEffect(() => {
-    if (timeLeft === 0 || rocketsLeft === 0) {
+    if (!isTutorial && (timeLeft === 0 || rocketsLeft === 0)) {
       if (directHits >= 1 || proximityHits >= 2) {
         onFinish({
           gameType: 'rojon',
@@ -217,7 +296,7 @@ export const RojonTarget: React.FC<RojonTargetProps> = ({ onFinish }) => {
         });
       }
     }
-  }, [timeLeft, rocketsLeft, directHits, proximityHits, onFinish]);
+  }, [timeLeft, rocketsLeft, directHits, proximityHits, isTutorial, onFinish]);
 
   const handleLockAzimuth = () => {
     if (stage !== 'AZIMUTH') return;
@@ -231,7 +310,6 @@ export const RojonTarget: React.FC<RojonTargetProps> = ({ onFinish }) => {
     setLockedY(finalY);
     setStage('RESULT');
 
-    // Target center is X: 50, Y: 50
     const distX = Math.abs(lockedX - 50);
     const distY = Math.abs(finalY - 50);
     const totalDist = Math.hypot(distX, distY);
@@ -249,6 +327,36 @@ export const RojonTarget: React.FC<RojonTargetProps> = ({ onFinish }) => {
       setStage('AZIMUTH');
     }, 600);
   };
+
+  if (isTutorial) {
+    return (
+      <div className="flex flex-col items-center bg-zinc-950 p-6 rounded-2xl border border-orange-700 text-white max-w-sm w-full select-none shadow-2xl space-y-4 text-center">
+        <div className="border-b border-zinc-800 pb-2 w-full">
+          <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest block">🚀 GUERRA DE ROJÕES</span>
+          <h3 className="text-sm font-black text-white uppercase mt-0.5">Radar Balístico de Morteiros</h3>
+        </div>
+
+        <p className="text-xs text-zinc-300 leading-relaxed text-left">
+          <strong>Como Jogar:</strong> Dispare até 3 morterios contra o comboio rival no centro.
+        </p>
+        <ul className="text-[11px] text-zinc-400 text-left space-y-1.5 list-disc pl-4">
+          <li>Clique em <span className="text-amber-400 font-bold">1️⃣ Travar Direção</span> para travar o Eixo X horizontal.</li>
+          <li>Clique em <span className="text-orange-400 font-bold">2️⃣ Disparar Morteiro</span> para lançar no Eixo Y vertical!</li>
+        </ul>
+
+        <div className="bg-zinc-900 border border-zinc-800 p-2.5 rounded-xl text-[10px] font-mono text-amber-400 w-full text-left">
+          ⏱️ Duração: 10s • Meta Rank S: 1 Impacto Direto (+25% PEC)
+        </div>
+
+        <button
+          onClick={() => setIsTutorial(false)}
+          className="w-full py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer"
+        >
+          ▶️ INICIAR RADAR DE MORTEIROS
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center bg-zinc-950 p-6 rounded-2xl border border-orange-700 text-white max-w-sm w-full select-none shadow-2xl space-y-3">
@@ -326,159 +434,208 @@ export const RojonTarget: React.FC<RojonTargetProps> = ({ onFinish }) => {
 };
 
 // ==========================================
-// 4. MINI-GAME 3: MOSAICO & BATERIA (3 COLUNAS DE INSTRUMENTOS, 10s)
+// 4. MINI-GAME 3: MOSAICO 3D (JOGO DA MEMÓRIA COM CORES - 10s)
 // ==========================================
-interface RhythmBannerProps {
+interface MemoryMosaicProps {
   onFinish: (result: MiniGameResult) => void;
 }
 
-export const RhythmBanner: React.FC<RhythmBannerProps> = ({ onFinish }) => {
-  const [hits, setHits] = useState<number[]>([]);
-  const [notes, setNotes] = useState<{ id: number; lane: number; pos: number }[]>([]);
+export const MemoryMosaic: React.FC<MemoryMosaicProps> = ({ onFinish }) => {
+  const [isTutorial, setIsTutorial] = useState(true);
   const [timeLeft, setTimeLeft] = useState(10);
-  const animRef = useRef<number | null>(null);
+  const [completedSequences, setCompletedSequences] = useState(0);
 
-  // Spawn and fall of drum notes across 3 lanes
+  // Colors: 0 = Red, 1 = Blue, 2 = Yellow, 3 = Green
+  const colors = [
+    { name: 'Vermelho', hex: '#ef4444', icon: '🔴' },
+    { name: 'Azul', hex: '#3b82f6', icon: '🔵' },
+    { name: 'Amarelo', hex: '#eab308', icon: '🟡' },
+    { name: 'Verde', hex: '#22c55e', icon: '🟢' },
+  ];
+
+  const [sequence, setSequence] = useState<number[]>([]);
+  const [userSequence, setUserSequence] = useState<number[]>([]);
+  const [isShowingSequence, setIsShowingSequence] = useState(false);
+  const [activeHighlightColor, setActiveHighlightColor] = useState<number | null>(null);
+
+  // Generate new color sequence
+  const startNewRound = (length: number) => {
+    const newSeq = Array.from({ length }, () => Math.floor(Math.random() * 4));
+    setSequence(newSeq);
+    setUserSequence([]);
+    setIsShowingSequence(true);
+
+    // Playback animation
+    newSeq.forEach((colorIdx, step) => {
+      setTimeout(() => {
+        setActiveHighlightColor(colorIdx);
+        setTimeout(() => setActiveHighlightColor(null), 350);
+      }, step * 500);
+    });
+
+    setTimeout(() => {
+      setIsShowingSequence(false);
+    }, newSeq.length * 500 + 100);
+  };
+
   useEffect(() => {
+    if (!isTutorial) {
+      startNewRound(3);
+    }
+  }, [isTutorial]);
+
+  // Master 10s Timer
+  useEffect(() => {
+    if (isTutorial) return;
     const timer = setInterval(() => {
       setTimeLeft((t) => (t <= 1 ? 0 : t - 1));
     }, 1000);
-
-    const noteSpawner = setInterval(() => {
-      const randomLane = Math.floor(Math.random() * 3);
-      setNotes((prev) => [...prev, { id: Date.now() + Math.random(), lane: randomLane, pos: 0 }]);
-    }, 850);
-
-    const moveNotes = () => {
-      setNotes((prev) =>
-        prev
-          .map((n) => ({ ...n, pos: n.pos + 2.2 }))
-          .filter((n) => n.pos <= 100)
-      );
-      animRef.current = requestAnimationFrame(moveNotes);
-    };
-
-    animRef.current = requestAnimationFrame(moveNotes);
-
-    return () => {
-      clearInterval(timer);
-      clearInterval(noteSpawner);
-      if (animRef.current) cancelAnimationFrame(animRef.current);
-    };
-  }, []);
+    return () => clearInterval(timer);
+  }, [isTutorial]);
 
   useEffect(() => {
-    if (timeLeft === 0) {
-      const perfectHits = hits.filter((h) => h === 1).length;
-      if (perfectHits >= 5) {
+    if (!isTutorial && timeLeft === 0) {
+      if (completedSequences >= 3) {
         onFinish({
           gameType: 'rhythm',
           modifier: 0.25,
           rank: 'S',
-          description: 'Mosaico 3D subiu perfeito em sintonia com a bateria (+25% Bancada/PEC)!',
+          description: 'Mosaico 3D de cores subiu perfeito na arquibancada (+25% Bancada/PEC)!',
         });
-      } else if (perfectHits >= 3) {
+      } else if (completedSequences >= 2) {
         onFinish({
           gameType: 'rhythm',
           modifier: 0.10,
           rank: 'B',
-          description: 'Festa da bancada levantou o estádio (+10% Bancada).',
+          description: 'Festa com cores da bancada levantou o estádio (+10% Bancada).',
         });
       } else {
         onFinish({
           gameType: 'rhythm',
           modifier: -0.10,
           rank: 'F',
-          description: 'Bateria desencontrou e o mosaico subiu torto (-10% Moral).',
+          description: 'Mosaico de cores subiu desencontrado e torto (-10% Moral).',
         });
       }
     }
-  }, [timeLeft, hits, onFinish]);
+  }, [timeLeft, completedSequences, isTutorial, onFinish]);
 
-  const handleHitLane = (targetLane: number) => {
-    const currentNote = notes.find((n) => n.lane === targetLane && n.pos >= 65 && n.pos <= 96);
-    if (currentNote) {
-      setHits((h) => [...h, 1]);
-      setNotes((prev) => prev.filter((n) => n.id !== currentNote.id));
-    } else {
-      setHits((h) => [...h, 0]);
+  const handleTileClick = (colorIdx: number) => {
+    if (isTutorial || isShowingSequence) return;
+    const nextUserSeq = [...userSequence, colorIdx];
+    setUserSequence(nextUserSeq);
+
+    const stepIndex = nextUserSeq.length - 1;
+    if (nextUserSeq[stepIndex] !== sequence[stepIndex]) {
+      // Wrong sequence, reset current round
+      setUserSequence([]);
+      startNewRound(Math.min(5, 3 + completedSequences));
+      return;
+    }
+
+    if (nextUserSeq.length === sequence.length) {
+      // Sequence completed!
+      setCompletedSequences((c) => c + 1);
+      setTimeout(() => {
+        startNewRound(Math.min(5, 3 + completedSequences + 1));
+      }, 400);
     }
   };
 
-  const laneLabels = ['Surdo 🥁', 'Repique 🪘', 'Caixa 🥁'];
+  if (isTutorial) {
+    return (
+      <div className="flex flex-col items-center bg-zinc-950 p-6 rounded-2xl border border-emerald-700 text-white max-w-sm w-full select-none shadow-2xl space-y-4 text-center">
+        <div className="border-b border-zinc-800 pb-2 w-full">
+          <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest block">🧩 MOSAICO 3D</span>
+          <h3 className="text-sm font-black text-white uppercase mt-0.5">Jogo da Memória por Cores</h3>
+        </div>
+
+        <p className="text-xs text-zinc-300 leading-relaxed text-left">
+          <strong>Como Jogar:</strong> A arquibancada exibirá uma sequência de placas coloridas (🔴 🔵 🟡 🟢).
+        </p>
+        <ul className="text-[11px] text-zinc-400 text-left space-y-1.5 list-disc pl-4">
+          <li>Observe atentamente as cores piscarem na tela.</li>
+          <li>Repita a sequência exata clicando nos setores coloridos correspondentes!</li>
+        </ul>
+
+        <div className="bg-zinc-900 border border-zinc-800 p-2.5 rounded-xl text-[10px] font-mono text-amber-400 w-full text-left">
+          ⏱️ Duração: 10s • Meta Rank S: 3+ Sequências Perfeitas (+25% Bancada/PEC)
+        </div>
+
+        <button
+          onClick={() => setIsTutorial(false)}
+          className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer"
+        >
+          ▶️ INICIAR MOSAICO DE CORES
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center bg-zinc-950 p-6 rounded-2xl border border-emerald-700 text-white max-w-sm w-full select-none shadow-2xl space-y-3">
       <div className="flex justify-between w-full text-xs font-black tracking-wider uppercase border-b border-zinc-800 pb-2">
-        <span className="text-emerald-400">Bateria: 3 Instrumentos no Compasso</span>
+        <span className="text-emerald-400">Mosaico: Memorize a Sequência</span>
         <span className="text-yellow-400 font-mono text-sm">{timeLeft}s</span>
       </div>
 
-      <div className="relative w-full h-52 bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800">
-        {/* 3 Vertical Lanes */}
-        <div className="absolute inset-0 grid grid-cols-3 divide-x divide-dashed divide-zinc-800 pointer-events-none" />
-
-        {/* Hit Zone Line */}
-        <div className="absolute bottom-4 left-1 right-1 h-9 border-2 border-emerald-400 bg-emerald-950/40 rounded-lg flex items-center justify-center pointer-events-none">
-          <span className="text-[9px] font-black tracking-widest text-emerald-300">ZONA DE BATIDA</span>
+      <div className="relative w-full h-52 bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 p-3 flex flex-col justify-between">
+        <div className="text-[10px] font-black text-center text-zinc-400 uppercase tracking-wider">
+          {isShowingSequence ? '👀 OBSERVE A SEQUÊNCIA...' : '👇 REPITA A SEQUÊNCIA!'}
         </div>
 
-        {/* Notes falling */}
-        {notes.map((note) => (
-          <div
-            key={note.id}
-            className="absolute w-1/3 flex justify-center transition-all duration-75"
-            style={{ left: `${note.lane * 33.33}%`, top: `${note.pos}%` }}
-          >
-            <div className="w-8 h-8 bg-emerald-500 border border-white rounded-full flex items-center justify-center font-bold text-xs shadow-lg animate-pulse">
-              🥁
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* 3 Hit Buttons */}
-      <div className="grid grid-cols-3 gap-2 w-full pt-1">
-        {[0, 1, 2].map((laneIdx) => (
-          <button
-            key={laneIdx}
-            onClick={() => handleHitLane(laneIdx)}
-            className="py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 active:scale-95 text-white font-black text-xs uppercase transition-all shadow-md cursor-pointer text-center"
-          >
-            {laneLabels[laneIdx]}
-          </button>
-        ))}
+        {/* 4 Color Tiles Grid */}
+        <div className="grid grid-cols-2 gap-3 h-36">
+          {colors.map((col, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleTileClick(idx)}
+              disabled={isShowingSequence}
+              className={`rounded-xl flex items-center justify-center text-2xl transition-all cursor-pointer border ${
+                activeHighlightColor === idx
+                  ? 'scale-105 border-white shadow-[0_0_15px_rgba(255,255,255,0.8)]'
+                  : 'border-white/20 hover:border-white/50 opacity-80 hover:opacity-100'
+              }`}
+              style={{ backgroundColor: col.hex }}
+            >
+              {col.icon}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="flex justify-between items-center w-full text-xs text-zinc-400 border-t border-zinc-800 pt-2 font-semibold">
-        <span>Batidas Perfeitas:</span>
-        <span className="text-emerald-400 font-bold font-mono text-sm">{hits.filter((h) => h === 1).length}</span>
+        <span>Sequências Completadas:</span>
+        <span className="text-emerald-400 font-bold font-mono text-sm">{completedSequences}</span>
       </div>
     </div>
   );
 };
 
 // ==========================================
-// 5. MINI-GAME 4: FUGA DA BLITZ (LANE RUNNER - 10s, VELOCIDADE EQUILIBRADA)
+// 5. MINI-GAME 4: FUGA DA BLITZ (LANE RUNNER - 10s)
 // ==========================================
 interface CaravanDodgeProps {
   onFinish: (result: MiniGameResult) => void;
 }
 
 export const CaravanDodge: React.FC<CaravanDodgeProps> = ({ onFinish }) => {
-  const [lane, setLane] = useState<number>(1); // 0: Left, 1: Center, 2: Right
+  const [isTutorial, setIsTutorial] = useState(true);
+  const [lane, setLane] = useState<number>(1);
   const [obstacles, setObstacles] = useState<{ id: number; lane: number; y: number; type: string }[]>([]);
   const [collisions, setCollisions] = useState(0);
   const [timeLeft, setTimeLeft] = useState(10);
 
   useEffect(() => {
+    if (isTutorial) return;
     const timer = setInterval(() => {
       setTimeLeft((t) => (t <= 1 ? 0 : t - 1));
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [isTutorial]);
 
   useEffect(() => {
+    if (isTutorial) return;
     const spawnInterval = setInterval(() => {
       const randomLane = Math.floor(Math.random() * 3);
       const types = ['🚧', '🚔', '🛞', '🚓'];
@@ -507,10 +664,10 @@ export const CaravanDodge: React.FC<CaravanDodgeProps> = ({ onFinish }) => {
       clearInterval(spawnInterval);
       clearInterval(moveInterval);
     };
-  }, [lane]);
+  }, [isTutorial, lane]);
 
   useEffect(() => {
-    if (timeLeft === 0) {
+    if (!isTutorial && timeLeft === 0) {
       if (collisions <= 1) {
         onFinish({
           gameType: 'dodge',
@@ -536,7 +693,37 @@ export const CaravanDodge: React.FC<CaravanDodgeProps> = ({ onFinish }) => {
         });
       }
     }
-  }, [timeLeft, collisions, onFinish]);
+  }, [timeLeft, collisions, isTutorial, onFinish]);
+
+  if (isTutorial) {
+    return (
+      <div className="flex flex-col items-center bg-zinc-950 p-6 rounded-2xl border border-yellow-700 text-white max-w-sm w-full select-none shadow-2xl space-y-4 text-center">
+        <div className="border-b border-zinc-800 pb-2 w-full">
+          <span className="text-[10px] font-black text-yellow-400 uppercase tracking-widest block">🚐 CARAVANA DA TORCIDA</span>
+          <h3 className="text-sm font-black text-white uppercase mt-0.5">Fuga da Blitz Policial</h3>
+        </div>
+
+        <p className="text-xs text-zinc-300 leading-relaxed text-left">
+          <strong>Como Jogar:</strong> Conduza a caravana pelas 3 pistas evitando bloqueios (🚧 🚔 🛞).
+        </p>
+        <ul className="text-[11px] text-zinc-400 text-left space-y-1.5 list-disc pl-4">
+          <li>Use os botões de <span className="text-yellow-400 font-bold">⬅️ Esquerda</span> e <span className="text-yellow-400 font-bold">Direita ➡️</span> para mudar de pista.</li>
+          <li>Evite colidir para não atrasar a chegada ou tomar multas da PM!</li>
+        </ul>
+
+        <div className="bg-zinc-900 border border-zinc-800 p-2.5 rounded-xl text-[10px] font-mono text-amber-400 w-full text-left">
+          ⏱️ Duração: 10s • Meta Rank S: No máximo 1 colisão (+25% PEC)
+        </div>
+
+        <button
+          onClick={() => setIsTutorial(false)}
+          className="w-full py-3 rounded-xl bg-yellow-600 hover:bg-yellow-500 text-black font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer"
+        >
+          ▶️ INICIAR CORRIDA DA CARAVANA
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center bg-zinc-950 p-6 rounded-2xl border border-yellow-700 text-white max-w-sm w-full select-none shadow-2xl space-y-3">
@@ -611,13 +798,11 @@ export const MatchTacticalResolver: React.FC<{
       const visitorHasEnoughContingent = context.awayContingent >= threshold;
 
       if (!visitorHasEnoughContingent) {
-        // Visitante tem menos de 80% do contingente: sem confronto de pista
         const message = `Torcida visitante em menor número (${context.awayContingent} vs ${context.homeContingent}). O bonde rival recuou com escolta policial. Sem confronto nos portões!`;
         setStatusMessage(message);
         onMatchComplete(message, 0.0);
         return;
       } else {
-        // Visitante tem >= 80%: Dispara confronto direto
         setStatusMessage('Visitante com grande contingente forçou passagem pelo portão! Confronto iminente!');
         setActiveMiniGame('whack');
         return;
@@ -645,10 +830,10 @@ export const MatchTacticalResolver: React.FC<{
       )}
 
       {activeMiniGame === 'whack' && (
-        <WhackCombat opponentTier={context.opponentTier} onFinish={handleMiniGameFinish} />
+        <PunchFrontCombat opponentTier={context.opponentTier} onFinish={handleMiniGameFinish} />
       )}
       {activeMiniGame === 'rojon' && <RojonTarget onFinish={handleMiniGameFinish} />}
-      {activeMiniGame === 'rhythm' && <RhythmBanner onFinish={handleMiniGameFinish} />}
+      {activeMiniGame === 'rhythm' && <MemoryMosaic onFinish={handleMiniGameFinish} />}
       {activeMiniGame === 'dodge' && <CaravanDodge onFinish={handleMiniGameFinish} />}
     </div>
   );

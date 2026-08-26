@@ -4,9 +4,9 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Drum, Shield, Flame, Bus, Swords, CheckCircle2, RotateCcw, AlertTriangle } from "lucide-react";
 import {
-  WhackCombat,
+  PunchFrontCombat,
   RojonTarget,
-  RhythmBanner,
+  MemoryMosaic,
   CaravanDodge,
   MatchTacticalResolver,
   MiniGameResult,
@@ -303,7 +303,7 @@ export default function MiniGamesTestPage() {
       {/* PLAYGROUND CONTAINER */}
       <div className="max-w-3xl w-full bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col items-center justify-center min-h-[380px] shadow-2xl relative">
         {activeTab === "whack" && (
-          <WhackCombat key={gameKey} opponentTier={whackTier} onFinish={handleFinishMiniGame} />
+          <PunchFrontCombat key={gameKey} opponentTier={whackTier} onFinish={handleFinishMiniGame} />
         )}
 
         {activeTab === "rojon" && (
@@ -311,7 +311,7 @@ export default function MiniGamesTestPage() {
         )}
 
         {activeTab === "rhythm" && (
-          <RhythmBanner key={gameKey} onFinish={handleFinishMiniGame} />
+          <MemoryMosaic key={gameKey} onFinish={handleFinishMiniGame} />
         )}
 
         {activeTab === "dodge" && (

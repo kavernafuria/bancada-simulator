@@ -2885,3 +2885,243 @@ export function getRandomNewsReelEvent(): NewsReelEvent {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
+// -------------------------------------------------------------
+// 6. MOTOR DE DECISÃO ESTRATÉGICA DE TEMPORADA (A CADA 3 ANOS)
+// -------------------------------------------------------------
+export interface SeasonalOptionDefinition {
+  id: string;
+  title: string;
+  badge: string;
+  description: string;
+  consequencesSummary: string;
+  contingenteDelta?: number;
+  pistaDelta?: number;
+  bancadaDelta?: number;
+  riscoMpDelta?: number;
+  respeitoDelta?: number;
+  cashDelta?: number;
+  rivalPistaBonus?: number;
+}
+
+export interface SeasonalMilestoneDefinition {
+  season: number;
+  title: string;
+  subtitle: string;
+  newsHeadline: string;
+  narrativeText: string;
+  hasPositiveRivalTrigger?: boolean;
+  options: SeasonalOptionDefinition[];
+}
+
+export function getSeasonalMilestoneEvent(
+  season: number,
+  stats: TorcidaStats,
+  trackers: StateTrackers,
+  mainRivalName: string,
+  isPositiveVsRival: boolean
+): SeasonalMilestoneDefinition | null {
+  if (season === 3) {
+    return {
+      season: 3,
+      title: "🏛️ 3ª TEMPORADA: DECISÃO ESTRATÉGICA & RESPOSTA RIVAL",
+      subtitle: "CONSOLIDAÇÃO DE FORÇA E ESTRUTURA DE BONDE",
+      hasPositiveRivalTrigger: isPositiveVsRival,
+      newsHeadline: isPositiveVsRival
+        ? `⚠️ ELEIÇÃO RIVAL AGRESSIVA: A ${mainRivalName} elegeu um Presidente Linha de Frente para conter o seu histórico positivo!`
+        : `🔥 RESTRUTURAÇÃO DE RECTAGUARDA E EXPANSÃO REGIONAL DA TORCIDA!`,
+      narrativeText: isPositiveVsRival
+        ? `Humilhada pelo seu histórico positivo no clássico, a assembleia rival elegeu uma diretoria violenta. A ${mainRivalName} ganhou +35% de PEC de Pista permanente e trará contingentes maiores!`
+        : `Com o crescimento da torcida após 3 anos de mandato, os bondes de bairro exigem voz ativa na diretoria para definir os rumos da arquibancada e da pista.`,
+      options: [
+        {
+          id: "REFORCO_PISTA",
+          title: "👊 Criar Novo Bonde da Periferia (Foco Pista)",
+          badge: "EXPANSÃO DE RUAS",
+          description: "Organiza sub-sedes de bairro num bonde de combate móvel.",
+          consequencesSummary: "+20% Contingente, +15 Poder Pista, +10% Risco MP",
+          contingenteDelta: 20,
+          pistaDelta: 15,
+          riscoMpDelta: 10,
+          rivalPistaBonus: isPositiveVsRival ? 35 : 0,
+        },
+        {
+          id: "REFORMA_INTERNA",
+          title: "🏛️ Reforma Interna & Transparência da Diretoria",
+          badge: "RESTRUTURAÇÃO MORAL",
+          description: "Contém excessos de rua e foca na regularização com o Ministério Público.",
+          consequencesSummary: "-15% Risco MP, +10 Respeito Nacional, -5 Contingente",
+          riscoMpDelta: -15,
+          respeitoDelta: 10,
+          contingenteDelta: -5,
+          rivalPistaBonus: isPositiveVsRival ? 35 : 0,
+        },
+        {
+          id: "PACTO_LOCAL",
+          title: "🕊️ Acordo Diplomático de Bastidores com Rival",
+          badge: "PACTO ISOLADO",
+          description: "Firma pacto de não-agressão de ferro com a nova diretoria rival.",
+          consequencesSummary: "-R$ 5.000 do Caixa, Reduz a agressividade rival nos clássicos",
+          cashDelta: -5000,
+          rivalPistaBonus: isPositiveVsRival ? 15 : 0,
+        },
+      ],
+    };
+  }
+
+  if (season === 6) {
+    return {
+      season: 6,
+      title: "🏛️ 6ª TEMPORADA: DIVISOR DE ÁGUAS DA TORCIDA",
+      subtitle: "RACHA INTERNO VS EXPANSÃO NACIONAL",
+      newsHeadline: "🚨 INTERVENÇÃO DO MP E TENSÃO ENTRE BONDES ANTAGÔNICOS!",
+      narrativeText: "Seis anos de liderança colocam a torcida sob holofotes nacionais. Divergências entre a velha guarda e os bondes jovens exigem posicionamento definitivo.",
+      options: [
+        {
+          id: "UNIFICACAO_BONDES",
+          title: "🔥 Unificação dos Bondes de Bairro (Pista Total)",
+          badge: "UNIFICAÇÃO DE RUA",
+          description: "Funde todas as sub-sedes num mega-bonde principal.",
+          consequencesSummary: "+30 Poder Pista em jogos fora, +15% Risco MP",
+          pistaDelta: 30,
+          riscoMpDelta: 15,
+        },
+        {
+          id: "RACHA_DISSIDENCIA",
+          title: "⚡ Rompimento de Dissidência da Bancada (Racha)",
+          badge: "INDEPENDÊNCIA MORAL",
+          description: "Grupo tradicional rompe com a diretoria devido a divergências.",
+          consequencesSummary: "-15 Contingente, +25 Respeito Nacional por independência",
+          contingenteDelta: -15,
+          respeitoDelta: 25,
+        },
+        {
+          id: "CONSELHO_COMERCIAL",
+          title: "💼 Profissionalização do Conselho Comercial",
+          badge: "GESTÃO FINANCEIRA",
+          description: "Estrutura as vendas de produtos e a arrecadação da quadra.",
+          consequencesSummary: "+R$ 15.000 no Caixa imediato, -10 Poder Pista",
+          cashDelta: 15000,
+          pistaDelta: -10,
+        },
+      ],
+    };
+  }
+
+  if (season === 9) {
+    return {
+      season: 9,
+      title: "🏛️ 9ª TEMPORADA: CONSOLIDACÃO DAS ALIANÇAS E OPERAÇÃO",
+      subtitle: "DIPLOMACIA NACIONAIS E CRISE COM O MP",
+      newsHeadline: "🤝 REARRANJO DOS EIXOS INTERESTADUAIS DE UNIDOS E DEDO PRO ALTO!",
+      narrativeText: "A nona temporada exige definir as prioridades logísticas: estreitar laços com torcidas aliadas do país, reestruturar a defesa jurídica ou adquirir frota.",
+      options: [
+        {
+          id: "PACTO_ALIADAS",
+          title: "🤝 Pacto Exclusivo de União com Aliadas Nacionais",
+          badge: "SUPORTE LOGÍSTICO",
+          description: "Garante acolhimento e reforço total em viagens interestaduais.",
+          consequencesSummary: "+50% Suporte em Caravanas Fora, +15 Respeito Nacional",
+          respeitoDelta: 15,
+          contingenteDelta: 10,
+        },
+        {
+          id: "RESTRUCT_ANTICRISE",
+          title: "⚖️ Reestruturação Anticrise do Ministério Público",
+          badge: "PACTO INSTITUCIONAL",
+          description: "Reformula o conselho de ética para zerar pendências judiciais.",
+          consequencesSummary: "-25% Risco MP imediato, +10 Relação Clube",
+          riscoMpDelta: -25,
+        },
+        {
+          id: "FROTA_CARAVANA",
+          title: "🚐 Aquisição de Frota Própria de Caravana",
+          badge: "AUTONOMIA DE VIAGEM",
+          description: "Compra veículos próprios para transporte de membros.",
+          consequencesSummary: "-R$ 10.000 Caixa, Custo de caravana reduzido em 50%",
+          cashDelta: -10000,
+          contingenteDelta: 15,
+        },
+      ],
+    };
+  }
+
+  if (season === 12) {
+    return {
+      season: 12,
+      title: "🏛️ 12ª TEMPORADA: ERA DAS ARENAS & GUERRA FRIA",
+      subtitle: "RESISTÊNCIA CULTURAL VS SUPREMACIA DE PISTA",
+      newsHeadline: "🏟️ ARENIZAÇÃO DOS ESTÁDIOS E ENTRADA DA BIOMETRIA FACIAL!",
+      narrativeText: "Com 12 anos de estrada, a modernização dos estádios cobra caro. A torcida precisa decidir entre a supremacia de rua, a resistência pacífica ou grandes parcerias.",
+      options: [
+        {
+          id: "HEGEMONIA_ESTADUAL",
+          title: "👑 Hegemonia Total de Pista Estadual",
+          badge: "SUPREMACIA DE RUA",
+          description: "Domínio completo nos arredores dos jogos locais.",
+          consequencesSummary: "+30 Poder Pista em clássicos estaduais",
+          pistaDelta: 30,
+        },
+        {
+          id: "BOICOTE_RESISTENCIA",
+          title: "✊ Boicote Cultural e Resistência de Catraca",
+          badge: "PAX DE BANCADA",
+          description: "Protesto organizado contra o encarecimento dos ingressos.",
+          consequencesSummary: "Reseta o Risco MP para 0%, +20 Respeito Nacional",
+          riscoMpDelta: -100,
+          respeitoDelta: 20,
+        },
+        {
+          id: "MEGAPARCERIA_FESTA",
+          title: "🎨 Megaparceria de Festas & Mosaicos 3D",
+          badge: "ARENA FESTIVAL",
+          description: "Parceria comercial para grandes espetáculos de bancada.",
+          consequencesSummary: "+R$ 30.000 no Caixa, Lucros de Mosaico dobrados",
+          cashDelta: 30000,
+          bancadaDelta: 20,
+        },
+      ],
+    };
+  }
+
+  if (season === 15) {
+    return {
+      season: 15,
+      title: "👑 15ª TEMPORADA: A DECISÃO DO SÉCULO & LEGADO FINAL",
+      subtitle: "CONSAGRAÇÃO MÁXIMA DA CARREIRA ULTRAS",
+      newsHeadline: "🏆 APOGEU DE 15 ANOS DE MANDATO E LIDERANÇA DE ARQUIBANCADA!",
+      narrativeText: "Na décima quinta e última temporada, sua torcida disputa o topo absoluto do país. Escolha como selar o legado histórico da sua liderança.",
+      options: [
+        {
+          id: "SUPREMACIA_NACIONAL",
+          title: "🏆 Supremacia Absoluta de Pista & Bancada",
+          badge: "COROA DE MAIOR DO PAÍS",
+          description: "Combate final pela liderança incontestada das arquibancadas.",
+          consequencesSummary: "+50% PEC e Moral no confronto final da temporada",
+          pistaDelta: 25,
+          bancadaDelta: 25,
+        },
+        {
+          id: "INSTITUCIONALIZACAO",
+          title: "🕊️ Institucionalização & Referência Cultural",
+          badge: "PATRIMÔNIO CULTURAL",
+          description: "Consolida a torcida como instituição cultural pacífica e de show.",
+          consequencesSummary: "Risco MP Zerado, +50 Respeito Nacional",
+          riscoMpDelta: -100,
+          respeitoDelta: 50,
+        },
+        {
+          id: "MEGAFUSAO_LEGAIS",
+          title: "🤝 Megafusão com Aliadas em Holding de Bancada",
+          badge: "UNIFICAÇÃO NACIONAL",
+          description: "Une formalmente os bonde e subsedes num império de torcidas.",
+          consequencesSummary: "+50 Contingente, +R$ 50.000 no Caixa",
+          contingenteDelta: 50,
+          cashDelta: 50000,
+        },
+      ],
+    };
+  }
+
+  return null;
+}
+
