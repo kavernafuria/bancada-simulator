@@ -1345,11 +1345,11 @@ export default function App() {
             </button>
           </div>
 
-          <div className="text-center pb-1 border-b border-zinc-800/80">
+          <div className="text-center py-2 border-b border-zinc-800/80">
             <img
               src="/bancada_logo.png"
               alt="Bancada Simulator"
-              className="w-52 sm:w-60 h-auto mx-auto object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.9)]"
+              className="w-64 sm:w-80 h-auto mx-auto object-contain filter drop-shadow-[0_10px_20px_rgba(220,38,38,0.45)]"
             />
           </div>
 
@@ -1800,7 +1800,19 @@ export default function App() {
           }}
         />
 
-        <div className="flex items-center justify-between pt-1">
+        {/* Top Brand Logo Banner */}
+        <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-zinc-800/80">
+          <img
+            src="/bancada_logo.png"
+            alt="Bancada Simulator Logo"
+            className="h-7 sm:h-9 w-auto object-contain filter drop-shadow-[0_4px_12px_rgba(220,38,38,0.4)]"
+          />
+          <span className="text-[9px] font-black px-2 py-0.5 rounded bg-zinc-800 text-amber-300 border border-zinc-700 uppercase">
+            {season <= 3 ? "Fase 1: Construção" : season <= 6 ? "Fase 2: Expansão" : season <= 9 ? "Fase 3: Consolidação" : season <= 12 ? "Fase 4: Influência" : "Fase 5: Legado"}
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between pt-0.5">
           <div className="flex items-center gap-2">
             {/* Torcida Flag Icon with Colors */}
             <div className="flex flex-col gap-0.5 shrink-0">
@@ -1809,21 +1821,11 @@ export default function App() {
             </div>
 
             <div>
-              <div className="flex items-center gap-1.5 mb-0.5">
-                <img
-                  src="/bancada_logo.png"
-                  alt="Bancada Simulator Logo"
-                  className="h-5 sm:h-6 w-auto object-contain filter drop-shadow"
-                />
-              </div>
               <span className="text-[10px] font-black tracking-wider text-amber-400 uppercase block">
                 {currentTorcida?.torcida} • {currentTorcida?.clube}
               </span>
               <h2 className="text-xs font-black text-white uppercase flex items-center gap-1.5 flex-wrap">
                 <span>TEMPORADA {season} DE 15 • ETAPA {pipelineIndex + 1}/13</span>
-                <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-zinc-800 text-amber-300 border border-zinc-700">
-                  {season <= 3 ? "Fase 1: Construção" : season <= 6 ? "Fase 2: Expansão" : season <= 9 ? "Fase 3: Consolidação" : season <= 12 ? "Fase 4: Influência" : "Fase 5: Legado"}
-                </span>
               </h2>
             </div>
           </div>
