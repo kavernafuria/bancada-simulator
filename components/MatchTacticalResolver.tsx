@@ -16,7 +16,7 @@ export interface MiniGameResult {
 export interface MatchContext {
   isHome: boolean;
   isAllyGame?: boolean;
-  tacticalChoice: 'gate_concentration' | 'front_charge' | 'rojon_barrage' | 'rhythm_mosaic' | 'caravan_escape';
+  tacticalChoice: 'gate_concentration' | 'front_charge' | 'punch_combat' | 'rojon_barrage' | 'rhythm_mosaic' | 'caravan_escape';
   homeContingent: number;
   awayContingent: number;
   opponentTier: 'S' | 'A' | 'B';
@@ -985,6 +985,7 @@ export const MatchTacticalResolver: React.FC<{
 
     // Seleção de mini-game conforme tática padrão
     if (context.tacticalChoice === 'front_charge') setActiveMiniGame('whack');
+    if (context.tacticalChoice === 'punch_combat') setActiveMiniGame('punch');
     if (context.tacticalChoice === 'rojon_barrage') setActiveMiniGame('rojon');
     if (context.tacticalChoice === 'rhythm_mosaic') setActiveMiniGame('rhythm');
     if (context.tacticalChoice === 'caravan_escape') setActiveMiniGame('dodge');
@@ -1005,6 +1006,9 @@ export const MatchTacticalResolver: React.FC<{
 
       {activeMiniGame === 'whack' && (
         <WhackCombat opponentTier={context.opponentTier} onFinish={handleMiniGameFinish} />
+      )}
+      {activeMiniGame === 'punch' && (
+        <PunchFrontCombat opponentTier={context.opponentTier} onFinish={handleMiniGameFinish} />
       )}
       {activeMiniGame === 'rojon' && <RojonTarget onFinish={handleMiniGameFinish} />}
       {activeMiniGame === 'rhythm' && <MemoryMosaic onFinish={handleMiniGameFinish} />}

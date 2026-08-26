@@ -601,11 +601,23 @@ export default function App() {
     if (!selectedTransport || !activeScoutIntel || !activeMatchDerby || !currentTorcida) return;
 
     let mappedChoice: MatchContext['tacticalChoice'] = 'front_charge';
-    if (tactic.id === "MOSAICO_3D_FESTA") mappedChoice = 'rhythm_mosaic';
-    else if (tactic.id === "GUERRA_ROJOES_MORTEIROS") mappedChoice = 'rojon_barrage';
-    else if (tactic.id === "DEFESA_COMBOIO_ESCOLTA") mappedChoice = 'caravan_escape';
-    else if (activeMatchDerby.isHome && (tactic.id === "CONFRONTO_BARRA_FERRO" || tactic.id === "DEFESA_PERIMETRO_LOCAL")) mappedChoice = 'gate_concentration';
-    else mappedChoice = 'front_charge';
+    const tid = (tactic.id || "").toUpperCase();
+
+    if (tactic.isMosaicTactic || tid.includes("MOSAICO") || tid.includes("FESTA") || tid.includes("SAMBA") || tid.includes("ALAMBRADO")) {
+      mappedChoice = 'rhythm_mosaic';
+    } else if (tid.includes("ROJOES") || tid.includes("MORTEIROS")) {
+      mappedChoice = 'rojon_barrage';
+    } else if (tid.includes("EMBOSCADA") || tid.includes("COMBOIO") || tid.includes("ESCOLTA") || tid.includes("FLANCO") || tid.includes("SURPRESA") || tid.includes("RODOVIA")) {
+      mappedChoice = 'caravan_escape';
+    } else if (tid.includes("MAO_LIMPA") || tid.includes("LINHA_FRENTE") || tid.includes("SOCO") || tid.includes("DISPOSICAO")) {
+      mappedChoice = 'punch_combat';
+    } else if (tid.includes("BARRA") || tid.includes("PERIMETRO")) {
+      mappedChoice = 'front_charge';
+    } else if (activeMatchDerby.isHome && (tid.includes("PORTAO") || tid.includes("PERIMETRO_LOCAL"))) {
+      mappedChoice = 'gate_concentration';
+    } else {
+      mappedChoice = 'front_charge';
+    }
 
     const opponentTier: MatchContext['opponentTier'] = activeScoutIntel.rivalMembersWaiting > 3000 ? 'S' : activeScoutIntel.rivalMembersWaiting > 1500 ? 'A' : 'B';
 
