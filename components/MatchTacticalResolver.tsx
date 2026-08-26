@@ -334,7 +334,7 @@ export const PunchFrontCombat: React.FC<PunchFrontCombatProps> = ({ opponentTier
 };
 
 // ==========================================
-// 4. MINI-GAME 3: MOSAICO 3D (JOGO DA MEMÓRIA - 3 FASES FIXAS DE REPETIÇÃO, FLASH RÁPIDO 300ms)
+// 4. MINI-GAME 3: MOSAICO 3D (PARES DE MEMÓRIA - 10 PLACAS, 5 PARES)
 // ==========================================
 interface MemoryMosaicProps {
   onFinish: (result: MiniGameResult) => void;
@@ -342,78 +342,135 @@ interface MemoryMosaicProps {
 
 export const MemoryMosaic: React.FC<MemoryMosaicProps> = ({ onFinish }) => {
   const [isTutorial, setIsTutorial] = useState(true);
-  const [currentPhase, setCurrentPhase] = useState<number>(1); // Phase 1, 2, 3
 
-  const colors = [
-    { name: 'Vermelho', hex: '#ef4444', icon: '🔴' },
-    { name: 'Azul', hex: '#3b82f6', icon: '🔵' },
-    { name: 'Amarelo', hex: '#eab308', icon: '🟡' },
-    { name: 'Verde', hex: '#22c55e', icon: '🟢' },
+  // 5 Color Pairs Definition
+  const COLOR_PAIRS = [
+    { id: 'RED', name: 'Vermelho', hex: '#ef4444', icon: '🔴' },
+    { id: 'BLUE', name: 'Azul', hex: '#3b82f6', icon: '🔵' },
+    { id: 'YELLOW', name: 'Amarelo', hex: '#eab308', icon: '🟡' },
+    { id: 'GREEN', name: 'Verde', hex: '#22c55e', icon: '🟢' },
+    { id: 'PURPLE', name: 'Roxo', hex: '#a855f7', icon: '🟣' },
   ];
 
-  const [sequence, setSequence] = useState<number[]>([]);
-  const [userSequence, setUserSequence] = useState<number[]>([]);
-  const [isShowingSequence, setIsShowingSequence] = useState(false);
-  const [activeHighlightColor, setActiveHighlightColor] = useState<number | null>(null);
+  interface CardTile {
+    uniqueId: number;
+    colorId: string;
+    hex: string;
+    icon: string;
+    isMatched: boolean;
+  }
 
-  // Generate sequence for current phase (Phase 1 = 3 colors, Phase 2 = 4 colors, Phase 3 = 5 colors)
-  const startPhase = (phaseNum: number) => {
-    const seqLength = phaseNum === 1 ? 3 : phaseNum === 2 ? 4 : 5;
-    const newSeq = Array.from({ length: seqLength }, () => Math.floor(Math.random() * 4));
-    setSequence(newSeq);
-    setUserSequence([]);
-    setIsShowingSequence(true);
+  const [cards, setCards] = useState<CardTile[]>([]);
+  const [previewCountdown, setPreviewCountdown] = useState<number>(3); // 3 seconds initial reveal preview
+  const [isMemorizing, setIsMemorizing] = useState<boolean>(true);
+  const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
+  const [attempts, setAttempts] = useState<number>(0);
+  const [matchedPairsCount, setMatchedPairsCount] = useState<number>(0);
 
-    // Fast snappy flash playback (300ms on, 120ms off)
-    newSeq.forEach((colorIdx, step) => {
-      setTimeout(() => {
-        setActiveHighlightColor(colorIdx);
-        setTimeout(() => setActiveHighlightColor(null), 300);
-      }, step * 420);
+  // Initialize and shuffle 10 cards (5 pairs)
+  const initializeGrid = () => {
+    const deck: CardTile[] = [];
+    let counter = 0;
+    COLOR_PAIRS.forEach((col) => {
+      deck.push({ uniqueId: counter++, colorId: col.id, hex: col.hex, icon: col.icon, isMatched: false });
+      deck.push({ uniqueId: counter++, colorId: col.id, hex: col.hex, icon: col.icon, isMatched: false });
     });
 
-    setTimeout(() => {
-      setIsShowingSequence(false);
-    }, newSeq.length * 420 + 100);
+    // Shuffle deck
+    for (let i = deck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+
+    setCards(deck);
+    setPreviewCountdown(3);
+    setIsMemorizing(true);
+    setSelectedIndices([]);
+    setAttempts(0);
+    setMatchedPairsCount(0);
   };
 
   useEffect(() => {
     if (!isTutorial) {
-      startPhase(1);
+      initializeGrid();
     }
   }, [isTutorial]);
 
-  const handleTileClick = (colorIdx: number) => {
-    if (isTutorial || isShowingSequence) return;
-    const nextUserSeq = [...userSequence, colorIdx];
-    setUserSequence(nextUserSeq);
+  // 3-second memorization countdown timer
+  useEffect(() => {
+    if (isTutorial || !isMemorizing) return;
+    const interval = setInterval(() => {
+      setPreviewCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setIsMemorizing(false); // Cards flip face-down!
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
-    const stepIndex = nextUserSeq.length - 1;
-    if (nextUserSeq[stepIndex] !== sequence[stepIndex]) {
-      // Wrong tile, restart current phase!
-      setUserSequence([]);
-      startPhase(currentPhase);
+    return () => clearInterval(interval);
+  }, [isTutorial, isMemorizing]);
+
+  // Card click handler
+  const handleCardClick = (index: number) => {
+    if (isTutorial || isMemorizing || cards[index].isMatched || selectedIndices.includes(index) || selectedIndices.length >= 2) {
       return;
     }
 
-    if (nextUserSeq.length === sequence.length) {
-      // Phase completed!
-      if (currentPhase < 3) {
-        const nextP = currentPhase + 1;
-        setCurrentPhase(nextP);
+    const nextSelected = [...selectedIndices, index];
+    setSelectedIndices(nextSelected);
+
+    if (nextSelected.length === 2) {
+      setAttempts((a) => a + 1);
+      const [firstIdx, secondIdx] = nextSelected;
+
+      if (cards[firstIdx].colorId === cards[secondIdx].colorId) {
+        // Matched pair!
         setTimeout(() => {
-          startPhase(nextP);
-        }, 500);
-      } else {
-        // All 3 phases completed!
-        setTimeout(() => {
-          onFinish({
-            gameType: 'rhythm',
-            modifier: 0.25,
-            rank: 'S',
-            description: 'Mosaico 3D de 3 fases completado perfeitamente na bancada (+25% Bancada/PEC)!',
+          setCards((prev) =>
+            prev.map((c, idx) => (idx === firstIdx || idx === secondIdx ? { ...c, isMatched: true } : c))
+          );
+          setSelectedIndices([]);
+          setMatchedPairsCount((c) => {
+            const nextCount = c + 1;
+            if (nextCount >= 5) {
+              // Win! Evaluate final attempts
+              const finalAttempts = attempts + 1;
+              setTimeout(() => {
+                if (finalAttempts <= 8) {
+                  onFinish({
+                    gameType: 'rhythm',
+                    modifier: 0.25,
+                    rank: 'S',
+                    description: 'Mosaico 3D de cores perfeito! Todos os 5 pares encontrados (+25% Bancada/PEC)!',
+                  });
+                } else if (finalAttempts <= 12) {
+                  onFinish({
+                    gameType: 'rhythm',
+                    modifier: 0.10,
+                    rank: 'B',
+                    description: 'Festa da bancada com cores levantou o estádio (+10% Bancada).',
+                  });
+                } else {
+                  onFinish({
+                    gameType: 'rhythm',
+                    modifier: -0.10,
+                    rank: 'F',
+                    description: 'Mosaico subiu desencontrado com muitas tentativas (-10% Moral).',
+                  });
+                }
+              }, 400);
+            }
+            return nextCount;
           });
-        }, 300);
+        }, 350);
+      } else {
+        // Mismatch - flip back after 600ms
+        setTimeout(() => {
+          setSelectedIndices([]);
+        }, 600);
       }
     }
   };
@@ -423,70 +480,71 @@ export const MemoryMosaic: React.FC<MemoryMosaicProps> = ({ onFinish }) => {
       <div className="flex flex-col items-center bg-zinc-950 p-6 rounded-2xl border border-emerald-700 text-white max-w-sm w-full select-none shadow-2xl space-y-4 text-center">
         <div className="border-b border-zinc-800 pb-2 w-full">
           <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest block">🧩 MOSAICO 3D</span>
-          <h3 className="text-sm font-black text-white uppercase mt-0.5">Jogo da Memória (3 Fases de Repetição)</h3>
+          <h3 className="text-sm font-black text-white uppercase mt-0.5">Jogo da Memória de Pares (10 Placas)</h3>
         </div>
 
         <p className="text-xs text-zinc-300 leading-relaxed text-left">
-          <strong>Como Jogar:</strong> Complete as **3 Fases de Sequências Coloridas** da arquibancada (🔴 🔵 🟡 🟢).
+          <strong>Como Jogar:</strong> As 10 placas da arquibancada (5 pares de cores 🔴🔵🟡🟢🟣) ficarão visíveis durante **3 segundos**.
         </p>
         <ul className="text-[11px] text-zinc-400 text-left space-y-1.5 list-disc pl-4">
-          <li><strong>Fase 1:</strong> Sequência de 3 cores.</li>
-          <li><strong>Fase 2:</strong> Sequência de 4 cores.</li>
-          <li><strong>Fase 3:</strong> Sequência de 5 cores.</li>
-          <li>Sem limite de tempo corrido — concentre-se e repita cada fase perfeitamente!</li>
+          <li><strong>Passo 1:</strong> Memorize as posições nos 3 segundos iniciais.</li>
+          <li><strong>Passo 2:</strong> Quando as placas virarem, clique para formar os 5 pares de cores iguais!</li>
         </ul>
 
         <div className="bg-zinc-900 border border-zinc-800 p-2.5 rounded-xl text-[10px] font-mono text-amber-400 w-full text-left">
-          🎯 Objetivo: Concluir as 3 Fases sem errar (+25% Bancada/PEC)
+          🎯 Meta Rank S: Encontrar os 5 Pares em até 8 tentativas (+25% Bancada/PEC)
         </div>
 
         <button
           onClick={() => setIsTutorial(false)}
           className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer"
         >
-          ▶️ INICIAR MOSAICO DE MEMÓRIA (3 FASES)
+          ▶️ INICIAR MOSAICO DE PARES
         </button>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center bg-zinc-950 p-6 rounded-2xl border border-emerald-700 text-white max-w-sm w-full select-none shadow-2xl space-y-3">
+    <div className="flex flex-col items-center bg-zinc-950 p-5 rounded-2xl border border-emerald-700 text-white max-w-sm w-full select-none shadow-2xl space-y-3">
       <div className="flex justify-between w-full text-xs font-black tracking-wider uppercase border-b border-zinc-800 pb-2">
-        <span className="text-emerald-400">Mosaico: Fase {currentPhase} de 3 ({currentPhase + 2} Cores)</span>
-        <span className="text-yellow-400 font-mono text-xs">FASE {currentPhase}/3</span>
+        <span className="text-emerald-400">Mosaico: Encontre os 5 Pares</span>
+        <span className="text-amber-400 font-mono text-xs">Tentativas: {attempts}</span>
       </div>
 
-      <div className="relative w-full h-52 bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 p-3 flex flex-col justify-between">
-        <div className="text-[10px] font-black text-center text-zinc-400 uppercase tracking-wider">
-          {isShowingSequence ? '⚡ OBSERVE A SEQUÊNCIA RÁPIDA...' : '👇 REPITA A SEQUÊNCIA!'}
+      {isMemorizing ? (
+        <div className="w-full bg-amber-500/20 border border-amber-500/40 p-2 rounded-xl text-center text-amber-300 font-bold text-xs animate-pulse">
+          👀 MEMORIZE OS PARES! ({previewCountdown}s)
         </div>
+      ) : (
+        <div className="w-full bg-zinc-900 border border-zinc-800 p-2 rounded-xl text-center text-zinc-400 font-bold text-xs flex justify-between px-3">
+          <span>Pares Encontrados: <strong className="text-emerald-400 font-mono text-sm">{matchedPairsCount}/5</strong></span>
+          <span className="text-[10px] text-zinc-500 font-normal">Clique para virar</span>
+        </div>
+      )}
 
-        {/* 4 Color Tiles Grid */}
-        <div className="grid grid-cols-2 gap-3 h-36">
-          {colors.map((col, idx) => (
+      {/* 10 Cards Grid (5x2) */}
+      <div className="grid grid-cols-5 gap-2 w-full h-44">
+        {cards.map((card, idx) => {
+          const isRevealed = isMemorizing || card.isMatched || selectedIndices.includes(idx);
+          return (
             <button
-              key={idx}
-              onClick={() => handleTileClick(idx)}
-              disabled={isShowingSequence}
-              className={`rounded-xl flex items-center justify-center text-2xl transition-all cursor-pointer border ${
-                activeHighlightColor === idx
-                  ? 'scale-105 border-white shadow-[0_0_18px_rgba(255,255,255,0.9)] bg-white/30'
-                  : 'border-white/20 hover:border-white/50 opacity-80 hover:opacity-100'
+              key={card.uniqueId}
+              onClick={() => handleCardClick(idx)}
+              disabled={isMemorizing || card.isMatched}
+              className={`rounded-xl flex items-center justify-center text-xl transition-all duration-200 cursor-pointer border ${
+                card.isMatched
+                  ? 'opacity-40 border-emerald-500 bg-emerald-950/40 cursor-default'
+                  : isRevealed
+                  ? 'border-white scale-105 shadow-md'
+                  : 'bg-zinc-900 border-zinc-800 hover:border-zinc-600 text-zinc-600'
               }`}
-              style={{ backgroundColor: col.hex }}
+              style={{ backgroundColor: isRevealed ? card.hex : undefined }}
             >
-              {col.icon}
+              {isRevealed ? card.icon : '🎨'}
             </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex justify-between items-center w-full text-xs text-zinc-400 border-t border-zinc-800 pt-2 font-semibold">
-        <span>Progresso do Mosaico:</span>
-        <span className="text-emerald-400 font-bold font-mono text-xs">
-          FASE {currentPhase}/3 ({userSequence.length}/{sequence.length})
-        </span>
+          );
+        })}
       </div>
     </div>
   );
