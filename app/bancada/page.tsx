@@ -1308,16 +1308,25 @@ export default function App() {
   // 1. ONBOARDING & SETUP SCREEN
   if (!isStarted) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-center items-center p-4">
+      <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-center items-center p-4 relative overflow-hidden">
+        {/* Full-Screen Watermark Background Image */}
+        <div
+          className="fixed inset-0 pointer-events-none bg-cover bg-center bg-no-repeat z-0 opacity-30 mix-blend-luminosity scale-105"
+          style={{
+            backgroundImage: "url('/bancada_bg.jpg')",
+          }}
+        />
+        <div className="fixed inset-0 pointer-events-none bg-gradient-to-b from-zinc-950/85 via-zinc-950/60 to-zinc-950/95 z-0" />
+
         {/* Subtle Ambient Background Gradient */}
         <div
-          className="fixed inset-0 pointer-events-none opacity-20 blur-3xl"
+          className="fixed inset-0 pointer-events-none opacity-20 blur-3xl z-0"
           style={{
             background: `radial-gradient(circle at 50% 20%, ${primaryColor} 0%, transparent 60%)`,
           }}
         />
 
-        <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-3xl p-6 shadow-2xl space-y-4 relative z-10">
+        <div className="max-w-md w-full bg-zinc-900/90 backdrop-blur-md border border-zinc-800/80 rounded-3xl p-6 shadow-2xl space-y-4 relative z-10">
           <div className="flex items-center justify-between">
             <div
               className="w-12 h-12 rounded-2xl flex items-center justify-center font-black shadow-lg border border-white/10"
@@ -1338,13 +1347,13 @@ export default function App() {
 
           <div>
             <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block">
-              SIMULADOR DE ARQUIBANCADA • 30 TEMPORADAS
+              SIMULADOR DE ARQUIBANCADA • 15 TEMPORADAS
             </span>
             <h1 className="text-xl font-black text-white tracking-tight uppercase">
               Bancada: Gestão, Clássicos & Pista
             </h1>
             <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
-              Defina as cores do seu pavilhão, cumpra objetivos sazonais (mosaicos, pistas e caravanas) e comande 30 anos de história de torcida.
+              Defina as cores do seu pavilhão, cumpra objetivos sazonais (mosaicos, pistas e caravanas) e comande 15 temporadas de história de torcida.
             </p>
           </div>
 
@@ -1643,8 +1652,17 @@ export default function App() {
     const totalFaixasPerdidas = Object.values(rivalryRecords).reduce((acc, r) => acc + r.faixasPerdidas, 0);
 
     return (
-      <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-center items-center p-4">
-        <div className="max-w-md w-full bg-zinc-900 border border-amber-500/50 rounded-3xl p-6 shadow-2xl text-center space-y-4 max-h-[90vh] overflow-y-auto">
+      <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-center items-center p-4 relative overflow-hidden">
+        {/* Full-Screen Watermark Background Image */}
+        <div
+          className="fixed inset-0 pointer-events-none bg-cover bg-center bg-no-repeat z-0 opacity-30 mix-blend-luminosity scale-105"
+          style={{
+            backgroundImage: "url('/bancada_bg.jpg')",
+          }}
+        />
+        <div className="fixed inset-0 pointer-events-none bg-gradient-to-b from-zinc-950/85 via-zinc-950/60 to-zinc-950/95 z-0" />
+
+        <div className="max-w-md w-full bg-zinc-900/90 backdrop-blur-md border border-amber-500/50 rounded-3xl p-6 shadow-2xl text-center space-y-4 max-h-[90vh] overflow-y-auto relative z-10">
           <div className="mx-auto w-16 h-16 rounded-2xl bg-amber-500 text-black flex items-center justify-center shadow-xl animate-bounce">
             <Trophy className="w-8 h-8" />
           </div>
@@ -1740,7 +1758,16 @@ export default function App() {
 
   // 3. MAIN GAMEPLAY DASHBOARD
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-3 sm:p-4 flex flex-col max-w-lg mx-auto relative">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-3 sm:p-4 flex flex-col max-w-lg mx-auto relative overflow-x-hidden">
+      {/* Full-Screen Watermark Background Image */}
+      <div
+        className="fixed inset-0 pointer-events-none bg-cover bg-center bg-no-repeat z-0 opacity-25 mix-blend-luminosity scale-105"
+        style={{
+          backgroundImage: "url('/bancada_bg.jpg')",
+        }}
+      />
+      <div className="fixed inset-0 pointer-events-none bg-gradient-to-b from-zinc-950/80 via-zinc-950/50 to-zinc-950/95 z-0" />
+
       {/* Subtle Atmospheric Top Glow with Torcida Colors */}
       <div
         className="fixed top-0 left-0 right-0 h-32 pointer-events-none opacity-20 blur-3xl z-0"
