@@ -15,6 +15,7 @@ export interface MiniGameResult {
 
 export interface MatchContext {
   isHome: boolean;
+  isAllyGame?: boolean;
   tacticalChoice: 'gate_concentration' | 'front_charge' | 'rojon_barrage' | 'rhythm_mosaic' | 'caravan_escape';
   homeContingent: number;
   awayContingent: number;
@@ -891,7 +892,22 @@ export const MatchTacticalResolver: React.FC<{
 
   useEffect(() => {
     // -------------------------------------------------------------
-    // REGRA: CONCENTRAÇÃO NO PORTÃO (JOGO EM CASA)
+    // REGRA: JOGOS DE AMIZADE COM TORCIDA ALIADA
+    // -------------------------------------------------------------
+    if (context.isAllyGame) {
+      if (context.tacticalChoice === 'rhythm_mosaic') {
+        setActiveMiniGame('rhythm');
+        return;
+      } else {
+        const message = 'Recepção pacífica e confraternização de irmandade com a torcida aliada. Sem confrontos de pista!';
+        setStatusMessage(message);
+        onMatchComplete(message, 0.0);
+        return;
+      }
+    }
+
+    // -------------------------------------------------------------
+    // REGRA: CONCENTRAÇÃO NO PORTÃO (JOGO EM CASA COM RIVAL)
     // -------------------------------------------------------------
     if (context.isHome && context.tacticalChoice === 'gate_concentration') {
       const threshold = context.homeContingent * 0.8;

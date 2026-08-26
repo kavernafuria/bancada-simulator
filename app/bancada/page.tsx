@@ -611,6 +611,7 @@ export default function App() {
     setActiveSelectedTactic(tactic);
     setActiveMatchMiniGameContext({
       isHome: activeMatchDerby.isHome,
+      isAllyGame: activeMatchDerby.isAllyGame,
       tacticalChoice: mappedChoice,
       homeContingent: activeMatchDerby.isHome ? activeScoutIntel.playerMembersPresent : activeScoutIntel.rivalMembersWaiting,
       awayContingent: activeMatchDerby.isHome ? activeScoutIntel.rivalMembersWaiting : activeScoutIntel.playerMembersPresent,
