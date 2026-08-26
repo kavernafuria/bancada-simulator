@@ -2,8 +2,9 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Drum, Shield, Flame, Bus, Swords, CheckCircle2, RotateCcw, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Drum, Shield, Flame, Bus, Swords, CheckCircle2, RotateCcw, AlertTriangle, Zap } from "lucide-react";
 import {
+  WhackCombat,
   PunchFrontCombat,
   RojonTarget,
   MemoryMosaic,
@@ -14,10 +15,10 @@ import {
 } from "@/components/MatchTacticalResolver";
 
 export default function MiniGamesTestPage() {
-  const [activeTab, setActiveTab] = useState<"whack" | "rojon" | "rhythm" | "dodge" | "gate">("whack");
+  const [activeTab, setActiveTab] = useState<"whack" | "punch" | "rojon" | "rhythm" | "dodge" | "gate">("whack");
 
-  // Whack Config
-  const [whackTier, setWhackTier] = useState<"S" | "A" | "B">("S");
+  // Tier Config
+  const [opponentTier, setOpponentTier] = useState<"S" | "A" | "B">("S");
 
   // Gate 80% Config
   const [homeContingent, setHomeContingent] = useState<number>(3000);
@@ -78,25 +79,45 @@ export default function MiniGamesTestPage() {
       </div>
 
       {/* SELECTOR TABS */}
-      <div className="max-w-3xl w-full grid grid-cols-2 md:grid-cols-5 gap-2">
+      <div className="max-w-3xl w-full grid grid-cols-2 md:grid-cols-6 gap-2">
         <button
           onClick={() => {
             setActiveTab("whack");
             setLastResult(null);
             setGameKey((k) => k + 1);
           }}
-          className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+          className={`p-2.5 rounded-2xl border text-left transition-all cursor-pointer ${
             activeTab === "whack"
               ? "bg-red-950/60 border-red-500 text-white shadow-lg"
               : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700"
           }`}
         >
           <div className="flex items-center justify-between font-black text-xs">
-            <span className="flex items-center gap-1.5 text-red-400">
-              <Swords className="w-4 h-4" /> Briga na Mão
+            <span className="flex items-center gap-1 text-red-400 text-[11px]">
+              <Swords className="w-3.5 h-3.5" /> Barras Ferro
             </span>
           </div>
-          <span className="text-[9px] text-zinc-500 block mt-1">Whack-a-Mole</span>
+          <span className="text-[9px] text-zinc-500 block mt-0.5">Clicar no Alvo</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setActiveTab("punch");
+            setLastResult(null);
+            setGameKey((k) => k + 1);
+          }}
+          className={`p-2.5 rounded-2xl border text-left transition-all cursor-pointer ${
+            activeTab === "punch"
+              ? "bg-red-950/60 border-red-500 text-white shadow-lg"
+              : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+          }`}
+        >
+          <div className="flex items-center justify-between font-black text-xs">
+            <span className="flex items-center gap-1 text-red-400 text-[11px]">
+              <Zap className="w-3.5 h-3.5" /> Combate Soco
+            </span>
+          </div>
+          <span className="text-[9px] text-zinc-500 block mt-0.5">Soco & Bloqueio</span>
         </button>
 
         <button
@@ -105,18 +126,18 @@ export default function MiniGamesTestPage() {
             setLastResult(null);
             setGameKey((k) => k + 1);
           }}
-          className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+          className={`p-2.5 rounded-2xl border text-left transition-all cursor-pointer ${
             activeTab === "rojon"
               ? "bg-orange-950/60 border-orange-500 text-white shadow-lg"
               : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700"
           }`}
         >
           <div className="flex items-center justify-between font-black text-xs">
-            <span className="flex items-center gap-1.5 text-orange-400">
-              <Flame className="w-4 h-4" /> Rojões
+            <span className="flex items-center gap-1 text-orange-400 text-[11px]">
+              <Flame className="w-3.5 h-3.5" /> Rojões
             </span>
           </div>
-          <span className="text-[9px] text-zinc-500 block mt-1">Mira com Inércia</span>
+          <span className="text-[9px] text-zinc-500 block mt-0.5">Radar Balístico X/Y</span>
         </button>
 
         <button
@@ -125,18 +146,18 @@ export default function MiniGamesTestPage() {
             setLastResult(null);
             setGameKey((k) => k + 1);
           }}
-          className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+          className={`p-2.5 rounded-2xl border text-left transition-all cursor-pointer ${
             activeTab === "rhythm"
               ? "bg-emerald-950/60 border-emerald-500 text-white shadow-lg"
               : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700"
           }`}
         >
           <div className="flex items-center justify-between font-black text-xs">
-            <span className="flex items-center gap-1.5 text-emerald-400">
-              <Drum className="w-4 h-4" /> Bateria/Mosaico
+            <span className="flex items-center gap-1 text-emerald-400 text-[11px]">
+              <Drum className="w-3.5 h-3.5" /> Mosaico Cores
             </span>
           </div>
-          <span className="text-[9px] text-zinc-500 block mt-1">Rhythm Game</span>
+          <span className="text-[9px] text-zinc-500 block mt-0.5">Memória (3 Fases)</span>
         </button>
 
         <button
@@ -145,18 +166,18 @@ export default function MiniGamesTestPage() {
             setLastResult(null);
             setGameKey((k) => k + 1);
           }}
-          className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+          className={`p-2.5 rounded-2xl border text-left transition-all cursor-pointer ${
             activeTab === "dodge"
               ? "bg-yellow-950/60 border-yellow-500 text-white shadow-lg"
               : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700"
           }`}
         >
           <div className="flex items-center justify-between font-black text-xs">
-            <span className="flex items-center gap-1.5 text-yellow-400">
-              <Bus className="w-4 h-4" /> Caravana/Blitz
+            <span className="flex items-center gap-1 text-yellow-400 text-[11px]">
+              <Bus className="w-3.5 h-3.5" /> Jogo da Van
             </span>
           </div>
-          <span className="text-[9px] text-zinc-500 block mt-1">Lane Runner</span>
+          <span className="text-[9px] text-zinc-500 block mt-0.5">Caravana/Flancos</span>
         </button>
 
         <button
@@ -165,18 +186,18 @@ export default function MiniGamesTestPage() {
             setLastResult(null);
             setGameKey((k) => k + 1);
           }}
-          className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+          className={`p-2.5 rounded-2xl border text-left transition-all cursor-pointer ${
             activeTab === "gate"
               ? "bg-blue-950/60 border-blue-500 text-white shadow-lg"
               : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700"
           }`}
         >
           <div className="flex items-center justify-between font-black text-xs">
-            <span className="flex items-center gap-1.5 text-blue-400">
-              <Shield className="w-4 h-4" /> Trava 80%
+            <span className="flex items-center gap-1 text-blue-400 text-[11px]">
+              <Shield className="w-3.5 h-3.5" /> Trava 80%
             </span>
           </div>
-          <span className="text-[9px] text-zinc-500 block mt-1">Portão Local</span>
+          <span className="text-[9px] text-zinc-500 block mt-0.5">Portão Local</span>
         </button>
       </div>
 
@@ -187,11 +208,11 @@ export default function MiniGamesTestPage() {
             <div className="flex items-center justify-between">
               <span className="font-black text-red-400 uppercase text-xs">📌 TELA QUE PUXA ESTE MINI-GAME:</span>
               <span className="px-2 py-0.5 rounded bg-red-500/20 text-red-300 font-bold border border-red-500/30 text-[10px]">
-                Fase 4: Decisão Tática de Pista
+                Fase 4: Decisão Tática (`CONFRONTO_BARRA_FERRO`)
               </span>
             </div>
             <p className="text-zinc-300 leading-relaxed">
-              <strong>Tática acionadora:</strong> <code className="bg-zinc-950 px-1.5 py-0.5 rounded text-amber-300">Confronto de Pista / Barra de Ferro</code> ou <code className="bg-zinc-950 px-1.5 py-0.5 rounded text-amber-300">Concentração no Portão (com visitante &gt;= 80%)</code>.
+              <strong>Tática acionadora:</strong> <code className="bg-zinc-950 px-1.5 py-0.5 rounded text-amber-300">Confronto de Pista / Barra de Ferro</code>.
             </p>
             <div className="flex items-center gap-2 pt-1">
               <span className="text-zinc-400 font-bold">Nível do Rival (Velocidade):</span>
@@ -199,18 +220,32 @@ export default function MiniGamesTestPage() {
                 <button
                   key={t}
                   onClick={() => {
-                    setWhackTier(t);
+                    setOpponentTier(t);
                     setGameKey((k) => k + 1);
                     setLastResult(null);
                   }}
                   className={`px-3 py-1 rounded-xl text-xs font-black transition-all ${
-                    whackTier === t ? "bg-red-500 text-black shadow" : "bg-zinc-800 text-zinc-400"
+                    opponentTier === t ? "bg-red-500 text-black shadow" : "bg-zinc-800 text-zinc-400"
                   }`}
                 >
                   Tier {t}
                 </button>
               ))}
             </div>
+          </>
+        )}
+
+        {activeTab === "punch" && (
+          <>
+            <div className="flex items-center justify-between">
+              <span className="font-black text-red-400 uppercase text-xs">📌 TELA QUE PUXA ESTE MINI-GAME:</span>
+              <span className="px-2 py-0.5 rounded bg-red-500/20 text-red-300 font-bold border border-red-500/30 text-[10px]">
+                Combate de Linha de Frente (Ritmo Ajustado)
+              </span>
+            </div>
+            <p className="text-zinc-300 leading-relaxed">
+              <strong>Tática acionadora:</strong> <code className="bg-zinc-950 px-1.5 py-0.5 rounded text-amber-300">Combate de Punhos / Linha de Frente</code>.
+            </p>
           </>
         )}
 
@@ -226,7 +261,7 @@ export default function MiniGamesTestPage() {
               <strong>Tática acionadora:</strong> <code className="bg-zinc-950 px-1.5 py-0.5 rounded text-amber-300">Guerra de Rojões & Morteiros</code>.
             </p>
             <p className="text-zinc-400 text-[11px]">
-              <strong>Novo Motor de Radar Balístico:</strong> Clique em 1️⃣ para travar a direção horizontal (Eixo X) e depois em 2️⃣ para disparar o morteiro na elevação vertical (Eixo Y) em cima do alvo vermelho! (3 Morteiros em 10 segundos).
+              <strong>Motor de Radar Balístico X/Y (Aprovado):</strong> Clique em 1️⃣ para travar a direção horizontal (Eixo X) e depois em 2️⃣ para disparar o morteiro na elevação (Eixo Y)!
             </p>
           </>
         )}
@@ -236,14 +271,14 @@ export default function MiniGamesTestPage() {
             <div className="flex items-center justify-between">
               <span className="font-black text-emerald-400 uppercase text-xs">📌 TELA QUE PUXA ESTE MINI-GAME:</span>
               <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30 text-[10px]">
-                Fase 4: Decisão Tática de Bancada
+                Fase 4: Mosaico 3D & Festa de Bancada
               </span>
             </div>
             <p className="text-zinc-300 leading-relaxed">
               <strong>Tática acionadora:</strong> <code className="bg-zinc-950 px-1.5 py-0.5 rounded text-amber-300">Mosaico 3D & Festa de Bancada</code>.
             </p>
             <p className="text-zinc-400 text-[11px]">
-              Clique ou aperte espaço no momento exato em que as notas caírem na Zona de Batida para sincronizar a bateria.
+              <strong>3 Fases de Repetição (Sem Cronômetro Corrido):</strong> Complete as 3 fases de sequências coloridas (3, 4 e 5 cores) com flashes rápidos de 300ms!
             </p>
           </>
         )}
@@ -253,14 +288,14 @@ export default function MiniGamesTestPage() {
             <div className="flex items-center justify-between">
               <span className="font-black text-yellow-400 uppercase text-xs">📌 TELA QUE PUXA ESTE MINI-GAME:</span>
               <span className="px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-300 font-bold border border-yellow-500/30 text-[10px]">
-                Fase 4: Decisão Tática de Caravana
+                Fase 4: Caravana & Ataque pelos Flancos
               </span>
             </div>
             <p className="text-zinc-300 leading-relaxed">
-              <strong>Tática acionadora:</strong> <code className="bg-zinc-950 px-1.5 py-0.5 rounded text-amber-300">Defesa de Comboio & Escolta Rodoviária</code>.
+              <strong>Tática acionadora:</strong> <code className="bg-zinc-950 px-1.5 py-0.5 rounded text-amber-300">Defesa de Comboio / Ataque pelos Flancos</code>.
             </p>
             <p className="text-zinc-400 text-[11px]">
-              Use os botões de Esquerda / Direita para evitar os bloqueios policiais e detritos na rodovia.
+              Use os botões de Esquerda / Direita para evitar os bloqueios policiais e retenção nos flancos.
             </p>
           </>
         )}
@@ -274,7 +309,7 @@ export default function MiniGamesTestPage() {
               </span>
             </div>
             <p className="text-zinc-300 leading-relaxed">
-              <strong>Regra dos 80%:</strong> Se o contingente visitante for menor que 80% da torcida local, o confronto de rua é evitado. Se for igual ou maior a 80%, o visitante força a passagem e dispara o confronto!
+              <strong>Regra dos 80%:</strong> Se o contingente visitante for menor que 80% da torcida local, o confronto de rua é evitado. Se for igual ou maior a 80%, o visitante força a passagem!
             </p>
             <div className="grid grid-cols-2 gap-3 pt-2">
               <div>
@@ -303,7 +338,11 @@ export default function MiniGamesTestPage() {
       {/* PLAYGROUND CONTAINER */}
       <div className="max-w-3xl w-full bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col items-center justify-center min-h-[380px] shadow-2xl relative">
         {activeTab === "whack" && (
-          <PunchFrontCombat key={gameKey} opponentTier={whackTier} onFinish={handleFinishMiniGame} />
+          <WhackCombat key={gameKey} opponentTier={opponentTier} onFinish={handleFinishMiniGame} />
+        )}
+
+        {activeTab === "punch" && (
+          <PunchFrontCombat key={gameKey} opponentTier={opponentTier} onFinish={handleFinishMiniGame} />
         )}
 
         {activeTab === "rojon" && (
