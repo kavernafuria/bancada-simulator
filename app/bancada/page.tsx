@@ -1345,13 +1345,18 @@ export default function App() {
             </button>
           </div>
 
+          <div className="text-center pb-1 border-b border-zinc-800/80">
+            <img
+              src="/bancada_logo.png"
+              alt="Bancada Simulator"
+              className="w-52 sm:w-60 h-auto mx-auto object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.9)]"
+            />
+          </div>
+
           <div>
             <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block">
               SIMULADOR DE ARQUIBANCADA • 15 TEMPORADAS
             </span>
-            <h1 className="text-xl font-black text-white tracking-tight uppercase">
-              Bancada: Gestão, Clássicos & Pista
-            </h1>
             <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
               Defina as cores do seu pavilhão, cumpra objetivos sazonais (mosaicos, pistas e caravanas) e comande 15 temporadas de história de torcida.
             </p>
@@ -1663,8 +1668,14 @@ export default function App() {
         <div className="fixed inset-0 pointer-events-none bg-gradient-to-b from-zinc-950/85 via-zinc-950/60 to-zinc-950/95 z-0" />
 
         <div className="max-w-md w-full bg-zinc-900/90 backdrop-blur-md border border-amber-500/50 rounded-3xl p-6 shadow-2xl text-center space-y-4 max-h-[90vh] overflow-y-auto relative z-10">
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-amber-500 text-black flex items-center justify-center shadow-xl animate-bounce">
-            <Trophy className="w-8 h-8" />
+          <img
+            src="/bancada_logo.png"
+            alt="Bancada Simulator Logo"
+            className="w-48 sm:w-56 h-auto mx-auto object-contain filter drop-shadow-lg"
+          />
+
+          <div className="mx-auto w-14 h-14 rounded-2xl bg-amber-500 text-black flex items-center justify-center shadow-xl animate-bounce">
+            <Trophy className="w-7 h-7" />
           </div>
 
           <div>
@@ -1798,6 +1809,13 @@ export default function App() {
             </div>
 
             <div>
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <img
+                  src="/bancada_logo.png"
+                  alt="Bancada Simulator Logo"
+                  className="h-5 sm:h-6 w-auto object-contain filter drop-shadow"
+                />
+              </div>
               <span className="text-[10px] font-black tracking-wider text-amber-400 uppercase block">
                 {currentTorcida?.torcida} • {currentTorcida?.clube}
               </span>
