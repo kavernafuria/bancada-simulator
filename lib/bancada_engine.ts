@@ -17,6 +17,52 @@ export interface StateTrackers {
   respeito_nacional: number;
 }
 
+// ==========================================
+// CENTRALIZED GAME BALANCE LAYER
+// ==========================================
+export const GAME_BALANCE = {
+  CAREER_MAX_SEASONS: 15,
+  PRESIDENT_ELECTIONS_SEASONS: [1, 4, 7, 10, 13],
+  MILESTONE_SEASONS: [3, 6, 9, 12, 15],
+  ANNUAL_STEPS_COUNT: 13,
+
+  // Economics
+  MEMBERSHIP_DUES_PER_MEMBER: 450, // R$ 450 por membro em mensalidades anuais
+  MERCH_REVENUE_FACTOR: 350,
+  HEADQUARTERS_PURCHASE_COST: 45000, // R$ 45.000 para compra da sede própria
+  HEADQUARTERS_ANNUAL_RENT: 3500, // R$ 3.500/ano economizados de aluguel
+  ALLIANCE_MEETING_COST: 3000, // R$ 3.000 para reunião diplomática
+  BANNER_RESCUE_COST: 15000, // R$ 15.000 para resgate de faixa tomada
+
+  // President Modifiers
+  PRESIDENT_MODIFIERS: {
+    LINHA_FRENTE: { pistaBonusPct: 0.15, passiveRiscoMpAdded: 10 },
+    GESTOR: { cashBonusPct: 0.25, moralPenaltyInBattle: 10 },
+    MESTRE_BATERIA: { bancadaBonusPct: 0.20, bateriaWearReductionPct: 0.50, caravanLimitPenaltyPct: 0.10 },
+  },
+
+  // MP Risk Bands
+  MP_RISK_BANDS: {
+    GREEN_MAX: 49,
+    YELLOW_MIN: 50,
+    ORANGE_MIN: 75,
+    DARK_RED_MIN: 86, // >85% no Jogo 4 ativa Choque Total e Visual Ban
+    PURPLE_BAN: 100, // 100% causa suspensão de 1 ano
+  },
+
+  // 80% Contingent Gate Threshold
+  GATE_VISITOR_CONTINGENT_RATIO: 0.80,
+
+  // 15-Season Progression Eras
+  ERAS: [
+    { phase: 1, name: "Construção", seasons: [1, 2, 3], subtitle: "Afirmação de Pista e Organização Social" },
+    { phase: 2, name: "Expansão", seasons: [4, 5, 6], subtitle: "Subsedes Regionais e Comboios de Frota" },
+    { phase: 3, name: "Consolidação", seasons: [7, 8, 9], subtitle: "Respeito Nacional e Alianças Interestaduais" },
+    { phase: 4, name: "Influência", seasons: [10, 11, 12], subtitle: "Arena de Espetáculos e Hegemonia de Bancada" },
+    { phase: 5, name: "Legado", seasons: [13, 14, 15], subtitle: "Apogeu Ultras e Consagração Histórica" },
+  ],
+};
+
 export type ArchetypeId = "PADRAO" | "BARRA_BRAVA" | "BONDE_PISTA" | "COLETIVO_POPULAR";
 
 export interface ArchetypeDefinition {

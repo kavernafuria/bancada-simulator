@@ -46,6 +46,7 @@ import {
 import confetti from "canvas-confetti";
 import { MatchTacticalResolver, MatchContext } from "@/components/MatchTacticalResolver";
 import {
+  GAME_BALANCE,
   getOfficialTorcidas,
   getAlliancesData,
   createCustomTorcidaWithArchetype,
@@ -821,10 +822,19 @@ export default function App() {
         ]);
       }
 
-      // Annual Season Closing & Objective Evaluation
-      const annualDues = Math.floor(stats.contingente * 450);
-      const merchRevenue = Math.floor(stats.autonomia_financeira * 350);
+      // Annual Season Closing & Objective Evaluation (with Gestor President +25% Bonus)
+      const gestorMult = presidentProfile === "GESTOR" ? GAME_BALANCE.PRESIDENT_MODIFIERS.GESTOR.cashBonusPct + 1.0 : 1.0;
+      const annualDues = Math.floor(stats.contingente * GAME_BALANCE.MEMBERSHIP_DUES_PER_MEMBER * gestorMult);
+      const merchRevenue = Math.floor(stats.autonomia_financeira * GAME_BALANCE.MERCH_REVENUE_FACTOR * gestorMult);
       const baseRevenue = annualDues + merchRevenue;
+
+      // Passive Linha de Frente MP Risk Penalty (+10%)
+      if (presidentProfile === "LINHA_FRENTE") {
+        setStateTrackers((st) => ({
+          ...st,
+          risco_mp: Math.min(100, st.risco_mp + GAME_BALANCE.PRESIDENT_MODIFIERS.LINHA_FRENTE.passiveRiscoMpAdded),
+        }));
+      }
 
       // Evaluate Season Objectives
       const evaluation = evaluateSeasonEndObjectives(
@@ -875,7 +885,7 @@ export default function App() {
       const nextStatus = statuses[Math.floor(Math.random() * statuses.length)];
       setClubStatus(nextStatus);
 
-      if (season >= 15) {
+      if (season >= GAME_BALANCE.CAREER_MAX_SEASONS) {
         setIsGameOver(true);
         confetti({ particleCount: 150, spread: 85, origin: { y: 0.5 } });
       } else {
@@ -884,16 +894,17 @@ export default function App() {
         setPipelineIndex(0);
         setChallengedRivalTorcida(null);
 
-        // Bateria wear & tear per season
-        setBateriaDurability((prev) => Math.max(10, prev - 15));
+        // Bateria wear & tear per season (50% reduction for Mestre de Bateria)
+        const wearAmount = presidentProfile === "MESTRE_BATERIA" ? 8 : 15;
+        setBateriaDurability((prev) => Math.max(10, prev - wearAmount));
 
-        // Rent deduction for non-owned headquarters
+        // Rent deduction for non-owned headquarters (R$ 3.500/year)
         if (!hasOwnHeadquarters) {
-          setBankBalance((prev) => prev - 3500);
+          setBankBalance((prev) => prev - GAME_BALANCE.HEADQUARTERS_ANNUAL_RENT);
         }
 
         // Presidential Election trigger at Seasons 4, 7, 10, 13
-        if ([4, 7, 10, 13].includes(nextSeason)) {
+        if (GAME_BALANCE.PRESIDENT_ELECTIONS_SEASONS.includes(nextSeason)) {
           setShowPresidentElectionModal(true);
         }
 
@@ -1614,21 +1625,24 @@ export default function App() {
     );
   }
 
-  // 2. HALL OF FAME
+  // 2. HALL OF FAME & LEGADO DE 15 TEMPORADAS
   if (isGameOver) {
+    const totalFaixasTomadas = Object.values(rivalryRecords).reduce((acc, r) => acc + r.faixasTomadas, 0);
+    const totalFaixasPerdidas = Object.values(rivalryRecords).reduce((acc, r) => acc + r.faixasPerdidas, 0);
+
     return (
       <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-center items-center p-4">
-        <div className="max-w-md w-full bg-zinc-900 border border-amber-500/50 rounded-3xl p-6 shadow-2xl text-center space-y-4">
+        <div className="max-w-md w-full bg-zinc-900 border border-amber-500/50 rounded-3xl p-6 shadow-2xl text-center space-y-4 max-h-[90vh] overflow-y-auto">
           <div className="mx-auto w-16 h-16 rounded-2xl bg-amber-500 text-black flex items-center justify-center shadow-xl animate-bounce">
             <Trophy className="w-8 h-8" />
           </div>
 
           <div>
             <span className="text-[10px] font-black tracking-widest text-amber-400 uppercase block">
-              30 ANOS DE HISTÓRIA CONCLUÍDOS
+              🏆 CARREIRA CONCLUÍDA — 15 TEMPORADAS DE MANDATO
             </span>
             <h2 className="text-xl font-black text-white uppercase tracking-tight">
-              Hall da Fama da Arquibancada
+              Hall da Fama & Legado Ultras
             </h2>
             <div className="mt-2 inline-block bg-amber-500/20 text-amber-400 border border-amber-500/40 px-3 py-1 rounded-full text-xs font-black uppercase">
               {getHonoraryTitle()}
@@ -1636,29 +1650,51 @@ export default function App() {
           </div>
 
           <div className="bg-zinc-950 p-4 rounded-2xl border border-zinc-800 text-left text-xs space-y-2">
-            <div className="flex justify-between">
-              <span className="text-zinc-400">Torcida / Clube:</span>
-              <span className="font-bold text-white">{currentTorcida?.torcida} ({currentTorcida?.clube})</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-zinc-400">Contingente / Massa:</span>
-              <span className="font-bold text-amber-400">{stats.contingente}/100</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-zinc-400">Pressão de Bancada:</span>
-              <span className="font-bold text-amber-400">{stats.pressao_bancada}/100</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-zinc-400">Poder de Pista:</span>
-              <span className="font-bold text-amber-400">{stats.poder_pista}/100</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-zinc-400">Caravanas:</span>
-              <span className="font-bold text-amber-400">{stats.caravana}/100</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-zinc-400">Caixa Acumulado:</span>
-              <span className="font-bold text-emerald-400">R$ {bankBalance.toLocaleString()}</span>
+            <span className="text-[9px] font-black text-amber-400 uppercase block tracking-wider">
+              📊 RESUMO DO LEGADO DA TORCIDA (15 ANOS)
+            </span>
+
+            <div className="grid grid-cols-2 gap-2 text-[11px] pt-1">
+              <div className="p-2 rounded-xl bg-zinc-900 border border-zinc-800">
+                <span className="text-zinc-400 text-[9px] block">Torcida / Clube:</span>
+                <span className="font-bold text-white truncate block">{currentTorcida?.torcida}</span>
+              </div>
+              <div className="p-2 rounded-xl bg-zinc-900 border border-zinc-800">
+                <span className="text-zinc-400 text-[9px] block">Temporadas:</span>
+                <span className="font-bold text-amber-400">15 / 15 Concluídas</span>
+              </div>
+
+              <div className="p-2 rounded-xl bg-zinc-900 border border-zinc-800">
+                <span className="text-zinc-400 text-[9px] block">Massa / Contingente:</span>
+                <span className="font-bold text-amber-400">{stats.contingente}/100</span>
+              </div>
+              <div className="p-2 rounded-xl bg-zinc-900 border border-zinc-800">
+                <span className="text-zinc-400 text-[9px] block">Pressão de Bancada:</span>
+                <span className="font-bold text-orange-400">{stats.pressao_bancada}/100</span>
+              </div>
+
+              <div className="p-2 rounded-xl bg-zinc-900 border border-zinc-800">
+                <span className="text-zinc-400 text-[9px] block">Poder de Pista (PEC):</span>
+                <span className="font-bold text-red-400">{stats.poder_pista}/100</span>
+              </div>
+              <div className="p-2 rounded-xl bg-zinc-900 border border-zinc-800">
+                <span className="text-zinc-400 text-[9px] block">Capacidade Caravana:</span>
+                <span className="font-bold text-blue-400">{stats.caravana}/100</span>
+              </div>
+
+              <div className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 col-span-2">
+                <span className="text-zinc-400 text-[9px] block">Patrimônio & Sede:</span>
+                <span className="font-bold text-emerald-400 block">
+                  Caixa: R$ {bankBalance.toLocaleString()} • {hasOwnHeadquarters ? "🏡 Sede Própria Comprada" : "🏠 Imóvel Alugado"}
+                </span>
+              </div>
+
+              <div className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 col-span-2">
+                <span className="text-zinc-400 text-[9px] block">Desempenho contra Rivais:</span>
+                <span className="font-bold text-zinc-200 block">
+                  🏴‍☠️ {totalFaixasTomadas} Faixas Tomadas • ⚠️ {totalFaixasPerdidas} Faixas Perdidas
+                </span>
+              </div>
             </div>
           </div>
 
@@ -1669,20 +1705,20 @@ export default function App() {
             >
               {copied ? (
                 <>
-                  <Check className="w-4 h-4" /> Resumo Copiado!
+                  <Check className="w-4 h-4" /> Resumo de Legado Copiado!
                 </>
               ) : (
                 <>
-                  <Share2 className="w-4 h-4" /> Compartilhar Legado da Torcida
+                  <Share2 className="w-4 h-4" /> Compartilhar Legado de 15 Anos
                 </>
               )}
             </button>
 
             <button
               onClick={handleRestartGame}
-              className="w-full py-2.5 px-4 rounded-xl bg-zinc-800 text-zinc-300 hover:text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-colors border border-zinc-700 cursor-pointer"
+              className="w-full py-2.5 px-4 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-xs uppercase tracking-wider transition-all cursor-pointer"
             >
-              <RefreshCw className="w-3.5 h-3.5 text-amber-400" /> Iniciar Nova Carreira de 30 Anos
+              🔄 Iniciar Nova Carreira de 15 Anos
             </button>
           </div>
         </div>
@@ -1726,8 +1762,11 @@ export default function App() {
               <span className="text-[10px] font-black tracking-wider text-amber-400 uppercase block">
                 {currentTorcida?.torcida} • {currentTorcida?.clube}
               </span>
-              <h2 className="text-xs font-black text-white uppercase flex items-center gap-1.5">
-                ANO {season} DE 30 • ETAPA {pipelineIndex + 1}/13
+              <h2 className="text-xs font-black text-white uppercase flex items-center gap-1.5 flex-wrap">
+                <span>TEMPORADA {season} DE 15 • ETAPA {pipelineIndex + 1}/13</span>
+                <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-zinc-800 text-amber-300 border border-zinc-700">
+                  {season <= 3 ? "Fase 1: Construção" : season <= 6 ? "Fase 2: Expansão" : season <= 9 ? "Fase 3: Consolidação" : season <= 12 ? "Fase 4: Influência" : "Fase 5: Legado"}
+                </span>
               </h2>
             </div>
           </div>
