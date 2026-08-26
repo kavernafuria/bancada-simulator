@@ -62,7 +62,7 @@ for db_path in db_paths:
 
         if is_ren == 1:
             renowned_ids.append(p_id)
-            if val >= 4_000_000 or games >= 35 or (is_major_club and val >= 1_500_000 and has_valid_photo):
+            if (is_major_club and (val >= 2_000_000 or (has_valid_photo and games >= 15))) or val >= 8_000_000:
                 famous_endpoint_ids.append(p_id)
 
     # Bulk update is_renowned
