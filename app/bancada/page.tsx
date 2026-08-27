@@ -2773,8 +2773,8 @@ export default function App() {
 
       {/* 1. ACTION FEEDBACK MODAL */}
       {actionFeedback && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-sm w-full p-5 text-center shadow-2xl space-y-3">
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fade-in">
+          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-sm w-full p-5 text-center shadow-2xl space-y-3 max-h-[85vh] overflow-y-auto pb-10">
             <div className="mx-auto w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
               <CheckCircle2 className="w-6 h-6" />
             </div>
@@ -2812,8 +2812,8 @@ export default function App() {
 
       {/* 2. KEY GAME STAGE 1: REUNIÃO COM A POLÍCIA & SEGURANÇA */}
       {matchModalPhase === "POLICE_MEETING" && activeMatchDerby && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-zinc-900 border border-blue-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-3 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fade-in">
+          <div className="bg-zinc-900 border border-blue-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-3 max-h-[85vh] overflow-y-auto pb-12">
             <div className="flex items-center justify-between">
               <span className="text-[9px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-1">
                 <Shield className="w-3.5 h-3.5" /> FASE 1: REUNIÃO DE SEGURANÇA & POLÍCIA
@@ -2873,8 +2873,8 @@ export default function App() {
 
       {/* 3. KEY GAME STAGE 2: ESCOLHA DE TRANSPORTE & CONDUÇÃO */}
       {matchModalPhase === "TRANSPORT" && activeMatchDerby && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-3 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fade-in">
+          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-3 max-h-[85vh] overflow-y-auto pb-12">
             <div className="flex items-center justify-between">
               <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest flex items-center gap-1">
                 <Bus className="w-3.5 h-3.5" /> FASE 2: {activeMatchDerby.isHome ? "CONCENTRAÇÃO & POSICIONAMENTO LOCAL" : "CONDUÇÃO & TRANSPORTE"}
@@ -2933,8 +2933,8 @@ export default function App() {
 
       {/* 4. KEY GAME STAGE 3: SCOUT INTEL & REVELATION OF TWIST */}
       {matchModalPhase === "SCOUT_INTEL" && activeMatchDerby && activeScoutIntel && selectedTransport && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto text-center">
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fade-in">
+          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto pb-12 text-center">
             <div className="mx-auto w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center animate-pulse">
               <Radio className="w-6 h-6" />
             </div>
@@ -3000,8 +3000,8 @@ export default function App() {
 
       {/* 5. KEY GAME STAGE 4: 5 TACTICAL CHOICES (INCLUDING MOSAIC) */}
       {matchModalPhase === "TACTICAL" && activeMatchDerby && activeScoutIntel && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-3 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fade-in">
+          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-3 max-h-[85vh] overflow-y-auto pb-16">
             <div className="flex items-center justify-between">
               <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest">
                 {activeMatchDerby.isAllyGame ? "FESTA & CONFRATERNIZAÇÃO DE IRMANDADE" : "DECISÃO TÁTICA DE PISTA & BANCADA"}
@@ -3061,7 +3061,7 @@ export default function App() {
 
       {/* 5.B. MINI-GAME RESOLUTION MODAL */}
       {matchModalPhase === "MINIGAME" && activeMatchMiniGameContext && activeMatchDerby && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in">
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-[100] animate-fade-in">
           <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-4 text-center">
             <div className="border-b border-zinc-800 pb-2 flex items-center justify-between">
               <div>
@@ -3090,8 +3090,8 @@ export default function App() {
 
       {/* 6. MATCH RESULT & GEMINI CHRONICLE MODAL */}
       {activeMatchResult && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 text-center shadow-2xl space-y-3 relative max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fade-in">
+          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 text-center shadow-2xl space-y-3 relative max-h-[85vh] overflow-y-auto pb-12">
             <button
               onClick={() => setActiveMatchResult(null)}
               className="absolute top-4 right-4 text-zinc-400 hover:text-white p-1 rounded-full bg-zinc-800 cursor-pointer"
@@ -3146,8 +3146,8 @@ export default function App() {
 
       {/* 7. SEASON END OBJECTIVES CELEBRATION MODAL */}
       {seasonEndReport && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-zinc-900 border border-emerald-500/50 rounded-3xl max-w-md w-full p-5 text-center shadow-2xl space-y-3.5 relative max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fade-in">
+          <div className="bg-zinc-900 border border-emerald-500/50 rounded-3xl max-w-md w-full p-5 text-center shadow-2xl space-y-3.5 relative max-h-[85vh] overflow-y-auto pb-12">
             <div className="mx-auto w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
               <Award className="w-7 h-7" />
             </div>
@@ -3206,8 +3206,8 @@ export default function App() {
 
       {/* 7.B. SEASONAL MILESTONE DECISION MODAL (SEASONS 3, 6, 9, 12, 15) */}
       {activeMilestoneDecision && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-4 text-center max-h-[90vh] overflow-y-auto relative">
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-[100] animate-fade-in">
+          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-4 text-center max-h-[85vh] overflow-y-auto pb-12 relative">
             <div className="border-b border-zinc-800 pb-3 text-left">
               <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block">
                 {activeMilestoneDecision.title}
@@ -3611,8 +3611,8 @@ export default function App() {
 
       {/* PRESIDENTIAL ELECTION MODAL */}
       {showPresidentElectionModal && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl p-6 max-w-xl w-full shadow-2xl space-y-5 animate-in fade-in zoom-in-95">
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl p-6 max-w-xl w-full shadow-2xl space-y-5 max-h-[85vh] overflow-y-auto pb-12">
             <div className="flex items-center gap-3 border-b border-zinc-800 pb-4">
               <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500 flex items-center justify-center text-2xl">
                 🗳️
@@ -3667,8 +3667,8 @@ export default function App() {
 
       {/* ULTRAS NEWS REEL MODAL */}
       {activeNewsReel && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-rose-500/50 rounded-3xl p-6 max-w-lg w-full shadow-2xl space-y-4 animate-in fade-in zoom-in-95">
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-rose-500/50 rounded-3xl p-6 max-w-lg w-full shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto pb-12 animate-in fade-in zoom-in-95">
             <div className="flex items-center gap-3 border-b border-zinc-800 pb-3">
               <div className="w-10 h-10 rounded-2xl bg-rose-500/20 border border-rose-500 flex items-center justify-center text-xl animate-pulse">
                 📢

@@ -41,7 +41,7 @@ export function FloatingDock() {
   if (!mounted) return null;
 
   return (
-    <div className="fixed bottom-6 inset-x-0 mx-auto max-w-fit z-50 px-4">
+    <div className="fixed bottom-6 inset-x-0 mx-auto max-w-fit z-30 px-4">
       <div className="flex items-center gap-1.5 p-1.5 rounded-full glass-panel shadow-2xl border border-kavers-border/60 backdrop-blur-xl">
         {/* Elo Perdido Link */}
         <Link
