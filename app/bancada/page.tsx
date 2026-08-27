@@ -256,6 +256,61 @@ export default function App() {
   const [copied, setCopied] = useState<boolean>(false);
   const [showResetConfirm, setShowResetConfirm] = useState<boolean>(false);
   const [isDownloadingZip, setIsDownloadingZip] = useState<boolean>(false);
+  const [shareToast, setShareToast] = useState<string | null>(null);
+
+  const handleCopyForInstagram = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setShareToast("Texto copiado! Abra o Instagram e cole nos seus Stories / Direct.");
+    setTimeout(() => setShareToast(null), 3500);
+  };
+
+  const renderSocialShareSection = (title: string, text: string) => {
+    const encodedText = encodeURIComponent(text);
+    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodedText}`;
+
+    return (
+      <div className="bg-zinc-950/90 border border-amber-500/40 rounded-2xl p-3 space-y-2 text-center my-2.5 shadow-inner">
+        <div className="flex items-center justify-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-amber-400">
+          <span>📢 COMPARTILHAR ({title})</span>
+          <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-black">
+            KAVERS GAMES
+          </span>
+        </div>
+
+        <div className="grid grid-cols-3 gap-1.5 pt-1">
+          {/* WhatsApp */}
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="py-2 px-1 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all active:scale-95 shadow"
+          >
+            <span>💬 WhatsApp</span>
+          </a>
+
+          {/* Instagram */}
+          <button
+            type="button"
+            onClick={() => handleCopyForInstagram(text)}
+            className="py-2 px-1 rounded-xl bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 border border-pink-500/40 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all active:scale-95 shadow cursor-pointer"
+          >
+            <span>📸 Instagram</span>
+          </button>
+
+          {/* X / Twitter */}
+          <a
+            href={twitterUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="py-2 px-1 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-600 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all active:scale-95 shadow"
+          >
+            <span>𝕏 Twitter / X</span>
+          </a>
+        </div>
+      </div>
+    );
+  };
 
   // RIVALRY & DIPLOMACY STATE
   const [rivalryRecords, setRivalryRecords] = useState<Record<string, RivalryRecord>>({});
@@ -1739,22 +1794,13 @@ export default function App() {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <button
-              onClick={handleShareHistory}
-              className="w-full py-3 px-4 rounded-xl bg-amber-500 text-black font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all cursor-pointer"
-            >
-              {copied ? (
-                <>
-                  <Check className="w-4 h-4" /> Resumo de Legado Copiado!
-                </>
-              ) : (
-                <>
-                  <Share2 className="w-4 h-4" /> Compartilhar Legado de 15 Anos
-                </>
-              )}
-            </button>
+          {/* Kavers Games Social Sharing Section */}
+          {renderSocialShareSection(
+            "LEGADO DE 15 ANOS",
+            `👑 [BANCADA SIMULATOR • KAVERS GAMES]\n15 TEMPORADAS DE LEGADO ULTRAS CONCLUÍDAS!\nTorcida: ${currentTorcida?.torcida} (${currentTorcida?.clube})\nTítulo Honorário: ${getHonoraryTitle()}\n\n📊 Resumo do Mandato:\n👥 Massa: ${stats.contingente}/100 | 🥁 Bancada: ${stats.pressao_bancada}/100 | 🥊 Pista: ${stats.poder_pista}/100\n💰 Caixa Final: R$ ${bankBalance.toLocaleString()}\n🏴‍☠️ Troféus de Pista: ${totalFaixasTomadas} Faixas Tomadas!\n\n🎮 Viva essa jornada no Simulador de Torcidas da Kavers Games:\n👉 https://kaversgames.com.br\n#KaversGames #BancadaSimulator #LegadoUltras`
+          )}
 
+          <div className="space-y-2 pt-1">
             <button
               onClick={handleRestartGame}
               className="w-full py-2.5 px-4 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-xs uppercase tracking-wider transition-all cursor-pointer"
@@ -1770,6 +1816,14 @@ export default function App() {
   // 3. MAIN GAMEPLAY DASHBOARD
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 p-3 sm:p-4 flex flex-col max-w-lg mx-auto relative overflow-x-hidden">
+      {/* Floating Instagram Share Toast Notification */}
+      {shareToast && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] bg-pink-600 text-white font-extrabold text-xs px-4 py-2.5 rounded-2xl shadow-2xl border border-pink-300 flex items-center gap-2 animate-in fade-in zoom-in-95 max-w-xs text-center">
+          <span>📸</span>
+          <span>{shareToast}</span>
+        </div>
+      )}
+
       {/* Full-Screen Watermark Background Image */}
       <div
         className="fixed inset-0 pointer-events-none bg-cover bg-center bg-no-repeat z-0 opacity-25 mix-blend-luminosity scale-105"
@@ -3074,6 +3128,12 @@ export default function App() {
               )}
             </div>
 
+            {/* Kavers Games Social Sharing Block */}
+            {renderSocialShareSection(
+              "RESULTADO DO JOGO",
+              `🥁 [BANCADA SIMULATOR • KAVERS GAMES]\n${activeMatchResult.statusTitle} - ${currentTorcida?.torcida} vs ${activeMatchDerby?.rivalTorcida || "Rival"}!\nEstádio: ${activeMatchDerby?.stadium || "Estádio"}\n\n"Crônica de Arquibancada: ${activeMatchResult.chronicleText.slice(0, 160)}..."\n\n🎮 Jogue grátis o Simulador de Torcidas da Kavers Games:\n👉 https://kaversgames.com.br\n#BancadaSimulator #KaversGames #TorcidasOrganizadas`
+            )}
+
             <button
               onClick={() => setActiveMatchResult(null)}
               className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider shadow-lg active:scale-95 transition-all cursor-pointer"
@@ -3127,6 +3187,12 @@ export default function App() {
                 </div>
               ))}
             </div>
+
+            {/* Kavers Games Social Sharing Block */}
+            {renderSocialShareSection(
+              `TEMPORADA ${season - 1}`,
+              `🏆 [BANCADA SIMULATOR • KAVERS GAMES]\nFechamento da Temporada ${season - 1} com a ${currentTorcida?.torcida} (${currentTorcida?.clube})!\n\nMetas Cumpridas: ${seasonEndReport.completedCount}\nMassa: ${stats.contingente}/100 | Bancada: ${stats.pressao_bancada}/100 | Pista: ${stats.poder_pista}/100\nCaixa Acumulado: R$ ${bankBalance.toLocaleString()}\n\n🎮 Monte sua torcida no Simulador Oficial Kavers Games:\n👉 https://kaversgames.com.br\n#BancadaSimulator #KaversGames #Futebol`
+            )}
 
             <button
               onClick={() => setSeasonEndReport(null)}
