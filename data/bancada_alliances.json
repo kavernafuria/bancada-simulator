@@ -1,143 +1,120 @@
 {
   "eixos_nacionais": {
-    "ALIANCA_ALVINEGRA": {
-      "name": "Aliança Alvinegra (Gaviões & Fúria Jovem)",
-      "symbol": "🦅",
-      "members": [
-        "Gaviões da Fiel",
-        "Fúria Jovem do Botafogo"
-      ]
-    },
     "PUNHO_CRUZADO": {
       "name": "União Punho Cruzado",
       "symbol": "🙅‍♂️",
+      "description": "Irmandade de estrada, churrasco unificado e apoio mútuo em comboios interestaduais.",
       "members": [
         "Torcida Jovem do Fla",
-        "Camisa 12 do Inter",
+        "Raça Rubro-Negra",
         "Torcida Tricolor Indep.",
+        "Dragões da Real",
         "Máfia Azul",
         "Pavilhão Independente",
-        "Dragões Atleticanos",
+        "Camisa 12 do Inter",
+        "Os Imbatíveis",
         "Pavilhão Jovem",
-        "Guerrilha Jovem",
-        "Facção Jovem",
-        "Torcida Jovem do Leão",
-        "Piratas Azulinos",
-        "Os Imbatíveis"
+        "Torcida Jovem do Sport"
       ]
     },
     "DPA": {
       "name": "União Dedo Pro Alto (DPA)",
       "symbol": "👆",
+      "description": "União massiva alviverde e alvinegra, mosaicos gigantes e recepção conjunta nas rodovias.",
       "members": [
-        "Força Jovem do Vasco",
-        "Ira Jovem do Vasco",
-        "Fúria Jovem do Botafogo",
         "Mancha Alvi-Verde",
+        "TUP",
+        "Acadêmicos da Savoia",
+        "Força Jovem do Vasco",
         "Galoucura",
-        "Império Alviverde",
-        "Mancha Azul (SC)",
-        "Mancha Verde (RS)",
         "Geral do Grêmio",
         "Torcida Jovem do Grêmio",
-        "Força Jovem Goiás",
-        "Ira Jovem (Gama)",
-        "Bamor Nova Era",
-        "Trovão Azul",
-        "Mancha Negra (ASA)",
-        "Explosão Inferno Coral",
-        "Torcida Jovem (Botafogo-PB)",
-        "Garra Alvinegra",
+        "Império Alviverde",
+        "Torcida Bamor",
+        "Inferno Coral",
         "Cearamor",
-        "Esporão do Galo",
-        "Tubarões da Fiel",
-        "Terror Bicolor"
+        "Força Jovem Goiás",
+        "Mancha Azul",
+        "Mancha Azul de Alagoas",
+        "Torcida IRA Jovem do Gama"
       ]
     },
     "PC": {
       "name": "União Punho Colado (PC)",
       "symbol": "👊",
+      "description": "Aliança tradicional tricolor e litorânea, defesa conjunta de setores e comitivas.",
       "members": [
-        "Torcida Young Flu",
-        "Torcida Raça Tricolor",
-        "Fúria Indep. Guarani",
-        "Fúria Independente (Paraná)",
-        "Fúria Marcilista",
-        "Pavilhão 6",
-        "Máfia Vermelha",
-        "Falange Tricolor",
-        "Torcida Jovem do Santos",
-        "Torcida Sangue Jovem",
-        "Guarda Popular"
+        "Young Flu",
+        "Fúria Independente",
+        "Torcida Raça Tricolor"
+      ]
+    },
+    "ALIANCA_ALVINEGRA": {
+      "name": "Aliança Alvinegra",
+      "symbol": "🦅",
+      "description": "União alvinegra entre a Capital Paulista e o Rio de Janeiro com bateria e recepção nas sedes.",
+      "members": [
+        "Gaviões da Fiel",
+        "Fúria Jovem do Botafogo"
       ]
     }
   },
   "geopolitica_nordeste": {
     "LADO_A": {
       "name": "Nordeste Lado A",
+      "symbol": "☀️",
       "members": [
         "Leões da TUF",
-        "Fúria Jovem de Baraúnas",
         "Máfia Vermelha",
-        "Jovem do Galo",
-        "Explosão Inferno Coral",
-        "Mancha Azul (CSA)",
-        "Trovão Azul"
+        "Mancha Azul de Alagoas",
+        "Torcida Trovão Azul"
       ]
     },
     "LADO_B": {
       "name": "Nordeste Lado B",
+      "symbol": "⚡",
       "members": [
-        "Terror Bicolor",
         "Comando Alvi-Rubro",
-        "Comando Alvinegro",
-        "TJF - Náutico Até Morrer",
-        "Torcida Jovem (Botafogo-PB)",
-        "Garra Alvinegra",
-        "Império Vermelho",
         "Cearamor",
+        "Terror Bicolor",
         "Tubarões da Fiel",
-        "Torcida Uniformizada Terror Bicolor",
-        "Esporão do Galo",
-        "Jovem Crato",
-        "Fúria Icasiana"
+        "Fúria Independente BFP"
       ]
     }
   },
   "blocos_interior_abc": {
     "FAMILIA_INTERIOR": {
       "name": "Família Interior (Bloco 1 SP)",
+      "symbol": "🏢",
       "members": [
-        "Fúria Andreense",
-        "Malucos do Tigre",
-        "Torcida Falcão Azul",
-        "Fúria Noroestina",
-        "Sancaloucos",
-        "Garra Azul",
         "Leões da Fabulosa",
-        "Torcida Mancha Azul (Marília)"
+        "Fúria Andreense",
+        "Dragões Alvi Azul",
+        "Sangue Rubro",
+        "Força Rubro Verde",
+        "Malucos do Tigre"
       ]
     },
     "PUNHO_SEGURO": {
       "name": "União Punho Seguro (Bloco 2 SP)",
+      "symbol": "🛡️",
       "members": [
-        "Torcida Gladiadores",
-        "Comando Rubro-Negro",
+        "Gladiadores",
+        "Guerreiros do Tigre",
         "Esquadrão XVzetas",
-        "Febre Amarela",
-        "Guerreiros Barueri",
         "Sangue Barbarense",
         "Torcida Inter Beer"
       ]
     },
     "IRMANDADE": {
       "name": "Irmandade (Bloco 3 SP)",
+      "symbol": "🤝",
       "members": [
         "Torcida Jovem Ponte",
-        "Torcida Afeganistão",
-        "Torcida Mancha Azul (São José)",
-        "Mancha Alvinegra (Comercial)",
-        "Fiel Força Tricolor"
+        "Fiel Força Tricolor",
+        "Torcida Mancha Azul",
+        "Mancha Alvinegra",
+        "Torcida Afeganistão"
       ]
     }
   }

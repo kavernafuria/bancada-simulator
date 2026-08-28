@@ -49,7 +49,7 @@
     "caravana": 92,
     "autonomia_financeira": 88,
     "perfil_predominante": "Tradição Litorânea & Presença na Capital",
-    "eixo_alianca": "PC"
+    "eixo_alianca": "INDEPENDENTE"
   },
   {
     "estado": "SP",
@@ -179,7 +179,7 @@
     "caravana": 65,
     "autonomia_financeira": 60,
     "perfil_predominante": "Linha de Frente na Estrada",
-    "eixo_alianca": "PC"
+    "eixo_alianca": "INDEPENDENTE"
   },
   {
     "estado": "SP",
@@ -270,7 +270,7 @@
     "caravana": 50,
     "autonomia_financeira": 35,
     "perfil_predominante": "Presença Fiel no Interior",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "FAMILIA_INTERIOR"
   },
   {
     "estado": "SP",
@@ -322,7 +322,7 @@
     "caravana": 45,
     "autonomia_financeira": 35,
     "perfil_predominante": "Viagens Financeiras / Acesso",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "PUNHO_SEGURO"
   },
   {
     "estado": "SP",
@@ -348,7 +348,7 @@
     "caravana": 58,
     "autonomia_financeira": 52,
     "perfil_predominante": "Ônibus Conforto / Família",
-    "eixo_alianca": "PUNHO_SEGURO"
+    "eixo_alianca": "INDEPENDENTE"
   },
   {
     "estado": "SP",
@@ -465,7 +465,7 @@
     "caravana": 78,
     "autonomia_financeira": 70,
     "perfil_predominante": "Linha de Frente Interestadual",
-    "eixo_alianca": "DPA"
+    "eixo_alianca": "ALIANCA_ALVINEGRA"
   },
   {
     "estado": "RJ",
@@ -699,7 +699,7 @@
     "caravana": 85,
     "autonomia_financeira": 80,
     "perfil_predominante": "Invasões de Murga & Libertadores",
-    "eixo_alianca": "PC"
+    "eixo_alianca": "INDEPENDENTE"
   },
   {
     "estado": "RS",
@@ -881,7 +881,7 @@
     "caravana": 65,
     "autonomia_financeira": 65,
     "perfil_predominante": "Maior de Floripa & Eixo DPA",
-    "eixo_alianca": "DPA"
+    "eixo_alianca": "INDEPENDENTE"
   },
   {
     "estado": "SC",
@@ -933,7 +933,7 @@
     "caravana": 60,
     "autonomia_financeira": 55,
     "perfil_predominante": "Força do Norte Catarinense & DPA",
-    "eixo_alianca": "DPA"
+    "eixo_alianca": "INDEPENDENTE"
   },
   {
     "estado": "BA",
@@ -946,7 +946,7 @@
     "caravana": 82,
     "autonomia_financeira": 80,
     "perfil_predominante": "Massa Tricolor & Eixo PC",
-    "eixo_alianca": "PC"
+    "eixo_alianca": "DPA"
   },
   {
     "estado": "BA",
@@ -959,7 +959,7 @@
     "caravana": 80,
     "autonomia_financeira": 78,
     "perfil_predominante": "Linha de Frente Rubro-Negra & Eixo DPA",
-    "eixo_alianca": "DPA"
+    "eixo_alianca": "PUNHO_CRUZADO"
   },
   {
     "estado": "PE",
@@ -1011,7 +1011,7 @@
     "caravana": 82,
     "autonomia_financeira": 80,
     "perfil_predominante": "Massa Alvinegra & Eixo PC",
-    "eixo_alianca": "DPA"
+    "eixo_alianca": "LADO_B"
   },
   {
     "estado": "CE",
@@ -1089,7 +1089,7 @@
     "caravana": 55,
     "autonomia_financeira": 50,
     "perfil_predominante": "Tradição Azulina & DPA",
-    "eixo_alianca": "DPA"
+    "eixo_alianca": "LADO_A"
   },
   {
     "estado": "MA",
@@ -1102,7 +1102,7 @@
     "caravana": 50,
     "autonomia_financeira": 40,
     "perfil_predominante": "Maior do Maranhão",
-    "eixo_alianca": "DPA"
+    "eixo_alianca": "LADO_B"
   },
   {
     "estado": "MA",
@@ -1128,7 +1128,7 @@
     "caravana": 45,
     "autonomia_financeira": 45,
     "perfil_predominante": "Tradição Paraibana",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "LADO_B"
   },
   {
     "estado": "PB",
@@ -1167,7 +1167,7 @@
     "caravana": 45,
     "autonomia_financeira": 40,
     "perfil_predominante": "Força de Aracaju",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "LADO_A"
   },
   {
     "estado": "SE",
@@ -1206,7 +1206,7 @@
     "caravana": 70,
     "autonomia_financeira": 70,
     "perfil_predominante": "Pressão de Bancada & Punho Cruzado",
-    "eixo_alianca": "PUNHO_CRUZADO"
+    "eixo_alianca": "INDEPENDENTE"
   },
   {
     "estado": "GO",
@@ -1323,7 +1323,7 @@
     "caravana": 70,
     "autonomia_financeira": 75,
     "perfil_predominante": "Superpotência do Norte & Punho Cruzado",
-    "eixo_alianca": "PUNHO_CRUZADO"
+    "eixo_alianca": "LADO_B"
   },
   {
     "estado": "PA",
