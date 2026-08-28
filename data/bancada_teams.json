@@ -140,7 +140,7 @@
     "caravana": 55,
     "autonomia_financeira": 65,
     "perfil_predominante": "Viagens pelo Interior & Série B",
-    "eixo_alianca": "IRMANDADE"
+    "eixo_alianca": "INDEPENDENTE"
   },
   {
     "estado": "SP",
@@ -275,7 +275,7 @@
   {
     "estado": "SP",
     "clube": "Taubaté",
-    "torcida": "Os Jacus",
+    "torcida": "Os Jecas",
     "tier": "B",
     "contingente": 50,
     "pressao_bancada": 60,
