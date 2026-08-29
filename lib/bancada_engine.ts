@@ -2972,22 +2972,22 @@ export function getSeasonalMilestoneEvent(
   if (season === 3) {
     return {
       season: 3,
-      title: "🏛️ 3ª TEMPORADA: DECISÃO ESTRATÉGICA & RESPOSTA RIVAL",
-      subtitle: "CONSOLIDAÇÃO DE FORÇA E ESTRUTURA DE BONDE",
+      title: "🏛️ 3ª TEMPORADA: ELEVAÇÃO DE NÍVEL RIVAL & DECISÃO DE PISTA",
+      subtitle: "REORGANIZAÇÃO DA RIVALIDADE E NÍVEL DA TORCIDA ADVERSÁRIA",
       hasPositiveRivalTrigger: isPositiveVsRival,
       newsHeadline: isPositiveVsRival
-        ? `⚠️ ELEIÇÃO RIVAL AGRESSIVA: A ${mainRivalName} elegeu um Presidente Linha de Frente para conter o seu histórico positivo!`
-        : `🔥 RESTRUTURAÇÃO DE RECTAGUARDA E EXPANSÃO REGIONAL DA TORCIDA!`,
+        ? `🔥 REAÇÃO DE PISTA (75%+ VITÓRIAS): A ${mainRivalName} ELEVOU SEU NÍVEL E REESTRUTUROU O BONDE DE COMBATE!`
+        : `🏢 CONSOLIDAÇÃO DE ESTRUTURA E EXPANSÃO DAS SUB-SEDES REGIONAIS DA TORCIDA!`,
       narrativeText: isPositiveVsRival
-        ? `Humilhada pelo seu histórico positivo no clássico, a assembleia rival elegeu uma diretoria violenta. A ${mainRivalName} ganhou +35% de PEC de Pista permanente e trará contingentes maiores!`
-        : `Com o crescimento da torcida após 3 anos de mandato, os bondes de bairro exigem voz ativa na diretoria para definir os rumos da arquibancada e da pista.`,
+        ? `Devido ao seu histórico avassalador com 75%+ de vitórias nos confrontos de pista, a torcida rival ${mainRivalName} entrou em crise de diretoria e elevou seu nível de combate! Eles reestruturaram a linha de frente, subiram de patamar (+35% PEC de Pista permanente) e trarão contingentes muito mais pesados nos próximos clássicos!`
+        : `Com 3 anos de liderança consolidada, os bondes de bairro exigem voz ativa na diretoria para definir os rumos da arquibancada, finanças e segurança de pista.`,
       options: [
         {
           id: "REFORCO_PISTA",
-          title: "👊 Criar Novo Bonde da Periferia (Foco Pista)",
+          title: "👊 Resposta de Pista: Fortalecer Bonde da Periferia",
           badge: "EXPANSÃO DE RUAS",
-          description: "Organiza sub-sedes de bairro num bonde de combate móvel.",
-          consequencesSummary: "+20% Contingente, +15 Poder Pista, +10% Risco MP",
+          description: "Reorganiza sub-sedes num bonde móvel para combater o nível elevado do rival.",
+          consequencesSummary: "+20 Contingente, +15 Poder Pista, +10% Risco MP",
           contingenteDelta: 20,
           pistaDelta: 15,
           riscoMpDelta: 10,
@@ -2995,9 +2995,9 @@ export function getSeasonalMilestoneEvent(
         },
         {
           id: "REFORMA_INTERNA",
-          title: "🏛️ Reforma Interna & Transparência da Diretoria",
-          badge: "RESTRUTURAÇÃO MORAL",
-          description: "Contém excessos de rua e foca na regularização com o Ministério Público.",
+          title: "🏛️ Profissionalização & Regularização com MP",
+          badge: "REESTRUTURAÇÃO MORAL",
+          description: "Contém excessos de rua e foca no controle institucional e jurídico.",
           consequencesSummary: "-15% Risco MP, +10 Respeito Nacional, -5 Contingente",
           riscoMpDelta: -15,
           respeitoDelta: 10,
@@ -3006,10 +3006,10 @@ export function getSeasonalMilestoneEvent(
         },
         {
           id: "PACTO_LOCAL",
-          title: "🕊️ Acordo Diplomático de Bastidores com Rival",
+          title: "🕊️ Acordo Diplomático de Bastidores com Rival Elevado",
           badge: "PACTO ISOLADO",
-          description: "Firma pacto de não-agressão de ferro com a nova diretoria rival.",
-          consequencesSummary: "-R$ 5.000 do Caixa, Reduz a agressividade rival nos clássicos",
+          description: "Firma pacto de não-agressão de ferro para atenuar o novo nível do rival.",
+          consequencesSummary: "-R$ 5.000 do Caixa, Atenua a agressividade do rival (+15% PEC)",
           cashDelta: -5000,
           rivalPistaBonus: isPositiveVsRival ? 15 : 0,
         },

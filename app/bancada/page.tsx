@@ -980,8 +980,10 @@ export default function App() {
         if ([3, 6, 9, 12, 15].includes(nextSeason)) {
           const mainRivalName = activeMatchDerby?.rivalTorcida || "Rival Principal";
           const rKey = (mainRivalName || "").trim().toUpperCase();
-          const rec = rivalryRecords[rKey] || { faixasTomadas: 0, faixasPerdidas: 0 };
-          const isPositive = rec.faixasTomadas > rec.faixasPerdidas;
+          const rec = rivalryRecords[rKey] || { faixasTomadas: 0, faixasPerdidas: 0, vitoriasPista: 0, totalConfrontos: 0, derrotasPista: 0 };
+          const winRate = rec.totalConfrontos > 0 ? (rec.vitoriasPista / rec.totalConfrontos) : 0;
+          const is75PctVictories = winRate >= 0.75 || (rec.vitoriasPista >= 2 && rec.derrotasPista === 0);
+          const isPositive = nextSeason === 3 ? is75PctVictories : (rec.faixasTomadas > rec.faixasPerdidas || is75PctVictories);
           const milestone = getSeasonalMilestoneEvent(nextSeason, stats, stateTrackers, mainRivalName, isPositive);
           if (milestone) {
             setActiveMilestoneDecision(milestone);
