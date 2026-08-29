@@ -192,7 +192,9 @@
     "caravana": 60,
     "autonomia_financeira": 55,
     "perfil_predominante": "Bate-Volta no Interior",
-    "eixo_alianca": "IRMANDADE"
+    "eixo_alianca": "IRMANDADE",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",

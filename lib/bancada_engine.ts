@@ -121,8 +121,11 @@ export function getDefaultTorcidaColors(clube: string): { primary: string; secon
   if (c.includes("flamengo") || c.includes("internacional") || c.includes("sport") || c.includes("vitória") || c.includes("athletico")) {
     return { primary: "#dc2626", secondary: "#09090b" };
   }
-  if (c.includes("são paulo") || c.includes("botafogo-sp") || c.includes("comercial") || c.includes("noroeste") || c.includes("náutico") || c.includes("santa cruz")) {
+  if (c.includes("são paulo") || c.includes("botafogo-sp") || c.includes("noroeste") || c.includes("náutico") || c.includes("santa cruz")) {
     return { primary: "#dc2626", secondary: "#f4f4f5" };
+  }
+  if (c.includes("comercial") || c.includes("corinthians") || c.includes("santos") || c.includes("vasco") || c.includes("botafogo") || c.includes("ceará") || c.includes("operário")) {
+    return { primary: "#09090b", secondary: "#f4f4f5" };
   }
   if (c.includes("são caetano")) {
     return { primary: "#0284c7", secondary: "#f4f4f5" };
