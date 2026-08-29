@@ -166,6 +166,7 @@ function playStadiumSound(type: "drum" | "whistle" | "victory" | "alert" | "cash
 export default function App() {
   const [isStarted, setIsStarted] = useState<boolean>(false);
   const [startMode, setStartMode] = useState<"HISTORICA" | "CRIAR">("HISTORICA");
+  const [selectedFilterClub, setSelectedFilterClub] = useState<string>("Corinthians");
   const [selectedOfficialTorcidaName, setSelectedOfficialTorcidaName] = useState<string>("Gaviões da Fiel");
   const [torcidaName, setTorcidaName] = useState<string>("Fúria Alvinegra");
   const [sigla, setSigla] = useState<string>("FAN");
@@ -1525,18 +1526,67 @@ export default function App() {
 
           {startMode === "HISTORICA" ? (
             <div className="space-y-3 pt-1">
+              {/* Passo 1: Filtrar Primeiro por Time / Clube */}
               <div>
-                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-wider block mb-1">
-                  Selecione a Torcida Oficial
+                <label className="text-[10px] font-black text-amber-400 uppercase tracking-wider block mb-1">
+                  1º Selecione o Time / Clube
+                </label>
+                <select
+                  value={selectedFilterClub}
+                  onChange={(e) => {
+                    const club = e.target.value;
+                    setSelectedFilterClub(club);
+                    const filtered =
+                      club === "TODOS"
+                        ? officialList
+                        : officialList.filter((t) => t.clube.toLowerCase() === club.toLowerCase());
+                    if (filtered.length > 0) {
+                      setSelectedOfficialTorcidaName(filtered[0].torcida);
+                      const colors = getDefaultTorcidaColors(filtered[0].clube);
+                      setPrimaryColor(filtered[0].primaryColor || colors.primary);
+                      setSecondaryColor(filtered[0].secondaryColor || colors.secondary);
+                    }
+                  }}
+                  className="w-full bg-zinc-950 border border-zinc-800 text-white rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none focus:border-amber-500"
+                >
+                  <option value="TODOS">🌐 TODOS OS TIMES ({officialList.length} Torcidas)</option>
+                  {mappedClubsList.map((club, idx) => {
+                    const count = officialList.filter((t) => t.clube === club).length;
+                    const st = officialList.find((t) => t.clube === club)?.estado || "";
+                    return (
+                      <option key={idx} value={club}>
+                        ⚽ {club} [{st}] ({count} torcida{count > 1 ? "s" : ""})
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+
+              {/* Passo 2: Selecionar a Torcida do Clube */}
+              <div>
+                <label className="text-[10px] font-black text-amber-400 uppercase tracking-wider block mb-1">
+                  2º Selecione a Torcida Organizada {selectedFilterClub !== "TODOS" ? `do ${selectedFilterClub}` : ""}
                 </label>
                 <select
                   value={selectedOfficialTorcidaName}
-                  onChange={(e) => setSelectedOfficialTorcidaName(e.target.value)}
+                  onChange={(e) => {
+                    const name = e.target.value;
+                    setSelectedOfficialTorcidaName(name);
+                    const found = officialList.find((t) => t.torcida === name);
+                    if (found) {
+                      const colors = getDefaultTorcidaColors(found.clube);
+                      setPrimaryColor(found.primaryColor || colors.primary);
+                      setSecondaryColor(found.secondaryColor || colors.secondary);
+                    }
+                  }}
                   className="w-full bg-zinc-950 border border-zinc-800 text-white rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none focus:border-amber-500"
                 >
-                  {officialList.map((t, idx) => (
+                  {(selectedFilterClub === "TODOS"
+                    ? officialList
+                    : officialList.filter((t) => t.clube.toLowerCase() === selectedFilterClub.toLowerCase())
+                  ).map((t, idx) => (
                     <option key={idx} value={t.torcida}>
-                      {t.torcida} ({t.sigla}) • {t.clube} [{t.estado}]
+                      🥁 {t.torcida} ({t.sigla}) • Tier {t.tier}
                     </option>
                   ))}
                 </select>
