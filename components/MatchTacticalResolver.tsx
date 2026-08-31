@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 // ==========================================
 // 1. TIPOS & INTERFACES
 // ==========================================
-export type GameType = 'whack' | 'rojon' | 'rhythm' | 'dodge' | 'punch';
+export type GameType = 'whack' | 'rojon' | 'rhythm' | 'dodge' | 'punch' | 'memory';
 
 export interface MiniGameResult {
   gameType: GameType;
@@ -1013,6 +1013,161 @@ export const MatchTacticalResolver: React.FC<{
       {activeMiniGame === 'rojon' && <RojonTarget onFinish={handleMiniGameFinish} />}
       {activeMiniGame === 'rhythm' && <MemoryMosaic onFinish={handleMiniGameFinish} />}
       {activeMiniGame === 'dodge' && <CaravanDodge onFinish={handleMiniGameFinish} />}
+    </div>
+  );
+};
+
+
+// ==========================================
+// 7. MINI-GAME 6: MEMÓRIA & SEQUÊNCIA DE CORES DA BANCADA (SIMON SAYS)
+// ==========================================
+interface ColorMemoryGameProps {
+  opponentTier: 'S' | 'A' | 'B';
+  onFinish: (result: MiniGameResult) => void;
+}
+
+export const ColorMemoryGame: React.FC<ColorMemoryGameProps> = ({ opponentTier, onFinish }) => {
+  const [isTutorial, setIsTutorial] = useState(true);
+  const [sequence, setSequence] = useState<number[]>([]);
+  const [playerInput, setPlayerInput] = useState<number[]>([]);
+  const [isPlayingSequence, setIsPlayingSequence] = useState(false);
+  const [activeButton, setActiveButton] = useState<number | null>(null);
+  const [round, setRound] = useState(1);
+  const [gameStatus, setGameStatus] = useState<'IDLE' | 'SHOWING' | 'USER_TURN' | 'FAIL' | 'SUCCESS'>('IDLE');
+
+  const COLORS = [
+    { id: 0, name: 'VERMELHO', bg: 'bg-red-600', activeBg: 'bg-red-400 border-white scale-105 shadow-red-500/80 shadow-lg' },
+    { id: 1, name: 'PRETO', bg: 'bg-zinc-900 border-zinc-700', activeBg: 'bg-zinc-700 border-white scale-105 shadow-zinc-400/80 shadow-lg' },
+    { id: 2, name: 'BRANCO', bg: 'bg-zinc-100 text-black', activeBg: 'bg-white text-black border-yellow-400 scale-105 shadow-white/80 shadow-lg' },
+    { id: 3, name: 'AMARELO', bg: 'bg-amber-500', activeBg: 'bg-amber-300 border-white scale-105 shadow-amber-400/80 shadow-lg' },
+    { id: 4, name: 'AZUL', bg: 'bg-blue-600', activeBg: 'bg-blue-400 border-white scale-105 shadow-blue-500/80 shadow-lg' },
+  ];
+
+  const startNextRound = (currentSeq: number[]) => {
+    const nextColor = Math.floor(Math.random() * 5);
+    const newSeq = [...currentSeq, nextColor];
+    setSequence(newSeq);
+    setPlayerInput([]);
+    setIsPlayingSequence(true);
+    setGameStatus('SHOWING');
+
+    // Play sequence visually
+    let idx = 0;
+    const interval = setInterval(() => {
+      if (idx < newSeq.length) {
+        setActiveButton(newSeq[idx]);
+        setTimeout(() => setActiveButton(null), 450);
+        idx++;
+      } else {
+        clearInterval(interval);
+        setIsPlayingSequence(false);
+        setGameStatus('USER_TURN');
+      }
+    }, 700);
+  };
+
+  const handleStartGame = () => {
+    setIsTutorial(false);
+    setRound(1);
+    startNextRound([]);
+  };
+
+  const handleColorClick = (colorId: number) => {
+    if (gameStatus !== 'USER_TURN' || isPlayingSequence) return;
+
+    setActiveButton(colorId);
+    setTimeout(() => setActiveButton(null), 200);
+
+    const newInput = [...playerInput, colorId];
+    setPlayerInput(newInput);
+
+    const step = newInput.length - 1;
+    if (newInput[step] !== sequence[step]) {
+      // Failed sequence
+      setGameStatus('FAIL');
+      setTimeout(() => {
+        const finalScore = round - 1;
+        if (finalScore >= 5) {
+          onFinish({ gameType: 'memory', modifier: 0.25, rank: 'S', description: `Memorização perfeita das cores da torcida (${finalScore} sequências)! (+25% Bancada)` });
+        } else if (finalScore >= 3) {
+          onFinish({ gameType: 'memory', modifier: 0.12, rank: 'B', description: `Boa sincronia de mosaico e cores (${finalScore} sequências). (+12% Bancada)` });
+        } else if (finalScore >= 1) {
+          onFinish({ gameType: 'memory', modifier: 0.05, rank: 'C', description: `Sincronia regular de cores (${finalScore} sequência). (+5% Bancada)` });
+        } else {
+          onFinish({ gameType: 'memory', modifier: -0.15, rank: 'F', description: 'Erro na sequência do mosaico (-15% Bancada).' });
+        }
+      }, 1000);
+      return;
+    }
+
+    if (newInput.length === sequence.length) {
+      if (round >= 6) {
+        // Max round reached with success
+        setGameStatus('SUCCESS');
+        setTimeout(() => {
+          onFinish({ gameType: 'memory', modifier: 0.25, rank: 'S', description: 'Memorização Máxima de 6 Sequências! Espetáculo Perfeito (+25% Bancada)' });
+        }, 1000);
+      } else {
+        setRound((r) => r + 1);
+        setTimeout(() => startNextRound(sequence), 800);
+      }
+    }
+  };
+
+  if (isTutorial) {
+    return (
+      <div className="flex flex-col items-center bg-zinc-950 p-6 rounded-2xl border border-amber-500 text-white max-w-sm w-full select-none shadow-2xl space-y-4 text-center">
+        <div className="border-b border-zinc-800 pb-2 w-full">
+          <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block">🧩 MEMÓRIA DA BANCADA</span>
+          <h3 className="text-sm font-black text-white uppercase mt-0.5">Sequência de Cores do Mosaico</h3>
+        </div>
+
+        <p className="text-xs text-zinc-300 leading-relaxed text-left">
+          <strong>Como Jogar:</strong> Observe a sequência piscar nas cores da torcida e repita a ordem exata das luzes!
+        </p>
+
+        <ul className="text-[11px] text-zinc-400 text-left space-y-1.5 list-disc pl-4">
+          <li>A cada rodada a sequência ganha 1 nova cor!</li>
+          <li>Atingir 5+ rodadas corretas garante <strong>Rank S (+25% Bancada)</strong>!</li>
+        </ul>
+
+        <button
+          onClick={handleStartGame}
+          className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer"
+        >
+          ▶️ INICIAR MEMÓRIA DE CORES
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col items-center bg-zinc-950 p-6 rounded-2xl border border-amber-500 text-white max-w-sm w-full select-none shadow-2xl space-y-4">
+      <div className="flex justify-between w-full text-xs font-black tracking-wider uppercase border-b border-zinc-800 pb-2">
+        <span className="text-amber-400">Rodada {round}/6</span>
+        <span className="text-zinc-400 text-[10px]">
+          {gameStatus === 'SHOWING' ? '👀 Observe a Sequência...' : gameStatus === 'FAIL' ? '❌ Errou a Sequência!' : '👉 Sua Vez de Clicar!'}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-3 gap-3 w-full my-2">
+        {COLORS.map((c) => (
+          <button
+            key={c.id}
+            onClick={() => handleColorClick(c.id)}
+            disabled={gameStatus !== 'USER_TURN'}
+            className={`h-20 rounded-2xl flex flex-col items-center justify-center font-black text-xs transition-all border-2 cursor-pointer ${
+              activeButton === c.id ? c.activeBg : `${c.bg} border-zinc-800 hover:border-amber-400 opacity-90 hover:opacity-100`
+            }`}
+          >
+            <span className="text-[10px] uppercase font-black tracking-wider">{c.name}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="text-[10px] text-zinc-400 font-mono border-t border-zinc-800 pt-2 w-full text-center">
+        {gameStatus === 'USER_TURN' ? `Toques: ${playerInput.length} / ${sequence.length}` : 'Aguarde a pisca das cores...'}
+      </div>
     </div>
   );
 };

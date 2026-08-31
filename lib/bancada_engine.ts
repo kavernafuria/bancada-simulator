@@ -2152,7 +2152,62 @@ export function executeCompleteMatch(
   // ------------------------------------------------------------------------
   // 1.B. FÓRMULA DE PODER EFETIVO DE COMBATE (PEC)
   // ------------------------------------------------------------------------
-  const ratio = playerMembers / Math.max(1, rivalMembers);
+    // ------------------------------------------------------------------------
+  // 1.A. TRATAMENTO DEDICADO PARA TÁTICAS DE FESTA E EVASÃO (ZERO FERIDOS & TEXTO DE FESTA)
+  // ------------------------------------------------------------------------
+  const tid = (tactic.id || "").toUpperCase();
+  const isFestaTactic = tactic.isMosaicTactic || tid.includes("FESTA") || tid.includes("BANDEIRAO") || tid.includes("MOSAICO") || tid.includes("SAMBA") || tid.includes("RUAZAO") || tid.includes("BATERIA");
+  const isEvasionTactic = tid.includes("EVASAO") || tid.includes("CORTEJO") || tid.includes("ANTECIPADA") || tid.includes("QUADRA") || tactic.injuryRisk === 0;
+
+  if (isFestaTactic || isEvasionTactic) {
+    const scorePower =
+      stats.pressao_bancada * 0.55 +
+      state.moral * 0.45 +
+      (police ? police.bancadaBonus * 0.5 : 0) +
+      (isFestaTactic ? 15 : 0) +
+      (Math.random() - 0.5) * 20;
+
+    const scorePlayerClub = scorePower > 50 ? Math.floor(Math.random() * 2 + 1) : Math.floor(Math.random() * 2);
+    const scoreRivalClub = scorePower > 65 ? Math.max(0, scorePlayerClub - 1) : scorePlayerClub + 1;
+
+    const statusTitle = isFestaTactic
+      ? `🎨 ESPETÁCULO DE BANCADA & FESTA EM ${derby.stadium.toUpperCase()}`
+      : `🛡️ ENTRADA ORGANIZADA & PRESERVAÇÃO EM ${derby.stadium.toUpperCase()}`;
+
+    const chronicleText = isFestaTactic
+      ? `A ${currentTorcida?.torcida || "nossa torcida"} focou 100% no espetáculo de arquibancada no estádio ${derby.stadium}. A massa deu um show ininterrupto com bandeiras, cânticos e apoio incondicional do primeiro ao último minuto da partida contra o ${derby.rivalTorcida}.`
+      : `A diretoria e os associados priorizaram a segurança e a entrada organizada com cortejo blindado. O deslocamento para o ${derby.stadium} foi concluído sem incidentes na rodovia e com 100% do bonde seguro e preservado.`;
+
+    const deltas: FormattedDelta[] = [
+      { label: "Diretriz de Partida", value: isFestaTactic ? "Festa & Apoio de Bancada" : "Evasão & Comboio Preservado", isPositive: true },
+      { label: "Membros Preservados", value: "100% Seguros (0 Feridos)", isPositive: true },
+      { label: "Placar do Jogo", value: `${scorePlayerClub} x ${scoreRivalClub}`, isPositive: scorePlayerClub >= scoreRivalClub },
+      { label: "Pressão de Bancada", value: `+7 pts`, isPositive: true },
+      { label: "Moral da Tropa", value: `+${tactic.moralMod || 6}`, isPositive: true },
+      { label: "Baixas Médicas", value: "0 feridos", isPositive: true },
+      { label: "Custos Logísticos", value: `R$ ${(transport.fixedCost + (tactic.costRisk || 0)).toLocaleString()}`, isPositive: true },
+    ];
+
+    return {
+      scorePlayerClub,
+      scoreRivalClub,
+      effectiveForcePlayer: 75,
+      effectiveForceRival: 50,
+      isVictoryPista: true,
+      isVictoryBancada: true,
+      statusTitle,
+      membersLost: 0,
+      medicalCost: 0,
+      extraExpenses: transport.fixedCost + (tactic.costRisk || 0),
+      mpAdded: Math.max(0, transport.mpRisk + (tactic.mpPenalty || 0)),
+      moralChange: tactic.moralMod || 6,
+      chronicleText,
+      formattedDeltas: deltas,
+      bannerCaptured: false,
+    };
+  }
+
+const ratio = playerMembers / Math.max(1, rivalMembers);
   const presidentCombatMult = presidentProfile === "LINHA_FRENTE" ? 1.15 : 1.0;
 
   // Força Base = (Poder Pista * Coeficiente Tier) * (Bonde Presente / 100)

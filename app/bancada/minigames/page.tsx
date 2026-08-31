@@ -8,6 +8,7 @@ import {
   PunchFrontCombat,
   RojonTarget,
   MemoryMosaic,
+  ColorMemoryGame,
   CaravanDodge,
   MatchTacticalResolver,
   MiniGameResult,
@@ -15,7 +16,7 @@ import {
 } from "@/components/MatchTacticalResolver";
 
 export default function MiniGamesTestPage() {
-  const [activeTab, setActiveTab] = useState<"whack" | "punch" | "rojon" | "rhythm" | "dodge" | "gate">("whack");
+  const [activeTab, setActiveTab] = useState<"whack" | "punch" | "rojon" | "rhythm" | "dodge" | "gate" | "memory">("whack");
 
   // Tier Config
   const [opponentTier, setOpponentTier] = useState<"S" | "A" | "B">("S");
@@ -178,6 +179,26 @@ export default function MiniGamesTestPage() {
             </span>
           </div>
           <span className="text-[9px] text-zinc-500 block mt-0.5">Caravana/Flancos</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setActiveTab("memory");
+            setLastResult(null);
+            setGameKey((k) => k + 1);
+          }}
+          className={`p-2.5 rounded-2xl border text-left transition-all cursor-pointer ${
+            activeTab === "memory"
+              ? "bg-amber-950/60 border-amber-500 text-white shadow-lg"
+              : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+          }`}
+        >
+          <div className="flex items-center justify-between font-black text-xs">
+            <span className="flex items-center gap-1 text-amber-400 text-[11px]">
+              <Zap className="w-3.5 h-3.5" /> Sequência Cores
+            </span>
+          </div>
+          <span className="text-[9px] text-zinc-500 block mt-0.5">Memória de Torcida</span>
         </button>
 
         <button
