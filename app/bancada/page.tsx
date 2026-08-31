@@ -33,6 +33,7 @@ import {
   VolumeX,
   Compass,
   MapPin,
+  Tv,
   Car,
   Eye,
   Flag,
@@ -212,6 +213,8 @@ export default function App() {
   const [isBannedByMP, setIsBannedByMP] = useState<boolean>(false);
   const [debtYears, setDebtYears] = useState<number>(0);
   const [pipelineIndex, setPipelineIndex] = useState<number>(0);
+  const [retryUsedCurrentMatch, setRetryUsedCurrentMatch] = useState<boolean>(false);
+  const [isRetryWithAdAttempt, setIsRetryWithAdAttempt] = useState<boolean>(false);
 
   // MATCH WORKFLOW STATE
   // Phase: "CLOSED" | "POLICE_MEETING" | "TRANSPORT" | "SCOUT_INTEL" | "TACTICAL" | "MINIGAME" | "RESULT"
@@ -653,6 +656,78 @@ export default function App() {
   };
 
   // 5. Execute Tactical Choice & Trigger Mini-Game
+  const handleWatchAdAndRetryMatch = () => {
+    if (!activeMatchDerby || !activeScoutIntel || !activeSelectedTactic || !selectedTransport) return;
+
+    setRetryUsedCurrentMatch(true);
+    setIsRetryWithAdAttempt(true);
+    setActiveMatchResult(null);
+
+    // Re-run match execution with isRetryWithAd = true (2x contingent boost for this resolution)
+    const retryResult = executeCompleteMatch(
+      stats,
+      stateTrackers,
+      selectedPoliceChoice,
+      selectedTransport,
+      activeScoutIntel,
+      activeSelectedTactic,
+      activeMatchDerby,
+      currentTorcida || undefined,
+      presidentProfile || null,
+      bateriaDurability,
+      true // isRetryWithAd = true
+    );
+
+    if (retryResult.isVictoryPista) {
+      retryResult.statusTitle = `VITÓRIA DE RECUPERAÇÃO (2x CONTINGENTE - SEGUNDA CHANCE)`;
+      retryResult.chronicleText = `[Ano ${season} - Segunda Chance 2x] A comitiva da ${currentTorcida?.torcida || "nossa torcida"} dobrou o contingente no entorno do estádio ${activeMatchDerby.stadium} e garantiu uma grande vitória de recuperação por ${retryResult.scorePlayerClub} x ${retryResult.scoreRivalClub}. Conforme as regras da segunda chance, a faixa permaneceu sob domínio do rival.`;
+    }
+    retryResult.bannerCaptured = false; // STRICT RULE: Never capture banner on 2nd attempt!
+
+    setActiveMatchResult(retryResult);
+
+    // Update Rivalry Record (Track vitoriasSegundaChance, do NOT touch faixasTomadas or banner ownership)
+    if (activeMatchDerby && !activeMatchDerby.isAllyGame) {
+      const rKey = activeMatchDerby.rivalTorcida;
+
+      setRivalryRecords((prev) => {
+        const existing = prev[rKey] || {
+          rivalTorcida: rKey,
+          rivalClub: (activeMatchDerby.isHome ? activeMatchDerby.awayClub : activeMatchDerby.homeClub) || rKey,
+          totalConfrontos: 0,
+          vitoriasPista: 0,
+          derrotasPista: 0,
+          jogosDaPaz: 0,
+          faixasTomadas: 0,
+          faixasPerdidas: 0,
+          vitoriasSegundaChance: 0,
+          isPeacePactActive: false,
+          isTretaChallenged: false,
+        };
+
+        return {
+          ...prev,
+          [rKey]: {
+            ...existing,
+            totalConfrontos: existing.totalConfrontos + 1,
+            vitoriasPista: existing.vitoriasPista + (retryResult.isVictoryPista ? 1 : 0),
+            derrotasPista: existing.derrotasPista + (retryResult.isVictoryPista ? 0 : 1),
+            vitoriasSegundaChance: (existing.vitoriasSegundaChance || 0) + (retryResult.isVictoryPista ? 1 : 0),
+            faixasTomadas: existing.faixasTomadas, // STRICT RULE: Faixa permanece com o rival!
+            faixasPerdidas: existing.faixasPerdidas,
+            isPeacePactActive: false,
+            isTretaChallenged: false,
+          },
+        };
+      });
+    }
+
+    setHistoryLog((prev) => [
+      `[Ano ${season} - ${activeMatchDerby.competition || "Jogo"}] ${retryResult.isVictoryPista ? "Vitória de Recuperação (Segunda Chance 2x). Faixa permaneceu com o rival." : "Derrota Definitiva na 2ª tentativa."} Placar: ${retryResult.scorePlayerClub}x${retryResult.scoreRivalClub}.`,
+      ...prev,
+    ]);
+  };
+
   const handleExecuteTacticalChoice = (tactic: TacticalBattleChoice) => {
     if (!selectedTransport || !activeScoutIntel || !activeMatchDerby || !currentTorcida) return;
 
@@ -3180,6 +3255,41 @@ export default function App() {
               )}
             </div>
 
+            {/* REWARDED AD SECOND CHANCE OFFER FOR DEFEATS */}
+            {!activeMatchResult?.isVictoryPista && !retryUsedCurrentMatch && (
+              <div className="bg-red-950/60 border-2 border-red-500 rounded-2xl p-4 text-left space-y-3 shadow-2xl animate-fade-in my-3">
+                <div className="flex items-center justify-between border-b border-red-800/80 pb-2">
+                  <span className="text-[10px] font-black text-red-400 uppercase tracking-widest flex items-center gap-1">
+                    <AlertTriangle className="w-4 h-4 text-red-500" /> DERROTA! SEGUNDA CHANCE DISPONÍVEL
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-amber-500 text-black text-[10px] font-black">
+                    REWARDED AD (2x CONTINGENTE)
+                  </span>
+                </div>
+
+                <p className="text-xs text-zinc-200 font-medium leading-relaxed">
+                  Sua torcida perdeu o duelo. Você pode ter uma segunda chance de refazer este mesmo confronto com <strong>2x o Contingente de Tropa (Dobro de Membros Presentes)</strong>.
+                </p>
+
+                <div className="bg-zinc-950 p-3 rounded-xl border border-red-900/60 text-[11px] text-amber-300 font-bold space-y-1">
+                  <div className="text-white font-black uppercase text-[10px] tracking-wider">⚠️ RECOMPENSA & REGRA IMPORTANTE:</div>
+                  <div>• CONTINGENTE PARA A NOVA TENTATIVA: <span className="text-emerald-400 font-black">2x (DOBRADO)</span></div>
+                  <div className="text-red-400 leading-snug">
+                    • IMPORTANTE: Nesta segunda tentativa, mesmo que você vença, <u>NÃO poderá conquistar a faixa da torcida rival</u> (Vitória de Recuperação). A faixa permanecerá com o rival.
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-1">
+                  <button
+                    onClick={handleWatchAdAndRetryMatch}
+                    className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <Tv className="w-4 h-4" /> ASSISTIR ANÚNCIO — REFAZER COM 2x CONTINGENTE
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Kavers Games Social Sharing Block */}
             {renderSocialShareSection(
               "RESULTADO DO JOGO",
@@ -3239,6 +3349,41 @@ export default function App() {
                 </div>
               ))}
             </div>
+
+            {/* REWARDED AD SECOND CHANCE OFFER FOR DEFEATS */}
+            {!activeMatchResult?.isVictoryPista && !retryUsedCurrentMatch && (
+              <div className="bg-red-950/60 border-2 border-red-500 rounded-2xl p-4 text-left space-y-3 shadow-2xl animate-fade-in my-3">
+                <div className="flex items-center justify-between border-b border-red-800/80 pb-2">
+                  <span className="text-[10px] font-black text-red-400 uppercase tracking-widest flex items-center gap-1">
+                    <AlertTriangle className="w-4 h-4 text-red-500" /> DERROTA! SEGUNDA CHANCE DISPONÍVEL
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-amber-500 text-black text-[10px] font-black">
+                    REWARDED AD (2x CONTINGENTE)
+                  </span>
+                </div>
+
+                <p className="text-xs text-zinc-200 font-medium leading-relaxed">
+                  Sua torcida perdeu o duelo. Você pode ter uma segunda chance de refazer este mesmo confronto com <strong>2x o Contingente de Tropa (Dobro de Membros Presentes)</strong>.
+                </p>
+
+                <div className="bg-zinc-950 p-3 rounded-xl border border-red-900/60 text-[11px] text-amber-300 font-bold space-y-1">
+                  <div className="text-white font-black uppercase text-[10px] tracking-wider">⚠️ RECOMPENSA & REGRA IMPORTANTE:</div>
+                  <div>• CONTINGENTE PARA A NOVA TENTATIVA: <span className="text-emerald-400 font-black">2x (DOBRADO)</span></div>
+                  <div className="text-red-400 leading-snug">
+                    • IMPORTANTE: Nesta segunda tentativa, mesmo que você vença, <u>NÃO poderá conquistar a faixa da torcida rival</u> (Vitória de Recuperação). A faixa permanecerá com o rival.
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-1">
+                  <button
+                    onClick={handleWatchAdAndRetryMatch}
+                    className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <Tv className="w-4 h-4" /> ASSISTIR ANÚNCIO — REFAZER COM 2x CONTINGENTE
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Kavers Games Social Sharing Block */}
             {renderSocialShareSection(

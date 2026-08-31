@@ -341,6 +341,8 @@ export interface MatchExecutionResult {
   chronicleText: string;
   formattedDeltas: FormattedDelta[];
   bannerCaptured?: boolean;
+  isRetryWithAd?: boolean;
+  isSecondChanceVictory?: boolean;
 }
 
 export interface RivalryRecord {
@@ -352,6 +354,7 @@ export interface RivalryRecord {
   jogosDaPaz: number;
   faixasTomadas: number;
   faixasPerdidas: number;
+  vitoriasSegundaChance?: number;
   isPeacePactActive?: boolean;
   isTretaChallenged?: boolean;
 }
@@ -1863,9 +1866,11 @@ export function executeCompleteMatch(
   derby: DerbyMatchInfo,
   currentTorcida?: OfficialTorcida,
   presidentProfile?: PresidentProfile | null,
-  bateriaDurability: number = 100
+  bateriaDurability: number = 100,
+  isRetryWithAd: boolean = false
 ): MatchExecutionResult {
-  const playerMembers = intel.playerMembersPresent;
+  // RECOMPENSA DO ANÚNCIO (REWARDED AD): Contingente efetivo para o combate DOBRADO (2x)
+  const playerMembers = isRetryWithAd ? intel.playerMembersPresent * 2 : intel.playerMembersPresent;
   const rivalMembers = intel.rivalMembersWaiting;
 
   // ALLIED MATCH LOGIC (Churrasco, Irmandade, Confraternização, Zero Confronto Violento)
@@ -2146,6 +2151,8 @@ export function executeCompleteMatch(
       chronicleText,
       formattedDeltas: deltas,
       bannerCaptured: false,
+      isRetryWithAd,
+      isSecondChanceVictory: isRetryWithAd && true,
     };
   }
 
@@ -2204,6 +2211,8 @@ export function executeCompleteMatch(
       chronicleText,
       formattedDeltas: deltas,
       bannerCaptured: false,
+      isRetryWithAd,
+      isSecondChanceVictory: isRetryWithAd && true,
     };
   }
 
@@ -2264,7 +2273,8 @@ const ratio = playerMembers / Math.max(1, rivalMembers);
   const isRivalDisadvantaged = tactic.id === "ATAQUE_SURPRESA_EMBOSCADA" || playerMembers >= rivalMembers * 1.8;
   const isTierEligible = !( (playerTier === "C" || playerTier === "C+" || stats.poder_pista < 50) && (rivalTier === "S" || rivalTier === "S-" || rivalTier === "A+" || rivalTier === "A") );
 
-  const bannerCaptured = isVictoryPista && isOverwhelmingVictory && isRivalDisadvantaged && isTierEligible && Math.random() < 0.08;
+  // REGRA ABSOLUTA — REWARDED AD: Na segunda tentativa, NUNCA pode conquistar a faixa do rival
+  const bannerCaptured = !isRetryWithAd && isVictoryPista && isOverwhelmingVictory && isRivalDisadvantaged && isTierEligible && Math.random() < 0.08;
 
   // Condição para PERDER FAIXA:
   const isSeverePistaLoss = !isVictoryPista && (rivalForce >= playerForce * 1.8) && !derby.isHome && (coefTierRival > coefTierPlayer);
@@ -2358,7 +2368,9 @@ const ratio = playerMembers / Math.max(1, rivalMembers);
     moralChange,
     chronicleText,
     formattedDeltas: deltas,
-    bannerCaptured,
+    bannerCaptured: isRetryWithAd ? false : bannerCaptured,
+    isRetryWithAd,
+    isSecondChanceVictory: isRetryWithAd && isVictoryPista,
   };
 }
 
