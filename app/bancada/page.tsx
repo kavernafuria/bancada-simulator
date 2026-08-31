@@ -2,6 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { AgeGateService } from "@/lib/age_gate_service";
+import { AgeGateModal } from "@/components/AgeGateModal";
+import { AdService } from "@/lib/ad_service";
+import { MockAdProvider } from "@/lib/mock_ad_provider";
+import { MockAdModal } from "@/components/MockAdModal";
 import {
   Drum,
   Shield,
@@ -215,6 +220,8 @@ export default function App() {
   const [pipelineIndex, setPipelineIndex] = useState<number>(0);
   const [retryUsedCurrentMatch, setRetryUsedCurrentMatch] = useState<boolean>(false);
   const [isRetryWithAdAttempt, setIsRetryWithAdAttempt] = useState<boolean>(false);
+  const [isAgeVerified, setIsAgeVerified] = useState<boolean>(false);
+  const [showMockAdModal, setShowMockAdModal] = useState<boolean>(false);
 
   // MATCH WORKFLOW STATE
   // Phase: "CLOSED" | "POLICE_MEETING" | "TRANSPORT" | "SCOUT_INTEL" | "TACTICAL" | "MINIGAME" | "RESULT"
@@ -656,6 +663,16 @@ export default function App() {
   };
 
   // 5. Execute Tactical Choice & Trigger Mini-Game
+  const handleTriggerRewardedAdFlow = () => {
+    // REGRA 3: Não permite solicitar anúncios se a idade não for verificada
+    if (!isAgeVerified) {
+      alert("Acesso restrito a maiores de 18 anos.");
+      return;
+    }
+
+    setShowMockAdModal(true);
+  };
+
   const handleWatchAdAndRetryMatch = () => {
     if (!activeMatchDerby || !activeScoutIntel || !activeSelectedTactic || !selectedTransport) return;
 
@@ -1434,9 +1451,29 @@ export default function App() {
   const currentStep = pipeline[pipelineIndex] || pipeline[0];
   const activeActionEvent = actionEvents[pipelineIndex];
 
+  // Age Gate 18+ verification on mount
+  useEffect(() => {
+    const verified = AgeGateService.isVerified();
+    setIsAgeVerified(verified);
+
+    // Initialize AdService with MockAdProvider for development
+    const mockProvider = new MockAdProvider();
+    AdService.setProvider(mockProvider);
+  }, []);
+
+  const handleConfirmAge = () => {
+    AgeGateService.setVerified(true);
+    setIsAgeVerified(true);
+  };
+
   // Dynamic Theme Colors
   const themePrimary = currentTorcida?.primaryColor || primaryColor || "#f59e0b";
   const themeSecondary = currentTorcida?.secondaryColor || secondaryColor || "#18181b";
+
+  // 0. AGE GATE 18+ ENFORCEMENT
+  if (!isAgeVerified) {
+    return <AgeGateModal onConfirmAge={handleConfirmAge} />;
+  }
 
   // 1. ONBOARDING & SETUP SCREEN
   if (!isStarted) {
@@ -3281,7 +3318,7 @@ export default function App() {
 
                 <div className="space-y-2 pt-1">
                   <button
-                    onClick={handleWatchAdAndRetryMatch}
+                    onClick={handleTriggerRewardedAdFlow}
                     className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer flex items-center justify-center gap-2"
                   >
                     <Tv className="w-4 h-4" /> ASSISTIR ANÚNCIO — REFAZER COM 2x CONTINGENTE
@@ -3376,7 +3413,7 @@ export default function App() {
 
                 <div className="space-y-2 pt-1">
                   <button
-                    onClick={handleWatchAdAndRetryMatch}
+                    onClick={handleTriggerRewardedAdFlow}
                     className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer flex items-center justify-center gap-2"
                   >
                     <Tv className="w-4 h-4" /> ASSISTIR ANÚNCIO — REFAZER COM 2x CONTINGENTE
@@ -3534,6 +3571,20 @@ export default function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* MOCK REWARDED AD MODAL (DEV MODE) */}
+      {showMockAdModal && (
+        <MockAdModal
+          onComplete={() => {
+            setShowMockAdModal(false);
+            // Grant reward only upon valid completion callback
+            handleWatchAdAndRetryMatch();
+          }}
+          onCancel={() => {
+            setShowMockAdModal(false);
+          }}
+        />
       )}
 
       {/* 9.B. ALLIANCE DIPLOMATIC PROPOSAL MODAL */}
