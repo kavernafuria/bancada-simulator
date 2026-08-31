@@ -656,7 +656,14 @@ export default function App() {
     setSelectedTransport(transport);
     if (activeMatchDerby) {
       const isInterior = isInteriorSP(currentTorcida);
-      const intel = calculateScoutIntel(stats, transport, activeMatchDerby, isInterior);
+      let intel = calculateScoutIntel(stats, transport, activeMatchDerby, isInterior);
+      if (isRetryWithAdAttempt) {
+        // DOBRA O CONTINGENTE DA TORCIDA SE FOR TENTATIVA DE SEGUNDA CHANCE (REWARDED AD)
+        intel = {
+          ...intel,
+          playerMembersPresent: intel.playerMembersPresent * 2,
+        };
+      }
       setActiveScoutIntel(intel);
       setMatchModalPhase("SCOUT_INTEL");
     }
@@ -680,75 +687,21 @@ export default function App() {
   };
 
   const handleWatchAdAndRetryMatch = () => {
-    if (!activeMatchDerby || !activeScoutIntel || !activeSelectedTactic || !selectedTransport) return;
+    if (!activeMatchDerby) return;
 
+    // Marca que a segunda chance deste duelo foi usada e ativa o modo 2x contingente
     setRetryUsedCurrentMatch(true);
     setIsRetryWithAdAttempt(true);
     setActiveMatchResult(null);
 
-    // Re-run match execution with isRetryWithAd = true (2x contingent boost for this resolution)
-    const retryResult = executeCompleteMatch(
-      stats,
-      stateTrackers,
-      selectedPoliceChoice,
-      selectedTransport,
-      activeScoutIntel,
-      activeSelectedTactic,
-      activeMatchDerby,
-      currentTorcida || undefined,
-      presidentProfile || null,
-      bateriaDurability,
-      true // isRetryWithAd = true
-    );
+    // Reseta todas as escolhas para o jogador refazer o duelo do início!
+    setSelectedPoliceChoice(null);
+    setSelectedTransport(null);
+    setActiveScoutIntel(null);
+    setActiveSelectedTactic(null);
 
-    if (retryResult.isVictoryPista) {
-      retryResult.statusTitle = `VITÓRIA DE RECUPERAÇÃO (2x CONTINGENTE - SEGUNDA CHANCE)`;
-      retryResult.chronicleText = `[Ano ${season} - Segunda Chance 2x] A comitiva da ${currentTorcida?.torcida || "nossa torcida"} dobrou o contingente no entorno do estádio ${activeMatchDerby.stadium} e garantiu uma grande vitória de recuperação por ${retryResult.scorePlayerClub} x ${retryResult.scoreRivalClub}. Conforme as regras da segunda chance, a faixa permaneceu sob domínio do rival.`;
-    }
-    retryResult.bannerCaptured = false; // STRICT RULE: Never capture banner on 2nd attempt!
-
-    setActiveMatchResult(retryResult);
-
-    // Update Rivalry Record (Track vitoriasSegundaChance, do NOT touch faixasTomadas or banner ownership)
-    if (activeMatchDerby && !activeMatchDerby.isAllyGame) {
-      const rKey = activeMatchDerby.rivalTorcida;
-
-      setRivalryRecords((prev) => {
-        const existing = prev[rKey] || {
-          rivalTorcida: rKey,
-          rivalClub: (activeMatchDerby.isHome ? activeMatchDerby.awayClub : activeMatchDerby.homeClub) || rKey,
-          totalConfrontos: 0,
-          vitoriasPista: 0,
-          derrotasPista: 0,
-          jogosDaPaz: 0,
-          faixasTomadas: 0,
-          faixasPerdidas: 0,
-          vitoriasSegundaChance: 0,
-          isPeacePactActive: false,
-          isTretaChallenged: false,
-        };
-
-        return {
-          ...prev,
-          [rKey]: {
-            ...existing,
-            totalConfrontos: existing.totalConfrontos + 1,
-            vitoriasPista: existing.vitoriasPista + (retryResult.isVictoryPista ? 1 : 0),
-            derrotasPista: existing.derrotasPista + (retryResult.isVictoryPista ? 0 : 1),
-            vitoriasSegundaChance: (existing.vitoriasSegundaChance || 0) + (retryResult.isVictoryPista ? 1 : 0),
-            faixasTomadas: existing.faixasTomadas, // STRICT RULE: Faixa permanece com o rival!
-            faixasPerdidas: existing.faixasPerdidas,
-            isPeacePactActive: false,
-            isTretaChallenged: false,
-          },
-        };
-      });
-    }
-
-    setHistoryLog((prev) => [
-      `[Ano ${season} - ${activeMatchDerby.competition || "Jogo"}] ${retryResult.isVictoryPista ? "Vitória de Recuperação (Segunda Chance 2x). Faixa permaneceu com o rival." : "Derrota Definitiva na 2ª tentativa."} Placar: ${retryResult.scorePlayerClub}x${retryResult.scoreRivalClub}.`,
-      ...prev,
-    ]);
+    // Reinicia o fluxo a partir da Etapa 1: Reunião com a PM!
+    setMatchModalPhase("POLICE_MEETING");
   };
 
   const handleExecuteTacticalChoice = (tactic: TacticalBattleChoice) => {
@@ -830,8 +783,51 @@ export default function App() {
         activeMatchDerby,
         currentTorcida,
         presidentProfile,
-        bateriaDurability
+        bateriaDurability,
+        isRetryWithAdAttempt // Passa o parâmetro de Segunda Chance (2x Contingente & Trava de Faixa)
       );
+
+      if (isRetryWithAdAttempt) {
+        if (result.isVictoryPista) {
+          result.statusTitle = `VITÓRIA DE RECUPERAÇÃO (2x CONTINGENTE - SEGUNDA CHANCE)`;
+          result.chronicleText = `[Ano ${season} - Segunda Chance 2x] A comitiva da ${currentTorcida?.torcida || "nossa torcida"} dobrou o contingente no entorno do estádio ${activeMatchDerby.stadium} e garantiu uma grande vitória de recuperação por ${result.scorePlayerClub} x ${result.scoreRivalClub}. Conforme as regras da segunda chance, a faixa permaneceu sob domínio do rival.`;
+        }
+        result.bannerCaptured = false; // TRAVA DE FAIXA: Nunca toma faixa na 2ª tentativa!
+
+        if (activeMatchDerby && !activeMatchDerby.isAllyGame) {
+          const rKey = activeMatchDerby.rivalTorcida;
+          setRivalryRecords((prev) => {
+            const existing = prev[rKey] || {
+              rivalTorcida: rKey,
+              rivalClub: (activeMatchDerby.isHome ? activeMatchDerby.awayClub : activeMatchDerby.homeClub) || rKey,
+              totalConfrontos: 0,
+              vitoriasPista: 0,
+              derrotasPista: 0,
+              jogosDaPaz: 0,
+              faixasTomadas: 0,
+              faixasPerdidas: 0,
+              vitoriasSegundaChance: 0,
+              isPeacePactActive: false,
+              isTretaChallenged: false,
+            };
+
+            return {
+              ...prev,
+              [rKey]: {
+                ...existing,
+                totalConfrontos: existing.totalConfrontos + 1,
+                vitoriasPista: existing.vitoriasPista + (result.isVictoryPista ? 1 : 0),
+                derrotasPista: existing.derrotasPista + (result.isVictoryPista ? 0 : 1),
+                vitoriasSegundaChance: (existing.vitoriasSegundaChance || 0) + (result.isVictoryPista ? 1 : 0),
+                faixasTomadas: existing.faixasTomadas,
+                faixasPerdidas: existing.faixasPerdidas,
+                isPeacePactActive: false,
+                isTretaChallenged: false,
+              },
+            };
+          });
+        }
+      }
 
       setSeasonObjectives((prev) =>
         prev.map((obj) => {
@@ -2997,6 +2993,12 @@ export default function App() {
                 <X className="w-4 h-4" />
               </button>
             </div>
+
+            {isRetryWithAdAttempt && (
+              <div className="bg-amber-500/20 border border-amber-500/50 rounded-xl p-2 text-center text-[10px] font-black text-amber-400 uppercase tracking-wider flex items-center justify-center gap-1">
+                <Sparkles className="w-3.5 h-3.5" /> SEGUNDA CHANCE ATIVA • CONTINGENTE DOBRADO (2x)
+              </div>
+            )}
 
             <div>
               <h3 className="text-sm font-black text-white uppercase">
