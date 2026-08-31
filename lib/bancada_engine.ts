@@ -1,3 +1,39 @@
+
+export interface SeasonClimate {
+  season: number;
+  name: string;
+  subtitle: string;
+  description: string;
+  costMult: number;
+  cashBonus: number;
+  mpRiskMod: number;
+  massaBonus: number;
+  bancadaBonus: number;
+  pistaBonus: number;
+}
+
+export const SEASON_CLIMATES: Record<number, SeasonClimate> = {
+  1: { season: 1, name: "Ano de Reestruturação da Sede", subtitle: "Estruturação de Quadra & Bairro", description: "Custos equilibrados e clima de reestruturação dos associados.", costMult: 1.0, cashBonus: 0, mpRiskMod: 0, massaBonus: 0, bancadaBonus: 0, pistaBonus: 0 },
+  2: { season: 2, name: "Crise de Inflação nos Ingressos", subtitle: "Ingressos Caros & Teste de Caixa", description: "Custos operacionais 25% mais altos. Ingressos de futebol sobem no país.", costMult: 1.25, cashBonus: -2000, mpRiskMod: -5, massaBonus: -2, bancadaBonus: 0, pistaBonus: 0 },
+  3: { season: 3, name: "Operação Pista Limpa do MP", subtitle: "Pressão Judicial & Reação Rival", description: "O Ministério Público aumenta o cerco. Risco de punição judicial elevado.", costMult: 1.0, cashBonus: 0, mpRiskMod: 15, massaBonus: 0, bancadaBonus: 0, pistaBonus: 3 },
+  4: { season: 4, name: "Boom de Matrículas e Venda de Roupas", subtitle: "Arrecadação Alta & Crescimento", description: "Ano de alta arrecadação e expansão do quadro social.", costMult: 0.9, cashBonus: 8000, mpRiskMod: -5, massaBonus: 3, bancadaBonus: 2, pistaBonus: 0 },
+  5: { season: 5, name: "Ano de Tensão de Dérbis Regionais", subtitle: "Confrontos Interestaduais Quentes", description: "Clássicos fervendo nas rodovias e percursos interestaduais.", costMult: 1.2, cashBonus: 0, mpRiskMod: 10, massaBonus: 0, bancadaBonus: 0, pistaBonus: 4 },
+  6: { season: 6, name: "Racha Político de Arquibancada", subtitle: "Divergências na Diretoria", description: "Discussões sobre os rumos da agremiação exigem prudência financeira.", costMult: 1.1, cashBonus: -3000, mpRiskMod: 5, massaBonus: -1, bancadaBonus: -2, pistaBonus: 0 },
+  7: { season: 7, name: "Ano da Caravana da Amizade", subtitle: "Alianças Nacionais Fortalecidas", description: "Viagens com recepção festiva de torcidas aliadas por todo o país.", costMult: 0.85, cashBonus: 4000, mpRiskMod: -10, massaBonus: 2, bancadaBonus: 3, pistaBonus: 0 },
+  8: { season: 8, name: "Cercamento Policial & Arenização", subtitle: "Estádios Modernizados & Biometria", description: "Catracas com biometria facial e ingressos 40% mais caros.", costMult: 1.4, cashBonus: 0, mpRiskMod: 20, massaBonus: -2, bancadaBonus: -1, pistaBonus: 0 },
+  9: { season: 9, name: "Ano do Centenário do Clube", subtitle: "Festa Monumental & Recordes", description: "Grandes celebrações de massa, mosaicos 3D e arrecadação de loja em alta.", costMult: 1.1, cashBonus: 15000, mpRiskMod: -5, massaBonus: 4, bancadaBonus: 4, pistaBonus: 0 },
+  10: { season: 10, name: "Crise Financeira do Clube de Apoio", subtitle: "Retração de Apoio Institucional", description: "O clube reduz ingressos de cota. A torcida precisa da sua autonomia.", costMult: 1.2, cashBonus: -5000, mpRiskMod: 0, massaBonus: 0, bancadaBonus: 0, pistaBonus: 0 },
+  11: { season: 11, name: "Renovação dos Bondes de Bairro", subtitle: "Nova Geração nas Sub-Sedes", description: "Surgimento de novos bondes de rua fortalecendo a segurança.", costMult: 1.0, cashBonus: 0, mpRiskMod: 5, massaBonus: 2, bancadaBonus: 0, pistaBonus: 3 },
+  12: { season: 12, name: "Implantação da Biometria Facial Geral", subtitle: "Fiscalização Rigorosa do MP", description: "Fiscalização máxima dos órgãos públicos. Exige táticas de preservação.", costMult: 1.35, cashBonus: 0, mpRiskMod: 25, massaBonus: -1, bancadaBonus: 0, pistaBonus: 0 },
+  13: { season: 13, name: "Ano de Ouro de Caravanas Interestaduais", subtitle: "Invasões Rodoviárias Históricas", description: "Comboios de dezenas de ônibus cruzando o Brasil.", costMult: 0.95, cashBonus: 6000, mpRiskMod: 0, massaBonus: 3, bancadaBonus: 2, pistaBonus: 2 },
+  14: { season: 14, name: "Guerra Fria Fiel x Rival Histórico", subtitle: "Rivalidade sem Concessões", description: "Materiais de festa mais caros e clima de alta tensão em clássicos.", costMult: 1.3, cashBonus: 0, mpRiskMod: 15, massaBonus: 0, bancadaBonus: 0, pistaBonus: 4 },
+  15: { season: 15, name: "Temporada de Consagração do Legado", subtitle: "Apogeu dos 15 Anos de Mandato", description: "Mandato histórico de 15 anos no auge da reputação nacional.", costMult: 1.0, cashBonus: 25000, mpRiskMod: -10, massaBonus: 5, bancadaBonus: 5, pistaBonus: 5 },
+};
+
+export function getSeasonClimate(season: number): SeasonClimate {
+  return SEASON_CLIMATES[season] || SEASON_CLIMATES[1];
+}
+
 import teamsData from "@/data/bancada_teams.json";
 import alliancesData from "@/data/bancada_alliances.json";
 import { getSeasonalActionEvent, isInteriorSP } from "./season_events";
@@ -1486,15 +1522,15 @@ export function getTacticalBattleChoices(
         id: "CHURRASCO_FARTO_CANTOS_INTERCALADOS",
         title: "1. Churrasco Farto no Entorno & Cantos Intercalados de Irmandade",
         description: "Confraternização nas imediações do estádio com churrasco farto, costela no fogo de chão, chopp gelado e cantos em uníssono exaltando a união do eixo.",
-        pistaMod: 14,
-        moralMod: 16,
+        pistaMod: 6,
+        moralMod: 8,
         mpPenalty: -15,
         costRisk: 1000,
         injuryRisk: 0,
         tacticalLog: "Churrasco farto na sede e no entorno com cerveja gelada, cantos intercalados e amizade profunda entre as massas.",
         formattedDeltas: [
-          { label: "Moral da Torcida", value: "+16", isPositive: true },
-          { label: "Respeito Nacional", value: "+15", isPositive: true },
+          { label: "Moral da Torcida", value: "+8", isPositive: true },
+          { label: "Respeito Nacional", value: "+7", isPositive: true },
           { label: "Risco MP", value: "-15% (Paz)", isPositive: true },
           { label: "Custo do Banquete", value: "-R$ 1.000", isPositive: false },
         ],
@@ -1503,16 +1539,16 @@ export function getTacticalBattleChoices(
         id: "MOSAICO_DUPLO_FESTA_ARQUIBANCADA",
         title: "2. Espetáculo de Mosaico Duplo & Show de Fumaça das Duas Torcidas",
         description: "Subida triunfal com mosaico gigante e show pirotécnico coordenado unindo as cores dos dois clubes nas bancadas.",
-        pistaMod: 10,
-        moralMod: 18,
+        pistaMod: 4,
+        moralMod: 8,
         mpPenalty: 0,
         costRisk: 1800,
         injuryRisk: 0,
         isMosaicTactic: true,
         tacticalLog: "Apresentou mosaico conjunto e espetáculo de fumaça monumental, marcando a história das duas agremiações.",
         formattedDeltas: [
-          { label: "Pressão de Bancada", value: "+22", isPositive: true },
-          { label: "Moral Histórica", value: "+18", isPositive: true },
+          { label: "Pressão de Bancada", value: "+8", isPositive: true },
+          { label: "Moral Histórica", value: "+8", isPositive: true },
           { label: "Mosaico Realizado", value: "Meta Cumprida", isPositive: true },
           { label: "Materiais & Fumaça", value: "-R$ 1.800", isPositive: false },
         ],
@@ -1521,15 +1557,15 @@ export function getTacticalBattleChoices(
         id: "TROCA_FAIXAS_ALAMBRADO_HOMENAGEM",
         title: "3. Troca de Faixas no Alambrado & Homenagem às Lideranças da Aliada",
         description: "Estender a faixa da torcida irmã no setor principal e realizar troca oficial de camisas e placas comemorativas entre as diretorias.",
-        pistaMod: 8,
-        moralMod: 14,
+        pistaMod: 3,
+        moralMod: 6,
         mpPenalty: -10,
         costRisk: 500,
         injuryRisk: 0,
         tacticalLog: "Subiu as faixas das duas torcidas lado a lado no alambrado com homenagem e troca solene de camisas de jogo.",
         formattedDeltas: [
-          { label: "Respeito Nacional", value: "+18", isPositive: true },
-          { label: "União do Eixo", value: "+14 Moral", isPositive: true },
+          { label: "Respeito Nacional", value: "+8", isPositive: true },
+          { label: "União do Eixo", value: "+6 Moral", isPositive: true },
           { label: "Risco MP", value: "-10%", isPositive: true },
           { label: "Placas & Brindes", value: "-R$ 500", isPositive: false },
         ],
@@ -1538,16 +1574,16 @@ export function getTacticalBattleChoices(
         id: "BATERIAS_UNIDAS_SAMBA_HINOS",
         title: "4. Desfile das Duas Baterias Tocando Sambas e Hinos em Conjunto",
         description: "Mais de 100 ritmistas das duas torcidas tocam juntos os surdos, repiques e caixas, contagiando todo o estádio.",
-        pistaMod: 12,
-        moralMod: 15,
+        pistaMod: 4,
+        moralMod: 7,
         mpPenalty: -8,
         costRisk: 600,
         injuryRisk: 0,
         tacticalLog: "Baterias unificadas deram um show rítmico inesquecível, cantando os hinos de ambos os clubes do início ao fim.",
         formattedDeltas: [
-          { label: "Show de Bateria", value: "+18 Bancada", isPositive: true },
-          { label: "Moral da Massa", value: "+15", isPositive: true },
-          { label: "Contingente", value: "+10 Sócios", isPositive: true },
+          { label: "Show de Bateria", value: "+7 Bancada", isPositive: true },
+          { label: "Moral da Massa", value: "+7", isPositive: true },
+          { label: "Contingente", value: "+5 Sócios", isPositive: true },
           { label: "Apoio Rítmico", value: "-R$ 600", isPositive: false },
         ],
       },
@@ -1555,14 +1591,14 @@ export function getTacticalBattleChoices(
         id: "CORTEJO_ESCOLTA_FRATERNA_RODOVIA",
         title: "5. Cortejo e Escolta Fraterna no Retorno dos Ônibus até a Rodovia",
         description: "Após o apito final, comboio de motos e carros da nossa torcida acompanha a torcida irmã até o acesso da rodovia com aplausos e queima de fogos.",
-        pistaMod: 10,
-        moralMod: 12,
+        pistaMod: 4,
+        moralMod: 6,
         mpPenalty: -12,
         costRisk: 400,
         injuryRisk: 0,
         tacticalLog: "Despedida com honras e cortejo fraterno até a rodovia com fogos e agradecimentos pela grande confraternização.",
         formattedDeltas: [
-          { label: "Respeito & Honra", value: "+16", isPositive: true },
+          { label: "Respeito & Honra", value: "+8", isPositive: true },
           { label: "Segurança de Frota", value: "100% Protegido", isPositive: true },
           { label: "Risco MP", value: "-12%", isPositive: true },
           { label: "Fogos de Despedida", value: "-R$ 400", isPositive: false },
@@ -1571,108 +1607,111 @@ export function getTacticalBattleChoices(
     ];
   }
 
+  // DERBY MATCHES (Casa vs Fora) WITH BRANCHING DECISION TREE: RAMO A (FESTA), RAMO B (COMBATE), RAMO C (EVASÃO)
+  const isHome = derby.isHome;
+
   return [
+    // RAMO A: FOCO NA ARQUIBANCADA & FESTA (MATERIAIS)
     {
-      id: "ATAQUE_FRONTAL_LINHA_FRENTE",
-      title: "1. Ataque Frontal & Avanço da Linha de Frente",
-      description: "Marcha compacta dos veteranos e do bonde de choque na linha de frente para quebrar a contenção e tomar a pista na força bruta.",
-      pistaMod: 18,
-      moralMod: 14,
-      mpPenalty: 12,
-      costRisk: 1500,
-      injuryRisk: 15,
-      tacticalLog: "Avançou em linha compacta com o bonde de choque na linha de frente, quebrando a contenção rival e tomando a pista.",
+      id: isHome ? "FESTA_BANDEIRAO_3D_CASA" : "FESTA_FAIXAS_TIRANTES_FORA",
+      title: isHome ? "🚩 [RAMO A - FESTA] Bandeirão 3D de Pavilhão no Setor Principal" : "🚩 [RAMO A - FESTA] Faixas de Mão & Tirantes de Setor Visitante",
+      description: isHome
+        ? "Desfraldar bandeirão 3D gigante cobrindo todo o setor e subir tirantes verticais na entrada do time."
+        : "Estender faixas de comitivas e tirantes verticais no setor visitante, contagiando os membros que viajaram.",
+      pistaMod: -4,
+      moralMod: 7,
+      mpPenalty: 0,
+      costRisk: isHome ? 3500 : 1500,
+      injuryRisk: 0,
+      isMosaicTactic: true,
+      tacticalLog: isHome
+        ? "Subiu o bandeirão 3D de pavilhão cobrindo o setor principal em um espetáculo visual inesquecível de arquibancada."
+        : "Apoio ininterrupto no setor visitante com faixas de mão e tirantes representando a agremiação fora de casa.",
       formattedDeltas: [
-        { label: "Poder de Pista", value: "+18", isPositive: true },
-        { label: "Moral do Bonde", value: "+14", isPositive: true },
-        { label: "Risco MP", value: "+12%", isPositive: false },
+        { label: "Pressão de Bancada", value: "+7", isPositive: true },
+        { label: "Novos Sócios (Massa)", value: "+5", isPositive: true },
+        { label: "Foco Pista", value: "-4", isPositive: false },
+        { label: "Confecção & Materiais", value: isHome ? "-R$ 3.500" : "-R$ 1.500", isPositive: false },
+      ],
+    },
+    {
+      id: isHome ? "FESTA_RUAZAO_FUMACA_CASA" : "FESTA_BATERIA_RITMO_FORA",
+      title: isHome ? "🔥 [RAMO A - FESTA] Ruazão de Fogo & Corredor de Sinalizadores" : "🥁 [RAMO A - FESTA] Bateria de Samba & Canto Ininterrupto Visitante",
+      description: isHome
+        ? "Recepção apoteótica do ônibus do clube nos portões do estádio com dezenas de fumaças e sinalizadores."
+        : "Manter mais de 30 ritmistas tocando surdos e repiques os 90 minutos para abafar o som da torcida local.",
+      pistaMod: -3,
+      moralMod: 8,
+      mpPenalty: isHome ? 5 : -5,
+      costRisk: isHome ? 2800 : 2000,
+      injuryRisk: 0,
+      tacticalLog: isHome
+        ? "Recepção apoteótica na chegada do ônibus com corredor em brasa viva e show de fumaças nos portões do estádio."
+        : "Bateria de samba manteve o canto ininterrupto no setor visitante, abafando os refletores do estádio adverso.",
+      formattedDeltas: [
+        { label: "Pressão de Bancada", value: "+6", isPositive: true },
+        { label: "Contingente (Massa)", value: "+4", isPositive: true },
+        { label: "Risco MP", value: isHome ? "+5%" : "-5%", isPositive: !isHome },
+        { label: "Arsenal Pirotécnico", value: isHome ? "-R$ 2.800" : "-R$ 2.000", isPositive: false },
+      ],
+    },
+
+    // RAMO B: FOCO EM COMBATE & PISTA (COMBATE MANTIDO!)
+    {
+      id: "COMBATE_LINHA_FRENTE_PORTAO",
+      title: "⚔️ [RAMO B - COMBATE] Avanço Compacto da Linha de Frente de Pista",
+      description: "Marcha compacta dos veteranos e do bonde de combate na rua para impor respeito e controlar o perímetro.",
+      pistaMod: 7,
+      moralMod: 6,
+      mpPenalty: 10,
+      costRisk: 1500,
+      injuryRisk: 12,
+      tacticalLog: "Avançou em linha compacta com o bonde de pista, quebrando a linha rival e impondo respeito no perímetro.",
+      formattedDeltas: [
+        { label: "Poder de Pista", value: "+7", isPositive: true },
+        { label: "Moral do Bonde", value: "+6", isPositive: true },
+        { label: "Risco MP", value: "+10%", isPositive: false },
         { label: "Custos Médicos", value: "-R$ 1.500", isPositive: false },
       ],
     },
     {
-      id: "ATAQUE_SURPRESA_EMBOSCADA",
-      title: "2. Ataque Surpresa & Emboscada de Alça",
-      description: "Bonde veloz com motos e vans contornando pelas travessas e alças de acesso para pegar o rival desprevenido e desarticulado por trás.",
-      pistaMod: 16,
-      moralMod: 12,
-      mpPenalty: 8,
-      costRisk: 900,
-      injuryRisk: 8,
-      tacticalLog: "Executou ataque surpresa e emboscada de alça, flanqueando os rivais pelas travessas e desarticulando o grupo adversário.",
-      formattedDeltas: [
-        { label: "Respeito de Pista", value: "+16", isPositive: true },
-        { label: "Moral Tática", value: "+12", isPositive: true },
-        { label: "Risco MP", value: "+8%", isPositive: false },
-        { label: "Despesas de Apoio", value: "-R$ 900", isPositive: false },
-      ],
-    },
-    {
-      id: "GUERRA_ROJOES_MORTEIROS",
-      title: "3. Guerra de Rojões & Bateria de Morteiros de Vara",
-      description: "Rajadas pesadas de fogos de artifício, rojões de vara e morteiros disparados para dispersar a linha rival antes do choque corporal.",
-      pistaMod: 20,
-      moralMod: 15,
-      mpPenalty: 16,
-      costRisk: 1800,
-      injuryRisk: 12,
-      tacticalLog: "Abriu fogo com guerra de rojões e bateria pesada de morteiros de vara, iluminando o céu e botando a contenção rival para correr.",
-      formattedDeltas: [
-        { label: "Poder de Fogo", value: "+20", isPositive: true },
-        { label: "Moral da Tropa", value: "+15", isPositive: true },
-        { label: "Risco MP", value: "+16%", isPositive: false },
-        { label: "Foguetório & Morteiros", value: "-R$ 1.800", isPositive: false },
-      ],
-    },
-    {
-      id: "CONFRONTO_BARRA_FERRO",
-      title: "4. Briga com Barra de Ferro & Contenção Armada",
-      description: "Linha armada com barras de ferro, canos e madeiramento para travar investidas pesadas e romper o cerco rival.",
-      pistaMod: 17,
-      moralMod: 10,
-      mpPenalty: 18,
-      costRisk: 2200,
-      injuryRisk: 18,
-      tacticalLog: "Entrou no confronto armado com barras de ferro e madeiras, travando a pista em disputa feroz de contenção armada.",
-      formattedDeltas: [
-        { label: "Impacto Armada", value: "+17", isPositive: true },
-        { label: "Moral", value: "+10", isPositive: true },
-        { label: "Risco MP", value: "+18%", isPositive: false },
-        { label: "Custos Hospitalares", value: "-R$ 2.200", isPositive: false },
-      ],
-    },
-    {
-      id: "BRIGA_NA_MAO_LIMPA",
-      title: "5. Briga na Mão Limpa (Disposição & Corpo a Corpo)",
-      description: "Trocação franca no soco, na raça e na pura disposição de arquibancada sem uso de armas.",
-      pistaMod: 22,
-      moralMod: 20,
-      mpPenalty: 10,
-      costRisk: 1200,
-      injuryRisk: 14,
-      tacticalLog: "Partiu para a briga na mão limpa, na pura disposição e coração de arquibancada, impondo respeito visceral na trocação franca.",
-      formattedDeltas: [
-        { label: "Disposição Histórica", value: "+22", isPositive: true },
-        { label: "Moral Supremo", value: "+20", isPositive: true },
-        { label: "Respeito Nacional", value: "+25", isPositive: true },
-        { label: "Risco MP", value: "+10%", isPositive: false },
-      ],
-    },
-    {
-      id: "FESTA_MOSAICO_CALDEIRAO",
-      title: "6. Espetáculo de Mosaico 3D & Festa Pirotécnica na Bancada",
-      description: "Concentrar todas as energias na subida dos times: erguer mosaico 3D monumental, acender fumaça e cantar os 90 minutos ininterruptos.",
+      id: "COMBATE_GUERRA_ROJOES_MORTEIROS",
+      title: "⚔️ [RAMO B - COMBATE] Guerra de Rojões & Bateria de Morteiros de Vara",
+      description: "Rajadas pesadas de morteiros e rojões para dispersar a linha adversária antes da aproximação corporal.",
       pistaMod: 8,
-      moralMod: 20,
-      mpPenalty: 4,
-      costRisk: 2500,
-      injuryRisk: 0,
-      isMosaicTactic: true,
-      tacticalLog: "Apresentou um mosaico 3D histórico e show pirotécnico vivo, deixando o estádio estarrecido com a beleza e pressão da bancada.",
+      moralMod: 7,
+      mpPenalty: 14,
+      costRisk: 1800,
+      injuryRisk: 10,
+      tacticalLog: "Disparou bateria pesada de morteiros de vara e rojões, iluminando a avenida e dispersando o grupo rival.",
       formattedDeltas: [
-        { label: "Pressão de Bancada", value: "+24", isPositive: true },
-        { label: "Moral da Torcida", value: "+20", isPositive: true },
-        { label: "Mosaico Realizado", value: "Meta Cumprida", isPositive: true },
-        { label: "Custo de Material", value: "-R$ 2.500", isPositive: false },
+        { label: "Poder de Fogo de Pista", value: "+8", isPositive: true },
+        { label: "Moral de Guerra", value: "+7", isPositive: true },
+        { label: "Risco MP", value: "+14%", isPositive: false },
+        { label: "Foguetório Pista", value: "-R$ 1.800", isPositive: false },
+      ],
+    },
+
+    // RAMO C: FOCO EM EVASÃO & PRESERVAÇÃO (FUGA DA PISTA / ZERO FERIDOS)
+    {
+      id: isHome ? "EVASAO_ENTRADA_ANTECIPADA_CASA" : "EVASAO_CORTEJO_BLINDADO_FORA",
+      title: isHome ? "🛡️ [RAMO C - EVASÃO] Entrada Antecipada 2h Antes pelo Portão Principal" : "🛡️ [RAMO C - EVASÃO] Cortejo de Ônibus Blindado com Escolta de Rodovia",
+      description: isHome
+        ? "Entrar no estádio 2 horas antes do apito inicial com escolta de segurança. Evita 100% o perímetro de confronto."
+        : "Comboio de ônibus vai direto da praça de pedágio até a caixa de contenção visitante. Evita emboscadas na estrada.",
+      pistaMod: -5,
+      moralMod: 4,
+      mpPenalty: -12,
+      costRisk: 0,
+      injuryRisk: 0,
+      tacticalLog: isHome
+        ? "Evasão de pista bem-sucedida! Entrada antecipada 2h antes com 100% do bonde seguro e zero perdas de membros."
+        : "Cortejo blindado de rodovia conduziu a caravana direto ao setor visitante sem nenhum ponto de emboscada.",
+      formattedDeltas: [
+        { label: "Membros Preservados", value: "100% Seguros (0 Feridos)", isPositive: true },
+        { label: "Risco MP", value: "-12%", isPositive: true },
+        { label: "Massa / Engajamento", value: "+4 Sócios", isPositive: true },
+        { label: "Combate de Rua", value: "Evitado (Fuga)", isPositive: true },
       ],
     },
   ];
