@@ -987,7 +987,7 @@ export const MatchTacticalResolver: React.FC<{
     if (context.tacticalChoice === 'front_charge') setActiveMiniGame('whack');
     if (context.tacticalChoice === 'punch_combat') setActiveMiniGame('punch');
     if (context.tacticalChoice === 'rojon_barrage') setActiveMiniGame('rojon');
-    if (context.tacticalChoice === 'rhythm_mosaic') setActiveMiniGame('rhythm');
+    if (context.tacticalChoice === 'rhythm_mosaic') setActiveMiniGame('memory');
     if (context.tacticalChoice === 'caravan_escape') setActiveMiniGame('dodge');
   }, [context, onMatchComplete]);
 
@@ -1013,6 +1013,7 @@ export const MatchTacticalResolver: React.FC<{
       {activeMiniGame === 'rojon' && <RojonTarget onFinish={handleMiniGameFinish} />}
       {activeMiniGame === 'rhythm' && <MemoryMosaic onFinish={handleMiniGameFinish} />}
       {activeMiniGame === 'dodge' && <CaravanDodge onFinish={handleMiniGameFinish} />}
+      {activeMiniGame === 'memory' && <ColorMemoryGame opponentTier={context.opponentTier} onFinish={handleMiniGameFinish} />}
     </div>
   );
 };

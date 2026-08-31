@@ -321,6 +321,27 @@ export default function MiniGamesTestPage() {
           </>
         )}
 
+        {activeTab === "memory" && (
+          <>
+            <div className="flex items-center justify-between">
+              <span className="font-black text-amber-400 uppercase text-xs">📌 TELA QUE PUXA ESTE MINI-GAME:</span>
+              <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 text-[10px]">
+                Fase 4: Festa de Arquibancada (`rhythm_mosaic`)
+              </span>
+            </div>
+            <p className="text-zinc-300 leading-relaxed">
+              <strong>Tática acionadora:</strong> <code className="bg-zinc-950 px-1.5 py-0.5 rounded text-amber-300">Bandeirão 3D, Mosaico de Papelão, Ruazão de Fogo & Bateria</code>.
+            </p>
+            <p className="text-zinc-400 text-[11px]">
+              Observe a sequência piscar nas cores do pavilhão e repita a ordem exata! Acertar 5+ rodadas concede <strong>Rank S (+25% em Pressão de Bancada)</strong>!
+            </p>
+          </>
+        )}
+
+        {activeTab === "memory" && (
+          <ColorMemoryGame key={gameKey} opponentTier={opponentTier} onFinish={handleFinishMiniGame} />
+        )}
+
         {activeTab === "gate" && (
           <>
             <div className="flex items-center justify-between">
@@ -376,6 +397,27 @@ export default function MiniGamesTestPage() {
 
         {activeTab === "dodge" && (
           <CaravanDodge key={gameKey} onFinish={handleFinishMiniGame} />
+        )}
+
+        {activeTab === "memory" && (
+          <>
+            <div className="flex items-center justify-between">
+              <span className="font-black text-amber-400 uppercase text-xs">📌 TELA QUE PUXA ESTE MINI-GAME:</span>
+              <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 text-[10px]">
+                Fase 4: Festa de Arquibancada (`rhythm_mosaic`)
+              </span>
+            </div>
+            <p className="text-zinc-300 leading-relaxed">
+              <strong>Tática acionadora:</strong> <code className="bg-zinc-950 px-1.5 py-0.5 rounded text-amber-300">Bandeirão 3D, Mosaico de Papelão, Ruazão de Fogo & Bateria</code>.
+            </p>
+            <p className="text-zinc-400 text-[11px]">
+              Observe a sequência piscar nas cores do pavilhão e repita a ordem exata! Acertar 5+ rodadas concede <strong>Rank S (+25% em Pressão de Bancada)</strong>!
+            </p>
+          </>
+        )}
+
+        {activeTab === "memory" && (
+          <ColorMemoryGame key={gameKey} opponentTier={opponentTier} onFinish={handleFinishMiniGame} />
         )}
 
         {activeTab === "gate" && (
