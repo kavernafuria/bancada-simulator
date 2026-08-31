@@ -1033,7 +1033,7 @@ export const ColorMemoryGame: React.FC<ColorMemoryGameProps> = ({ opponentTier, 
   const [playerInput, setPlayerInput] = useState<number[]>([]);
   const [isPlayingSequence, setIsPlayingSequence] = useState(false);
   const [activeButton, setActiveButton] = useState<number | null>(null);
-  const [round, setRound] = useState(1);
+  const [phase, setPhase] = useState<1 | 2 | 3>(1); // 3 Phases: Phase 1 (4), Phase 2 (5), Phase 3 (6)
   const [gameStatus, setGameStatus] = useState<'IDLE' | 'SHOWING' | 'USER_TURN' | 'FAIL' | 'SUCCESS'>('IDLE');
 
   const COLORS = [
@@ -1044,40 +1044,48 @@ export const ColorMemoryGame: React.FC<ColorMemoryGameProps> = ({ opponentTier, 
     { id: 4, name: 'AZUL', bg: 'bg-blue-600', activeBg: 'bg-blue-400 border-white scale-105 shadow-blue-500/80 shadow-lg' },
   ];
 
-  const startNextRound = (currentSeq: number[]) => {
-    const nextColor = Math.floor(Math.random() * 5);
-    const newSeq = [...currentSeq, nextColor];
+  const generateSequenceForPhase = (targetLength: number): number[] => {
+    const seq: number[] = [];
+    for (let i = 0; i < targetLength; i++) {
+      seq.push(Math.floor(Math.random() * 5));
+    }
+    return seq;
+  };
+
+  const startPhase = (phaseNum: 1 | 2 | 3) => {
+    const targetLength = phaseNum === 1 ? 4 : phaseNum === 2 ? 5 : 6;
+    const newSeq = generateSequenceForPhase(targetLength);
     setSequence(newSeq);
     setPlayerInput([]);
     setIsPlayingSequence(true);
     setGameStatus('SHOWING');
 
-    // Play sequence visually
+    // Faster speed: 280ms flash, 420ms interval
     let idx = 0;
     const interval = setInterval(() => {
       if (idx < newSeq.length) {
         setActiveButton(newSeq[idx]);
-        setTimeout(() => setActiveButton(null), 450);
+        setTimeout(() => setActiveButton(null), 280);
         idx++;
       } else {
         clearInterval(interval);
         setIsPlayingSequence(false);
         setGameStatus('USER_TURN');
       }
-    }, 700);
+    }, 420);
   };
 
   const handleStartGame = () => {
     setIsTutorial(false);
-    setRound(1);
-    startNextRound([]);
+    setPhase(1);
+    startPhase(1);
   };
 
   const handleColorClick = (colorId: number) => {
     if (gameStatus !== 'USER_TURN' || isPlayingSequence) return;
 
     setActiveButton(colorId);
-    setTimeout(() => setActiveButton(null), 200);
+    setTimeout(() => setActiveButton(null), 180);
 
     const newInput = [...playerInput, colorId];
     setPlayerInput(newInput);
@@ -1087,30 +1095,28 @@ export const ColorMemoryGame: React.FC<ColorMemoryGameProps> = ({ opponentTier, 
       // Failed sequence
       setGameStatus('FAIL');
       setTimeout(() => {
-        const finalScore = round - 1;
-        if (finalScore >= 5) {
-          onFinish({ gameType: 'memory', modifier: 0.25, rank: 'S', description: `Memorização perfeita das cores da torcida (${finalScore} sequências)! (+25% Bancada)` });
-        } else if (finalScore >= 3) {
-          onFinish({ gameType: 'memory', modifier: 0.12, rank: 'B', description: `Boa sincronia de mosaico e cores (${finalScore} sequências). (+12% Bancada)` });
-        } else if (finalScore >= 1) {
-          onFinish({ gameType: 'memory', modifier: 0.05, rank: 'C', description: `Sincronia regular de cores (${finalScore} sequência). (+5% Bancada)` });
+        if (phase === 3) {
+          onFinish({ gameType: 'memory', modifier: 0.15, rank: 'B', description: 'Boa memorização até a 2ª Fase (+15% Bancada).' });
+        } else if (phase === 2) {
+          onFinish({ gameType: 'memory', modifier: 0.08, rank: 'C', description: 'Completou a 1ª Fase de 4 piscadas (+8% Bancada).' });
         } else {
-          onFinish({ gameType: 'memory', modifier: -0.15, rank: 'F', description: 'Erro na sequência do mosaico (-15% Bancada).' });
+          onFinish({ gameType: 'memory', modifier: -0.15, rank: 'F', description: 'Errou na 1ª Fase de 4 piscadas (-15% Bancada).' });
         }
       }, 1000);
       return;
     }
 
     if (newInput.length === sequence.length) {
-      if (round >= 6) {
-        // Max round reached with success
+      if (phase === 3) {
+        // Completed all 3 phases (4, 5 and 6 flashes)!
         setGameStatus('SUCCESS');
         setTimeout(() => {
-          onFinish({ gameType: 'memory', modifier: 0.25, rank: 'S', description: 'Memorização Máxima de 6 Sequências! Espetáculo Perfeito (+25% Bancada)' });
+          onFinish({ gameType: 'memory', modifier: 0.25, rank: 'S', description: 'Memorização Máxima das 3 Fases (4, 5 e 6 Piscadas)! Espetáculo Perfeito (+25% Bancada)' });
         }, 1000);
       } else {
-        setRound((r) => r + 1);
-        setTimeout(() => startNextRound(sequence), 800);
+        const nextPhase = (phase + 1) as 2 | 3;
+        setPhase(nextPhase);
+        setTimeout(() => startPhase(nextPhase), 700);
       }
     }
   };
@@ -1120,23 +1126,24 @@ export const ColorMemoryGame: React.FC<ColorMemoryGameProps> = ({ opponentTier, 
       <div className="flex flex-col items-center bg-zinc-950 p-6 rounded-2xl border border-amber-500 text-white max-w-sm w-full select-none shadow-2xl space-y-4 text-center">
         <div className="border-b border-zinc-800 pb-2 w-full">
           <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block">🧩 MEMÓRIA DA BANCADA</span>
-          <h3 className="text-sm font-black text-white uppercase mt-0.5">Sequência de Cores do Mosaico</h3>
+          <h3 className="text-sm font-black text-white uppercase mt-0.5">Sequência de Cores (3 Fases)</h3>
         </div>
 
         <p className="text-xs text-zinc-300 leading-relaxed text-left">
-          <strong>Como Jogar:</strong> Observe a sequência piscar nas cores da torcida e repita a ordem exata das luzes!
+          <strong>Como Jogar:</strong> Memorize as piscadas rápidas das cores e repita a sequência exata nas 3 Fases!
         </p>
 
         <ul className="text-[11px] text-zinc-400 text-left space-y-1.5 list-disc pl-4">
-          <li>A cada rodada a sequência ganha 1 nova cor!</li>
-          <li>Atingir 5+ rodadas corretas garante <strong>Rank S (+25% Bancada)</strong>!</li>
+          <li><strong>Fase 1:</strong> 4 piscadas rápidas</li>
+          <li><strong>Fase 2:</strong> 5 piscadas rápidas</li>
+          <li><strong>Fase 3:</strong> 6 piscadas rápidas (Meta Rank S +25% Bancada)!</li>
         </ul>
 
         <button
           onClick={handleStartGame}
-          className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer"
+          className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer font-bold"
         >
-          ▶️ INICIAR MEMÓRIA DE CORES
+          ▶️ INICIAR SEQUÊNCIA DE CORES
         </button>
       </div>
     );
@@ -1145,9 +1152,9 @@ export const ColorMemoryGame: React.FC<ColorMemoryGameProps> = ({ opponentTier, 
   return (
     <div className="flex flex-col items-center bg-zinc-950 p-6 rounded-2xl border border-amber-500 text-white max-w-sm w-full select-none shadow-2xl space-y-4">
       <div className="flex justify-between w-full text-xs font-black tracking-wider uppercase border-b border-zinc-800 pb-2">
-        <span className="text-amber-400">Rodada {round}/6</span>
+        <span className="text-amber-400">FASE {phase}/3 ({sequence.length} Piscadas)</span>
         <span className="text-zinc-400 text-[10px]">
-          {gameStatus === 'SHOWING' ? '👀 Observe a Sequência...' : gameStatus === 'FAIL' ? '❌ Errou a Sequência!' : '👉 Sua Vez de Clicar!'}
+          {gameStatus === 'SHOWING' ? '⚡ Atenção às Piscadas!' : gameStatus === 'FAIL' ? '❌ Errou a Sequência!' : '👉 Sua Vez de Clicar!'}
         </span>
       </div>
 
@@ -1166,8 +1173,8 @@ export const ColorMemoryGame: React.FC<ColorMemoryGameProps> = ({ opponentTier, 
         ))}
       </div>
 
-      <div className="text-[10px] text-zinc-400 font-mono border-t border-zinc-800 pt-2 w-full text-center">
-        {gameStatus === 'USER_TURN' ? `Toques: ${playerInput.length} / ${sequence.length}` : 'Aguarde a pisca das cores...'}
+      <div className="text-[10px] text-zinc-400 font-mono border-t border-zinc-800 pt-2 w-full text-center font-bold">
+        {gameStatus === 'USER_TURN' ? `Toques: ${playerInput.length} / ${sequence.length}` : 'Aguarde as piscadas rápidas...'}
       </div>
     </div>
   );
