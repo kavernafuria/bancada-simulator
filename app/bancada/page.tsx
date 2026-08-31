@@ -3072,7 +3072,7 @@ export default function App() {
             </div>
 
             <div className="space-y-2">
-              {getTacticalBattleChoices(activeScoutIntel, activeMatchDerby).map((tactic) => (
+              {getTacticalBattleChoices(activeScoutIntel, activeMatchDerby, selectedPoliceChoice).map((tactic) => (
                 <button
                   key={tactic.id}
                   onClick={() => handleExecuteTacticalChoice(tactic)}

@@ -1514,7 +1514,8 @@ export function getPoliceMeetingChoices(
 // 5 SIGNIFICANT TACTICAL CHOICES FOR THE BATTLE OR ALLIANCE CELEBRATION
 export function getTacticalBattleChoices(
   intel: MatchScoutReport,
-  derby: DerbyMatchInfo
+  derby: DerbyMatchInfo,
+  selectedPoliceChoice?: PoliceMeetingChoice | null
 ): TacticalBattleChoice[] {
   if (derby.isAllyGame) {
     return [
@@ -1607,111 +1608,237 @@ export function getTacticalBattleChoices(
     ];
   }
 
-  // DERBY MATCHES (Casa vs Fora) WITH BRANCHING DECISION TREE: RAMO A (FESTA), RAMO B (COMBATE), RAMO C (EVASÃO)
+  const stance = selectedPoliceChoice ? selectedPoliceChoice.stance : "COMBATIVA";
   const isHome = derby.isHome;
 
-  return [
-    // RAMO A: FOCO NA ARQUIBANCADA & FESTA (MATERIAIS)
-    {
-      id: isHome ? "FESTA_BANDEIRAO_3D_CASA" : "FESTA_FAIXAS_TIRANTES_FORA",
-      title: isHome ? "🚩 [RAMO A - FESTA] Bandeirão 3D de Pavilhão no Setor Principal" : "🚩 [RAMO A - FESTA] Faixas de Mão & Tirantes de Setor Visitante",
-      description: isHome
-        ? "Desfraldar bandeirão 3D gigante cobrindo todo o setor e subir tirantes verticais na entrada do time."
-        : "Estender faixas de comitivas e tirantes verticais no setor visitante, contagiando os membros que viajaram.",
-      pistaMod: -4,
-      moralMod: 7,
-      mpPenalty: 0,
-      costRisk: isHome ? 3500 : 1500,
-      injuryRisk: 0,
-      isMosaicTactic: true,
-      tacticalLog: isHome
-        ? "Subiu o bandeirão 3D de pavilhão cobrindo o setor principal em um espetáculo visual inesquecível de arquibancada."
-        : "Apoio ininterrupto no setor visitante com faixas de mão e tirantes representando a agremiação fora de casa.",
-      formattedDeltas: [
-        { label: "Pressão de Bancada", value: "+7", isPositive: true },
-        { label: "Novos Sócios (Massa)", value: "+5", isPositive: true },
-        { label: "Foco Pista", value: "-4", isPositive: false },
-        { label: "Confecção & Materiais", value: isHome ? "-R$ 3.500" : "-R$ 1.500", isPositive: false },
-      ],
-    },
-    {
-      id: isHome ? "FESTA_RUAZAO_FUMACA_CASA" : "FESTA_BATERIA_RITMO_FORA",
-      title: isHome ? "🔥 [RAMO A - FESTA] Ruazão de Fogo & Corredor de Sinalizadores" : "🥁 [RAMO A - FESTA] Bateria de Samba & Canto Ininterrupto Visitante",
-      description: isHome
-        ? "Recepção apoteótica do ônibus do clube nos portões do estádio com dezenas de fumaças e sinalizadores."
-        : "Manter mais de 30 ritmistas tocando surdos e repiques os 90 minutos para abafar o som da torcida local.",
-      pistaMod: -3,
-      moralMod: 8,
-      mpPenalty: isHome ? 5 : -5,
-      costRisk: isHome ? 2800 : 2000,
-      injuryRisk: 0,
-      tacticalLog: isHome
-        ? "Recepção apoteótica na chegada do ônibus com corredor em brasa viva e show de fumaças nos portões do estádio."
-        : "Bateria de samba manteve o canto ininterrupto no setor visitante, abafando os refletores do estádio adverso.",
-      formattedDeltas: [
-        { label: "Pressão de Bancada", value: "+6", isPositive: true },
-        { label: "Contingente (Massa)", value: "+4", isPositive: true },
-        { label: "Risco MP", value: isHome ? "+5%" : "-5%", isPositive: !isHome },
-        { label: "Arsenal Pirotécnico", value: isHome ? "-R$ 2.800" : "-R$ 2.000", isPositive: false },
-      ],
-    },
+  // 1. IF POLICE CHOICE IS COMBATIVA (PISTA) -> RETURN ALL 5 CLASSIC COMBAT OPTIONS!
+  if (stance === "COMBATIVA") {
+    return [
+      {
+        id: "BRIGA_NA_MAO_LIMPA",
+        title: "1. Briga na Mão Limpa (Disposição & Corpo a Corpo)",
+        description: "Trocação franca no soco, na raça e na pura disposição de arquibancada sem uso de armas.",
+        pistaMod: 8,
+        moralMod: 7,
+        mpPenalty: 10,
+        costRisk: 1200,
+        injuryRisk: 10,
+        tacticalLog: "Confronto na mão limpa e na raça de rua, impondo a disposição do bonde sem o uso de armas.",
+        formattedDeltas: [
+          { label: "Respeito de Pista", value: "+8", isPositive: true },
+          { label: "Moral da Tropa", value: "+7", isPositive: true },
+          { label: "Risco MP", value: "+10%", isPositive: false },
+          { label: "Custos de Apoio", value: "-R$ 1.200", isPositive: false },
+        ],
+      },
+      {
+        id: "GUERRA_ROJOES_MORTEIROS",
+        title: "2. Guerra de Rojões & Bateria de Morteiros de Vara",
+        description: "Rajadas pesadas de fogos de artifício, rojões de vara e morteiros disparados para dispersar a linha rival antes do choque corporal.",
+        pistaMod: 8,
+        moralMod: 7,
+        mpPenalty: 16,
+        costRisk: 1800,
+        injuryRisk: 12,
+        tacticalLog: "Abriu fogo com guerra de rojões e bateria pesada de morteiros de vara, iluminando o céu e botando a contenção rival para correr.",
+        formattedDeltas: [
+          { label: "Poder de Fogo", value: "+8", isPositive: true },
+          { label: "Moral da Tropa", value: "+7", isPositive: true },
+          { label: "Risco MP", value: "+16%", isPositive: false },
+          { label: "Foguetório & Morteiros", value: "-R$ 1.800", isPositive: false },
+        ],
+      },
+      {
+        id: "ATAQUE_SURPRESA_EMBOSCADA",
+        title: "3. Ataque Surpresa & Emboscada de Alça",
+        description: "Bonde veloz com motos e vans contornando pelas travessas e alças de acesso para pegar o rival desprevenido e desarticulado por trás.",
+        pistaMod: 7,
+        moralMod: 6,
+        mpPenalty: 8,
+        costRisk: 900,
+        injuryRisk: 8,
+        tacticalLog: "Executou ataque surpresa e emboscada de alça, flanqueando os rivais pelas travessas e desarticulando o grupo adversário.",
+        formattedDeltas: [
+          { label: "Respeito de Pista", value: "+7", isPositive: true },
+          { label: "Moral Tática", value: "+6", isPositive: true },
+          { label: "Risco MP", value: "+8%", isPositive: false },
+          { label: "Despesas de Apoio", value: "-R$ 900", isPositive: false },
+        ],
+      },
+      {
+        id: "CONFRONTO_BARRA_FERRO",
+        title: "4. Briga com Barra de Ferro & Contenção Armada",
+        description: "Linha armada com barras de ferro, canos e madeiramento para travar investidas pesadas e romper o cerco rival.",
+        pistaMod: 7,
+        moralMod: 5,
+        mpPenalty: 18,
+        costRisk: 2200,
+        injuryRisk: 18,
+        tacticalLog: "Entrou no confronto armado com barras de ferro e madeiras, travando a pista em disputa feroz de contenção armada.",
+        formattedDeltas: [
+          { label: "Impacto Armado", value: "+7", isPositive: true },
+          { label: "Moral da Tropa", value: "+5", isPositive: true },
+          { label: "Risco MP", value: "+18%", isPositive: false },
+          { label: "Custos Hospitalares", value: "-R$ 2.200", isPositive: false },
+        ],
+      },
+      {
+        id: "ATAQUE_FRONTAL_LINHA_FRENTE",
+        title: "5. Ataque Frontal & Avanço da Linha de Frente",
+        description: "Marcha compacta dos veteranos e do bonde de choque na linha de frente para quebrar a contenção e tomar a pista na força bruta.",
+        pistaMod: 7,
+        moralMod: 6,
+        mpPenalty: 12,
+        costRisk: 1500,
+        injuryRisk: 15,
+        tacticalLog: "Avançou em linha compacta com o bonde de choque na linha de frente, quebrando a contenção rival e tomando a pista.",
+        formattedDeltas: [
+          { label: "Poder de Pista", value: "+7", isPositive: true },
+          { label: "Moral do Bonde", value: "+6", isPositive: true },
+          { label: "Risco MP", value: "+12%", isPositive: false },
+          { label: "Custos Médicos", value: "-R$ 1.500", isPositive: false },
+        ],
+      },
+    ];
+  }
 
-    // RAMO B: FOCO EM COMBATE & PISTA (COMBATE MANTIDO!)
+  // 2. IF POLICE CHOICE IS ESCOLTA_TOTAL OR DIPLOMATICA -> OPTIONS SPLIT BETWEEN FUGA/ESCOLTA AND FESTA DE ARQUIBANCADA
+  if (stance === "ESCOLTA_TOTAL" || stance === "DIPLOMATICA") {
+    return [
+      {
+        id: isHome ? "EVASAO_ENTRADA_ANTECIPADA_CASA" : "EVASAO_CORTEJO_BLINDADO_FORA",
+        title: isHome ? "🛡️ [OPÇÃO FUGA / PRESERVAÇÃO] Entrada Antecipada 2h Antes pelo Portão Principal" : "🛡️ [OPÇÃO FUGA / PRESERVAÇÃO] Cortejo de Ônibus Blindado com Escolta de Rodovia",
+        description: isHome
+          ? "Entrar no estádio 2 horas antes do apito inicial sob supervisão da PM. Evita 100% o perímetro de confronto."
+          : "Comboio de ônibus vai direto da praça de pedágio até a caixa de contenção visitante. Evita emboscadas na estrada.",
+        pistaMod: -5,
+        moralMod: 4,
+        mpPenalty: -12,
+        costRisk: 0,
+        injuryRisk: 0,
+        tacticalLog: isHome
+          ? "Evasão de pista bem-sucedida! Entrada antecipada 2h antes com 100% do bonde seguro e zero perdas de membros."
+          : "Cortejo blindado de rodovia conduziu a caravana direto ao setor visitante sem nenhum ponto de emboscada.",
+        formattedDeltas: [
+          { label: "Membros Preservados", value: "100% Seguros (0 Feridos)", isPositive: true },
+          { label: "Risco MP", value: "-12%", isPositive: true },
+          { label: "Massa / Engajamento", value: "+4 Sócios", isPositive: true },
+          { label: "Combate de Rua", value: "Evitado (Fuga)", isPositive: true },
+        ],
+      },
+      {
+        id: isHome ? "FESTA_BANDEIRAO_3D_CASA" : "FESTA_FAIXAS_TIRANTES_FORA",
+        title: isHome ? "🚩 [OPÇÃO FESTA] Bandeirão 3D de Pavilhão no Setor Principal" : "🚩 [OPÇÃO FESTA] Faixas de Mão & Tirantes de Setor Visitante",
+        description: isHome
+          ? "Desfraldar bandeirão 3D gigante cobrindo todo o setor e subir tirantes verticais na entrada do time."
+          : "Estender faixas de comitivas e tirantes verticais no setor visitante, contagiando os membros que viajaram.",
+        pistaMod: -4,
+        moralMod: 7,
+        mpPenalty: 0,
+        costRisk: isHome ? 3500 : 1500,
+        injuryRisk: 0,
+        isMosaicTactic: true,
+        tacticalLog: isHome
+          ? "Subiu o bandeirão 3D de pavilhão cobrindo o setor principal em um espetáculo visual inesquecível de arquibancada."
+          : "Apoio ininterrupto no setor visitante com faixas de mão e tirantes representando a agremiação fora de casa.",
+        formattedDeltas: [
+          { label: "Pressão de Bancada", value: "+7", isPositive: true },
+          { label: "Novos Sócios (Massa)", value: "+5", isPositive: true },
+          { label: "Foco Pista", value: "-4", isPositive: false },
+          { label: "Confecção & Materiais", value: isHome ? "-R$ 3.500" : "-R$ 1.500", isPositive: false },
+        ],
+      },
+      {
+        id: isHome ? "FESTA_RUAZAO_FUMACA_CASA" : "FESTA_BATERIA_RITMO_FORA",
+        title: isHome ? "🔥 [OPÇÃO FESTA] Ruazão de Fogo & Corredor de Sinalizadores" : "🥁 [OPÇÃO FESTA] Bateria de Samba & Canto Ininterrupto Visitante",
+        description: isHome
+          ? "Recepção apoteótica do ônibus do clube nos portões do estádio com dezenas de fumaças e sinalizadores."
+          : "Manter mais de 30 ritmistas tocando surdos e repiques os 90 minutos para abafar o som da torcida local.",
+        pistaMod: -3,
+        moralMod: 8,
+        mpPenalty: isHome ? 5 : -5,
+        costRisk: isHome ? 2800 : 2000,
+        injuryRisk: 0,
+        tacticalLog: isHome
+          ? "Recepção apoteótica na chegada do ônibus com corredor em brasa viva e show de fumaças nos portões do estádio."
+          : "Bateria de samba manteve o canto ininterrupto no setor visitante, abafando os refletores do estádio adverso.",
+        formattedDeltas: [
+          { label: "Pressão de Bancada", value: "+6", isPositive: true },
+          { label: "Contingente (Massa)", value: "+4", isPositive: true },
+          { label: "Risco MP", value: isHome ? "+5%" : "-5%", isPositive: !isHome },
+          { label: "Arsenal Pirotécnico", value: isHome ? "-R$ 2.800" : "-R$ 2.000", isPositive: false },
+        ],
+      },
+      {
+        id: "COMBATE_LINHA_FRENTE_PORTAO",
+        title: "⚔️ [OPÇÃO PISTA] Avanço da Linha de Frente no Perímetro Escoltado",
+        description: "Apesar do alinhamento com a PM, o bonde de choque atua no perímetro para não deixar o rival crescer.",
+        pistaMod: 6,
+        moralMod: 5,
+        mpPenalty: 8,
+        costRisk: 1200,
+        injuryRisk: 10,
+        tacticalLog: "Linha de frente garantiu a segurança do perímetro sem quebrar o cerco principal.",
+        formattedDeltas: [
+          { label: "Poder de Pista", value: "+6", isPositive: true },
+          { label: "Moral do Bonde", value: "+5", isPositive: true },
+          { label: "Risco MP", value: "+8%", isPositive: false },
+          { label: "Custos de Apoio", value: "-R$ 1.200", isPositive: false },
+        ],
+      },
+    ];
+  }
+
+  // 3. IF POLICE CHOICE IS CLANDESTINA -> CLANDESTINA OPTIONS
+  return [
     {
-      id: "COMBATE_LINHA_FRENTE_PORTAO",
-      title: "⚔️ [RAMO B - COMBATE] Avanço Compacto da Linha de Frente de Pista",
-      description: "Marcha compacta dos veteranos e do bonde de combate na rua para impor respeito e controlar o perímetro.",
-      pistaMod: 7,
-      moralMod: 6,
-      mpPenalty: 10,
-      costRisk: 1500,
-      injuryRisk: 12,
-      tacticalLog: "Avançou em linha compacta com o bonde de pista, quebrando a linha rival e impondo respeito no perímetro.",
-      formattedDeltas: [
-        { label: "Poder de Pista", value: "+7", isPositive: true },
-        { label: "Moral do Bonde", value: "+6", isPositive: true },
-        { label: "Risco MP", value: "+10%", isPositive: false },
-        { label: "Custos Médicos", value: "-R$ 1.500", isPositive: false },
-      ],
-    },
-    {
-      id: "COMBATE_GUERRA_ROJOES_MORTEIROS",
-      title: "⚔️ [RAMO B - COMBATE] Guerra de Rojões & Bateria de Morteiros de Vara",
-      description: "Rajadas pesadas de morteiros e rojões para dispersar a linha adversária antes da aproximação corporal.",
+      id: "ATAQUE_SURPRESA_EMBOSCADA",
+      title: "⚔️ [CLANDESTINA] Emboscada Clandestina de Alça de Acesso",
+      description: "Desviar do bloqueio da PM e surpreender o bonde rival por alças clandestinas.",
       pistaMod: 8,
       moralMod: 7,
-      mpPenalty: 14,
-      costRisk: 1800,
+      mpPenalty: 12,
+      costRisk: 1000,
       injuryRisk: 10,
-      tacticalLog: "Disparou bateria pesada de morteiros de vara e rojões, iluminando a avenida e dispersando o grupo rival.",
+      tacticalLog: "Emboscada clandestina desarticulou a marcha rival antes da chegada do Choque.",
       formattedDeltas: [
-        { label: "Poder de Fogo de Pista", value: "+8", isPositive: true },
-        { label: "Moral de Guerra", value: "+7", isPositive: true },
-        { label: "Risco MP", value: "+14%", isPositive: false },
-        { label: "Foguetório Pista", value: "-R$ 1.800", isPositive: false },
+        { label: "Poder de Pista", value: "+8", isPositive: true },
+        { label: "Moral do Bonde", value: "+7", isPositive: true },
+        { label: "Risco MP", value: "+12%", isPositive: false },
+        { label: "Custos Operacionais", value: "-R$ 1.000", isPositive: false },
       ],
     },
-
-    // RAMO C: FOCO EM EVASÃO & PRESERVAÇÃO (FUGA DA PISTA / ZERO FERIDOS)
     {
-      id: isHome ? "EVASAO_ENTRADA_ANTECIPADA_CASA" : "EVASAO_CORTEJO_BLINDADO_FORA",
-      title: isHome ? "🛡️ [RAMO C - EVASÃO] Entrada Antecipada 2h Antes pelo Portão Principal" : "🛡️ [RAMO C - EVASÃO] Cortejo de Ônibus Blindado com Escolta de Rodovia",
-      description: isHome
-        ? "Entrar no estádio 2 horas antes do apito inicial com escolta de segurança. Evita 100% o perímetro de confronto."
-        : "Comboio de ônibus vai direto da praça de pedágio até a caixa de contenção visitante. Evita emboscadas na estrada.",
+      id: "EVASAO_QUADRA_CLANDESTINA",
+      title: "🛡️ [CLANDESTINA - EVASÃO] Concentração Festiva Exclusiva na Quadra/Sede",
+      description: "Permanecer concentrado na quadra até 15 minutos antes do jogo e entrar em bonde fechado.",
       pistaMod: -5,
-      moralMod: 4,
-      mpPenalty: -12,
+      moralMod: 5,
+      mpPenalty: -10,
       costRisk: 0,
       injuryRisk: 0,
-      tacticalLog: isHome
-        ? "Evasão de pista bem-sucedida! Entrada antecipada 2h antes com 100% do bonde seguro e zero perdas de membros."
-        : "Cortejo blindado de rodovia conduziu a caravana direto ao setor visitante sem nenhum ponto de emboscada.",
+      tacticalLog: "Concentração festiva na quadra evitou emboscadas e manteve 100% dos associados seguros.",
       formattedDeltas: [
         { label: "Membros Preservados", value: "100% Seguros (0 Feridos)", isPositive: true },
-        { label: "Risco MP", value: "-12%", isPositive: true },
-        { label: "Massa / Engajamento", value: "+4 Sócios", isPositive: true },
-        { label: "Combate de Rua", value: "Evitado (Fuga)", isPositive: true },
+        { label: "Risco MP", value: "-10%", isPositive: true },
+        { label: "Pressão de Bancada", value: "+5", isPositive: true },
+      ],
+    },
+    {
+      id: "FESTA_CLANDESTINA_FUMACA",
+      title: "🔥 [CLANDESTINA - FESTA] Infiltração de Fumaça & Sinalizadores Marítimos",
+      description: "Recusar vistorias e infiltrar pirotecnia pelas casas de associados vizinhas ao estádio.",
+      pistaMod: -3,
+      moralMod: 7,
+      mpPenalty: 15,
+      costRisk: 1500,
+      injuryRisk: 0,
+      tacticalLog: "Infiltrou arsenal pirotécnico pelas travessas clandestinas, acendendo a bancada.",
+      formattedDeltas: [
+        { label: "Pressão de Bancada", value: "+7", isPositive: true },
+        { label: "Moral da Massa", value: "+7", isPositive: true },
+        { label: "Risco MP", value: "+15%", isPositive: false },
+        { label: "Arsenal Clandestino", value: "-R$ 1.500", isPositive: false },
       ],
     },
   ];
