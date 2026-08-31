@@ -534,6 +534,8 @@ export default function App() {
       setPyroStockCount(0);
       setShowPresidentElectionModal(true);
       setIsGameOver(false);
+    setRetryUsedCurrentMatch(false);
+    setIsRetryWithAdAttempt(false);
       setIsStarted(true);
       return;
     }
@@ -575,6 +577,8 @@ export default function App() {
     setPyroStockCount(0);
     setShowPresidentElectionModal(true);
     setIsGameOver(false);
+    setRetryUsedCurrentMatch(false);
+    setIsRetryWithAdAttempt(false);
     setIsStarted(true);
   };
 
@@ -634,6 +638,8 @@ export default function App() {
     setSelectedPoliceChoice(null);
     setSelectedTransport(null);
     setActiveScoutIntel(null);
+    setRetryUsedCurrentMatch(false); // RESETA A SEGUNDA CHANCE PARA CADA NOVO DUELO!
+    setIsRetryWithAdAttempt(false);
     setMatchModalPhase("POLICE_MEETING");
   };
 
@@ -1391,6 +1397,8 @@ export default function App() {
     localStorage.removeItem("bancada_ultra_v2_save");
     setIsStarted(false);
     setIsGameOver(false);
+    setRetryUsedCurrentMatch(false);
+    setIsRetryWithAdAttempt(false);
     setSeason(1);
     setPipelineIndex(0);
     setDebtYears(0);
