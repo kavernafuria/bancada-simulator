@@ -56,6 +56,111 @@ export interface StateTrackers {
 // ==========================================
 // CENTRALIZED GAME BALANCE LAYER
 // ==========================================
+
+export interface EndGameInvestment {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  cost: number;
+  category: "FROTA" | "SUBSEDE" | "DOACAO_CLUBE";
+  statEffects: Partial<TorcidaStats>;
+  stateEffects: Partial<StateTrackers>;
+}
+
+export const ENDGAME_INVESTMENTS: EndGameInvestment[] = [
+  {
+    id: "ONIBUS_BLINDADO",
+    title: "🚌 Ônibus Blindado Oficial da Caravana",
+    subtitle: "Frota de Caravana Blindada & Segurança",
+    description: "Aquisição de um ônibus de dois andares com vidros blindados e chassi reforçado para viagens interestaduais.",
+    cost: 180000,
+    category: "FROTA",
+    statEffects: { caravana: 15, poder_pista: 5 },
+    stateEffects: { respeito_nacional: 10, moral: 10 },
+  },
+  {
+    id: "SUBSEDE_CAPITAL",
+    title: "🚩 Fundação da Sub-Sede Capital / Metropolitana",
+    subtitle: "Ponto de Encontro na Capital",
+    description: "Compra e reforma de imóvel próprio na capital para concentrar associados das zonas norte, sul, leste e oeste.",
+    cost: 120000,
+    category: "SUBSEDE",
+    statEffects: { contingente: 10, pressao_bancada: 8 },
+    stateEffects: { respeito_nacional: 10, moral: 8 },
+  },
+  {
+    id: "SUBSEDE_LITORAL",
+    title: "🚩 Fundação da Sub-Sede Litoral / Baixada",
+    subtitle: "Subsede Praiana & Recepção",
+    description: "Estruturação de subsede oficial no litoral para receber caravanas praianas e coordenar apoio rodoviário.",
+    cost: 120000,
+    category: "SUBSEDE",
+    statEffects: { contingente: 10, caravana: 8 },
+    stateEffects: { respeito_nacional: 10, moral: 8 },
+  },
+  {
+    id: "SUBSEDE_EIXO_BRASIL",
+    title: "🚩 Fundação da Sub-Sede Eixo Brasil",
+    subtitle: "QG Estratégico Interestadual",
+    description: "Instalação de subsede oficial em entroncamento rodoviário estratégico para recepção do eixo nacional.",
+    cost: 120000,
+    category: "SUBSEDE",
+    statEffects: { contingente: 10, poder_pista: 8 },
+    stateEffects: { respeito_nacional: 12, moral: 10 },
+  },
+  {
+    id: "DOACAO_PATROCINIO_CLUBE",
+    title: "🏟️ Patrocínio & Aporte Financeiro ao Clube do Coração",
+    subtitle: "Aporte Financeiro Institucional",
+    description: "Doação financeira oficial da torcida organizada para as categorias de base ou infraestrutura do estádio do clube.",
+    cost: 150000,
+    category: "DOACAO_CLUBE",
+    statEffects: { autonomia_financeira: 10 },
+    stateEffects: { relacao_clube: 25, risco_mp: -15, moral: 15 },
+  },
+];
+
+export interface UnforeseenExpense {
+  title: string;
+  description: string;
+  cost: number;
+  mpRiskDelta?: number;
+  moralDelta?: number;
+}
+
+export function triggerRandomUnforeseenExpense(season: number): UnforeseenExpense | null {
+  const rand = Math.random();
+  if (rand < 0.35) {
+    const expenses: UnforeseenExpense[] = [
+      {
+        title: "🪟 Vidros & Janelas Quebradas na Frota",
+        description: "Após o comboio ser alvejado por pedras na rodovia, a diretoria precisou arcar emergencialmente com o conserto dos ônibus.",
+        cost: Math.floor(Math.random() * 5500 + 2500),
+        moralDelta: -2,
+      },
+      {
+        title: "⚖️ Honorários Advocatícios & Notificação Judicial do MP",
+        description: "Contratação de banca jurídica para responder às intimações do Ministério Público sobre cadastro de associados.",
+        cost: Math.floor(Math.random() * 8000 + 4000),
+        mpRiskDelta: -5,
+      },
+      {
+        title: "🛑 Multa Administrativa por Uso de Pirotecnia",
+        description: "A administração do estádio aplicou multa direta à torcida por fumaça não autorizada no setor visitante.",
+        cost: Math.floor(Math.random() * 6000 + 3000),
+      },
+      {
+        title: "🔧 Reparo Emergencial na Quadra Social",
+        description: "Vazamento no telhado da quadra exigiu reforma estrutural imediata antes do ensaio da bateria.",
+        cost: Math.floor(Math.random() * 7000 + 3000),
+      },
+    ];
+    return expenses[Math.floor(Math.random() * expenses.length)];
+  }
+  return null;
+}
+
 export const GAME_BALANCE = {
   CAREER_MAX_SEASONS: 15,
   PRESIDENT_ELECTIONS_SEASONS: [1, 4, 7, 10, 13],
@@ -63,8 +168,8 @@ export const GAME_BALANCE = {
   ANNUAL_STEPS_COUNT: 13,
 
   // Economics
-  MEMBERSHIP_DUES_PER_MEMBER: 450, // R$ 450 por membro em mensalidades anuais
-  MERCH_REVENUE_FACTOR: 350,
+  MEMBERSHIP_DUES_PER_MEMBER: 180, // R$ 450 por membro em mensalidades anuais
+  MERCH_REVENUE_FACTOR: 150,
   HEADQUARTERS_PURCHASE_COST: 45000, // R$ 45.000 para compra da sede própria
   HEADQUARTERS_ANNUAL_RENT: 3500, // R$ 3.500/ano economizados de aluguel
   ALLIANCE_MEETING_COST: 3000, // R$ 3.000 para reunião diplomática

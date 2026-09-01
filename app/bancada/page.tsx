@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { ENDGAME_INVESTMENTS, EndGameInvestment, triggerRandomUnforeseenExpense, UnforeseenExpense } from "@/lib/bancada_engine";
 import { AgeGateService } from "@/lib/age_gate_service";
 import { AgeGateModal } from "@/components/AgeGateModal";
 import { AdService } from "@/lib/ad_service";
@@ -222,6 +223,8 @@ export default function App() {
   const [isRetryWithAdAttempt, setIsRetryWithAdAttempt] = useState<boolean>(false);
   const [isAgeVerified, setIsAgeVerified] = useState<boolean>(false);
   const [showMockAdModal, setShowMockAdModal] = useState<boolean>(false);
+  const [purchasedInvestments, setPurchasedInvestments] = useState<string[]>([]);
+  const [unforeseenExpenseModal, setUnforeseenExpenseModal] = useState<UnforeseenExpense | null>(null);
 
   // MATCH WORKFLOW STATE
   // Phase: "CLOSED" | "POLICE_MEETING" | "TRANSPORT" | "SCOUT_INTEL" | "TACTICAL" | "MINIGAME" | "RESULT"
@@ -494,6 +497,47 @@ export default function App() {
     : [];
 
   const actionEvents = getActionStepEvents(clubStatus, season, currentTorcida);
+
+
+  const handlePurchaseInvestment = (inv: EndGameInvestment) => {
+    if (bankBalance < inv.cost) {
+      alert(`Saldo insuficiente. Você precisa de R$ ${inv.cost.toLocaleString()} em caixa.`);
+      return;
+    }
+    if (purchasedInvestments.includes(inv.id)) {
+      alert("Este investimento de infraestrutura já foi adquirido!");
+      return;
+    }
+
+    setBankBalance((prev) => prev - inv.cost);
+    setPurchasedInvestments((prev) => [...prev, inv.id]);
+
+    if (inv.statEffects) {
+      setStats((st) => ({
+        contingente: Math.min(100, st.contingente + (inv.statEffects.contingente || 0)),
+        pressao_bancada: Math.min(100, st.pressao_bancada + (inv.statEffects.pressao_bancada || 0)),
+        poder_pista: Math.min(100, st.poder_pista + (inv.statEffects.poder_pista || 0)),
+        caravana: Math.min(100, st.caravana + (inv.statEffects.caravana || 0)),
+        autonomia_financeira: Math.min(100, st.autonomia_financeira + (inv.statEffects.autonomia_financeira || 0)),
+      }));
+    }
+
+    if (inv.stateEffects) {
+      setStateTrackers((st) => ({
+        moral: Math.min(100, st.moral + (inv.stateEffects.moral || 0)),
+        risco_mp: Math.max(0, Math.min(100, st.risco_mp + (inv.stateEffects.risco_mp || 0))),
+        relacao_clube: Math.min(100, st.relacao_clube + (inv.stateEffects.relacao_clube || 0)),
+        respeito_nacional: Math.min(100, st.respeito_nacional + (inv.stateEffects.respeito_nacional || 0)),
+      }));
+    }
+
+    if (soundEnabled) playStadiumSound("drum");
+
+    setHistoryLog((prev) => [
+      `[Ano ${season} - Investimento de Elite] A diretoria concluiu a aquisição: ${inv.title} (-R$ ${inv.cost.toLocaleString()}).`,
+      ...prev,
+    ]);
+  };
 
   const handleStartCareer = () => {
     if (soundEnabled) playStadiumSound("drum");
@@ -2658,6 +2702,74 @@ export default function App() {
             </ul>
           </div>
 
+          {/* INVESTIMENTOS DE ELITE & INFRAESTRUTURA (END-GAME MONEY SINKS) */}
+          <div className="bg-zinc-950 p-3.5 rounded-2xl border border-amber-500/50 space-y-3">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
+              <div>
+                <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest block">
+                  🏢 INFRAESTRUTURA & INVESTIMENTOS DE ELITE
+                </span>
+                <h4 className="text-xs font-black text-white uppercase">
+                  Grandes Obras & Expansão de Patrimônio
+                </h4>
+              </div>
+              <span className="text-[10px] font-black font-mono text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-lg border border-emerald-500/20">
+                Caixa: R$ {bankBalance.toLocaleString()}
+              </span>
+            </div>
+
+            <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+              {ENDGAME_INVESTMENTS.map((inv) => {
+                const isPurchased = purchasedInvestments.includes(inv.id);
+                const canAfford = bankBalance >= inv.cost;
+
+                return (
+                  <div
+                    key={inv.id}
+                    className={`p-3 rounded-2xl border transition-all text-left space-y-1.5 ${
+                      isPurchased
+                        ? "bg-emerald-950/40 border-emerald-500/50"
+                        : "bg-zinc-900 border-zinc-800 hover:border-amber-500/50"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-black text-xs text-white flex items-center gap-1">
+                        {inv.title}
+                      </span>
+                      <span
+                        className={`text-[10px] font-black px-2 py-0.5 rounded-md ${
+                          isPurchased
+                            ? "bg-emerald-500 text-black uppercase"
+                            : "bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                        }`}
+                      >
+                        {isPurchased ? "ADQUIRIDO" : `R$ ${inv.cost.toLocaleString()}`}
+                      </span>
+                    </div>
+
+                    <p className="text-[11px] text-zinc-300 leading-snug font-medium">
+                      {inv.description}
+                    </p>
+
+                    {!isPurchased && (
+                      <button
+                        onClick={() => handlePurchaseInvestment(inv)}
+                        disabled={!canAfford}
+                        className={`w-full py-2 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all cursor-pointer shadow mt-1 ${
+                          canAfford
+                            ? "bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black active:scale-95"
+                            : "bg-zinc-800 text-zinc-500 opacity-60 cursor-not-allowed"
+                        }`}
+                      >
+                        {canAfford ? "FINANCIAR E ADQUIRIR" : `SALDO INSUFICIENTE (R$ ${inv.cost.toLocaleString()})`}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="bg-zinc-950 p-3.5 rounded-2xl border border-amber-500/30 flex items-center justify-between">
             <div>
               <span className="font-bold text-white block text-xs flex items-center gap-1.5 text-amber-400">
@@ -2984,7 +3096,7 @@ export default function App() {
           <div className="bg-zinc-900 border border-blue-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-3 max-h-[85vh] overflow-y-auto pb-12">
             <div className="flex items-center justify-between">
               <span className="text-[9px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-1">
-                <Shield className="w-3.5 h-3.5" /> FASE 1: REUNIÃO DE SEGURANÇA & POLÍCIA
+                <Shield className="w-3.5 h-3.5" /> PASSO 1 DE 4 • REUNIÃO DE SEGURANÇA
               </span>
               <button
                 onClick={() => setMatchModalPhase("CLOSED")}
@@ -3051,7 +3163,7 @@ export default function App() {
           <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-3 max-h-[85vh] overflow-y-auto pb-12">
             <div className="flex items-center justify-between">
               <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest flex items-center gap-1">
-                <Bus className="w-3.5 h-3.5" /> FASE 2: {activeMatchDerby.isHome ? "CONCENTRAÇÃO & POSICIONAMENTO LOCAL" : "CONDUÇÃO & TRANSPORTE"}
+                <Bus className="w-3.5 h-3.5" /> PASSO 2 DE 4 • ESCOLHA DO TRANSPORTE
               </span>
               <button
                 onClick={() => setMatchModalPhase("CLOSED")}
@@ -3115,7 +3227,7 @@ export default function App() {
 
             <div>
               <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest block">
-                RELATÓRIO DOS ANTENAS EM TEMPO REAL
+                PASSO 3 DE 4 • RELATÓRIO DO BATEDOR
               </span>
               <h3 className="text-sm font-black text-white uppercase">
                 Estimativa de Forças & Inteligência de Pista
@@ -3178,7 +3290,7 @@ export default function App() {
           <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-3 max-h-[85vh] overflow-y-auto pb-16">
             <div className="flex items-center justify-between">
               <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest">
-                {activeMatchDerby.isAllyGame ? "FESTA & CONFRATERNIZAÇÃO DE IRMANDADE" : "DECISÃO TÁTICA DE PISTA & BANCADA"}
+                PASSO 4 DE 4 • DECISÃO TÁTICA
               </span>
               <span className="text-[9px] text-zinc-400">
                 {activeScoutIntel.playerMembersPresent} vs {activeScoutIntel.rivalMembersWaiting}
