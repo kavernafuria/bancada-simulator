@@ -49,12 +49,16 @@ import {
   Award,
   Crown,
   Download,
+  ShieldAlert,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { MatchTacticalResolver, MatchContext } from "@/components/MatchTacticalResolver";
+import { TorcidaUnicaModal } from "@/components/TorcidaUnicaModal";
+import { PressConferenceModal } from "@/components/PressConferenceModal";
 import {
   GAME_BALANCE,
   getOfficialTorcidas,
+  isPrincipalRival,
   getAlliancesData,
   createCustomTorcidaWithArchetype,
   getAnnualPipelineWithMatches,
@@ -98,6 +102,13 @@ import {
   RankingEntry,
   generateLeagueTable,
   LeagueTableEntry,
+  TorcidaUnicaState,
+  INITIAL_TORCIDA_UNICA_STATE,
+  resolveTorcidaUnicaAction,
+  TorcidaUnicaActionResult,
+  PressConference,
+  PressConferenceChoice,
+  getPressConference,
 } from "@/lib/bancada_engine";
 import { isInteriorSP } from "@/lib/season_events";
 
@@ -225,6 +236,14 @@ export default function App() {
   const [showMockAdModal, setShowMockAdModal] = useState<boolean>(false);
   const [purchasedInvestments, setPurchasedInvestments] = useState<string[]>([]);
   const [unforeseenExpenseModal, setUnforeseenExpenseModal] = useState<UnforeseenExpense | null>(null);
+
+  // MÓDULO 1 & 2 STATE
+  const [torcidaUnicaState, setTorcidaUnicaState] = useState<TorcidaUnicaState>(INITIAL_TORCIDA_UNICA_STATE);
+  const [activeTorcidaUnicaModalMode, setActiveTorcidaUnicaModalMode] = useState<"ACTIVATION_NEWS" | "REVOCATION_NEWS" | "MATCHDAY_CRISIS" | null>(null);
+  const [torcidaUnicaActionAppliedForStep, setTorcidaUnicaActionAppliedForStep] = useState<number | null>(null);
+  const [activePressConference, setActivePressConference] = useState<PressConference | null>(null);
+  const [shownPressConferenceIds, setShownPressConferenceIds] = useState<string[]>([]);
+  const [rivalAngry, setRivalAngry] = useState<boolean>(false);
 
   // MATCH WORKFLOW STATE
   // Phase: "CLOSED" | "POLICE_MEETING" | "TRANSPORT" | "SCOUT_INTEL" | "TACTICAL" | "MINIGAME" | "RESULT"
@@ -936,15 +955,14 @@ export default function App() {
 
       // Apply financial & attribute consequences
       setBankBalance((prev) => prev - result.extraExpenses);
-      setStateTrackers((prev) => {
-        const newMP = Math.min(100, Math.max(0, prev.risco_mp + result.mpAdded));
-        if (newMP >= 100) setIsBannedByMP(true);
-        return {
-          ...prev,
-          moral: Math.min(100, Math.max(0, prev.moral + result.moralChange)),
-          risco_mp: newMP,
-        };
-      });
+      const newMP = Math.min(100, Math.max(0, stateTrackers.risco_mp + result.mpAdded));
+      if (newMP >= 100) setIsBannedByMP(true);
+
+      setStateTrackers((prev) => ({
+        ...prev,
+        moral: Math.min(100, Math.max(0, prev.moral + result.moralChange)),
+        risco_mp: newMP,
+      }));
 
       setStats((prev) => ({
         ...prev,
@@ -996,6 +1014,41 @@ export default function App() {
             },
           };
         });
+      }
+
+      // MÓDULO 1: Gatilho de Ativação do Torcida Única (Risco MP > 85% + Falha em Dérbi contra o Principal Rival, Apenas 1x na Carreira)
+      if (
+        activeMatchDerby &&
+        !activeMatchDerby.isAllyGame &&
+        !torcidaUnicaState.hasAlreadyServedTorcidaUnica &&
+        !torcidaUnicaState.isTorcidaUnica
+      ) {
+        const opponentClub = activeMatchDerby.isHome ? activeMatchDerby.awayClub : activeMatchDerby.homeClub;
+        const isRivalMatch = isPrincipalRival(currentTorcida?.clube || "", opponentClub || activeMatchDerby.rivalTorcida);
+        const isPistaFailure = !result.isVictoryPista || (result.membersLost && result.membersLost > 0) || result.mpAdded > 0;
+
+        if (newMP > 85 && isPistaFailure && isRivalMatch) {
+          setTorcidaUnicaState({
+            isTorcidaUnica: true,
+            torcidaUnicaCounter: 3,
+            permanentCostMult: 1.0,
+            hasPendingActivationNews: true,
+            hasAlreadyServedTorcidaUnica: true,
+          });
+          setActiveTorcidaUnicaModalMode("ACTIVATION_NEWS");
+          const conf = getPressConference("ENTREVISTA_TORCIDA_UNICA");
+          if (conf) {
+            setActivePressConference(conf);
+          }
+        }
+      }
+
+      // MÓDULO 2: Gatilho da Coletiva de Imprensa Mosaico Gigante Viral (Bancada > 95)
+      if (tactic.isMosaicTactic && stats.pressao_bancada > 95) {
+        const conf = getPressConference("ENTREVISTA_MOSAICO");
+        if (conf) {
+          setActivePressConference(conf);
+        }
       }
 
       advancePipeline();
@@ -1098,7 +1151,58 @@ export default function App() {
         const nextSeason = season + 1;
         setSeason(nextSeason);
         setPipelineIndex(0);
+        setTorcidaUnicaActionAppliedForStep(null);
         setChallengedRivalTorcida(null);
+
+        // MÓDULO 1: Torcida Única Season Decrement & Revocation Check (3 temporadas de vigência, travado para nunca mais repetir)
+        if (torcidaUnicaState.isTorcidaUnica) {
+          const updatedCounter = torcidaUnicaState.torcidaUnicaCounter - 1;
+          if (updatedCounter <= 0) {
+            setTorcidaUnicaState((prev) => ({
+              ...prev,
+              isTorcidaUnica: false,
+              torcidaUnicaCounter: 0,
+              permanentCostMult: 1.20,
+              hasPendingRevocationNews: true,
+              hasAlreadyServedTorcidaUnica: true,
+            }));
+            setActiveTorcidaUnicaModalMode("REVOCATION_NEWS");
+          } else {
+            setTorcidaUnicaState((prev) => ({
+              ...prev,
+              torcidaUnicaCounter: updatedCounter,
+              hasAlreadyServedTorcidaUnica: true,
+            }));
+          }
+        }
+
+        // MÓDULO 2: Dynamic Press Conference Selection (Rotaciona entre 12 tipos)
+        const availablePressCandidates =
+          nextStatus === "DISPUTANDO_TITULO"
+            ? ["ENTREVISTA_TITULO_CAMPEAO", "ENTREVISTA_CONTRATACAO_BOMBA", "ENTREVISTA_CARAVANA_HISTORICA"]
+            : nextStatus === "CRISE_REBAIXAMENTO"
+            ? ["ENTREVISTA_REBAIXAMENTO", "ENTREVISTA_CRISE_FINANCEIRA", "ENTREVISTA_BRIGA_PISTA"]
+            : GAME_BALANCE.PRESIDENT_ELECTIONS_SEASONS.includes(nextSeason)
+            ? ["ENTREVISTA_ELEICAO_TORCIDA"]
+            : [
+                "ENTREVISTA_PARCERIA_SAF",
+                "ENTREVISTA_INCENDIO_SINALIZADOR",
+                "ENTREVISTA_CARAVANA_HISTORICA",
+                "ENTREVISTA_CONTRATACAO_BOMBA",
+                "ENTREVISTA_PACTO_PAZ",
+              ];
+
+        const unshownCandidates = availablePressCandidates.filter((id) => !shownPressConferenceIds.includes(id));
+        const selectedPressId =
+          unshownCandidates.length > 0
+            ? unshownCandidates[Math.floor(Math.random() * unshownCandidates.length)]
+            : availablePressCandidates[Math.floor(Math.random() * availablePressCandidates.length)];
+
+        const selectedConf = getPressConference(selectedPressId);
+        if (selectedConf) {
+          setActivePressConference(selectedConf);
+          setShownPressConferenceIds((prev) => [...prev.slice(-4), selectedPressId]);
+        }
 
         // Bateria wear & tear per season (50% reduction for Mestre de Bateria)
         const wearAmount = presidentProfile === "MESTRE_BATERIA" ? 8 : 15;
@@ -1441,6 +1545,7 @@ export default function App() {
     setIsRetryWithAdAttempt(false);
     setSeason(1);
     setPipelineIndex(0);
+    setTorcidaUnicaActionAppliedForStep(null);
     setDebtYears(0);
     setIsBannedByMP(false);
     setActiveMatchResult(null);
@@ -2394,12 +2499,42 @@ export default function App() {
                 </p>
               </div>
 
-              <button
-                onClick={() => handleStartMatchWorkflow(currentStep)}
-                className="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl active:scale-95 transition-all cursor-pointer"
-              >
-                <Swords className="w-4 h-4" /> Iniciar Planejamento Completo do Jogo (Segurança, Condução & Tática)
-              </button>
+              {(() => {
+                const opponentClub = currentStep.derby
+                  ? currentStep.derby.isHome
+                    ? currentStep.derby.awayClub || currentStep.derby.rivalTorcida
+                    : currentStep.derby.homeClub || currentStep.derby.rivalTorcida
+                  : "";
+                const isMatchAgainstPrincipalRival = isPrincipalRival(currentTorcida?.clube || "", opponentClub);
+
+                if (
+                  torcidaUnicaState.isTorcidaUnica &&
+                  !currentStep.derby?.isAllyGame &&
+                  isMatchAgainstPrincipalRival &&
+                  torcidaUnicaActionAppliedForStep !== pipelineIndex
+                ) {
+                  return (
+                    <button
+                      onClick={() => {
+                        setActiveMatchDerby(currentStep.derby || null);
+                        setActiveTorcidaUnicaModalMode("MATCHDAY_CRISIS");
+                      }}
+                      className="w-full py-3.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl shadow-red-900/30 active:scale-95 transition-all cursor-pointer animate-pulse"
+                    >
+                      <ShieldAlert className="w-4 h-4" /> Gestão de Crise de Torcida Única (MP) — Ações Especiais
+                    </button>
+                  );
+                }
+
+                return (
+                  <button
+                    onClick={() => handleStartMatchWorkflow(currentStep)}
+                    className="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl active:scale-95 transition-all cursor-pointer"
+                  >
+                    <Swords className="w-4 h-4" /> Iniciar Planejamento Completo do Jogo (Segurança, Condução & Tática)
+                  </button>
+                );
+              })()}
             </div>
           )}
         </div>
@@ -3509,41 +3644,6 @@ export default function App() {
               ))}
             </div>
 
-            {/* REWARDED AD SECOND CHANCE OFFER FOR DEFEATS */}
-            {!activeMatchResult?.isVictoryPista && !retryUsedCurrentMatch && (
-              <div className="bg-red-950/60 border-2 border-red-500 rounded-2xl p-4 text-left space-y-3 shadow-2xl animate-fade-in my-3">
-                <div className="flex items-center justify-between border-b border-red-800/80 pb-2">
-                  <span className="text-[10px] font-black text-red-400 uppercase tracking-widest flex items-center gap-1">
-                    <AlertTriangle className="w-4 h-4 text-red-500" /> DERROTA! SEGUNDA CHANCE DISPONÍVEL
-                  </span>
-                  <span className="px-2 py-0.5 rounded bg-amber-500 text-black text-[10px] font-black">
-                    REWARDED AD (2x CONTINGENTE)
-                  </span>
-                </div>
-
-                <p className="text-xs text-zinc-200 font-medium leading-relaxed">
-                  Sua torcida perdeu o duelo. Você pode ter uma segunda chance de refazer este mesmo confronto com <strong>2x o Contingente de Tropa (Dobro de Membros Presentes)</strong>.
-                </p>
-
-                <div className="bg-zinc-950 p-3 rounded-xl border border-red-900/60 text-[11px] text-amber-300 font-bold space-y-1">
-                  <div className="text-white font-black uppercase text-[10px] tracking-wider">⚠️ RECOMPENSA & REGRA IMPORTANTE:</div>
-                  <div>• CONTINGENTE PARA A NOVA TENTATIVA: <span className="text-emerald-400 font-black">2x (DOBRADO)</span></div>
-                  <div className="text-red-400 leading-snug">
-                    • IMPORTANTE: Nesta segunda tentativa, mesmo que você vença, <u>NÃO poderá conquistar a faixa da torcida rival</u> (Vitória de Recuperação). A faixa permanecerá com o rival.
-                  </div>
-                </div>
-
-                <div className="space-y-2 pt-1">
-                  <button
-                    onClick={handleTriggerRewardedAdFlow}
-                    className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    <Tv className="w-4 h-4" /> ASSISTIR ANÚNCIO — REFAZER COM 2x CONTINGENTE
-                  </button>
-                </div>
-              </div>
-            )}
-
             {/* Kavers Games Social Sharing Block */}
             {renderSocialShareSection(
               `TEMPORADA ${season - 1}`,
@@ -4088,6 +4188,79 @@ export default function App() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* MODAL MÓDULO 1: TORCIDA ÚNICA */}
+      {activeTorcidaUnicaModalMode && (
+        <TorcidaUnicaModal
+          mode={activeTorcidaUnicaModalMode}
+          scenario={activeMatchDerby?.isHome === false ? "VISITANTE" : "MANDANTE"}
+          rivalTorcidaName={activeMatchDerby?.rivalTorcida || "Rival Principal"}
+          stadiumName={activeMatchDerby?.stadium || "Estádio"}
+          userBalance={bankBalance}
+          onDismissNews={() => setActiveTorcidaUnicaModalMode(null)}
+          onSelectAction={(res: TorcidaUnicaActionResult) => {
+            if (res.statEffects) {
+              setStats((prev) => ({
+                contingente: Math.min(100, Math.max(0, prev.contingente + (res.statEffects?.contingente || 0))),
+                pressao_bancada: Math.min(100, Math.max(0, prev.pressao_bancada + (res.statEffects?.pressao_bancada || 0))),
+                poder_pista: Math.min(100, Math.max(0, prev.poder_pista + (res.statEffects?.poder_pista || 0))),
+                caravana: Math.min(100, Math.max(0, prev.caravana + (res.statEffects?.caravana || 0))),
+                autonomia_financeira: Math.min(100, Math.max(0, prev.autonomia_financeira + (res.statEffects?.autonomia_financeira || 0))),
+              }));
+            }
+            if (res.stateEffects) {
+              setStateTrackers((prev) => ({
+                moral: Math.min(100, Math.max(0, prev.moral + (res.stateEffects?.moral || 0))),
+                risco_mp: Math.min(100, Math.max(0, prev.risco_mp + (res.stateEffects?.risco_mp || 0))),
+                relacao_clube: Math.min(100, Math.max(0, prev.relacao_clube + (res.stateEffects?.relacao_clube || 0))),
+                respeito_nacional: Math.min(100, Math.max(0, prev.respeito_nacional + (res.stateEffects?.respeito_nacional || 0))),
+              }));
+            }
+            if (res.cashChange !== undefined && res.cashChange !== 0) {
+              setBankBalance((prev) => Math.max(0, prev + res.cashChange!));
+            }
+            setHistoryLog((prev) => [`[Torcida Única] ${res.log}`, ...prev]);
+            setTorcidaUnicaActionAppliedForStep(pipelineIndex);
+            setActiveTorcidaUnicaModalMode(null);
+            advancePipeline();
+          }}
+        />
+      )}
+
+      {/* MODAL MÓDULO 2: COLETIVA DE IMPRENSA */}
+      {activePressConference && (
+        <PressConferenceModal
+          conference={activePressConference}
+          userBalance={bankBalance}
+          onSelectChoice={(choice: PressConferenceChoice) => {
+            if (choice.statEffects) {
+              setStats((prev) => ({
+                contingente: Math.min(100, Math.max(0, prev.contingente + (choice.statEffects?.contingente || 0))),
+                pressao_bancada: Math.min(100, Math.max(0, prev.pressao_bancada + (choice.statEffects?.pressao_bancada || 0))),
+                poder_pista: Math.min(100, Math.max(0, prev.poder_pista + (choice.statEffects?.poder_pista || 0))),
+                caravana: Math.min(100, Math.max(0, prev.caravana + (choice.statEffects?.caravana || 0))),
+                autonomia_financeira: Math.min(100, Math.max(0, prev.autonomia_financeira + (choice.statEffects?.autonomia_financeira || 0))),
+              }));
+            }
+            if (choice.stateEffects) {
+              setStateTrackers((prev) => ({
+                moral: Math.min(100, Math.max(0, prev.moral + (choice.stateEffects?.moral || 0))),
+                risco_mp: Math.min(100, Math.max(0, prev.risco_mp + (choice.stateEffects?.risco_mp || 0))),
+                relacao_clube: Math.min(100, Math.max(0, prev.relacao_clube + (choice.stateEffects?.relacao_clube || 0))),
+                respeito_nacional: Math.min(100, Math.max(0, prev.respeito_nacional + (choice.stateEffects?.respeito_nacional || 0))),
+              }));
+            }
+            if (choice.cashDelta !== undefined && choice.cashDelta !== 0) {
+              setBankBalance((prev) => Math.max(0, prev + choice.cashDelta!));
+            }
+            if (choice.triggerRivalAmbushAlert) {
+              setRivalAngry(true);
+            }
+            setHistoryLog((prev) => [`[Coletiva de Imprensa] ${choice.log}`, ...prev]);
+            setActivePressConference(null);
+          }}
+        />
       )}
     </div>
   );

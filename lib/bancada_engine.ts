@@ -3512,3 +3512,1017 @@ export function getSeasonalMilestoneEvent(
   return null;
 }
 
+// ==========================================
+// MÓDULO 1: O ARCO NARRATIVO DA TORCIDA ÚNICA (PUNIÇÃO DINÂMICA)
+// ==========================================
+
+// Check if opponent is the club's genuine principal derby rival
+export function isPrincipalRival(clubA: string, clubB: string): boolean {
+  if (!clubA || !clubB) return false;
+  const a = clubA.trim().toLowerCase();
+  const b = clubB.trim().toLowerCase();
+  if (a === b) return false;
+
+  const matches = (c1: string, c2: string) =>
+    (a.includes(c1) && b.includes(c2)) || (a.includes(c2) && b.includes(c1));
+
+  // Alagoas - Clássico das Multidões AL
+  if (matches("csa", "crb")) return true;
+
+  // São Paulo - Clássicos Paulistas
+  if (matches("corinthians", "palmeiras")) return true;
+  if (matches("são paulo", "palmeiras")) return true;
+  if (matches("são paulo", "corinthians")) return true;
+  if (matches("santos", "palmeiras") || matches("santos", "corinthians") || matches("santos", "são paulo")) return true;
+  if (matches("guarani", "ponte preta")) return true;
+  if (matches("botafogo-sp", "comercial")) return true;
+
+  // Rio de Janeiro - Clássicos Cariocas
+  if (matches("flamengo", "vasco") || matches("flamengo", "fluminense") || matches("flamengo", "botafogo")) return true;
+  if (matches("vasco", "fluminense") || matches("vasco", "botafogo")) return true;
+  if (matches("fluminense", "botafogo")) return true;
+
+  // Rio Grande do Sul - Gre-Nal
+  if (matches("grêmio", "internacional")) return true;
+
+  // Minas Gerais - Clássico Mineiro
+  if (matches("cruzeiro", "atlético")) return true;
+
+  // Bahia - Ba-Vi
+  if (matches("bahia", "vitória")) return true;
+
+  // Ceará - Clássico-Rei
+  if (matches("ceará", "fortaleza")) return true;
+
+  // Pernambuco - Clássicos Pernambucanos
+  if (matches("sport", "santa cruz") || matches("sport", "náutico") || matches("santa cruz", "náutico")) return true;
+
+  // Paraná - Atletiba
+  if (matches("coritiba", "athletico")) return true;
+
+  // Santa Catarina - Dérbi Florianópolis
+  if (matches("avaí", "figueirense")) return true;
+
+  // Goiás - Dérbi Goiano
+  if (matches("goiás", "vila nova")) return true;
+
+  // Pará - Re-Pa
+  if (matches("remo", "paysandu")) return true;
+
+  // Maranhão - Superclássico
+  if (matches("sampaio", "moto")) return true;
+
+  return false;
+}
+
+export interface TorcidaUnicaState {
+  isTorcidaUnica: boolean;
+  torcidaUnicaCounter: number;
+  permanentCostMult: number; // 1.20 pós-revogação (+20% nos ingressos)
+  hasPendingActivationNews?: boolean;
+  hasPendingRevocationNews?: boolean;
+  hasAlreadyServedTorcidaUnica?: boolean;
+}
+
+export const INITIAL_TORCIDA_UNICA_STATE: TorcidaUnicaState = {
+  isTorcidaUnica: false,
+  torcidaUnicaCounter: 0,
+  permanentCostMult: 1.0,
+  hasPendingActivationNews: false,
+  hasPendingRevocationNews: false,
+  hasAlreadyServedTorcidaUnica: false,
+};
+
+export interface TorcidaUnicaActionResult {
+  id: string;
+  title: string;
+  scenario: "VISITANTE" | "MANDANTE";
+  log: string;
+  statEffects?: Partial<TorcidaStats>;
+  stateEffects?: Partial<StateTrackers>;
+  cashChange?: number;
+  formattedDeltas: FormattedDelta[];
+  narrative: string;
+  rngOutcome?: "SUCCESS" | "FAIL_LIGHT" | "FAIL_CRITICAL" | "VICTORY" | "DEFEAT";
+  rouletteOutcomeIndex?: number; // 0: Bote Certo (40%), 1: Giro em Vão (35%), 2: Arapuca (25%)
+}
+
+export function resolveTorcidaUnicaAction(
+  choiceId: string,
+  scenario: "VISITANTE" | "MANDANTE",
+  userBalance: number,
+  matchWinner?: "PLAYER" | "RIVAL" | "DRAW"
+): TorcidaUnicaActionResult {
+  if (scenario === "VISITANTE") {
+    if (choiceId === "CHURRASCO_SEDE") {
+      return {
+        id: "CHURRASCO_SEDE",
+        title: "🍖 Churrasco de Concentração na Sede",
+        scenario: "VISITANTE",
+        log: "Concentração na sede com telão. Bar e loja lotados renderam alto lucro, mas a pista cobrou a ausência no estádio.",
+        statEffects: { contingente: 5, poder_pista: -5 },
+        stateEffects: { respeito_nacional: -5 },
+        cashChange: 15000,
+        formattedDeltas: [
+          { label: "Massa na Quadra", value: "+5", isPositive: true },
+          { label: "Lucro com Bar e Loja", value: "+R$ 15.000", isPositive: true },
+          { label: "Ausência na Pista", value: "-5 Pista", isPositive: false },
+          { label: "Respeito Nacional", value: "-5", isPositive: false }
+        ],
+        narrative: "🍖 CHURRASCO NA QUADRA: Sem poder viajar, 3.000 associados lotaram a sede para assistir no telão. A arrecadação foi excelente (+R$ 15.000, +5 Massa), porém a pista chiou pela falta de presença no estádio rival (-5 Pista, -5 Respeito)."
+      };
+    }
+
+    if (choiceId === "CACADA_CLANDESTINA") {
+      const rand = Math.random();
+      if (rand < 0.40) { // 40% Bote Certo
+        return {
+          id: "CACADA_CLANDESTINA",
+          title: "🚐 Caçada Clandestina (Bonde de Bairro)",
+          scenario: "VISITANTE",
+          log: "Bonde descaracterizado pegou o comboio rival no ponto cego da polícia. Vitória total de pista!",
+          statEffects: { poder_pista: 12 },
+          stateEffects: { moral: 10 },
+          cashChange: 0,
+          rngOutcome: "SUCCESS",
+          rouletteOutcomeIndex: 0,
+          formattedDeltas: [
+            { label: "Postura de Pista", value: "+12", isPositive: true },
+            { label: "Moral da Tropa", value: "+10", isPositive: true }
+          ],
+          narrative: "🟢 BOTE CERTO (40%): O bonde descaracterizado interceptou o comboio rival no ponto cego de vigilância. Vitória incontestável na pista (+12 Pista, +10 Moral)."
+        };
+      } else if (rand < 0.75) { // 35% Giro em Vão
+        return {
+          id: "CACADA_CLANDESTINA",
+          title: "🚐 Caçada Clandestina (Bonde de Bairro)",
+          scenario: "VISITANTE",
+          log: "PM dispersou as vans antes de encontrar o rival. Gastos de combustível sem combate.",
+          statEffects: {},
+          stateEffects: { moral: -4 },
+          cashChange: -4000,
+          rngOutcome: "FAIL_LIGHT",
+          rouletteOutcomeIndex: 1,
+          formattedDeltas: [
+            { label: "Logística Perdida", value: "-R$ 4.000", isPositive: false },
+            { label: "Moral do Bonde", value: "-4", isPositive: false }
+          ],
+          narrative: "🟡 GIRO EM VÃO (35%): A PM dispersou as vans em pontos de bloqueio antes do bonde encontrar os rivais. Dinheiro gasto à toa (-R$ 4.000, -4 Moral)."
+        };
+      } else { // 25% Arapuca (Fail Critical)
+        return {
+          id: "CACADA_CLANDESTINA",
+          title: "🚐 Caçada Clandestina (Bonde de Bairro)",
+          scenario: "VISITANTE",
+          log: "O bonde caiu numa emboscada armada pela Linha de Frente rival. Baixas graves e explosão no Risco MP.",
+          statEffects: { poder_pista: -12 },
+          stateEffects: { moral: -8, risco_mp: 15 },
+          cashChange: 0,
+          rngOutcome: "FAIL_CRITICAL",
+          rouletteOutcomeIndex: 2,
+          formattedDeltas: [
+            { label: "Postura de Pista", value: "-12", isPositive: false },
+            { label: "Moral da Tropa", value: "-8", isPositive: false },
+            { label: "Risco MP", value: "+15%", isPositive: false }
+          ],
+          narrative: "🔴 ARAPUCA (25%): A Linha de Frente rival esperava o bonde descaracterizado. Confronto pesado com feridos e inquérito imediato do MP (-12 Pista, +15% Risco MP)."
+        };
+      }
+    }
+
+    if (choiceId === "INFILTRACAO_MOTORIZADA") {
+      const rand = Math.random();
+      if (rand < 0.50) { // 50% Sucesso
+        return {
+          id: "INFILTRACAO_MOTORIZADA",
+          title: "🏍️ Infiltração Motorizada Tática",
+          scenario: "VISITANTE",
+          log: "O comboio de motos surpreendeu o entorno do estádio rival, soltou rojões, estendeu faixa e fugiu sem baixas.",
+          statEffects: { poder_pista: 6 },
+          stateEffects: { moral: 6 },
+          cashChange: -5000,
+          rngOutcome: "SUCCESS",
+          formattedDeltas: [
+            { label: "Audácia de Pista", value: "+6", isPositive: true },
+            { label: "Moral da Diretoria", value: "+6", isPositive: true },
+            { label: "Custo Logístico", value: "-R$ 5.000", isPositive: false }
+          ],
+          narrative: "🟢 AUDÁCIA VIRAL: O comboio de motos cortou a avenida do estádio rival soltando morteiros e esticando faixa de protesto. Ação rápida e viral (+6 Moral, +6 Pista)."
+        };
+      } else { // 50% Falha
+        return {
+          id: "INFILTRACAO_MOTORIZADA",
+          title: "🏍️ Infiltração Motorizada Tática",
+          scenario: "VISITANTE",
+          log: "A PM cercou o comboio de motos no perímetro do estádio. Vários associados apreendidos e aperto do MP.",
+          statEffects: {},
+          stateEffects: { risco_mp: 20 },
+          cashChange: -5000,
+          rngOutcome: "FAIL_CRITICAL",
+          formattedDeltas: [
+            { label: "Risco MP", value: "+20%", isPositive: false },
+            { label: "Custo de Fianças", value: "-R$ 5.000", isPositive: false }
+          ],
+          narrative: "🔴 CERCO POLICIAL (50%): A PM encurralou as motos na chegada ao perímetro do estádio. Dezenas de conduzidos e aperto drástico do MP (+20% Risco MP)."
+        };
+      }
+    }
+  } else {
+    // MANDANTE (EM CASA)
+    if (choiceId === "MAIOR_FESTA_ANO") {
+      const rand = Math.random();
+      const isAmbushed = rand < 0.30; // 30% Emboscada
+      return {
+        id: "MAIOR_FESTA_ANO",
+        title: "🔥 A Maior Festa do Ano",
+        scenario: "MANDANTE",
+        log: isAmbushed
+          ? "Festa gigante de arquibancada, porém um bonde rival emboscou a sub-sede nos arredores durante a concentração."
+          : "Festa monumental com 100% de ocupação. Show de fumaça, sinalizadores e arrecadação recorde!",
+        statEffects: {
+          pressao_bancada: 12,
+          poder_pista: isAmbushed ? -8 : 0
+        },
+        stateEffects: {
+          moral: isAmbushed ? -6 : 6
+        },
+        cashChange: 10000,
+        rngOutcome: isAmbushed ? "FAIL_LIGHT" : "SUCCESS",
+        formattedDeltas: [
+          { label: "Pressão de Bancada", value: "+12", isPositive: true },
+          { label: "Receita de Festa", value: "+R$ 10.000", isPositive: true },
+          ...(isAmbushed
+            ? [
+                { label: "Emboscada Rival", value: "-8 Pista", isPositive: false },
+                { label: "Moral Abalada", value: "-6 Moral", isPositive: false }
+              ]
+            : [{ label: "Moral da Tropa", value: "+6 Moral", isPositive: true }])
+        ],
+        narrative: isAmbushed
+          ? "⚠️ FESTA COM EMBOSCADA RIVAL (30%): O mosaico e recepção foram históricos (+12 Bancada, +R$ 10.000), mas um bonde rival de surpresa atacou um ponto de concentração nos arredores (-8 Pista, -6 Moral)."
+          : "🟢 FESTA MONUMENTAL: Show inesquecível na arquibancada com ruas lotadas e estádio em transe (+12 Bancada, +R$ 10.000 no Caixa)."
+      };
+    }
+
+    if (choiceId === "ESCOLTA_DESCENTRALIZADA") {
+      return {
+        id: "ESCOLTA_DESCENTRALIZADA",
+        title: "🛡️ Escolta Descentralizada de Território",
+        scenario: "MANDANTE",
+        log: "A Linha de Frente patrulhou estações de trem e vias de acesso. Zero risco de emboscadas, mas a bateria no estádio ficou desfalecida.",
+        statEffects: { poder_pista: 6 },
+        stateEffects: { risco_mp: 0 },
+        cashChange: -5000,
+        formattedDeltas: [
+          { label: "Domínio de Território", value: "+6 Pista", isPositive: true },
+          { label: "Segurança de Trem", value: "Zero Emboscadas", isPositive: true },
+          { label: "Custo de Logística", value: "-R$ 5.000", isPositive: false }
+        ],
+        narrative: "🛡️ TERRITÓRIO PROTEGIDO: Os líderes da pista patrulharam as estações da cidade. Todos os torcedores chegaram seguros ao jogo (+6 Pista, 0% Emboscadas)."
+      };
+    }
+
+    if (choiceId === "HUMILHACAO_PUBLICA") {
+      const isVictory = matchWinner === "PLAYER";
+      return {
+        id: "HUMILHACAO_PUBLICA",
+        title: "✈️ Humilhação Pública (Aeronave / Outdoor Rival)",
+        scenario: "MANDANTE",
+        log: isVictory
+          ? "Avião com faixa provocativa sobrevoou o estádio e o time venceu em campo. Zoação perfeita e repercussão nacional!"
+          : "Gasto de R$ 25.000 na aeronave, mas o time perdeu em campo. A provocação virou piada no país inteiro.",
+        statEffects: {},
+        stateEffects: {
+          respeito_nacional: isVictory ? 12 : -6,
+          moral: isVictory ? 10 : -12
+        },
+        cashChange: -25000,
+        rngOutcome: isVictory ? "VICTORY" : "DEFEAT",
+        formattedDeltas: [
+          { label: "Custo do Aluguel", value: "-R$ 25.000", isPositive: false },
+          ...(isVictory
+            ? [
+                { label: "Respeito Nacional", value: "+12", isPositive: true },
+                { label: "Moral da Tropa", value: "+10", isPositive: true }
+              ]
+            : [{ label: "Fiasco com Derrota", value: "-12 Moral", isPositive: false }])
+        ],
+        narrative: isVictory
+          ? "✈️ ZOAÇÃO PERFEITA: O avião com a faixa sobrevoou o estádio e o time venceu no gramado! A provocação viralizou em todas as redes!"
+          : "🔴 TIRO PELA CULATRA: A faixa no ar foi linda, mas o time perdeu o clássico em casa. A torcida rival tripudiou do gasto milionário (-12 Moral)."
+      };
+    }
+  }
+
+  // Fallback
+  return {
+    id: choiceId,
+    title: "Ação de Torcida Única",
+    scenario,
+    log: "Ação concluída sob regime de Torcida Única.",
+    cashChange: 0,
+    formattedDeltas: [],
+    narrative: "Conclusão de ação do menu de crise."
+  };
+}
+
+
+// ==========================================
+// MÓDULO 2: COLETIVAS DE IMPRENSA (DAMAGE CONTROL)
+// ==========================================
+
+export interface PressConferenceChoice {
+  id: string;
+  type: "INSTITUCIONAL" | "RADICAL" | "GESTORA";
+  label: string;
+  badgeText: string;
+  answerText: string;
+  statEffects?: Partial<TorcidaStats>;
+  stateEffects?: Partial<StateTrackers>;
+  cashDelta?: number;
+  log: string;
+  formattedDeltas: FormattedDelta[];
+  triggerRivalAmbushAlert?: boolean;
+}
+
+export interface PressConference {
+  id: string;
+  triggerEvent: string;
+  title: string;
+  journalist: string;
+  outlet: string;
+  question: string;
+  choices: PressConferenceChoice[];
+}
+
+export const PRESS_CONFERENCES: Record<string, PressConference> = {
+  ENTREVISTA_TORCIDA_UNICA: {
+    id: "ENTREVISTA_TORCIDA_UNICA",
+    triggerEvent: "Pós-Decreto de Torcida Única pelo Ministério Público",
+    title: "🎙️ COLETIVA DE IMPRENSA: RESPOSTA AO BANIMENTO DO MP",
+    journalist: "Rodrigo Capelo / Mídia Esportiva",
+    outlet: "Rede Nacional de Esportes",
+    question: "Presidente, o Ministério Público acaba de banir a sua torcida dos clássicos alegando que vocês são uma organização criminosa. Como a diretoria responde a isso?",
+    choices: [
+      {
+        id: "RESP_INSTITUCIONAL_A",
+        type: "INSTITUCIONAL",
+        label: "🏛️ Resposta Institucional (Diplomata)",
+        badgeText: "DIPLOMACIA & DISCURSO POPULAR",
+        answerText: "O MP pune o povo, mas os engravatados continuam roubando o futebol. Não temos controle do que acontece a quilômetros do estádio.",
+        statEffects: { contingente: 5, poder_pista: -5 },
+        stateEffects: { risco_mp: -8 },
+        log: "Adotou discurso institucional popular. Aliviou a pressão do MP e atraiu massa, mas perdeu moral com a ala mais radical da pista.",
+        formattedDeltas: [
+          { label: "Risco MP", value: "-8%", isPositive: true },
+          { label: "Massa Popular", value: "+5", isPositive: true },
+          { label: "Postura de Pista", value: "-5", isPositive: false }
+        ]
+      },
+      {
+        id: "RESP_RADICAL_A",
+        type: "RADICAL",
+        label: "🥊 Resposta Radical (Linha de Frente)",
+        badgeText: "CONFRONTO DIRETO COM ESTADO",
+        answerText: "A pista é a pista. Se vierem na nossa direção, não vamos correr. O Estado é incompetente para garantir a segurança e joga a culpa na torcida.",
+        statEffects: { poder_pista: 10 },
+        stateEffects: { moral: 8, risco_mp: 15 },
+        cashDelta: -5000,
+        log: "Discurso radical e combativo. Inflou a moral da pista (+10), mas detonou o Risco MP (+15%) e arcou com custos de advogados (-R$ 5.000).",
+        formattedDeltas: [
+          { label: "Poder de Pista", value: "+10", isPositive: true },
+          { label: "Moral da Tropa", value: "+8", isPositive: true },
+          { label: "Risco MP", value: "+15%", isPositive: false },
+          { label: "Custas Advocatícias", value: "-R$ 5.000", isPositive: false }
+        ]
+      },
+      {
+        id: "RESP_GESTORA_A",
+        type: "GESTORA",
+        label: "💼 Resposta Gestora (Festa na Quadra)",
+        badgeText: "MOBILIZAÇÃO SOCIAL & ARRECADAÇÃO",
+        answerText: "Somos maiores que o Estado. Convoco os 50 mil associados a pagarem as mensalidades. Faremos a festa na quadra!",
+        cashDelta: 20000,
+        log: "Focou na captação financeira e eventos internos. Gerou R$ 20.000 extras para os cofres da agremiação.",
+        formattedDeltas: [
+          { label: "Arrecadação da Quadra", value: "+R$ 20.000", isPositive: true }
+        ]
+      }
+    ]
+  },
+
+  ENTREVISTA_MOSAICO: {
+    id: "ENTREVISTA_MOSAICO",
+    triggerEvent: "Mosaico Gigante Viral no Estádio (> 95 Bancada)",
+    title: "🎙️ COLETIVA DE IMPRENSA: REPERCUSSÃO DO MOSAICO MUNDIAL",
+    journalist: "Ana Thaís / Central de Esportes",
+    outlet: "Portal de Esportes & TV",
+    question: "Presidente, as imagens do mosaico rodaram o mundo todo. Isso prova de vez que as organizadas são um movimento cultural genuíno e não gangues de rua?",
+    choices: [
+      {
+        id: "RESP_INSTITUCIONAL_B",
+        type: "INSTITUCIONAL",
+        label: "🏛️ Resposta Institucional (Patrimônio Cultural)",
+        badgeText: "PATRIMÔNIO CULTURAL NACIONAL",
+        answerText: "Essa é a nossa verdadeira face. A festa da arquibancada é o maior patrimônio cultural do Brasil e deve ser respeitada.",
+        statEffects: { contingente: 8, poder_pista: -3 },
+        stateEffects: { risco_mp: -10 },
+        log: "Posicionou o mosaico como patrimônio cultural. Reduziu o Risco MP (-10%) e atraiu novos associados (+8 Massa).",
+        formattedDeltas: [
+          { label: "Risco MP", value: "-10%", isPositive: true },
+          { label: "Massa Popular", value: "+8", isPositive: true },
+          { label: "Postura de Pista", value: "-3", isPositive: false }
+        ]
+      },
+      {
+        id: "RESP_RADICAL_B",
+        type: "RADICAL",
+        label: "🥊 Resposta Radical (Donos da Cidade)",
+        badgeText: "PROVOCAÇÃO E DOMÍNIO DE CIDADE",
+        answerText: "Somos os donos da cidade. O estádio é o nosso salão de festas e ontem provamos quem manda aqui.",
+        statEffects: { pressao_bancada: 10 },
+        stateEffects: { moral: 8 },
+        triggerRivalAmbushAlert: true,
+        log: "Provocou abertamente os rivais. Aumentou o poder de bancada (+10) e moral (+8), mas enfureceu a torcida rival (Risco de ataque futuro).",
+        formattedDeltas: [
+          { label: "Pressão de Bancada", value: "+10", isPositive: true },
+          { label: "Moral da Agremiação", value: "+8", isPositive: true },
+          { label: "Alerta de Vingança Rival", value: "Rival Enfurecido", isPositive: false }
+        ]
+      },
+      {
+        id: "RESP_GESTORA_B",
+        type: "GESTORA",
+        label: "💼 Resposta Gestora (Monetização da Marca)",
+        badgeText: "VENDA DE ROUPAS & LOJA OFICIAL",
+        answerText: "Fazer história custa caro. Entrem no nosso site e comprem a camisa oficial do mosaico. A festa só continua se o caixa estiver cheio.",
+        statEffects: { autonomia_financeira: 10 },
+        stateEffects: { respeito_nacional: -5 },
+        cashDelta: 25000,
+        log: "Capitalizou sobre o sucesso do mosaico. Arrecadou R$ 25.000 em vendas e aumentou a autonomia financeira.",
+        formattedDeltas: [
+          { label: "Faturamento de Loja", value: "+R$ 25.000", isPositive: true },
+          { label: "Autonomia Financeira", value: "+10", isPositive: true },
+          { label: "Respeito de Outras Torcidas", value: "-5", isPositive: false }
+        ]
+      }
+    ]
+  },
+
+  ENTREVISTA_REBAIXAMENTO: {
+    id: "ENTREVISTA_REBAIXAMENTO",
+    triggerEvent: "Rebaixamento Confirmado no Campeonato",
+    title: "🎙️ COLETIVA DE IMPRENSA: A CRISE DO REBAIXAMENTO",
+    journalist: "Mauro Cezar / Mesa Redonda",
+    outlet: "TV Esporte Crítica",
+    question: "O rebaixamento da equipe está matematicamente confirmado e a revolta nas arquibancadas é imensa. Vocês vão abandonar o clube ou haverá cobrança pesada?",
+    choices: [
+      {
+        id: "RESP_RADICAL_C",
+        type: "RADICAL",
+        label: "🥊 Resposta Radical (Cobrança Severa)",
+        badgeText: "COBRANÇA EM CT & BALADAS",
+        answerText: "A paz acabou. Jogadores mercenários mancharam nossa camisa. Vamos cobrar no aeroporto, no CT e na balada. Ninguém dorme em paz.",
+        statEffects: { poder_pista: 12 },
+        stateEffects: { moral: 10, risco_mp: 20 },
+        cashDelta: -10000,
+        log: "Declarou guerra aos jogadores mercenários. Inflou a pista, mas atraiu intimação policial e arcou com custas judiciais.",
+        formattedDeltas: [
+          { label: "Poder de Pista", value: "+12", isPositive: true },
+          { label: "Moral do Bonde", value: "+10", isPositive: true },
+          { label: "Risco MP", value: "+20%", isPositive: false },
+          { label: "Custas de Processo", value: "-R$ 10.000", isPositive: false }
+        ]
+      },
+      {
+        id: "RESP_INSTITUCIONAL_C",
+        type: "INSTITUCIONAL",
+        label: "🏛️ Resposta Institucional (Fidelidade Incondicional)",
+        badgeText: "AMOR INCONDICIONAL AO ESCUDO",
+        answerText: "Série A ou várzea, nós torcemos para o escudo. Ano que vem vamos lotar o estádio e carregar esse time nas costas de volta para a elite.",
+        statEffects: { pressao_bancada: 10, poder_pista: -10 },
+        stateEffects: { respeito_nacional: 10 },
+        log: "Reafirmou apoio incondicional na Série B. Ganhou respeito nacional e fortalecimento de bancada, mas gerou racha com a pista.",
+        formattedDeltas: [
+          { label: "Pressão de Bancada", value: "+10", isPositive: true },
+          { label: "Respeito Nacional", value: "+10", isPositive: true },
+          { label: "Racha com a Pista", value: "-10 Pista", isPositive: false }
+        ]
+      },
+      {
+        id: "RESP_GESTORA_C",
+        type: "GESTORA",
+        label: "💼 Resposta Gestora (Ataque à Diretoria do Clube)",
+        badgeText: "EXIGÊNCIA DE GESTÃO E CADEIRA NO CONSELHO",
+        answerText: "O culpado é o presidente do clube. Exigimos a renúncia da diretoria e uma cadeira no conselho de futebol para a nossa torcida, ou o clube para.",
+        statEffects: { autonomia_financeira: 10 },
+        stateEffects: { risco_mp: -10, moral: -8 },
+        cashDelta: 0,
+        log: "Transferiu toda a culpa para os cartolas do clube e exigiu assento no conselho. Diminuiu o risco MP, mas a base acusou uso político.",
+        formattedDeltas: [
+          { label: "Autonomia Politica", value: "+10", isPositive: true },
+          { label: "Risco MP (Culpa Isolada)", value: "-10%", isPositive: true },
+          { label: "Moral da Base", value: "-8", isPositive: false }
+        ]
+      }
+    ]
+  },
+
+  ENTREVISTA_TITULO_CAMPEAO: {
+    id: "ENTREVISTA_TITULO_CAMPEAO",
+    triggerEvent: "Conquista de Título Histórico pelo Clube",
+    title: "🎙️ COLETIVA DE IMPRENSA: A GLÓRIA DO TÍTULO",
+    journalist: "Eric Faria / Esporte Espetacular",
+    outlet: "Rede Globo & GE",
+    question: "Presidente, o clube acaba de conquistar um título histórico e a arquibancada explodiu em euforia. Qual é o sentimento da diretoria da torcida neste momento?",
+    choices: [
+      {
+        id: "RESP_INSTITUCIONAL_TITULO",
+        type: "INSTITUCIONAL",
+        label: "🏛️ Resposta Institucional (Apoiador Fiel)",
+        badgeText: "A FESTA DO POVO",
+        answerText: "Esse título é de cada torcedor que cantou os 90 minutos debaixo de chuva. A torcida é a verdadeira alma dessa conquista!",
+        statEffects: { contingente: 10, pressao_bancada: 8 },
+        stateEffects: { respeito_nacional: 12 },
+        log: "Discurso emocionante exaltando a torcida. Aumentou o contingente (+10) e o respeito nacional (+12).",
+        formattedDeltas: [
+          { label: "Massa Popular", value: "+10", isPositive: true },
+          { label: "Pressão de Bancada", value: "+8", isPositive: true },
+          { label: "Respeito Nacional", value: "+12", isPositive: true }
+        ]
+      },
+      {
+        id: "RESP_RADICAL_TITULO",
+        type: "RADICAL",
+        label: "🥊 Resposta Radical (Aviso aos Rivais)",
+        badgeText: "HEGEMONIA & PRESSÃO",
+        answerText: "A nossa pressão na bancada e a cobrança no CT é que ganharam esse campeonato. Mostramos quem manda no futebol do país!",
+        statEffects: { poder_pista: 10 },
+        stateEffects: { moral: 10, risco_mp: 8 },
+        log: "Mandou recado combativo. Inflou a moral e a pista (+10), mas aumentou o Risco MP (+8%).",
+        formattedDeltas: [
+          { label: "Postura de Pista", value: "+10", isPositive: true },
+          { label: "Moral da Tropa", value: "+10", isPositive: true },
+          { label: "Risco MP", value: "+8%", isPositive: false }
+        ]
+      },
+      {
+        id: "RESP_GESTORA_TITULO",
+        type: "GESTORA",
+        label: "💼 Resposta Gestora (Vendas do Título)",
+        badgeText: "PRODUTOS EXCLUSIVOS DO CAMPEÃO",
+        answerText: "Lançamos agora no site a camisa e a faixa oficial do título. Convocamos a torcida a comprar os produtos oficiais para encher o caixa!",
+        statEffects: { autonomia_financeira: 12 },
+        cashDelta: 35000,
+        log: "Capitalizou o título com produtos oficiais. Injetou R$ 35.000 nos cofres da torcida.",
+        formattedDeltas: [
+          { label: "Vendas do Título", value: "+R$ 35.000", isPositive: true },
+          { label: "Autonomia Financeira", value: "+12", isPositive: true }
+        ]
+      }
+    ]
+  },
+
+  ENTREVISTA_BRIGA_PISTA: {
+    id: "ENTREVISTA_BRIGA_PISTA",
+    triggerEvent: "Repercussão de Confronto em Rodovia / Pista",
+    title: "🎙️ COLETIVA DE IMPRENSA: EMBOSCADA NA RODOVIA",
+    journalist: "Cesar Tralli / Jornal da Cidade",
+    outlet: "Noticiário Policial & TV",
+    question: "Imagens de um grave confronto de torcidas numa rodovia viralizaram hoje. A diretoria da organizada teve participação no agendamento dessa briga?",
+    choices: [
+      {
+        id: "RESP_INSTITUCIONAL_BRIGA",
+        type: "INSTITUCIONAL",
+        label: "🏛️ Resposta Institucional (Desvinculação)",
+        badgeText: "REPÚDIO À VIOLÊNCIA DE RODOVIA",
+        answerText: "Repudiamos veementemente a violência. Foram torcedores isolados agindo por conta própria fora do perímetro do estádio.",
+        statEffects: { contingente: 5, poder_pista: -6 },
+        stateEffects: { risco_mp: -12 },
+        log: "Desvinculou a diretoria do briga. Reduziu o Risco MP (-12%), mas perdeu moral com a ala de pista.",
+        formattedDeltas: [
+          { label: "Risco MP", value: "-12%", isPositive: true },
+          { label: "Massa Popular", value: "+5", isPositive: true },
+          { label: "Racha de Pista", value: "-6 Pista", isPositive: false }
+        ]
+      },
+      {
+        id: "RESP_RADICAL_BRIGA",
+        type: "RADICAL",
+        label: "🥊 Resposta Radical (Defesa de Honra)",
+        badgeText: "LEGÍTIMA DEFESA DO BONDE",
+        answerText: "Fomos emboscados covardemente pela torcida rival. O nosso bonde apenas se defendeu e honrou a nossa camisa!",
+        statEffects: { poder_pista: 12 },
+        stateEffects: { moral: 10, risco_mp: 18 },
+        cashDelta: -8000,
+        log: "Defendeu o combate na pista. Inflou a moral do bonde (+10), mas disparou o Risco MP (+18%) e gerou despesas jurídicas.",
+        formattedDeltas: [
+          { label: "Poder de Pista", value: "+12", isPositive: true },
+          { label: "Moral da Tropa", value: "+10", isPositive: true },
+          { label: "Risco MP", value: "+18%", isPositive: false },
+          { label: "Custas de Advogados", value: "-R$ 8.000", isPositive: false }
+        ]
+      },
+      {
+        id: "RESP_GESTORA_BRIGA",
+        type: "GESTORA",
+        label: "💼 Resposta Gestora (Fundo de Fianças)",
+        badgeText: "ASSISTÊNCIA JURÍDICA AOS MEMBROS",
+        answerText: "Instauramos uma sindicância interna e contratamos os melhores advogados para libertar os nossos associados detidos.",
+        cashDelta: -12000,
+        stateEffects: { moral: 6 },
+        log: "Prestou auxílio jurídico aos membros. Gastou R$ 12.000 em fianças mas manteve a lealdade interna.",
+        formattedDeltas: [
+          { label: "Moral Interna", value: "+6", isPositive: true },
+          { label: "Despesas de Fiança", value: "-R$ 12.000", isPositive: false }
+        ]
+      }
+    ]
+  },
+
+  ENTREVISTA_CRISE_FINANCEIRA: {
+    id: "ENTREVISTA_CRISE_FINANCEIRA",
+    triggerEvent: "Crise de Finanças e Dívidas no Clube",
+    title: "🎙️ COLETIVA DE IMPRENSA: A CRISE FINANCEIRA DO CLUBE",
+    journalist: "Vitor Birner / Mesa de Debates",
+    outlet: "Rádio & Podcast Esportivo",
+    question: "O clube acumula dívidas milionárias, salários atrasados e ameaça de bloqueio de bens. A torcida organizada vai ajudar ou cobrar a gestão?",
+    choices: [
+      {
+        id: "RESP_INSTITUCIONAL_FINANCEIRA",
+        type: "INSTITUCIONAL",
+        label: "🏛️ Resposta Institucional (Campanha de Socorro)",
+        badgeText: "SOS TORCIDA / VAQUINHA NACIONAL",
+        answerText: "Lançaremos uma vaquinha nacional e anistia de mensalidades. O torcedor vai tirar o clube do buraco!",
+        statEffects: { contingente: 8, autonomia_financeira: 6 },
+        cashDelta: 20000,
+        log: "Lançou vaquinha nacional de ajuda ao clube. Arrecadou R$ 20.000 e atraiu massa.",
+        formattedDeltas: [
+          { label: "Doações Arrecadadas", value: "+R$ 20.000", isPositive: true },
+          { label: "Massa Popular", value: "+8", isPositive: true }
+        ]
+      },
+      {
+        id: "RESP_RADICAL_FINANCEIRA",
+        type: "RADICAL",
+        label: "🥊 Resposta Radical (Devassa nos Cartolas)",
+        badgeText: "AUDITORIA POPULAR & PRESSÃO",
+        answerText: "Exigimos auditoria imediata nas contas do clube. Se houver desvio de dinheiro dos cartolas, a cobrança será pessoal!",
+        statEffects: { poder_pista: 8 },
+        stateEffects: { moral: 8, risco_mp: 8 },
+        log: "Pressionou os dirigentes corruptos. Aumentou o respeito de pista (+8), mas irritou conselheiros do clube.",
+        formattedDeltas: [
+          { label: "Poder de Pista", value: "+8", isPositive: true },
+          { label: "Moral da Base", value: "+8", isPositive: true },
+          { label: "Risco MP", value: "+8%", isPositive: false }
+        ]
+      },
+      {
+        id: "RESP_GESTORA_FINANCEIRA",
+        type: "GESTORA",
+        label: "💼 Resposta Gestora (Gestão de Ingressos/Loja)",
+        badgeText: "PARCERIA COMERCIAL COM O CLUBE",
+        answerText: "Oferecemos gerenciar a bilheteria dos setores populares e a loja oficial para repassar 50% dos lucros ao futebol do clube.",
+        statEffects: { autonomia_financeira: 12 },
+        cashDelta: 25000,
+        log: "Assumiu operações comerciais estratégicas. Aumentou a autonomia financeira (+12) e arrecadou R$ 25.000.",
+        formattedDeltas: [
+          { label: "Arrecadação de Loja", value: "+R$ 25.000", isPositive: true },
+          { label: "Autonomia Financeira", value: "+12", isPositive: true }
+        ]
+      }
+    ]
+  },
+
+  ENTREVISTA_CONTRATACAO_BOMBA: {
+    id: "ENTREVISTA_CONTRATACAO_BOMBA",
+    triggerEvent: "Anúncio de Reforço Polêmico pelo Clube",
+    title: "🎙️ COLETIVA DE IMPRENSA: A REPERCUSSÃO DO NOVO REFORÇO",
+    journalist: "André Rizek / Seleção Esportiva",
+    outlet: "Canais de Esporte por Assinatura",
+    question: "O clube anunciou a contratação de um astro polêmico de renome internacional. Como a arquibancada pretende tratar o jogador?",
+    choices: [
+      {
+        id: "RESP_INSTITUCIONAL_BOMBA",
+        type: "INSTITUCIONAL",
+        label: "🏛️ Resposta Institucional (Apoio Condicionado)",
+        badgeText: "APOIO TOTAL EM CAMPO",
+        answerText: "Problema extracampo cabe à polícia. Em campo, ele veste as nossas cores e terá o nosso apoio incondicional!",
+        statEffects: { contingente: 6, pressao_bancada: 8 },
+        log: "Apoiou o jogador em campo. Aumentou a massa popular e a pressão de bancada.",
+        formattedDeltas: [
+          { label: "Massa Popular", value: "+6", isPositive: true },
+          { label: "Pressão de Bancada", value: "+8", isPositive: true }
+        ]
+      },
+      {
+        id: "RESP_RADICAL_BOMBA",
+        type: "RADICAL",
+        label: "🥊 Resposta Radical (Aviso no Vestiário)",
+        badgeText: "VIGILÂNCIA DE BALADA & DISCIPLINA",
+        answerText: "Se vier para fazer corpo mole ou ir pra balada, o bonde vai cobrar pessoalmente na porta da boate!",
+        statEffects: { poder_pista: 10 },
+        stateEffects: { moral: 8, risco_mp: 10 },
+        log: "Prometeu cobrança pesada em caso de indisciplina. Aumentou o poder de pista (+10), mas atraiu holofotes negativos.",
+        formattedDeltas: [
+          { label: "Poder de Pista", value: "+10", isPositive: true },
+          { label: "Moral do Bonde", value: "+8", isPositive: true },
+          { label: "Risco MP", value: "+10%", isPositive: false }
+        ]
+      },
+      {
+        id: "RESP_GESTORA_BOMBA",
+        type: "GESTORA",
+        label: "💼 Resposta Gestora (Linha de Produtos do Atleta)",
+        badgeText: "COLEÇÃO EXCLUSIVA DA TORCIDA",
+        answerText: "Lançaremos em parceria com a agremiação a linha de agasalhos e bonés com a marca do novo camisa 10.",
+        statEffects: { autonomia_financeira: 10 },
+        cashDelta: 20000,
+        log: "Monetizou a imagem do novo reforço. Gerou R$ 20.000 extras para o caixa da torcida.",
+        formattedDeltas: [
+          { label: "Venda de Produtos", value: "+R$ 20.000", isPositive: true },
+          { label: "Autonomia Financeira", value: "+10", isPositive: true }
+        ]
+      }
+    ]
+  },
+
+  ENTREVISTA_ELEICAO_TORCIDA: {
+    id: "ENTREVISTA_ELEICAO_TORCIDA",
+    triggerEvent: "Posse da Nova Diretoria da Agremiação",
+    title: "🎙️ COLETIVA DE IMPRENSA: A NOVA GESTÃO DA TORCIDA",
+    journalist: "Juca Kfouri / Blog do Esporte",
+    outlet: "Portal da Imprensa Livre",
+    question: "Presidente, após a eleição da nova diretoria da organizada, qual será a diretriz principal nos próximos anos de mandato?",
+    choices: [
+      {
+        id: "RESP_INSTITUCIONAL_ELEICAO",
+        type: "INSTITUCIONAL",
+        label: "🏛️ Resposta Institucional (Foco Social)",
+        badgeText: "PROJETOS SOCIAIS & FAMÍLIA NA ARQUIBANCADA",
+        answerText: "Nossa meta é transformar a torcida num centro comunitário: escolinhas de futebol, doações de alimento e paz nos estádios.",
+        statEffects: { contingente: 10 },
+        stateEffects: { risco_mp: -15, respeito_nacional: 8 },
+        log: "Priorizou projetos comunitários. Reduziu drasticamente o Risco MP (-15%) e expandiu a massa popular (+10).",
+        formattedDeltas: [
+          { label: "Risco MP", value: "-15%", isPositive: true },
+          { label: "Massa Popular", value: "+10", isPositive: true },
+          { label: "Respeito Nacional", value: "+8", isPositive: true }
+        ]
+      },
+      {
+        id: "RESP_RADICAL_ELEICAO",
+        type: "RADICAL",
+        label: "🥊 Resposta Radical (Hegemonia de Pista)",
+        badgeText: "RESGATE DO RESPEITO NAS RODOVIAS",
+        answerText: "Viemos para resgatar o respeito da nossa torcida. Nenhuma agremiação rival vai dominar o nosso território!",
+        statEffects: { poder_pista: 12 },
+        stateEffects: { moral: 10, risco_mp: 12 },
+        log: "Focou na liderança de pista. Inflou a moral e o respeito violento de pista (+12), com aumento do Risco MP.",
+        formattedDeltas: [
+          { label: "Poder de Pista", value: "+12", isPositive: true },
+          { label: "Moral da Tropa", value: "+10", isPositive: true },
+          { label: "Risco MP", value: "+12%", isPositive: false }
+        ]
+      },
+      {
+        id: "RESP_GESTORA_ELEICAO",
+        type: "GESTORA",
+        label: "💼 Resposta Gestora (Modernização do Caixa)",
+        badgeText: "DIGITALIZAÇÃO & FUTEBOL PROFISSIONAL",
+        answerText: "Modernizaremos a quadra, lançaremos o programa de sócio-torcedor digital e triplicaremos o faturamento da loja.",
+        statEffects: { autonomia_financeira: 15 },
+        cashDelta: 30000,
+        log: "Focou na profissionalização financeira. Gerou R$ 30.000 e aumentou a autonomia da agremiação.",
+        formattedDeltas: [
+          { label: "Aporte Financeiro", value: "+R$ 30.000", isPositive: true },
+          { label: "Autonomia Financeira", value: "+15", isPositive: true }
+        ]
+      }
+    ]
+  },
+
+  ENTREVISTA_INCENDIO_SINALIZADOR: {
+    id: "ENTREVISTA_INCENDIO_SINALIZADOR",
+    triggerEvent: "Punição por Fumaça e Sinalizadores no Estádio",
+    title: "🎙️ COLETIVA DE IMPRENSA: A POLÊMICA DOS SINALIZADORES",
+    journalist: "Flavio Gomes / Rádio Arquibancada",
+    outlet: "Rede Esporte & Ação",
+    question: "O jogo de ontem ficou paralisado 15 minutos por causa dos sinalizadores da sua torcida e o STJD fala em perda de mandos de campo. Qual o posicionamento?",
+    choices: [
+      {
+        id: "RESP_INSTITUCIONAL_SINALIZADOR",
+        type: "INSTITUCIONAL",
+        label: "🏛️ Resposta Institucional (Respeito ao Regulamento)",
+        badgeText: "SUBSTITUIÇÃO POR MOSAICOS DE PAPEL",
+        answerText: "Pedimos desculpas ao clube pelo atraso no jogo. Trocaremos a pirotecnia por mosaicos e fumaça fria permitida.",
+        statEffects: { pressao_bancada: -4 },
+        stateEffects: { risco_mp: -14 },
+        log: "Aceitou adequação ao regulamento. Reduziu o Risco MP (-14%), com leve queda na pressão de bancada.",
+        formattedDeltas: [
+          { label: "Risco MP", value: "-14%", isPositive: true },
+          { label: "Pressão de Bancada", value: "-4", isPositive: false }
+        ]
+      },
+      {
+        id: "RESP_RADICAL_SINALIZADOR",
+        type: "RADICAL",
+        label: "🥊 Resposta Radical (Defesa da Festa Raiz)",
+        badgeText: "RESISTÊNCIA AO FUTEBOL MODERNO",
+        answerText: "Sinalizador é a alma do futebol sul-americano! Não aceitaremos a 'gourmetização' da nossa arquibancada!",
+        statEffects: { pressao_bancada: 10 },
+        stateEffects: { moral: 8, risco_mp: 15 },
+        log: "Defendeu a cultura tradicional do fogo na bancada. Inflou a moral (+8) e a pressão (+10), aumentando o Risco MP (+15%).",
+        formattedDeltas: [
+          { label: "Pressão de Bancada", value: "+10", isPositive: true },
+          { label: "Moral da Agremiação", value: "+8", isPositive: true },
+          { label: "Risco MP", value: "+15%", isPositive: false }
+        ]
+      },
+      {
+        id: "RESP_GESTORA_SINALIZADOR",
+        type: "GESTORA",
+        label: "💼 Resposta Gestora (Fundo de Multas do Tribunal)",
+        badgeText: "PAGAMENTO DE MULTAS COM EVENTOS",
+        answerText: "Assumiremos o pagamento da multa do STJD organizando uma grande festa na quadra para arrecadar fundos.",
+        cashDelta: -10000,
+        stateEffects: { respeito_nacional: 6 },
+        log: "Assumiu o custo da multa do tribunal. Gastou R$ 10.000 mas ganhou respeito diplomático com a diretoria do clube.",
+        formattedDeltas: [
+          { label: "Respeito do Clube", value: "+6", isPositive: true },
+          { label: "Pagamento de Multa", value: "-R$ 10.000", isPositive: false }
+        ]
+      }
+    ]
+  },
+
+  ENTREVISTA_CARAVANA_HISTORICA: {
+    id: "ENTREVISTA_CARAVANA_HISTORICA",
+    triggerEvent: "Invasão de 100+ Ônibus em Outro Estado",
+    title: "🎙️ COLETIVA DE IMPRENSA: A MAIOR CARAVANA DO ANO",
+    journalist: "Benjamin Back / Canal Direto",
+    outlet: "Portal Esportivo Nacional",
+    question: "Mais de 100 ônibus da sua torcida cortaram as estradas e invadiram o estádio rival ontem. Como foi viabilizar essa mega operação?",
+    choices: [
+      {
+        id: "RESP_INSTITUCIONAL_CARAVANA",
+        type: "INSTITUCIONAL",
+        label: "🏛️ Resposta Institucional (Orgulho de Viajar)",
+        badgeText: "EXÉRCITO DE FIDELIDADE",
+        answerText: "Demonstramos que a nossa paixão não tem fronteiras. Foram mil quilômetros cantando sem nenhum incidente violento!",
+        statEffects: { caravana: 12 },
+        stateEffects: { respeito_nacional: 10 },
+        log: "Exaltou o comportamento pacífico da caravana. Ganhou enorme respeito nacional (+10) e poder de caravana (+12).",
+        formattedDeltas: [
+          { label: "Poder de Caravana", value: "+12", isPositive: true },
+          { label: "Respeito Nacional", value: "+10", isPositive: true }
+        ]
+      },
+      {
+        id: "RESP_RADICAL_CARAVANA",
+        type: "RADICAL",
+        label: "🥊 Resposta Radical (Fechamento de Rodovia)",
+        badgeText: "DOMÍNIO DE RODOVIA",
+        answerText: "Paramos os pedágios e mostramos quem comanda a pista fora do nosso estado. Ninguém peita o nosso bonde!",
+        statEffects: { poder_pista: 10, caravana: 8 },
+        stateEffects: { moral: 10, risco_mp: 14 },
+        log: "Provocou as torcidas locais do outro estado. Inflou o poder de pista (+10) e moral (+10), com alta no Risco MP.",
+        formattedDeltas: [
+          { label: "Poder de Pista", value: "+10", isPositive: true },
+          { label: "Moral da Tropa", value: "+10", isPositive: true },
+          { label: "Risco MP", value: "+14%", isPositive: false }
+        ]
+      },
+      {
+        id: "RESP_GESTORA_CARAVANA",
+        type: "GESTORA",
+        label: "💼 Resposta Gestora (Frota Própria e Subsídio)",
+        badgeText: "LUCRO COM PASSAGENS E INGRESSOS",
+        answerText: "Fretamos a frota inteira com desconto direto e vendemos pacotes completos com ingresso e lanche, gerando alto lucro.",
+        statEffects: { autonomia_financeira: 10, caravana: 10 },
+        cashDelta: 22000,
+        log: "Faturou alto com a venda de pacotes de caravana. Rendeu R$ 22.000 extras para a agremiação.",
+        formattedDeltas: [
+          { label: "Lucro da Caravana", value: "+R$ 22.000", isPositive: true },
+          { label: "Poder de Caravana", value: "+10", isPositive: true }
+        ]
+      }
+    ]
+  },
+
+  ENTREVISTA_PARCERIA_SAF: {
+    id: "ENTREVISTA_PARCERIA_SAF",
+    triggerEvent: "Proposta de Venda do Futebol para Grupo SAF",
+    title: "🎙️ COLETIVA DE IMPRENSA: A TORCIDA E A SAF",
+    journalist: "PVC / Análise Tática",
+    outlet: "Rede de Jornalismo Esportivo",
+    question: "O conselho do clube votará a venda de 90% da SAF para um grupo bilionário de investimentos. Qual será a postura da organizada?",
+    choices: [
+      {
+        id: "RESP_INSTITUCIONAL_SAF",
+        type: "INSTITUCIONAL",
+        label: "🏛️ Resposta Institucional (Guardiões do Escudo)",
+        badgeText: "EXIGÊNCIA DE TRAVAS NO ESTATUTO",
+        answerText: "Exigimos travas estatutárias contra a mudança de nome, cores, escudo ou endereço do clube. As tradições são inegociáveis!",
+        statEffects: { pressao_bancada: 8 },
+        stateEffects: { respeito_nacional: 8, risco_mp: -5 },
+        log: "Exigiu garantias estatutárias da SAF. Ganhou respeito nacional e preservou as tradições do clube.",
+        formattedDeltas: [
+          { label: "Pressão de Bancada", value: "+8", isPositive: true },
+          { label: "Respeito Nacional", value: "+8", isPositive: true },
+          { label: "Risco MP", value: "-5%", isPositive: true }
+        ]
+      },
+      {
+        id: "RESP_RADICAL_SAF",
+        type: "RADICAL",
+        label: "🥊 Resposta Radical (Resistência Popular)",
+        badgeText: "PROTESTOS NA SEDE & CT",
+        answerText: "O clube é do povo, não de bilionários de fora! Protestaremos nas ruas contra a privatização do nosso futebol!",
+        statEffects: { poder_pista: 10 },
+        stateEffects: { moral: 10, risco_mp: 12 },
+        log: "Liderou protestos populares contra a privatização. Inflou a moral interna (+10) e a pista (+10).",
+        formattedDeltas: [
+          { label: "Poder de Pista", value: "+10", isPositive: true },
+          { label: "Moral da Base", value: "+10", isPositive: true },
+          { label: "Risco MP", value: "+12%", isPositive: false }
+        ]
+      },
+      {
+        id: "RESP_GESTORA_SAF",
+        type: "GESTORA",
+        label: "💼 Resposta Gestora (Contrato Comercial de Espaço)",
+        badgeText: "ACORDO COM OS NOVOS DONOS",
+        answerText: "Negociaremos a concessão do setor popular atrás do gol e a exclusividade nas vendas de souvenirs dentro do novo estádio.",
+        statEffects: { autonomia_financeira: 15 },
+        cashDelta: 40000,
+        log: "Fechou acordo comercial vantajoso com os novos investidores da SAF. Aporte de R$ 40.000 para a torcida.",
+        formattedDeltas: [
+          { label: "Aporte Comercial SAF", value: "+R$ 40.000", isPositive: true },
+          { label: "Autonomia Financeira", value: "+15", isPositive: true }
+        ]
+      }
+    ]
+  },
+
+  ENTREVISTA_PACTO_PAZ: {
+    id: "ENTREVISTA_PACTO_PAZ",
+    triggerEvent: "Reunião Diplomática e Pacto de Paz Aliado",
+    title: "🎙️ COLETIVA DE IMPRENSA: A ALIANÇA ENTRE TORCIDAS",
+    journalist: "Fabio Sormani / Debate Esportivo",
+    outlet: "Rede Esportiva de TV",
+    question: "A sua torcida assinou recentemente uma união oficial e pacto de paz com uma das maiores organizadas do país. Qual o impacto disso?",
+    choices: [
+      {
+        id: "RESP_INSTITUCIONAL_PACTO",
+        type: "INSTITUCIONAL",
+        label: "🏛️ Resposta Institucional (União dos Povos)",
+        badgeText: "FRATERNIDADE DE ARQUIBANCADA",
+        answerText: "É uma aliança histórica baseada no respeito mútuo. Receberemos a torcida irmã com grande festa e churrasco na nossa sede!",
+        statEffects: { contingente: 8 },
+        stateEffects: { respeito_nacional: 12, risco_mp: -10 },
+        log: "Exaltou o pacto de paz e a fraternidade. Aumentou o respeito nacional (+12) e reduziu o Risco MP (-10%).",
+        formattedDeltas: [
+          { label: "Respeito Nacional", value: "+12", isPositive: true },
+          { label: "Risco MP", value: "-10%", isPositive: true },
+          { label: "Massa Popular", value: "+8", isPositive: true }
+        ]
+      },
+      {
+        id: "RESP_RADICAL_PACTO",
+        type: "RADICAL",
+        label: "🥊 Resposta Radical (Eixo do Mal)",
+        badgeText: "FORÇA DUPLA NAS RODOVIAS",
+        answerText: "Agora formamos o maior e mais pesado eixo de pista do futebol brasileiro. Nenhuma torcida rival ousará pisar no nosso caminho!",
+        statEffects: { poder_pista: 12 },
+        stateEffects: { moral: 10, risco_mp: 10 },
+        log: "Focou na dominância violenta do eixo unido. Inflou o poder de pista (+12) e a moral (+10).",
+        formattedDeltas: [
+          { label: "Poder de Pista", value: "+12", isPositive: true },
+          { label: "Moral da Tropa", value: "+10", isPositive: true },
+          { label: "Risco MP", value: "+10%", isPositive: false }
+        ]
+      },
+      {
+        id: "RESP_GESTORA_PACTO",
+        type: "GESTORA",
+        label: "💼 Resposta Gestora (Intercâmbio Comercial)",
+        badgeText: "PRODUTOS CONJUNTOS DE ALIANÇA",
+        answerText: "Lançaremos agasalhos e faixas comemorativas unindo as duas marcas para vender nas sedes de ambos os estados.",
+        statEffects: { autonomia_financeira: 10 },
+        cashDelta: 25000,
+        log: "Lançou linha comercial conjunta com a torcida aliada. Gerou R$ 25.000 em vendas.",
+        formattedDeltas: [
+          { label: "Venda da União", value: "+R$ 25.000", isPositive: true },
+          { label: "Autonomia Financeira", value: "+10", isPositive: true }
+        ]
+      }
+    ]
+  }
+};
+
+export function getPressConference(id: string): PressConference | null {
+  return PRESS_CONFERENCES[id] || null;
+}
+
+
