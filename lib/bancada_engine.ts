@@ -759,9 +759,16 @@ export function getDerbyForMatch(
       allyTorcida = rivalsOnly.find((t) => t.clube.toLowerCase() === "marília") || rivalsOnly.find((t) => t.clube.toLowerCase() === "são bento");
       break;
     case "são josé ec":
-      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "santo andré") || rivalsOnly.find((t) => t.clube.toLowerCase() === "paulista jundiaí");
-      secondRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "botafogo-sp") || rivalsOnly.find((t) => t.clube.toLowerCase() === "são paulo");
+    case "são josé":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("taubaté")) || rivalsOnly.find((t) => t.clube.toLowerCase().includes("santo andré"));
+      secondRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "santo andré") || rivalsOnly.find((t) => t.clube.toLowerCase() === "paulista jundiaí");
       allyTorcida = rivalsOnly.find((t) => t.clube.toLowerCase() === "botafogo-sp") || rivalsOnly.find((t) => t.clube.toLowerCase() === "rio branco");
+      break;
+    case "taubaté":
+    case "ec taubaté":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("são josé")) || rivalsOnly[0];
+      secondRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("santo andré")) || rivalsOnly.find((t) => t.clube.toLowerCase().includes("guarani"));
+      allyTorcida = rivalsOnly.find((t) => t.clube.toLowerCase().includes("são bento"));
       break;
     case "santo andré":
       mainRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "são caetano") || rivalsOnly.find((t) => t.clube.toLowerCase() === "são bernardo");
@@ -774,9 +781,14 @@ export function getDerbyForMatch(
       allyTorcida = rivalsOnly.find((t) => t.clube.toLowerCase() === "comercial-rp") || rivalsOnly.find((t) => t.clube.toLowerCase() === "ferroviária");
       break;
     case "são bernardo":
-      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "santo andré") || rivalsOnly.find((t) => t.clube.toLowerCase() === "são caetano");
-      secondRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "são josé ec") || rivalsOnly.find((t) => t.clube.toLowerCase() === "santos");
+    case "são bernardo fc":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("ec são bernardo")) || rivalsOnly.find((t) => t.clube.toLowerCase() === "santo andré");
+      secondRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "são caetano") || rivalsOnly.find((t) => t.clube.toLowerCase() === "santos");
       allyTorcida = rivalsOnly.find((t) => t.clube.toLowerCase() === "xv de piracicaba") || rivalsOnly.find((t) => t.clube.toLowerCase() === "união barbarense");
+      break;
+    case "ec são bernardo":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("são bernardo fc")) || rivalsOnly.find((t) => t.clube.toLowerCase() === "santo andré");
+      secondRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "são caetano");
       break;
     case "rio branco":
       mainRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "união barbarense");
@@ -809,7 +821,7 @@ export function getDerbyForMatch(
       allyTorcida = rivalsOnly.find((t) => t.clube.toLowerCase() === "marília") || rivalsOnly.find((t) => t.clube.toLowerCase() === "santo andré");
       break;
     case "noroeste":
-      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "marília");
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("marília")) || rivalsOnly[0];
       secondRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "ferroviária") || rivalsOnly.find((t) => t.clube.toLowerCase() === "xv de piracicaba");
       allyTorcida = rivalsOnly.find((t) => t.clube.toLowerCase() === "botafogo-sp") || rivalsOnly.find((t) => t.clube.toLowerCase() === "ferroviária");
       break;
@@ -822,6 +834,109 @@ export function getDerbyForMatch(
       mainRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "xv de piracicaba") || rivalsOnly.find((t) => t.clube.toLowerCase() === "rio branco");
       secondRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "guarani") || rivalsOnly.find((t) => t.clube.toLowerCase() === "corinthians");
       allyTorcida = rivalsOnly.find((t) => t.clube.toLowerCase() === "união barbarense") || rivalsOnly.find((t) => t.clube.toLowerCase() === "xv de piracicaba");
+      break;
+    case "caxias":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("juventude"));
+      secondRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("grêmio"));
+      break;
+    case "juventude":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("caxias"));
+      secondRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("internacional"));
+      break;
+    case "brasil de pelotas":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("pelotas"));
+      secondRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("grêmio"));
+      break;
+    case "pelotas":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("brasil de pelotas"));
+      secondRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("internacional"));
+      break;
+    case "urt (patos)":
+    case "urt":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("mamoré"));
+      break;
+    case "mamoré (patos)":
+    case "mamoré":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("urt"));
+      break;
+    case "abc de natal":
+    case "abc":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("américa rn"));
+      break;
+    case "américa rn":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("abc"));
+      break;
+    case "botafogo-pb":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("treze")) || rivalsOnly.find((t) => t.clube.toLowerCase().includes("campinense"));
+      break;
+    case "treze":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("campinense")) || rivalsOnly.find((t) => t.clube.toLowerCase().includes("botafogo-pb"));
+      break;
+    case "campinense":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("treze")) || rivalsOnly.find((t) => t.clube.toLowerCase().includes("botafogo-pb"));
+      break;
+    case "confiança":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("sergipe"));
+      break;
+    case "sergipe":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("confiança"));
+      break;
+    case "atlético-go":
+    case "anápolis":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("goiás")) || rivalsOnly.find((t) => t.clube.toLowerCase().includes("vila nova"));
+      break;
+    case "brasiliense":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("gama"));
+      break;
+    case "gama":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("brasiliense"));
+      break;
+    case "cuiabá":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("mixto"));
+      break;
+    case "mixto":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("cuiabá"));
+      break;
+    case "operário-ms":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("comercial-ms"));
+      break;
+    case "comercial-ms":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("operário-ms"));
+      break;
+    case "nacional-am":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("amazonas")) || rivalsOnly.find((t) => t.clube.toLowerCase().includes("são raimundo"));
+      break;
+    case "amazonas fc":
+    case "amazonas":
+    case "são raimundo-am":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("nacional-am"));
+      break;
+    case "paraná clube":
+    case "paraná":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("coritiba")) || rivalsOnly.find((t) => t.clube.toLowerCase().includes("athletico"));
+      break;
+    case "londrina":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("maringá")) || rivalsOnly.find((t) => t.clube.toLowerCase().includes("operário pr"));
+      break;
+    case "maringá fc":
+    case "maringá":
+    case "operário pr":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("londrina"));
+      break;
+    case "criciúma":
+    case "chapecoense":
+    case "joinville":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("avaí")) || rivalsOnly.find((t) => t.clube.toLowerCase().includes("figueirense"));
+      break;
+    case "olaria":
+    case "bangu":
+    case "america rj":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("flamengo")) || rivalsOnly.find((t) => t.clube.toLowerCase().includes("vasco"));
+      break;
+    case "america mg":
+    case "tupi (jf)":
+    case "caldense":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("atlético")) || rivalsOnly.find((t) => t.clube.toLowerCase().includes("cruzeiro"));
       break;
     default:
       break;
@@ -863,6 +978,7 @@ export function getDerbyForMatch(
       case "botafogo-sp": return { stadium: "Santa Cruz (Arena Nicnet)", cityState: "Ribeirão Preto - SP" };
       case "comercial-rp": return { stadium: "Palma Travassos", cityState: "Ribeirão Preto - SP" };
       case "são josé ec": return { stadium: "Martins Pereira", cityState: "São José dos Campos - SP" };
+      case "taubaté": return { stadium: "Joaquim de Morais Filho (Joaquinzão)", cityState: "Taubaté - SP" };
       case "santo andré": return { stadium: "Bruno José Daniel", cityState: "Santo André - SP" };
       case "são caetano": return { stadium: "Anacleto Campanella", cityState: "São Caetano do Sul - SP" };
       case "são bernardo": return { stadium: "Primeiro de Maio", cityState: "São Bernardo do Campo - SP" };
@@ -890,7 +1006,9 @@ export function getDerbyForMatch(
     let derbyLabel = `Clássico Estadual: ${currentTorcida.clube} x ${mainRival.clube}`;
     const c1 = currentTorcida.clube.toLowerCase();
     const c2 = mainRival.clube.toLowerCase();
-    if ((c1 === "santo andré" && c2 === "são caetano") || (c1 === "são caetano" && c2 === "santo andré")) {
+    if ((c1.includes("taubaté") && c2.includes("são josé")) || (c1.includes("são josé") && c2.includes("taubaté"))) {
+      derbyLabel = `Clássico do Vale do Paraíba: ${currentTorcida.clube} x ${mainRival.clube}`;
+    } else if ((c1 === "santo andré" && c2 === "são caetano") || (c1 === "são caetano" && c2 === "santo andré")) {
       derbyLabel = `Clássico do ABC: ${currentTorcida.clube} x ${mainRival.clube}`;
     } else if ((c1 === "ponte preta" && c2 === "guarani") || (c1 === "guarani" && c2 === "ponte preta")) {
       derbyLabel = `Derby Campineiro: ${currentTorcida.clube} x ${mainRival.clube}`;
@@ -3519,58 +3637,113 @@ export function getSeasonalMilestoneEvent(
 // Check if opponent is the club's genuine principal derby rival
 export function isPrincipalRival(clubA: string, clubB: string): boolean {
   if (!clubA || !clubB) return false;
-  const a = clubA.trim().toLowerCase();
-  const b = clubB.trim().toLowerCase();
+  
+  const norm = (str: string) =>
+    str
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+
+  const a = norm(clubA);
+  const b = norm(clubB);
   if (a === b) return false;
 
   const matches = (c1: string, c2: string) =>
     (a.includes(c1) && b.includes(c2)) || (a.includes(c2) && b.includes(c1));
 
-  // Alagoas - Clássico das Multidões AL
-  if (matches("csa", "crb")) return true;
+  // Clássico do Vale do Paraíba (Taubaté x São José EC / Jecas / Dragões Alvi Azul x Mancha Azul)
+  if (matches("taubate", "sao jose") || matches("jecas", "mancha azul") || matches("dragoes alvi azul", "mancha azul")) return true;
 
-  // São Paulo - Clássicos Paulistas
-  if (matches("corinthians", "palmeiras")) return true;
-  if (matches("são paulo", "palmeiras")) return true;
-  if (matches("são paulo", "corinthians")) return true;
-  if (matches("santos", "palmeiras") || matches("santos", "corinthians") || matches("santos", "são paulo")) return true;
-  if (matches("guarani", "ponte preta")) return true;
-  if (matches("botafogo-sp", "comercial")) return true;
+  // Alagoas - Clássico das Multidões AL (CSA x CRB)
+  if (matches("csa", "crb") || matches("mancha azul", "comando")) return true;
+
+  // São Paulo - Clássicos Paulistas & Regionais
+  if (matches("corinthians", "palmeiras") || matches("gavioes", "mancha verde")) return true;
+  if (matches("sao paulo", "palmeiras") || matches("independente", "mancha verde")) return true;
+  if (matches("sao paulo", "corinthians") || matches("independente", "gavioes")) return true;
+  if (matches("santos", "palmeiras") || matches("santos", "corinthians") || matches("santos", "sao paulo")) return true;
+  if (matches("guarani", "ponte preta") || matches("furia", "ponte")) return true;
+  if (matches("botafogo-sp", "comercial") || matches("botafogo sp", "comercial")) return true;
+  if (matches("santo andre", "sao caetano") || matches("santo andre", "sao bernardo")) return true;
+  if (matches("ec sao bernardo", "sao bernardo fc") || matches("esquadrao alvinegro", "guerreiros do tigre")) return true;
+  if (matches("rio branco", "uniao barbarense")) return true;
+  if (matches("noroeste", "marilia") || matches("sangue rubro", "marilia")) return true;
+  if (matches("paulista", "ponte preta") || matches("paulista", "guarani") || matches("paulista", "sao jose")) return true;
+  if (matches("ferroviaria", "botafogo-sp") || matches("ferroviaria", "comercial")) return true;
+  if (matches("xv de piracicaba", "inter de limeira") || matches("xv de piracicaba", "uniao barbarense")) return true;
+  if (matches("sao bento", "paulista") || matches("sao bento", "xv de piracicaba")) return true;
 
   // Rio de Janeiro - Clássicos Cariocas
-  if (matches("flamengo", "vasco") || matches("flamengo", "fluminense") || matches("flamengo", "botafogo")) return true;
+  if (matches("flamengo", "vasco") || matches("jovem fla", "forca jovem")) return true;
+  if (matches("flamengo", "fluminense") || matches("jovem fla", "young flu")) return true;
+  if (matches("flamengo", "botafogo") || matches("jovem fla", "furia jovem")) return true;
   if (matches("vasco", "fluminense") || matches("vasco", "botafogo")) return true;
   if (matches("fluminense", "botafogo")) return true;
+  if (matches("olaria", "flamengo") || matches("bangu", "flamengo") || matches("america rj", "flamengo")) return true;
 
-  // Rio Grande do Sul - Gre-Nal
-  if (matches("grêmio", "internacional")) return true;
+  // Rio Grande do Sul - Gre-Nal, Ca-Ju, Bra-Pel
+  if (matches("gremio", "internacional") || matches("geral", "guarda popular")) return true;
+  if (matches("caxias", "juventude") || matches("grena", "mancha verde")) return true;
+  if (matches("brasil de pelotas", "pelotas") || matches("xavante", "lobos")) return true;
 
-  // Minas Gerais - Clássico Mineiro
-  if (matches("cruzeiro", "atlético")) return true;
+  // Minas Gerais - Clássico Mineiro, Patense
+  if (matches("cruzeiro", "atletico") || matches("mafia azul", "galoucura")) return true;
+  if (matches("america mg", "atletico") || matches("america mg", "cruzeiro")) return true;
+  if (matches("urt", "mamore")) return true;
+  if (matches("tupi", "atletico") || matches("caldense", "atletico")) return true;
 
   // Bahia - Ba-Vi
-  if (matches("bahia", "vitória")) return true;
+  if (matches("bahia", "vitoria") || matches("bamor", "imbativeis")) return true;
 
   // Ceará - Clássico-Rei
-  if (matches("ceará", "fortaleza")) return true;
+  if (matches("ceara", "fortaleza") || matches("cearamor", "tuf")) return true;
 
   // Pernambuco - Clássicos Pernambucanos
-  if (matches("sport", "santa cruz") || matches("sport", "náutico") || matches("santa cruz", "náutico")) return true;
+  if (matches("sport", "santa cruz") || matches("jovem do sport", "inferno coral")) return true;
+  if (matches("sport", "nautico") || matches("santa cruz", "nautico")) return true;
 
-  // Paraná - Atletiba
-  if (matches("coritiba", "athletico")) return true;
+  // Paraná - Atletiba, Paratiba, Dérbi do Café
+  if (matches("coritiba", "athletico") || matches("imperio", "fanaticos")) return true;
+  if (matches("parana", "coritiba") || matches("parana", "athletico")) return true;
+  if (matches("londrina", "maringa") || matches("londrina", "operario")) return true;
 
-  // Santa Catarina - Dérbi Florianópolis
-  if (matches("avaí", "figueirense")) return true;
+  // Santa Catarina - Dérbi Florianópolis, Clássico Catarinense
+  if (matches("avai", "figueirense") || matches("mancha azul", "gavioes alvinegros")) return true;
+  if (matches("criciuma", "avai") || matches("criciuma", "joinville") || matches("chapecoense", "avai")) return true;
 
   // Goiás - Dérbi Goiano
-  if (matches("goiás", "vila nova")) return true;
+  if (matches("goias", "vila nova") || matches("forca jovem goias", "esquadrao vilanovense")) return true;
+  if (matches("atletico-go", "goias") || matches("atletico go", "goias")) return true;
+  if (matches("anapolis", "goias")) return true;
 
-  // Pará - Re-Pa
-  if (matches("remo", "paysandu")) return true;
+  // Rio Grande do Norte - Clássico Rei RN
+  if (matches("abc", "america rn") || matches("gang alvinegra", "mafia vermelha")) return true;
 
   // Maranhão - Superclássico
-  if (matches("sampaio", "moto")) return true;
+  if (matches("sampaio", "moto") || matches("tubaroes", "motofiel")) return true;
+
+  // Paraíba - Clássico Tradição / Maiorais
+  if (matches("botafogo-pb", "treze") || matches("botafogo-pb", "campinense")) return true;
+  if (matches("treze", "campinense")) return true;
+
+  // Sergipe - Superclássico SE
+  if (matches("confianca", "sergipe") || matches("trovao azul", "esquadrao colorado")) return true;
+
+  // Distrito Federal - Clássico Candango
+  if (matches("brasiliense", "gama") || matches("faccao", "ira jovem")) return true;
+
+  // Mato Grosso - Clássico Vovô MT
+  if (matches("cuiaba", "mixto") || matches("furia cuiabana", "boca suja")) return true;
+
+  // Mato Grosso do Sul - Comer-Mato
+  if (matches("operario-ms", "comercial-ms") || matches("operario ms", "comercial ms")) return true;
+
+  // Pará - Re-Pa
+  if (matches("remo", "paysandu") || matches("camisa 33", "terror bicolor")) return true;
+
+  // Amazonas - Clássico do Rio Negro
+  if (matches("nacional-am", "amazonas") || matches("nacional-am", "sao raimundo")) return true;
 
   return false;
 }
