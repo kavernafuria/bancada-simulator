@@ -81,6 +81,7 @@ export const Runner3DGame: React.FC<Runner3DGameProps> = ({
   const [cameraMode, setCameraMode] = useState<CameraMode>('classic_3d');
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [fireworkTriggerSignal, setFireworkTriggerSignal] = useState<number>(0);
+  const [steerSignal, setSteerSignal] = useState<{ dir: 'left' | 'right'; timestamp: number } | undefined>(undefined);
 
   // Dados do confronto final
   const [clashData, setClashData] = useState<{
@@ -278,6 +279,7 @@ export const Runner3DGame: React.FC<Runner3DGameProps> = ({
           onReachClash={handleReachClash}
           onClashResolved={handleClashResolved}
           triggerFireworkSignal={fireworkTriggerSignal}
+          steerSignal={steerSignal}
           cameraMode={cameraMode}
         />
 
@@ -319,7 +321,7 @@ export const Runner3DGame: React.FC<Runner3DGameProps> = ({
         )}
       </div>
 
-      {/* HUD DE JOGO & CONTROLES */}
+      {/* HUD DE JOGO & CONTROLES (OTIMIZADO PARA MOBILE & DESKTOP) */}
       {stage === 'playing' && (
         <div className="w-full bg-zinc-900/95 border-t border-zinc-800 p-3 space-y-2 z-20">
           {/* BARRA DE ESTATÍSTICAS */}
@@ -362,15 +364,39 @@ export const Runner3DGame: React.FC<Runner3DGameProps> = ({
             />
           </div>
 
-          {/* BOTÃO DISPARAR ROJÃO */}
-          <div className="flex items-center justify-between gap-2 pt-1">
+          {/* CONTROLES MOBILE & TOUCH: ESQUERDA, DISPARAR ROJÃO, DIREITA */}
+          <div className="grid grid-cols-3 gap-2 pt-1">
+            <button
+              onClick={() => setSteerSignal({ dir: 'left', timestamp: Date.now() })}
+              onTouchStart={(e) => {
+                e.preventDefault();
+                setSteerSignal({ dir: 'left', timestamp: Date.now() });
+              }}
+              className="py-3 bg-zinc-800 hover:bg-zinc-700 active:bg-amber-600 text-white font-black text-xs uppercase tracking-wider rounded-xl border border-zinc-700 shadow active:scale-95 cursor-pointer flex items-center justify-center space-x-1 select-none"
+            >
+              <ArrowLeft className="w-4 h-4 text-amber-400" />
+              <span>ESQUERDA</span>
+            </button>
+
             <button
               onClick={handleTriggerFirework}
               disabled={fireworks <= 0}
-              className="flex-1 py-2.5 bg-gradient-to-r from-red-600 to-amber-600 disabled:from-zinc-800 disabled:to-zinc-800 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow active:scale-95 cursor-pointer disabled:cursor-not-allowed flex items-center justify-center space-x-1.5"
+              className="py-3 bg-gradient-to-r from-red-600 to-amber-600 disabled:from-zinc-800 disabled:to-zinc-800 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow active:scale-95 cursor-pointer disabled:cursor-not-allowed flex items-center justify-center space-x-1 select-none"
             >
               <Flame className="w-4 h-4" />
-              <span>DISPARAR ROJÃO / FUMAÇA ({fireworks})</span>
+              <span>ROJÃO ({fireworks})</span>
+            </button>
+
+            <button
+              onClick={() => setSteerSignal({ dir: 'right', timestamp: Date.now() })}
+              onTouchStart={(e) => {
+                e.preventDefault();
+                setSteerSignal({ dir: 'right', timestamp: Date.now() });
+              }}
+              className="py-3 bg-zinc-800 hover:bg-zinc-700 active:bg-amber-600 text-white font-black text-xs uppercase tracking-wider rounded-xl border border-zinc-700 shadow active:scale-95 cursor-pointer flex items-center justify-center space-x-1 select-none"
+            >
+              <span>DIREITA</span>
+              <ArrowRight className="w-4 h-4 text-amber-400" />
             </button>
           </div>
         </div>

@@ -36,6 +36,7 @@ interface GameCanvasProps {
     rivalPower: number;
   }) => void;
   triggerFireworkSignal?: number;
+  steerSignal?: { dir: 'left' | 'right'; timestamp: number };
   speedFactor?: number;
   cameraMode?: CameraMode;
 }
@@ -54,6 +55,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   onReachClash,
   onClashResolved,
   triggerFireworkSignal = 0,
+  steerSignal,
   speedFactor = 1.0,
   cameraMode = 'top_down',
 }) => {
@@ -168,6 +170,18 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       launchFireworks(3);
     }
   }, [triggerFireworkSignal]);
+
+  // Handle external mobile steer button signal
+  useEffect(() => {
+    if (!steerSignal) return;
+    const s = stateRef.current;
+    if (s.stage !== 'playing') return;
+    if (steerSignal.dir === 'left') {
+      s.targetX = Math.max(-1.4, s.targetX - 0.45);
+    } else if (steerSignal.dir === 'right') {
+      s.targetX = Math.min(1.4, s.targetX + 0.45);
+    }
+  }, [steerSignal]);
 
   const launchFireworks = (count = 2) => {
     const s = stateRef.current;
@@ -1035,10 +1049,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       ctx.translate((Math.random() - 0.5) * s.cameraShake, (Math.random() - 0.5) * s.cameraShake);
     }
 
-    // Camera Z follows player from further back for a complete view of the avenue
-    const camZ = isTopDown ? s.playerZ - 170 : s.playerZ - 195;
-    const camY = isTopDown ? Math.round(h * 0.32) : 210;
-    const horizonY = isTopDown ? h * 0.10 : h * 0.24;
+    // Camera Z follows player from further back for a complete view of the avenue and entire mob
+    const camZ = isTopDown ? s.playerZ - 170 : s.playerZ - 215;
+    const camY = isTopDown ? Math.round(h * 0.32) : 155;
+    const horizonY = isTopDown ? h * 0.10 : h * 0.22;
 
     // Draw Sky & Stadium Skyline
     const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY + 30);
@@ -1819,19 +1833,19 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     }
 
     // DRAW PLAYER CROWD FORMATION
-    // Render dynamic swarm of fans
-    const maxFansDrawn = isTopDown ? Math.min(s.crowdCount, 18) : Math.min(s.crowdCount, 32);
-    const crowdSpread = Math.min(1.2, 0.35 + (s.crowdCount / 100) * 0.5);
+    // Render dynamic swarm showing the complete bonde (front line, middle rows, rear flag bearers)
+    const maxFansDrawn = isTopDown ? Math.min(s.crowdCount, 22) : Math.min(s.crowdCount, 38);
+    const crowdSpread = Math.min(1.1, 0.35 + (s.crowdCount / 100) * 0.45);
 
     // Fans are sorted by Z distance so front ones draw over back ones
     const fanPositions: { x: number; z: number; hasIron: boolean; hasFirework: boolean }[] = [];
 
     for (let i = 0; i < maxFansDrawn; i++) {
-      // Compact golden spiral distribution for clean unobstructed view
+      // Tight golden spiral distribution so entire mob fits nicely on screen
       const angle = i * 2.39996;
       const dist = Math.sqrt((i + 1) / maxFansDrawn) * crowdSpread;
-      const fx = s.playerX + Math.cos(angle) * dist * 0.5;
-      const fz = s.playerZ + Math.sin(angle) * dist * (isTopDown ? 18 : 26);
+      const fx = s.playerX + Math.cos(angle) * dist * 0.55;
+      const fz = s.playerZ + Math.sin(angle) * dist * (isTopDown ? 16 : 14);
 
       // Assign iron bars to front/side fans
       const hasIron = i < s.ironBars * 2;

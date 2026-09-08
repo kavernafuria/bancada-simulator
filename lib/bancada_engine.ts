@@ -2340,7 +2340,7 @@ export function executeCompleteMatch(
   const isFamilyProfilePlayer = stats.poder_pista < 40 || playerTier === "C" || playerTier === "C+";
   const isHeavyUltrasRival = rivalPoderPista >= 70 || rivalTier === "S" || rivalTier === "S-" || rivalTier === "A+";
 
-  if (isFamilyProfilePlayer && isHeavyUltrasRival && !derby.isAllyGame) {
+  if (tactic.id !== "ATAQUE_FRONTAL_RUNNER_3D" && isFamilyProfilePlayer && isHeavyUltrasRival && !derby.isAllyGame) {
     const isPoliceIntervention = Math.random() < 0.5;
     const scorePlayerClub = Math.floor(Math.random() * 2);
     const scoreRivalClub = scorePlayerClub + 1;
@@ -2484,12 +2484,15 @@ const ratio = playerMembers / Math.max(1, rivalMembers);
   let playerForce = Math.max(5, Math.round(fuerzaBasePlayer * (1 + modTotalPlayer) + rngPlayer));
   let rivalForce = Math.max(5, Math.round(fuerzaBaseRival * (1 + modTotalRival) + rngRival));
 
-  if (tactic.id === "ATAQUE_FRONTAL_RUNNER_3D" && tactic.pistaMod >= 17) {
-    playerForce = Math.max(playerForce, Math.round(rivalForce * 1.25));
+  if (tactic.id === "ATAQUE_FRONTAL_RUNNER_3D" && tactic.pistaMod >= 10) {
+    playerForce = Math.max(playerForce, Math.round(rivalForce * 1.35 + 15));
   }
 
   // ⚠️ REGRA DE OURO (TRAVA DE TIER E DESVANTAGEM NUMÉRICA 2 PARA 1):
   let isVictoryPista = playerForce >= rivalForce;
+  if (tactic.id === "ATAQUE_FRONTAL_RUNNER_3D" && tactic.pistaMod >= 10) {
+    isVictoryPista = true;
+  }
   const tierDiff = coefTierRival / coefTierPlayer; // ex: Tier S (3.0) / Tier C (0.6) = 5.0
   const is2to1Disadvantage = rivalMembers >= playerMembers * 2.0;
 

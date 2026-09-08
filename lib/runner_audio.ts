@@ -19,7 +19,7 @@ class SoundController {
     }
   }
 
-  // Metallic CLANG when picking up iron bars
+  // Metallic CLANG when picking up or striking iron bars on concrete
   playIronBarPickup() {
     if (!this.enabled) return;
     this.initCtx();
@@ -30,16 +30,17 @@ class SoundController {
     const osc2 = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
 
-    osc1.type = 'triangle';
-    osc1.frequency.setValueAtTime(840, t);
-    osc1.frequency.exponentialRampToValueAtTime(320, t + 0.15);
+    // Metallic heavy strike frequencies (heavy iron bar impact)
+    osc1.type = 'sawtooth';
+    osc1.frequency.setValueAtTime(1180, t);
+    osc1.frequency.exponentialRampToValueAtTime(180, t + 0.18);
 
-    osc2.type = 'sawtooth';
-    osc2.frequency.setValueAtTime(1420, t);
-    osc2.frequency.exponentialRampToValueAtTime(450, t + 0.18);
+    osc2.type = 'square';
+    osc2.frequency.setValueAtTime(620, t);
+    osc2.frequency.exponentialRampToValueAtTime(120, t + 0.22);
 
-    gain.gain.setValueAtTime(0.3, t);
-    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+    gain.gain.setValueAtTime(0.35, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
 
     osc1.connect(gain);
     osc2.connect(gain);
@@ -47,8 +48,8 @@ class SoundController {
 
     osc1.start(t);
     osc2.start(t);
-    osc1.stop(t + 0.25);
-    osc2.stop(t + 0.25);
+    osc1.stop(t + 0.22);
+    osc2.stop(t + 0.22);
   }
 
   // Firework whoosh launch sound
