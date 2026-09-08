@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Runner3DGame } from './minigames/Runner3DGame';
 
 // ==========================================
 // 1. TIPOS & INTERFACES
 // ==========================================
-export type GameType = 'whack' | 'rojon' | 'rhythm' | 'dodge' | 'punch' | 'memory';
+export type GameType = 'whack' | 'rojon' | 'rhythm' | 'dodge' | 'punch' | 'memory' | 'runner_3d';
 
 export interface MiniGameResult {
   gameType: GameType;
@@ -16,10 +17,16 @@ export interface MiniGameResult {
 export interface MatchContext {
   isHome: boolean;
   isAllyGame?: boolean;
-  tacticalChoice: 'gate_concentration' | 'front_charge' | 'punch_combat' | 'rojon_barrage' | 'rhythm_mosaic' | 'caravan_escape';
+  tacticalChoice: 'gate_concentration' | 'front_charge' | 'punch_combat' | 'rojon_barrage' | 'rhythm_mosaic' | 'caravan_escape' | 'runner_3d';
   homeContingent: number;
   awayContingent: number;
   opponentTier: 'S' | 'A' | 'B';
+  playerTorcidaName?: string;
+  playerClubName?: string;
+  rivalTorcidaName?: string;
+  rivalClubName?: string;
+  contingente?: number;
+  poderPista?: number;
 }
 
 // ==========================================
@@ -984,6 +991,7 @@ export const MatchTacticalResolver: React.FC<{
     }
 
     // Seleção de mini-game conforme tática padrão
+    if (context.tacticalChoice === 'runner_3d') setActiveMiniGame('runner_3d');
     if (context.tacticalChoice === 'front_charge') setActiveMiniGame('whack');
     if (context.tacticalChoice === 'punch_combat') setActiveMiniGame('punch');
     if (context.tacticalChoice === 'rojon_barrage') setActiveMiniGame('rojon');
@@ -997,13 +1005,25 @@ export const MatchTacticalResolver: React.FC<{
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-4">
+    <div className="flex flex-col items-center justify-center p-2 w-full">
       {statusMessage && (
         <div className="bg-zinc-900 border border-zinc-700 p-4 rounded-xl text-center text-sm text-zinc-300 max-w-sm mb-4">
           {statusMessage}
         </div>
       )}
 
+      {activeMiniGame === 'runner_3d' && (
+        <Runner3DGame
+          playerTorcidaName={context.playerTorcidaName || "Torcida Organizada"}
+          playerClubName={context.playerClubName || "Nosso Clube"}
+          rivalTorcidaName={context.rivalTorcidaName || "Torcida Rival"}
+          rivalClubName={context.rivalClubName || "Rival FC"}
+          contingente={context.contingente ?? 50}
+          poderPista={context.poderPista ?? 50}
+          opponentTier={context.opponentTier}
+          onFinish={handleMiniGameFinish}
+        />
+      )}
       {activeMiniGame === 'whack' && (
         <WhackCombat opponentTier={context.opponentTier} onFinish={handleMiniGameFinish} />
       )}

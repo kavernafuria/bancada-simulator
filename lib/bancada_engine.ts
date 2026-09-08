@@ -1849,8 +1849,26 @@ export function getTacticalBattleChoices(
   if (stance === "COMBATIVA") {
     return [
       {
+        id: "ATAQUE_FRONTAL_RUNNER_3D",
+        title: "1. 🔥 [MINIGAME 3D] Ataque Frontal & Avanço da Linha de Frente",
+        description: "Assuma o comando direto da linha de frente no minigame 3D! Corra pela pista mobilizando seu contingente, desviando de cercos da PM e acelerando com faixas e poder de pista para impactar em até ±20% a chance de vitória do confronto.",
+        pistaMod: 7,
+        moralMod: 6,
+        mpPenalty: 12,
+        costRisk: 1500,
+        injuryRisk: 15,
+        tacticalLog: "Comandou o avanço da linha de frente no minigame 3D de pista, mobilizando a tropa e conquistando o espaço com impacto direto no resultado.",
+        formattedDeltas: [
+          { label: "Impacto Final (PEC)", value: "Até ±20%", isPositive: true },
+          { label: "Poder de Pista", value: "+7", isPositive: true },
+          { label: "Moral do Bonde", value: "+6", isPositive: true },
+          { label: "Risco MP", value: "+12%", isPositive: false },
+          { label: "Custos Médicos", value: "-R$ 1.500", isPositive: false },
+        ],
+      },
+      {
         id: "BRIGA_NA_MAO_LIMPA",
-        title: "1. Briga na Mão Limpa (Disposição & Corpo a Corpo)",
+        title: "2. Briga na Mão Limpa (Disposição & Corpo a Corpo)",
         description: "Trocação franca no soco, na raça e na pura disposição de arquibancada sem uso de armas.",
         pistaMod: 8,
         moralMod: 7,
@@ -1867,7 +1885,7 @@ export function getTacticalBattleChoices(
       },
       {
         id: "GUERRA_ROJOES_MORTEIROS",
-        title: "2. Guerra de Rojões & Bateria de Morteiros de Vara",
+        title: "3. Guerra de Rojões & Bateria de Morteiros de Vara",
         description: "Rajadas pesadas de fogos de artifício, rojões de vara e morteiros disparados para dispersar a linha rival antes do choque corporal.",
         pistaMod: 8,
         moralMod: 7,
@@ -1884,7 +1902,7 @@ export function getTacticalBattleChoices(
       },
       {
         id: "ATAQUE_SURPRESA_EMBOSCADA",
-        title: "3. Ataque Surpresa & Emboscada de Alça",
+        title: "4. Ataque Surpresa & Emboscada de Alça",
         description: "Bonde veloz com motos e vans contornando pelas travessas e alças de acesso para pegar o rival desprevenido e desarticulado por trás.",
         pistaMod: 7,
         moralMod: 6,
@@ -1901,7 +1919,7 @@ export function getTacticalBattleChoices(
       },
       {
         id: "CONFRONTO_BARRA_FERRO",
-        title: "4. Briga com Barra de Ferro & Contenção Armada",
+        title: "5. Briga com Barra de Ferro & Contenção Armada",
         description: "Linha armada com barras de ferro, canos e madeiramento para travar investidas pesadas e romper o cerco rival.",
         pistaMod: 7,
         moralMod: 5,
@@ -1914,23 +1932,6 @@ export function getTacticalBattleChoices(
           { label: "Moral da Tropa", value: "+5", isPositive: true },
           { label: "Risco MP", value: "+18%", isPositive: false },
           { label: "Custos Hospitalares", value: "-R$ 2.200", isPositive: false },
-        ],
-      },
-      {
-        id: "ATAQUE_FRONTAL_LINHA_FRENTE",
-        title: "5. Ataque Frontal & Avanço da Linha de Frente",
-        description: "Marcha compacta dos veteranos e do bonde de choque na linha de frente para quebrar a contenção e tomar a pista na força bruta.",
-        pistaMod: 7,
-        moralMod: 6,
-        mpPenalty: 12,
-        costRisk: 1500,
-        injuryRisk: 15,
-        tacticalLog: "Avançou em linha compacta com o bonde de choque na linha de frente, quebrando a contenção rival e tomando a pista.",
-        formattedDeltas: [
-          { label: "Poder de Pista", value: "+7", isPositive: true },
-          { label: "Moral do Bonde", value: "+6", isPositive: true },
-          { label: "Risco MP", value: "+12%", isPositive: false },
-          { label: "Custos Médicos", value: "-R$ 1.500", isPositive: false },
         ],
       },
     ];
@@ -2480,8 +2481,12 @@ const ratio = playerMembers / Math.max(1, rivalMembers);
   const rngPlayer = Math.random() * 10 - 5;
   const rngRival = Math.random() * 10 - 5;
 
-  const playerForce = Math.max(5, Math.round(fuerzaBasePlayer * (1 + modTotalPlayer) + rngPlayer));
-  const rivalForce = Math.max(5, Math.round(fuerzaBaseRival * (1 + modTotalRival) + rngRival));
+  let playerForce = Math.max(5, Math.round(fuerzaBasePlayer * (1 + modTotalPlayer) + rngPlayer));
+  let rivalForce = Math.max(5, Math.round(fuerzaBaseRival * (1 + modTotalRival) + rngRival));
+
+  if (tactic.id === "ATAQUE_FRONTAL_RUNNER_3D" && tactic.pistaMod >= 17) {
+    playerForce = Math.max(playerForce, Math.round(rivalForce * 1.25));
+  }
 
   // ⚠️ REGRA DE OURO (TRAVA DE TIER E DESVANTAGEM NUMÉRICA 2 PARA 1):
   let isVictoryPista = playerForce >= rivalForce;
@@ -2489,7 +2494,7 @@ const ratio = playerMembers / Math.max(1, rivalMembers);
   const is2to1Disadvantage = rivalMembers >= playerMembers * 2.0;
 
   // Se PEC Adversário > PEC Jogador * 1.5 OU desvantagem de mais de 2 Tiers / desvantagem 2:1, derrota é 100% GARANTIDA
-  if (rivalForce > playerForce * 1.5 || (tierDiff >= 2.5 && rivalForce > playerForce) || (is2to1Disadvantage && rivalForce > playerForce)) {
+  if (tactic.id !== "ATAQUE_FRONTAL_RUNNER_3D" && (rivalForce > playerForce * 1.5 || (tierDiff >= 2.5 && rivalForce > playerForce) || (is2to1Disadvantage && rivalForce > playerForce))) {
     isVictoryPista = false;
   }
 

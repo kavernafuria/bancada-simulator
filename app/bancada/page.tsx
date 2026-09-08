@@ -773,7 +773,9 @@ export default function App() {
     let mappedChoice: MatchContext['tacticalChoice'] = 'front_charge';
     const tid = (tactic.id || "").toUpperCase();
 
-    if (tactic.isMosaicTactic || tid.includes("MOSAICO") || tid.includes("FESTA") || tid.includes("SAMBA") || tid.includes("ALAMBRADO")) {
+    if (tid.includes("RUNNER_3D") || tid === "ATAQUE_FRONTAL_RUNNER_3D") {
+      mappedChoice = 'runner_3d';
+    } else if (tactic.isMosaicTactic || tid.includes("MOSAICO") || tid.includes("FESTA") || tid.includes("SAMBA") || tid.includes("ALAMBRADO")) {
       mappedChoice = 'rhythm_mosaic';
     } else if (tid.includes("ROJOES") || tid.includes("MORTEIROS")) {
       mappedChoice = 'rojon_barrage';
@@ -799,6 +801,12 @@ export default function App() {
       homeContingent: activeMatchDerby.isHome ? activeScoutIntel.playerMembersPresent : activeScoutIntel.rivalMembersWaiting,
       awayContingent: activeMatchDerby.isHome ? activeScoutIntel.rivalMembersWaiting : activeScoutIntel.playerMembersPresent,
       opponentTier,
+      playerTorcidaName: currentTorcida.torcida,
+      playerClubName: currentTorcida.clube,
+      rivalTorcidaName: activeMatchDerby.rivalTorcida || "Torcida Rival",
+      rivalClubName: activeMatchDerby.isHome ? activeMatchDerby.awayClub : activeMatchDerby.homeClub,
+      contingente: stats.contingente,
+      poderPista: stats.poder_pista,
     });
     setMatchModalPhase("MINIGAME");
   };
@@ -3446,7 +3454,9 @@ export default function App() {
                   key={tactic.id}
                   onClick={() => handleExecuteTacticalChoice(tactic)}
                   className={`w-full text-left p-3 rounded-2xl border transition-all active:scale-[0.98] shadow cursor-pointer group ${
-                    tactic.isMosaicTactic
+                    tactic.id === "ATAQUE_FRONTAL_RUNNER_3D"
+                      ? "bg-gradient-to-r from-amber-950/80 via-red-950/60 to-zinc-950 border-amber-400 hover:border-amber-300 ring-2 ring-amber-500/40"
+                      : tactic.isMosaicTactic
                       ? "bg-amber-950/40 border-amber-500/60 hover:border-amber-400"
                       : "bg-zinc-950 border-zinc-800 hover:border-amber-500"
                   }`}
@@ -3455,11 +3465,15 @@ export default function App() {
                     <span className="text-xs font-black text-white group-hover:text-amber-400">
                       {tactic.title}
                     </span>
-                    {tactic.isMosaicTactic && (
+                    {tactic.id === "ATAQUE_FRONTAL_RUNNER_3D" ? (
+                      <span className="text-[9px] font-black px-2 py-0.5 rounded bg-gradient-to-r from-amber-500 to-red-500 text-black shadow animate-pulse">
+                        🔥 MINIGAME RUNNER 3D
+                      </span>
+                    ) : tactic.isMosaicTactic ? (
                       <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-500 text-black">
                         🎨 META MOSAICO
                       </span>
-                    )}
+                    ) : null}
                   </div>
                   <p className="text-[11px] text-zinc-300 mt-1 leading-snug">
                     {tactic.description}
@@ -3482,8 +3496,10 @@ export default function App() {
 
       {/* 5.B. MINI-GAME RESOLUTION MODAL */}
       {matchModalPhase === "MINIGAME" && activeMatchMiniGameContext && activeMatchDerby && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-[100] animate-fade-in">
-          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-4 text-center">
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-[100] animate-fade-in overflow-y-auto">
+          <div className={`bg-zinc-900 border border-amber-500/50 rounded-3xl w-full p-4 sm:p-5 shadow-2xl space-y-4 text-center ${
+            activeMatchMiniGameContext.tacticalChoice === 'runner_3d' ? 'max-w-2xl' : 'max-w-md'
+          }`}>
             <div className="border-b border-zinc-800 pb-2 flex items-center justify-between">
               <div>
                 <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest block text-left">
