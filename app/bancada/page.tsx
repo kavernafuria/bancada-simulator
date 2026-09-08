@@ -2528,8 +2528,7 @@ export default function App() {
                 if (
                   torcidaUnicaState.isTorcidaUnica &&
                   !currentStep.derby?.isAllyGame &&
-                  isMatchAgainstPrincipalRival &&
-                  torcidaUnicaActionAppliedForStep !== pipelineIndex
+                  isMatchAgainstPrincipalRival
                 ) {
                   return (
                     <button
@@ -2539,7 +2538,7 @@ export default function App() {
                       }}
                       className="w-full py-3.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl shadow-red-900/30 active:scale-95 transition-all cursor-pointer animate-pulse"
                     >
-                      <ShieldAlert className="w-4 h-4" /> Gestão de Crise de Torcida Única (MP) — Ações Especiais
+                      <ShieldAlert className="w-4 h-4" /> Gestão de Crise de Torcida Única (MP) — Ação Única do Dérbi
                     </button>
                   );
                 }
@@ -4248,6 +4247,7 @@ export default function App() {
             }
             setHistoryLog((prev) => [`[Torcida Única] ${res.log}`, ...prev]);
             setTorcidaUnicaActionAppliedForStep(pipelineIndex);
+            setMatchModalPhase("CLOSED");
             setActiveTorcidaUnicaModalMode(null);
             advancePipeline();
           }}
