@@ -264,7 +264,7 @@ export const Runner3DGame: React.FC<Runner3DGameProps> = ({
       </div>
 
       {/* CANVAS CONTAINER */}
-      <div className="relative w-full aspect-[4/3] bg-black overflow-hidden flex items-center justify-center">
+      <div className="relative w-full min-h-[360px] sm:min-h-[420px] aspect-[4/3] bg-black overflow-hidden flex items-center justify-center">
         <GameCanvas
           playerTeam={playerTeam}
           rivalTeam={rivalTeam}
@@ -283,36 +283,40 @@ export const Runner3DGame: React.FC<Runner3DGameProps> = ({
           cameraMode={cameraMode}
         />
 
-        {/* MENU INICIAL OVERLAY */}
+        {/* MENU INICIAL OVERLAY (TOTALMENTE RESPONSIVO PARA MOBILE & DESKTOP) */}
         {stage === 'menu' && (
-          <div className="absolute inset-0 bg-black/85 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center space-y-4 z-30">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 text-xs font-black uppercase">
-              <Sparkles className="w-4 h-4" />
+          <div className="absolute inset-0 bg-black/90 backdrop-blur-md flex flex-col items-center justify-between p-4 sm:p-6 text-center z-30 overflow-y-auto space-y-3 sm:space-y-4">
+            <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 text-[10px] sm:text-xs font-black uppercase">
+              <Sparkles className="w-3.5 h-3.5" />
               <span>MINIGAME RUNNER 3D DA LINHA DE FRENTE</span>
             </div>
 
-            <h2 className="text-lg sm:text-xl font-black text-white uppercase tracking-wider">
+            <h2 className="text-base sm:text-xl font-black text-white uppercase tracking-wider">
               {playerTorcidaName} na Pista
             </h2>
 
-            <p className="text-xs text-zinc-300 max-w-md leading-relaxed">
+            <p className="text-[11px] sm:text-xs text-zinc-300 max-w-md leading-relaxed">
               Guie a linha de frente da torcida pela avenida! Passe pelos portões de reforço, recolha <strong className="text-amber-400">Barras de Ferro 🪵</strong> e <strong className="text-red-400">Rojões 🎆</strong>, desvie de bombas da PM e enfrente a emboscada rival.
             </p>
 
-            <div className="grid grid-cols-2 gap-3 bg-zinc-900/90 border border-zinc-800 p-3 rounded-xl text-left text-xs w-full max-w-sm">
+            <div className="grid grid-cols-2 gap-2.5 bg-zinc-900/90 border border-zinc-800 p-2.5 rounded-xl text-left text-xs w-full max-w-sm">
               <div>
-                <span className="text-[10px] text-zinc-500 block uppercase font-bold">Contingente Base:</span>
-                <span className="font-black text-amber-400">{contingente} Membros</span>
+                <span className="text-[9px] text-zinc-500 block uppercase font-bold">Contingente Base:</span>
+                <span className="font-black text-amber-400 text-xs sm:text-sm">{contingente} Membros</span>
               </div>
               <div>
-                <span className="text-[10px] text-zinc-500 block uppercase font-bold">Poder de Pista:</span>
-                <span className="font-black text-red-400">{poderPista} PTS</span>
+                <span className="text-[9px] text-zinc-500 block uppercase font-bold">Poder de Pista:</span>
+                <span className="font-black text-red-400 text-xs sm:text-sm">{poderPista} PTS</span>
               </div>
             </div>
 
             <button
               onClick={handleStartGame}
-              className="w-full max-w-xs py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer flex items-center justify-center space-x-2"
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                handleStartGame();
+              }}
+              className="w-full max-w-xs py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black font-black text-xs sm:text-sm uppercase tracking-wider transition-all shadow-xl active:scale-95 cursor-pointer flex items-center justify-center space-x-2 z-40 touch-manipulation my-1 shrink-0"
             >
               <Play className="w-4 h-4 fill-black" />
               <span>INICIAR MARCHA NA PISTA (3D)</span>

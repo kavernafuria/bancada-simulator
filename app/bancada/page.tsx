@@ -3496,8 +3496,8 @@ export default function App() {
 
       {/* 5.B. MINI-GAME RESOLUTION MODAL */}
       {matchModalPhase === "MINIGAME" && activeMatchMiniGameContext && activeMatchDerby && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-[100] animate-fade-in overflow-y-auto">
-          <div className={`bg-zinc-900 border border-amber-500/50 rounded-3xl w-full p-4 sm:p-5 shadow-2xl space-y-4 text-center ${
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-[100] animate-fade-in overflow-y-auto">
+          <div className={`bg-zinc-900 border border-amber-500/50 rounded-3xl w-full p-3 sm:p-5 shadow-2xl space-y-3 text-center max-h-[92vh] overflow-y-auto ${
             activeMatchMiniGameContext.tacticalChoice === 'runner_3d' ? 'max-w-2xl' : 'max-w-md'
           }`}>
             <div className="border-b border-zinc-800 pb-2 flex items-center justify-between">

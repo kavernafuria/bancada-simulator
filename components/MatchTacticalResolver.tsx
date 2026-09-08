@@ -119,7 +119,11 @@ export const WhackCombat: React.FC<WhackCombatProps> = ({ opponentTier, onFinish
 
         <button
           onClick={() => setIsTutorial(false)}
-          className="w-full py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer"
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            setIsTutorial(false);
+          }}
+          className="w-full py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer touch-manipulation"
         >
           ▶️ INICIAR BARRAS DE FERRO
         </button>
@@ -269,7 +273,11 @@ export const PunchFrontCombat: React.FC<PunchFrontCombatProps> = ({ opponentTier
 
         <button
           onClick={() => setIsTutorial(false)}
-          className="w-full py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer"
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            setIsTutorial(false);
+          }}
+          className="w-full py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer touch-manipulation"
         >
           ▶️ INICIAR DESAFIO DE PUNHOS
         </button>
@@ -504,7 +512,11 @@ export const MemoryMosaic: React.FC<MemoryMosaicProps> = ({ onFinish }) => {
 
         <button
           onClick={() => setIsTutorial(false)}
-          className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer"
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            setIsTutorial(false);
+          }}
+          className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer touch-manipulation"
         >
           ▶️ INICIAR MOSAICO DE PARES
         </button>
@@ -702,7 +714,11 @@ export const RojonTarget: React.FC<RojonTargetProps> = ({ onFinish }) => {
 
         <button
           onClick={() => setIsTutorial(false)}
-          className="w-full py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer"
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            setIsTutorial(false);
+          }}
+          className="w-full py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer touch-manipulation"
         >
           ▶️ INICIAR RADAR DE MORTEIROS
         </button>
@@ -886,7 +902,11 @@ export const CaravanDodge: React.FC<CaravanDodgeProps> = ({ onFinish }) => {
 
         <button
           onClick={() => setIsTutorial(false)}
-          className="w-full py-3 rounded-xl bg-yellow-600 hover:bg-yellow-500 text-black font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer"
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            setIsTutorial(false);
+          }}
+          className="w-full py-3 rounded-xl bg-yellow-600 hover:bg-yellow-500 text-black font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer touch-manipulation"
         >
           ▶️ INICIAR CORRIDA DE PISTA
         </button>
@@ -1161,7 +1181,11 @@ export const ColorMemoryGame: React.FC<ColorMemoryGameProps> = ({ opponentTier, 
 
         <button
           onClick={handleStartGame}
-          className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer font-bold"
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            handleStartGame();
+          }}
+          className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer font-bold touch-manipulation"
         >
           ▶️ INICIAR SEQUÊNCIA DE CORES
         </button>
