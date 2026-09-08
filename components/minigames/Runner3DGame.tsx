@@ -316,7 +316,7 @@ export const Runner3DGame: React.FC<Runner3DGameProps> = ({
                 e.preventDefault();
                 handleStartGame();
               }}
-              className="w-full max-w-xs py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black font-black text-xs sm:text-sm uppercase tracking-wider transition-all shadow-xl active:scale-95 cursor-pointer flex items-center justify-center space-x-2 z-40 touch-manipulation my-1 shrink-0"
+              className="w-full max-w-xs py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black font-black text-xs sm:text-sm uppercase tracking-wider transition-all shadow-2xl active:scale-95 cursor-pointer flex items-center justify-center space-x-2 z-40 touch-manipulation my-1 shrink-0 sticky bottom-1 border-2 border-amber-300"
             >
               <Play className="w-4 h-4 fill-black" />
               <span>INICIAR MARCHA NA PISTA (3D)</span>

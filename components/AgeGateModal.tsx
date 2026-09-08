@@ -37,14 +37,14 @@ export const AgeGateModal: React.FC<AgeGateModalProps> = ({ onConfirmAge }) => {
   }
 
   return (
-    <div className="fixed inset-0 z-[999] bg-black/95 backdrop-blur-md flex items-center justify-center p-4 select-none animate-fade-in">
-      <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 text-center relative overflow-hidden">
+    <div className="fixed inset-0 z-[999] bg-black/95 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 select-none animate-fade-in overflow-y-auto">
+      <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl space-y-4 sm:space-y-5 text-center relative overflow-y-auto max-h-[92vh]">
         {/* Ambient Top Glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-20 bg-amber-500/10 blur-2xl pointer-events-none" />
 
         {/* Brand Icon Header */}
-        <div className="mx-auto w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shadow-lg">
-          <Drum className="w-7 h-7" />
+        <div className="mx-auto w-12 sm:w-14 h-12 sm:h-14 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shadow-lg">
+          <Drum className="w-6 sm:w-7 h-6 sm:h-7" />
         </div>
 
         {/* Header Titles */}
@@ -52,13 +52,13 @@ export const AgeGateModal: React.FC<AgeGateModalProps> = ({ onConfirmAge }) => {
           <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block">
             BANCADA SIMULATOR
           </span>
-          <h1 className="text-lg font-black uppercase text-white tracking-tight">
+          <h1 className="text-base sm:text-lg font-black uppercase text-white tracking-tight">
             CONTEÚDO PARA MAIORES DE 18 ANOS
           </h1>
         </div>
 
         {/* Informational Warning Box */}
-        <div className="bg-zinc-950 p-4 rounded-2xl border border-zinc-800/80 text-left space-y-2">
+        <div className="bg-zinc-950 p-3.5 sm:p-4 rounded-2xl border border-zinc-800/80 text-left space-y-2">
           <div className="flex items-center gap-2 text-red-400 text-xs font-black uppercase tracking-wide">
             <ShieldAlert className="w-4 h-4 shrink-0" />
             <span>Aviso de Restrição de Idade</span>
@@ -77,7 +77,11 @@ export const AgeGateModal: React.FC<AgeGateModalProps> = ({ onConfirmAge }) => {
         <div className="space-y-2.5 pt-1">
           <button
             onClick={onConfirmAge}
-            className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-black text-xs uppercase tracking-wider transition-all shadow-xl active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              onConfirmAge();
+            }}
+            className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-black text-xs sm:text-sm uppercase tracking-wider transition-all shadow-xl active:scale-95 cursor-pointer flex items-center justify-center gap-2 touch-manipulation z-50"
           >
             <CheckCircle className="w-4 h-4" /> TENHO 18 ANOS — ENTRAR
           </button>

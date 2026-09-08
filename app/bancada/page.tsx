@@ -1639,7 +1639,7 @@ export default function App() {
   // 1. ONBOARDING & SETUP SCREEN
   if (!isStarted) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-center items-center p-4 relative overflow-hidden">
+      <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-start sm:justify-center items-center p-3 sm:p-4 relative overflow-y-auto py-6">
         {/* Full-Screen Watermark Background Image */}
         <div
           className="fixed inset-0 pointer-events-none bg-cover bg-center bg-no-repeat z-0 opacity-30 mix-blend-luminosity scale-105"
@@ -1657,7 +1657,7 @@ export default function App() {
           }}
         />
 
-        <div className="max-w-md w-full bg-zinc-900/90 backdrop-blur-md border border-zinc-800/80 rounded-3xl p-6 shadow-2xl space-y-4 relative z-10">
+        <div className="max-w-md w-full bg-zinc-900/95 backdrop-blur-md border border-amber-500/40 rounded-3xl p-4 sm:p-6 shadow-2xl space-y-4 relative z-10 max-h-none my-auto">
           <div className="flex items-center justify-between">
             <div
               className="w-12 h-12 rounded-2xl flex items-center justify-center font-black shadow-lg border border-white/10"
@@ -1917,9 +1917,14 @@ export default function App() {
 
               <button
                 onClick={handleStartCareer}
-                className="w-full py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl active:scale-95 transition-all cursor-pointer"
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  handleStartCareer();
+                }}
+                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-2xl active:scale-95 transition-all cursor-pointer touch-manipulation z-30 sticky bottom-2 border-2 border-amber-300"
               >
-                Assumir Diretoria e Iniciar <ChevronRight className="w-4 h-4" />
+                <span>Assumir Diretoria e Iniciar</span>
+                <ChevronRight className="w-5 h-5 fill-black" />
               </button>
             </div>
           ) : (
@@ -2020,9 +2025,14 @@ export default function App() {
 
               <button
                 onClick={handleStartCareer}
-                className="w-full py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl active:scale-95 transition-all cursor-pointer"
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  handleStartCareer();
+                }}
+                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-2xl active:scale-95 transition-all cursor-pointer touch-manipulation z-30 sticky bottom-2 border-2 border-amber-300"
               >
-                Fundar Torcida e Iniciar Carreira <ChevronRight className="w-4 h-4" />
+                <span>Fundar Torcida e Iniciar Carreira</span>
+                <ChevronRight className="w-5 h-5 fill-black" />
               </button>
             </div>
           )}
