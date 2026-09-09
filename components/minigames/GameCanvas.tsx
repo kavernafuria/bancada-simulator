@@ -521,7 +521,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
                 s.crowdCount = Math.min(maxAllowedCrowd, s.crowdCount + gate.value);
                 soundManager.playGateSound(true);
                 s.cameraZoomImpulse = 0.05;
-                addFloatingText(`+${gate.value} Bonde!`, 0, -40, '#22c55e');
+                addFloatingText(`+${gate.value}`, 0, -40, '#22c55e');
               } else if (gate.type === 'sub') {
                 const lost = Math.min(Math.abs(gate.value), Math.max(0, s.crowdCount - minAllowedCrowd));
                 s.crowdCount = Math.max(minAllowedCrowd, s.crowdCount + gate.value);
@@ -529,9 +529,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
                   spawnKnockoutFans(lost, s.playerX, 8, s.playerZ, s.playerTeam, false);
                 }
                 soundManager.playGateSound(false);
-                s.cameraShake = 8;
-                s.redFlashTimer = 0.16;
-                addFloatingText(`${gate.value} Blitz!`, 0, -40, '#ef4444');
+                s.cameraShake = 0;
+                s.redFlashTimer = 0;
+                addFloatingText(`${gate.value}`, 0, -40, '#ef4444');
               }
 
               // Gate burst particles
@@ -559,8 +559,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
                 item.exploded = true;
                 item.collected = true;
                 soundManager.playFireworkExplosion();
-                s.cameraShake = 18;
-                createSparks(item.x, 10, item.z, '#ef4444', 35);
+                s.cameraShake = 0;
+                createSparks(item.x, 10, item.z, '#ef4444', 12);
                 createSparks(item.x, 12, item.z, '#f97316', 25);
 
                 // Check if player mob is caught inside blast radius!
@@ -584,8 +584,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
               item.exploded = true;
               item.collected = true;
               soundManager.playFireworkExplosion();
-              s.cameraShake = 20;
-              createSparks(item.x, 10, item.z, '#ef4444', 40);
+              s.cameraShake = 0;
+              createSparks(item.x, 10, item.z, '#ef4444', 12);
               createSparks(item.x, 12, item.z, '#f97316', 30);
               const maxLoss = Math.max(0, s.crowdCount - minAllowedCrowd);
               const lost = Math.min(maxLoss, Math.min(7, Math.max(2, Math.floor(s.crowdCount * 0.1))));
@@ -638,7 +638,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
                   spawnKnockoutFans(lost, s.playerX, 8, s.playerZ, s.playerTeam, false);
                   addFloatingText(`-${lost}`, 0, -40, '#ef4444');
                 }
-                s.cameraShake = 15;
+                s.cameraShake = 0;
                 soundManager.playGateSound(false);
                 createSparks(item.x, 10, item.z, '#78716c', 20);
               }
@@ -686,7 +686,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
                   spawnKnockoutFans(lost, s.playerX, 8, s.playerZ, s.playerTeam, false);
                   addFloatingText(`-${lost}`, 0, -45, '#ef4444');
                 }
-                s.cameraShake = 18;
+                s.cameraShake = 0;
                 createSparks(p.x, 10, p.z, '#ef4444', 35);
               }
             }
@@ -723,10 +723,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
               p.exploded = true;
               hitRivalRocket.exploded = true;
               soundManager.playFireworkExplosion();
-              addFloatingText('ROJÃO INTERCEPTADO NO AR! 🎆', 0, -50, '#38bdf8');
-              createSparks((p.x + hitRivalRocket.x) / 2, 14, (p.z + hitRivalRocket.z) / 2, '#38bdf8', 35);
-              createSparks((p.x + hitRivalRocket.x) / 2, 14, (p.z + hitRivalRocket.z) / 2, '#fef08a', 20);
-              s.cameraShake = 8;
+              addFloatingText('Interceptado!', 0, -50, '#38bdf8');
+              createSparks((p.x + hitRivalRocket.x) / 2, 14, (p.z + hitRivalRocket.z) / 2, '#38bdf8', 12);
+              s.cameraShake = 0;
             }
 
             // Check if player projectile hits barricade
@@ -738,9 +737,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
               p.exploded = true;
               hitBarricade.collected = true;
               soundManager.playFireworkExplosion();
-              addFloatingText('BARRICADA DESTRUÍDA! 💥', 0, -40, '#f59e0b');
-              createSparks(hitBarricade.x, 12, hitBarricade.z, '#f97316', 30);
-              s.cameraShake = 10;
+              addFloatingText('Destruído!', 0, -40, '#f59e0b');
+              createSparks(hitBarricade.x, 12, hitBarricade.z, '#f97316', 12);
+              s.cameraShake = 0;
             }
 
             // Check if player projectile hits bomb (detonates it safely ahead!)
@@ -753,9 +752,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
               hitBomb.exploded = true;
               hitBomb.collected = true;
               soundManager.playFireworkExplosion();
-              addFloatingText('BOMBA DESARMADA COM ROJÃO! 💣💥', 0, -45, '#22c55e');
-              createSparks(hitBomb.x, 10, hitBomb.z, '#22c55e', 35);
-              s.cameraShake = 10;
+              addFloatingText('Desarmado!', 0, -45, '#22c55e');
+              createSparks(hitBomb.x, 10, hitBomb.z, '#22c55e', 12);
+              s.cameraShake = 0;
             }
 
             // Check if projectile reached rival torcida at track end
@@ -1077,20 +1076,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(0, 0, w, h);
 
-    // Camera shake & tilt roll
-    ctx.translate(w / 2, h / 2);
-    if (s.cameraShake > 0.5) {
-      ctx.translate((Math.random() - 0.5) * s.cameraShake, (Math.random() - 0.5) * s.cameraShake);
-    }
-    if (Math.abs(s.cameraRoll) > 0.001) {
-      ctx.rotate(s.cameraRoll);
-    }
-    ctx.translate(-w / 2, -h / 2);
-
-    // Dynamic Camera Z & Y with smooth running bobbing
-    const camBob = s.stage === 'playing' ? Math.sin(currentTime * 0.009 * s.speedFactor) * 1.8 : 0;
+    // Perfectly stable and smooth 3D tracking camera (no trembling or shaking)
     const camZ = isTopDown ? s.playerZ - 170 : s.playerZ - 215;
-    const camY = (isTopDown ? Math.round(h * 0.32) : 155) + camBob;
+    const camY = isTopDown ? Math.round(h * 0.32) : 155;
     const horizonY = isTopDown ? h * 0.10 : h * 0.22;
 
     // Draw Sky & Stadium Skyline
@@ -2050,40 +2038,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       ctx.restore();
     });
 
-    // DRAW SPEED LINES AT EDGE (Sensação de Velocidade Arcade)
-    if (s.stage === 'playing' && s.speed > 3.0) {
-      ctx.save();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-      ctx.lineWidth = 1.5;
-      for (let i = 0; i < 8; i++) {
-        const lineY = (currentTime * 0.4 + i * 50) % h;
-        const lineLen = 30 + Math.random() * 40;
-        // Left edge speed lines
-        ctx.beginPath();
-        ctx.moveTo(15 + (i % 3) * 10, lineY);
-        ctx.lineTo(15 + (i % 3) * 10, lineY + lineLen);
-        ctx.stroke();
-        // Right edge speed lines
-        ctx.beginPath();
-        ctx.moveTo(w - 15 - (i % 3) * 10, lineY);
-        ctx.lineTo(w - 15 - (i % 3) * 10, lineY + lineLen);
-        ctx.stroke();
-      }
-      ctx.restore();
-    }
-
-    // RED SCREEN DAMAGE VIGNETTE FLASH (Feedback Negativo Sutil)
-    if (s.redFlashTimer > 0) {
-      ctx.save();
-      const alpha = Math.min(0.35, s.redFlashTimer * 2.2);
-      const vigGrad = ctx.createRadialGradient(w / 2, h / 2, h * 0.3, w / 2, h / 2, h * 0.7);
-      vigGrad.addColorStop(0, 'rgba(239, 68, 68, 0)');
-      vigGrad.addColorStop(1, `rgba(239, 68, 68, ${alpha})`);
-      ctx.fillStyle = vigGrad;
-      ctx.fillRect(0, 0, w, h);
-      ctx.restore();
-    }
-
     ctx.restore();
   };
 
@@ -2132,15 +2086,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     ctx.beginPath();
     ctx.ellipse(x, groundY + 1 * s, (9 + Math.abs(stride) * 1.8) * s, 4.5 * s, 0, 0, Math.PI * 2);
     ctx.fill();
-
-    // Body tilt leaning into steering turns
-    const leanAngle = !facingDown ? (stateRef.current.mobLean * (0.4 + (runnerIdx % 5) * 0.08)) : 0;
-    ctx.save();
-    if (Math.abs(leanAngle) > 0.001) {
-      ctx.translate(x, groundY);
-      ctx.rotate(leanAngle);
-      ctx.translate(-x, -groundY);
-    }
 
     // 2. RUNNING LEGS & SHOES (True stride kinematics matching 3D runner images!)
     // Left Leg
@@ -2383,7 +2328,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       ctx.arc(x - bodyW * 0.25, torsoY + 4 * s, 1.6 * s, 0, Math.PI * 2);
       ctx.fill();
     }
-    ctx.restore();
   };
 
   // Pointer / Touch / Mouse drag handlers
