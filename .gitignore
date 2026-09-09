@@ -37,3 +37,6 @@ next-env.d.json
 bancada_projeto_atualizado*
 temp_zip_extract*
 scratch/
+
+# Localhost-only test laboratory
+app/bancada/minigames/
