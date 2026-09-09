@@ -103,11 +103,11 @@ export const Runner3DGame: React.FC<Runner3DGameProps> = ({
     description: string;
   } | null>(null);
 
-  // Teclado para movimentação e rojões
+  // Teclado para movimentação e rojões no PC
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (stage !== 'playing') return;
-      if (e.key === ' ' || e.key === 'f' || e.key === 'F') {
+      if (e.key === ' ' || e.code === 'Space' || e.key === 'f' || e.key === 'F') {
         e.preventDefault();
         handleTriggerFirework();
       }
@@ -119,7 +119,7 @@ export const Runner3DGame: React.FC<Runner3DGameProps> = ({
   const handleStartGame = () => {
     const initialFans = Math.max(12, Math.floor(contingente * 0.4) + upgrades.startingMembers * 3);
     setCrowdCount(initialFans);
-    setIronBars(0);
+    setIronBars(gameMode === 'clash_bars' ? 5 : 0);
     setFireworks(3);
     setFlaresActive(0);
     setDistanceProgress(0);
@@ -302,6 +302,17 @@ export const Runner3DGame: React.FC<Runner3DGameProps> = ({
                 ? 'Comande a linha de frente de cima (visão top-down)! Use Barras de Ferro 🪵 e Rojões 🎆 para romper a contenção rival no confronto de pista.'
                 : 'Guie o bonde da torcida pela avenida (visão 3D clássica)! Passe pelos portões de reforço, desvie de obstáculos e avance em direção ao estádio.'}
             </p>
+
+            {/* INSTRUÇÕES DE CONTROLE PC vs MOBILE */}
+            <div className="bg-zinc-900/90 border border-zinc-800 p-2.5 rounded-xl text-left text-xs w-full max-w-sm space-y-1.5">
+              <span className="font-bold text-amber-400 uppercase text-[10px] block">🎮 CONTROLES DO JOGO:</span>
+              <p className="text-[10px] text-zinc-200">
+                💻 <strong>No PC:</strong> Use as Setas (← →) ou A/D para mover | Aperte <strong>ESPAÇO</strong> para disparar Rojão 🎆
+              </p>
+              <p className="text-[10px] text-zinc-200">
+                📱 <strong>No Mobile:</strong> Arraste o dedo na tela ou use os botões <strong>ESQUERDA / DIREITA</strong> e toque em <strong>ROJÃO</strong> 🎆
+              </p>
+            </div>
 
             <div className="grid grid-cols-2 gap-2.5 bg-zinc-900/90 border border-zinc-800 p-2.5 rounded-xl text-left text-xs w-full max-w-sm">
               <div>
