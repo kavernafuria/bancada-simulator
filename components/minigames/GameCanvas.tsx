@@ -120,6 +120,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     cameraZoomImpulse: 0,
     redFlashTimer: 0,
     dustTimer: 0,
+    stoneTimer: 2.2,
   });
 
   // Keep state sync with props (except during active clash battle where counts tick down dynamically)
@@ -507,6 +508,27 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           soundManager.playFireworkLaunch();
         }
 
+        // Rival ambush throwing flying stones towards player mob (Maior Dificuldade & Desafio!)
+        s.stoneTimer = (s.stoneTimer ?? 2.2) - dt;
+        if (s.stoneTimer <= 0 && s.playerZ < s.trackLength - 280) {
+          s.stoneTimer = Math.max(1.8, 3.6 - s.level * 0.3) + Math.random() * 1.2;
+          const stoneLaneX = Math.max(-1.25, Math.min(1.25, s.playerX + (Math.random() - 0.5) * 0.9));
+          s.projectiles.push({
+            id: 'stone_' + Math.random(),
+            x: stoneLaneX,
+            y: 14,
+            z: s.playerZ + 420,
+            vx: (Math.random() - 0.5) * 0.02,
+            vy: 0,
+            vz: -(6.5 + Math.min(s.level * 0.35, 3.0)),
+            color: '#78716c',
+            exploded: false,
+            isStone: true,
+            rotation: 0,
+            damage: 3 + Math.floor(Math.random() * 3),
+          });
+        }
+
         // Check Gates collision
         s.gates.forEach((gate) => {
           if (!gate.passed && Math.abs(gate.z - s.playerZ) < 30) {
@@ -691,10 +713,36 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
               }
             }
 
-            // Rival rocket passed behind player without hitting
+            // Rival rocket or stone passed behind player without hitting
             if (p.z < s.playerZ - 30) {
               p.exploded = true;
               createSparks(p.x, 2, p.z, '#78716c', 10);
+            }
+          } else if (p.isStone) {
+            // Tumbling Flying Stone moving towards player
+            p.rotation = (p.rotation || 0) + 0.18;
+
+            // Check collision of flying stone with player mob!
+            if (Math.abs(p.z - s.playerZ) < 22) {
+              const playerWidth = Math.min(0.75, 0.35 + (s.crowdCount / 100) * 0.25);
+              if (Math.abs(p.x - s.playerX) < playerWidth) {
+                // Stone hit the crowd!
+                p.exploded = true;
+                soundManager.playGateSound(false);
+                const maxLoss = Math.max(0, s.crowdCount - minAllowedCrowd);
+                const lost = Math.min(maxLoss, Math.min(p.damage || 3, Math.max(1, Math.floor(s.crowdCount * 0.06))));
+                s.crowdCount = Math.max(minAllowedCrowd, s.crowdCount - lost);
+                if (lost > 0) {
+                  spawnKnockoutFans(lost, s.playerX, 8, s.playerZ, s.playerTeam, false);
+                  addFloatingText(`-${lost} 🪨`, 0, -45, '#ef4444');
+                }
+                createSparks(p.x, 6, p.z, '#a8a29e', 14);
+              }
+            }
+
+            // Stone passed behind player
+            if (p.z < s.playerZ - 30) {
+              p.exploded = true;
             }
           } else {
             // Player's forward rocket
@@ -726,6 +774,18 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
               addFloatingText('Interceptado!', 0, -50, '#38bdf8');
               createSparks((p.x + hitRivalRocket.x) / 2, 14, (p.z + hitRivalRocket.z) / 2, '#38bdf8', 12);
               s.cameraShake = 0;
+            }
+
+            // Intercept incoming flying stones with forward rockets in midair!
+            const hitStone = s.projectiles.find(
+              (st) => st.isStone && !st.exploded && Math.abs(st.z - p.z) < 28 && Math.abs(st.x - p.x) < 0.65
+            );
+            if (hitStone) {
+              p.exploded = true;
+              hitStone.exploded = true;
+              soundManager.playFireworkExplosion();
+              addFloatingText('Pedra Destruída!', 0, -50, '#38bdf8');
+              createSparks((p.x + hitStone.x) / 2, 14, (p.z + hitStone.z) / 2, '#a8a29e', 14);
             }
 
             // Check if player projectile hits barricade
@@ -1811,6 +1871,54 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         ctx.lineTo(rSize * 0.3, -rSize * 0.7);
         ctx.closePath();
         ctx.fill();
+        ctx.restore();
+      } else if (p.isStone) {
+        // DRAW FLYING STONE WITH AMBER WARNING CORRIDOR
+        const laneW = 0.38;
+        const pL1 = project(p.x - laneW, 0, p.z, w, h, camZ, camY);
+        const pR1 = project(p.x + laneW, 0, p.z, w, h, camZ, camY);
+        const pL2 = project(p.x - laneW, 0, Math.max(0, s.playerZ - 10), w, h, camZ, camY);
+        const pR2 = project(p.x + laneW, 0, Math.max(0, s.playerZ - 10), w, h, camZ, camY);
+
+        if (pL1 && pR1 && pL2 && pR2) {
+          ctx.save();
+          ctx.fillStyle = 'rgba(245, 158, 11, 0.18)';
+          ctx.beginPath();
+          ctx.moveTo(pL1.x, pL1.y);
+          ctx.lineTo(pR1.x, pR1.y);
+          ctx.lineTo(pR2.x, pR2.y);
+          ctx.lineTo(pL2.x, pL2.y);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.strokeStyle = 'rgba(217, 119, 6, 0.6)';
+          ctx.lineWidth = Math.max(1.5, 3 * projPoint.scale);
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // Draw Tumbling 3D Rock / Stone
+        const stoneRadius = Math.max(8, 20 * projPoint.scale);
+        ctx.save();
+        ctx.translate(projPoint.x, projPoint.y);
+        ctx.rotate(p.rotation || 0);
+
+        // Dark Rock Body
+        ctx.fillStyle = '#57534e';
+        ctx.beginPath();
+        ctx.arc(0, 0, stoneRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Facet specular highlight
+        ctx.fillStyle = '#a8a29e';
+        ctx.beginPath();
+        ctx.arc(-stoneRadius * 0.3, -stoneRadius * 0.3, stoneRadius * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Outline
+        ctx.strokeStyle = '#292524';
+        ctx.lineWidth = Math.max(1, 2 * projPoint.scale);
+        ctx.stroke();
         ctx.restore();
       } else {
         // Player forward rocket

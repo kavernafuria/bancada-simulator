@@ -51,6 +51,8 @@ export interface Projectile {
   color: string;
   exploded: boolean;
   isRival?: boolean;
+  isStone?: boolean;
+  rotation?: number;
   damage?: number;
 }
 
