@@ -1147,135 +1147,126 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     }
 
     // Draw Ground / Avenue & Sidewalks
-    const farZ = Math.min(s.playerZ + 800, s.trackLength + 300);
-    const nearZ = Math.max(0, camZ + 10);
+    // Safe ground rendering boundaries (Elimina distorções e retângulos brancos)
+    const farZ = Math.min(s.playerZ + 850, s.trackLength + 350);
+    const nearZ = Math.max(0, camZ + 45);
 
-    // Perspective Road & Sidewalk Polygons
-    const pRoadNearL = project(-1.85, 0, nearZ, w, h, camZ, camY);
-    const pRoadNearR = project(1.85, 0, nearZ, w, h, camZ, camY);
-    const pRoadFarL = project(-1.85, 0, farZ, w, h, camZ, camY);
-    const pRoadFarR = project(1.85, 0, farZ, w, h, camZ, camY);
+    // 1. Fixed Stylized City Backdrop on sides (Inspirado na imagem de referência)
+    const horizonBaseY = horizonY + 25;
 
-    const pSideNearL = project(-2.95, 0, nearZ, w, h, camZ, camY);
-    const pSideFarL = project(-2.95, 0, farZ, w, h, camZ, camY);
-    const pSideNearR = project(2.95, 0, nearZ, w, h, camZ, camY);
-    const pSideFarR = project(2.95, 0, farZ, w, h, camZ, camY);
-
-    // 1. Fixed City Skyline Silhouette Backdrop (Elimina retângulos e bordas piscando)
-    const horizonBaseY = horizonY + 15;
-
-    // Left city skyline
-    ctx.fillStyle = '#1e293b';
-    const leftBuildings = [
-      { x: 0, w: 0.10, h: 85 },
-      { x: 0.08, w: 0.07, h: 115 },
-      { x: 0.14, w: 0.09, h: 70 },
-      { x: 0.21, w: 0.08, h: 100 },
-      { x: 0.27, w: 0.07, h: 130 },
+    // Left urban building facades (Prédios urbanos estáticos à esquerda)
+    const leftCityBlocks = [
+      { x: 0, w: 0.12, h: 140, color: '#94a3b8' },
+      { x: 0.09, w: 0.09, h: 180, color: '#991b1b' },
+      { x: 0.16, w: 0.08, h: 120, color: '#475569' },
+      { x: 0.22, w: 0.07, h: 155, color: '#334155' },
     ];
-    leftBuildings.forEach((b) => {
+    leftCityBlocks.forEach((b) => {
       const bx = b.x * w;
       const bw = b.w * w;
       const bh = b.h;
-      ctx.fillRect(bx, horizonBaseY - bh, bw, bh + 50);
+      ctx.fillStyle = b.color;
+      ctx.fillRect(bx, horizonBaseY - bh, bw, bh + 60);
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(bx, horizonBaseY - bh, bw, bh + 60);
 
-      // Lit windows
-      ctx.fillStyle = 'rgba(254, 240, 138, 0.45)';
-      for (let wy = horizonBaseY - bh + 10; wy < horizonBaseY - 8; wy += 16) {
-        for (let wx = bx + 5; wx < bx + bw - 5; wx += 10) {
-          if ((Math.round(wx + wy)) % 3 === 0) {
-            ctx.fillRect(wx, wy, 3.5, 5);
-          }
+      // Lit windows grid
+      ctx.fillStyle = 'rgba(254, 240, 138, 0.6)';
+      for (let wy = horizonBaseY - bh + 14; wy < horizonBaseY - 10; wy += 22) {
+        for (let wx = bx + 8; wx < bx + bw - 8; wx += 14) {
+          ctx.fillRect(wx, wy, 5, 8);
         }
       }
-      ctx.fillStyle = '#1e293b';
     });
 
-    // Right city skyline
-    ctx.fillStyle = '#1e293b';
-    const rightBuildings = [
-      { x: 0.66, w: 0.07, h: 125 },
-      { x: 0.72, w: 0.08, h: 90 },
-      { x: 0.79, w: 0.09, h: 105 },
-      { x: 0.86, w: 0.07, h: 120 },
-      { x: 0.91, w: 0.09, h: 75 },
+    // Right urban building facades (Prédios urbanos estáticos à direita)
+    const rightCityBlocks = [
+      { x: 0.71, w: 0.07, h: 160, color: '#334155' },
+      { x: 0.76, w: 0.08, h: 130, color: '#475569' },
+      { x: 0.82, w: 0.09, h: 195, color: '#1e3a8a' },
+      { x: 0.89, w: 0.11, h: 145, color: '#64748b' },
     ];
-    rightBuildings.forEach((b) => {
+    rightCityBlocks.forEach((b) => {
       const bx = b.x * w;
       const bw = b.w * w;
       const bh = b.h;
-      ctx.fillRect(bx, horizonBaseY - bh, bw, bh + 50);
+      ctx.fillStyle = b.color;
+      ctx.fillRect(bx, horizonBaseY - bh, bw, bh + 60);
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(bx, horizonBaseY - bh, bw, bh + 60);
 
-      // Lit windows
-      ctx.fillStyle = 'rgba(254, 240, 138, 0.45)';
-      for (let wy = horizonBaseY - bh + 10; wy < horizonBaseY - 8; wy += 16) {
-        for (let wx = bx + 5; wx < bx + bw - 5; wx += 10) {
-          if ((Math.round(wx + wy)) % 3 === 0) {
-            ctx.fillRect(wx, wy, 3.5, 5);
-          }
+      // Lit windows grid
+      ctx.fillStyle = 'rgba(254, 240, 138, 0.6)';
+      for (let wy = horizonBaseY - bh + 14; wy < horizonBaseY - 10; wy += 22) {
+        for (let wx = bx + 8; wx < bx + bw - 8; wx += 14) {
+          ctx.fillRect(wx, wy, 5, 8);
         }
       }
-      ctx.fillStyle = '#1e293b';
     });
 
-    // 2. Draw Sidewalks (Calçadas com pavimento de concreto claro)
-    if (pSideNearL && pSideFarL && pRoadNearL && pRoadFarL) {
-      // Left sidewalk
-      ctx.fillStyle = '#94a3b8';
-      ctx.beginPath();
-      ctx.moveTo(pSideNearL.x, pSideNearL.y);
-      ctx.lineTo(pSideFarL.x, pSideFarL.y);
-      ctx.lineTo(pRoadFarL.x, pRoadFarL.y);
-      ctx.lineTo(pRoadNearL.x, pRoadNearL.y);
-      ctx.closePath();
-      ctx.fill();
+    // 2. Perspective Road & Sidewalk Polygons (Clamped safely inside canvas bounds)
+    const pRoadNearL = project(-1.65, 0, nearZ, w, h, camZ, camY);
+    const pRoadNearR = project(1.65, 0, nearZ, w, h, camZ, camY);
+    const pRoadFarL = project(-1.65, 0, farZ, w, h, camZ, camY);
+    const pRoadFarR = project(1.65, 0, farZ, w, h, camZ, camY);
 
-      // Curb stone edge (meio-fio)
-      ctx.strokeStyle = '#cbd5e1';
-      ctx.lineWidth = Math.max(2, 3 * pRoadNearL.scale);
-      ctx.stroke();
-    }
+    const pSideNearL = project(-2.2, 0, nearZ, w, h, camZ, camY);
+    const pSideFarL = project(-2.2, 0, farZ, w, h, camZ, camY);
+    const pSideNearR = project(2.2, 0, nearZ, w, h, camZ, camY);
+    const pSideFarR = project(2.2, 0, farZ, w, h, camZ, camY);
 
-    if (pRoadNearR && pRoadFarR && pSideNearR && pSideFarR) {
-      // Right sidewalk
-      ctx.fillStyle = '#94a3b8';
-      ctx.beginPath();
-      ctx.moveTo(pRoadNearR.x, pRoadNearR.y);
-      ctx.lineTo(pRoadFarR.x, pRoadFarR.y);
-      ctx.lineTo(pSideFarR.x, pSideFarR.y);
-      ctx.lineTo(pSideNearR.x, pSideNearR.y);
-      ctx.closePath();
-      ctx.fill();
-
-      // Curb stone edge (meio-fio)
-      ctx.strokeStyle = '#cbd5e1';
-      ctx.lineWidth = Math.max(2, 3 * pRoadNearR.scale);
-      ctx.stroke();
-    }
-
-    // 3. Draw Asphalt Road (Asfalto liso grafite)
     if (pRoadNearL && pRoadNearR && pRoadFarL && pRoadFarR) {
+      // Clamp near Y coordinates to bottom edge of canvas
+      const nearY = Math.min(h, pRoadNearL.y);
+
+      // Sidewalk Left
+      if (pSideNearL && pSideFarL) {
+        ctx.fillStyle = '#94a3b8';
+        ctx.beginPath();
+        ctx.moveTo(pSideNearL.x, nearY);
+        ctx.lineTo(pSideFarL.x, pSideFarL.y);
+        ctx.lineTo(pRoadFarL.x, pRoadFarL.y);
+        ctx.lineTo(pRoadNearL.x, nearY);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // Sidewalk Right
+      if (pSideNearR && pSideFarR) {
+        ctx.fillStyle = '#94a3b8';
+        ctx.beginPath();
+        ctx.moveTo(pRoadNearR.x, nearY);
+        ctx.lineTo(pRoadFarR.x, pRoadFarR.y);
+        ctx.lineTo(pSideFarR.x, pSideFarR.y);
+        ctx.lineTo(pSideNearR.x, nearY);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // 3. Draw Asphalt Road (Asfalto grafite liso)
       ctx.beginPath();
-      ctx.moveTo(pRoadNearL.x, pRoadNearL.y);
+      ctx.moveTo(pRoadNearL.x, nearY);
       ctx.lineTo(pRoadFarL.x, pRoadFarL.y);
       ctx.lineTo(pRoadFarR.x, pRoadFarR.y);
-      ctx.lineTo(pRoadNearR.x, pRoadNearR.y);
+      ctx.lineTo(pRoadNearR.x, nearY);
       ctx.closePath();
 
-      const roadGrad = ctx.createLinearGradient(0, pRoadFarL.y, 0, pRoadNearL.y);
+      const roadGrad = ctx.createLinearGradient(0, pRoadFarL.y, 0, nearY);
       roadGrad.addColorStop(0, '#334155');
       roadGrad.addColorStop(0.5, '#475569');
       roadGrad.addColorStop(1, '#64748b');
       ctx.fillStyle = roadGrad;
       ctx.fill();
 
-      // White Road Boundary Lines on outer edges
+      // White Road Boundary Lines (Meio-fio de delimitação)
       ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = Math.max(1.5, 4 * pRoadNearL.scale);
+      ctx.lineWidth = Math.max(2, 4 * pRoadNearL.scale);
       ctx.beginPath();
-      ctx.moveTo(pRoadNearL.x, pRoadNearL.y);
+      ctx.moveTo(pRoadNearL.x, nearY);
       ctx.lineTo(pRoadFarL.x, pRoadFarL.y);
-      ctx.moveTo(pRoadNearR.x, pRoadNearR.y);
+      ctx.moveTo(pRoadNearR.x, nearY);
       ctx.lineTo(pRoadFarR.x, pRoadFarR.y);
       ctx.stroke();
     }
