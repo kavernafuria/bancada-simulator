@@ -176,10 +176,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     if (!steerSignal) return;
     const s = stateRef.current;
     if (s.stage !== 'playing') return;
+    const maxSteer = s.cameraMode === 'top_down' ? 1.15 : 1.05;
     if (steerSignal.dir === 'left') {
-      s.targetX = Math.max(-1.4, s.targetX - 0.45);
+      s.targetX = Math.max(-maxSteer, s.targetX - 0.45);
     } else if (steerSignal.dir === 'right') {
-      s.targetX = Math.min(1.4, s.targetX + 0.45);
+      s.targetX = Math.min(maxSteer, s.targetX + 0.45);
     }
   }, [steerSignal]);
 
@@ -385,10 +386,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       const s = stateRef.current;
       if (s.stage !== 'playing') return;
 
+      const maxSteer = s.cameraMode === 'top_down' ? 1.15 : 1.05;
       if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
-        s.targetX = Math.max(-1.4, s.targetX - 0.4);
+        s.targetX = Math.max(-maxSteer, s.targetX - 0.4);
       } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
-        s.targetX = Math.min(1.4, s.targetX + 0.4);
+        s.targetX = Math.min(maxSteer, s.targetX + 0.4);
       } else if (e.key === ' ' || e.key === 'f' || e.key === 'F') {
         launchFireworks(2);
       }
@@ -437,7 +439,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
         // Smoothly interpolate player X with high responsiveness
         s.playerX += (s.targetX - s.playerX) * 0.22;
-        s.playerX = Math.max(-1.45, Math.min(1.45, s.playerX));
+        const maxBound = s.cameraMode === 'top_down' ? 1.15 : 1.02;
+        s.playerX = Math.max(-maxBound, Math.min(maxBound, s.playerX));
 
         // Flares decay over time
         if (s.flaresActive > 0) {
@@ -1841,11 +1844,14 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const fanPositions: { x: number; z: number; hasIron: boolean; hasFirework: boolean }[] = [];
 
     for (let i = 0; i < maxFansDrawn; i++) {
-      // Tight golden spiral distribution so entire mob fits nicely on screen
+      // Tight golden spiral distribution clamped strictly inside asphalt road boundaries (X: -1.48 to 1.48)
       const angle = i * 2.39996;
       const dist = Math.sqrt((i + 1) / maxFansDrawn) * crowdSpread;
-      const fx = s.playerX + Math.cos(angle) * dist * 0.55;
-      const fz = s.playerZ + Math.sin(angle) * dist * (isTopDown ? 16 : 14);
+      const spreadFactor = isTopDown ? 0.50 : 0.40;
+      const rawFx = s.playerX + Math.cos(angle) * dist * spreadFactor;
+      const maxFanRoadX = isTopDown ? 1.62 : 1.48;
+      const fx = Math.max(-maxFanRoadX, Math.min(maxFanRoadX, rawFx));
+      const fz = s.playerZ + Math.sin(angle) * dist * (isTopDown ? 16 : 13);
 
       // Assign iron bars to front/side fans
       const hasIron = i < s.ironBars * 2;
@@ -1863,7 +1869,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           ctx,
           p.x,
           p.y,
-          isTopDown ? p.scale * 0.52 : p.scale * 0.78,
+          isTopDown ? p.scale * 0.52 : p.scale * 0.70,
           s.playerTeam,
           fan.hasIron,
           fan.hasFirework,
@@ -2317,8 +2323,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const deltaX = e.clientX - s.dragStartX;
     const canvasWidth = canvasRef.current?.clientWidth || window.innerWidth;
     const normalizedDelta = (deltaX / (canvasWidth * 0.4)) * 1.6;
+    const maxSteer = s.cameraMode === 'top_down' ? 1.15 : 1.05;
 
-    s.targetX = Math.max(-1.4, Math.min(1.4, s.dragStartPlayerX + normalizedDelta));
+    s.targetX = Math.max(-maxSteer, Math.min(maxSteer, s.dragStartPlayerX + normalizedDelta));
   };
 
   const handlePointerUp = () => {
