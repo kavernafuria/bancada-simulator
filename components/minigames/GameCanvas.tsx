@@ -1161,67 +1161,62 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const pSideNearR = project(2.95, 0, nearZ, w, h, camZ, camY);
     const pSideFarR = project(2.95, 0, farZ, w, h, camZ, camY);
 
-    // 1. Draw 3D Urban Buildings flanking both sides (matching reference images)
-    const buildingStep = 110;
-    const startBZ = Math.floor(camZ / buildingStep) * buildingStep;
-    for (let bz = startBZ; bz < farZ; bz += buildingStep) {
-      const bHeight = 160 + ((Math.sin(bz * 0.05) + 1) * 35);
-      const bColor = bz % 220 === 0 ? '#64748b' : bz % 330 === 0 ? '#475569' : '#334155';
+    // 1. Fixed City Skyline Silhouette Backdrop (Elimina retângulos e bordas piscando)
+    const horizonBaseY = horizonY + 15;
 
-      // Left Building
-      const pBL_BotNear = project(-2.9, 0, bz, w, h, camZ, camY);
-      const pBL_BotFar = project(-2.9, 0, bz + buildingStep, w, h, camZ, camY);
-      const pBL_TopNear = project(-2.9, bHeight, bz, w, h, camZ, camY);
-      const pBL_TopFar = project(-2.9, bHeight, bz + buildingStep, w, h, camZ, camY);
+    // Left city skyline
+    ctx.fillStyle = '#1e293b';
+    const leftBuildings = [
+      { x: 0, w: 0.10, h: 85 },
+      { x: 0.08, w: 0.07, h: 115 },
+      { x: 0.14, w: 0.09, h: 70 },
+      { x: 0.21, w: 0.08, h: 100 },
+      { x: 0.27, w: 0.07, h: 130 },
+    ];
+    leftBuildings.forEach((b) => {
+      const bx = b.x * w;
+      const bw = b.w * w;
+      const bh = b.h;
+      ctx.fillRect(bx, horizonBaseY - bh, bw, bh + 50);
 
-      if (pBL_BotNear && pBL_BotFar && pBL_TopNear && pBL_TopFar) {
-        ctx.fillStyle = bColor;
-        ctx.beginPath();
-        ctx.moveTo(pBL_BotNear.x, pBL_BotNear.y);
-        ctx.lineTo(pBL_BotFar.x, pBL_BotFar.y);
-        ctx.lineTo(pBL_TopFar.x, pBL_TopFar.y);
-        ctx.lineTo(pBL_TopNear.x, pBL_TopNear.y);
-        ctx.closePath();
-        ctx.fill();
-
-        // Architectural facade accent lines
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-        ctx.lineWidth = Math.max(1, 1.5 * pBL_BotNear.scale);
-        ctx.beginPath();
-        ctx.moveTo(pBL_BotNear.x, pBL_BotNear.y);
-        ctx.lineTo(pBL_TopNear.x, pBL_TopNear.y);
-        ctx.moveTo(pBL_BotFar.x, pBL_BotFar.y);
-        ctx.lineTo(pBL_TopFar.x, pBL_TopFar.y);
-        ctx.stroke();
+      // Lit windows
+      ctx.fillStyle = 'rgba(254, 240, 138, 0.45)';
+      for (let wy = horizonBaseY - bh + 10; wy < horizonBaseY - 8; wy += 16) {
+        for (let wx = bx + 5; wx < bx + bw - 5; wx += 10) {
+          if ((Math.round(wx + wy)) % 3 === 0) {
+            ctx.fillRect(wx, wy, 3.5, 5);
+          }
+        }
       }
+      ctx.fillStyle = '#1e293b';
+    });
 
-      // Right Building
-      const pBR_BotNear = project(2.9, 0, bz, w, h, camZ, camY);
-      const pBR_BotFar = project(2.9, 0, bz + buildingStep, w, h, camZ, camY);
-      const pBR_TopNear = project(2.9, bHeight, bz, w, h, camZ, camY);
-      const pBR_TopFar = project(2.9, bHeight, bz + buildingStep, w, h, camZ, camY);
+    // Right city skyline
+    ctx.fillStyle = '#1e293b';
+    const rightBuildings = [
+      { x: 0.66, w: 0.07, h: 125 },
+      { x: 0.72, w: 0.08, h: 90 },
+      { x: 0.79, w: 0.09, h: 105 },
+      { x: 0.86, w: 0.07, h: 120 },
+      { x: 0.91, w: 0.09, h: 75 },
+    ];
+    rightBuildings.forEach((b) => {
+      const bx = b.x * w;
+      const bw = b.w * w;
+      const bh = b.h;
+      ctx.fillRect(bx, horizonBaseY - bh, bw, bh + 50);
 
-      if (pBR_BotNear && pBR_BotFar && pBR_TopNear && pBR_TopFar) {
-        ctx.fillStyle = bColor;
-        ctx.beginPath();
-        ctx.moveTo(pBR_BotNear.x, pBR_BotNear.y);
-        ctx.lineTo(pBR_BotFar.x, pBR_BotFar.y);
-        ctx.lineTo(pBR_TopFar.x, pBR_TopFar.y);
-        ctx.lineTo(pBR_TopNear.x, pBR_TopNear.y);
-        ctx.closePath();
-        ctx.fill();
-
-        // Architectural facade accent lines
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-        ctx.lineWidth = Math.max(1, 1.5 * pBR_BotNear.scale);
-        ctx.beginPath();
-        ctx.moveTo(pBR_BotNear.x, pBR_BotNear.y);
-        ctx.lineTo(pBR_TopNear.x, pBR_TopNear.y);
-        ctx.moveTo(pBR_BotFar.x, pBR_BotFar.y);
-        ctx.lineTo(pBR_TopFar.x, pBR_TopFar.y);
-        ctx.stroke();
+      // Lit windows
+      ctx.fillStyle = 'rgba(254, 240, 138, 0.45)';
+      for (let wy = horizonBaseY - bh + 10; wy < horizonBaseY - 8; wy += 16) {
+        for (let wx = bx + 5; wx < bx + bw - 5; wx += 10) {
+          if ((Math.round(wx + wy)) % 3 === 0) {
+            ctx.fillRect(wx, wy, 3.5, 5);
+          }
+        }
       }
-    }
+      ctx.fillStyle = '#1e293b';
+    });
 
     // 2. Draw Sidewalks (Calçadas com pavimento de concreto claro)
     if (pSideNearL && pSideFarL && pRoadNearL && pRoadFarL) {
