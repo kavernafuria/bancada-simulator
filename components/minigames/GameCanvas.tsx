@@ -176,11 +176,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     if (!steerSignal) return;
     const s = stateRef.current;
     if (s.stage !== 'playing') return;
-    const maxSteer = s.cameraMode === 'top_down' ? 1.15 : 1.05;
+    const maxSteer = s.cameraMode === 'top_down' ? 0.95 : 0.85;
     if (steerSignal.dir === 'left') {
-      s.targetX = Math.max(-maxSteer, s.targetX - 0.45);
+      s.targetX = Math.max(-maxSteer, s.targetX - 0.40);
     } else if (steerSignal.dir === 'right') {
-      s.targetX = Math.min(maxSteer, s.targetX + 0.45);
+      s.targetX = Math.min(maxSteer, s.targetX + 0.40);
     }
   }, [steerSignal]);
 
@@ -319,23 +319,23 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       const roll = Math.random();
 
       if (roll < 0.38) {
-        // Barras de Ferro (Iron bars in clusters along double yellow center line)
-        const lx = (Math.random() - 0.5) * 0.25;
+        // Barras de Ferro (Iron bars in clusters)
+        const lx = (Math.random() - 0.5) * 1.5;
         const count = 2 + Math.floor(Math.random() * 3);
         for (let k = 0; k < count; k++) {
           s.items.push({
             id: `iron_${itemId++}`,
-            x: Math.max(-0.4, Math.min(0.4, lx + (k - count / 2) * 0.12)),
+            x: Math.max(-1.3, Math.min(1.3, lx + (k - count / 2) * 0.2)),
             z: z + k * 18,
             type: 'iron_bar',
             collected: false,
           });
         }
       } else if (roll < 0.68) {
-        // Rojões (Fireworks bundle along double yellow center line matching Image 2!)
+        // Rojões (Fireworks)
         s.items.push({
           id: `fw_${itemId++}`,
-          x: (Math.random() - 0.5) * 0.25,
+          x: (Math.random() - 0.5) * 1.6,
           z,
           type: 'firework',
           collected: false,
@@ -386,11 +386,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       const s = stateRef.current;
       if (s.stage !== 'playing') return;
 
-      const maxSteer = s.cameraMode === 'top_down' ? 1.15 : 1.05;
+      const maxSteer = s.cameraMode === 'top_down' ? 0.95 : 0.85;
       if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
-        s.targetX = Math.max(-maxSteer, s.targetX - 0.4);
+        s.targetX = Math.max(-maxSteer, s.targetX - 0.35);
       } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
-        s.targetX = Math.min(maxSteer, s.targetX + 0.4);
+        s.targetX = Math.min(maxSteer, s.targetX + 0.35);
       } else if (e.key === ' ' || e.key === 'f' || e.key === 'F') {
         launchFireworks(2);
       }
@@ -439,7 +439,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
         // Smoothly interpolate player X with high responsiveness
         s.playerX += (s.targetX - s.playerX) * 0.22;
-        const maxBound = s.cameraMode === 'top_down' ? 1.15 : 1.02;
+        const maxBound = s.cameraMode === 'top_down' ? 0.95 : 0.85;
         s.playerX = Math.max(-maxBound, Math.min(maxBound, s.playerX));
 
         // Flares decay over time
@@ -1250,105 +1250,91 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       ctx.fillStyle = roadGrad;
       ctx.fill();
 
-      // Solid Yellow Outer Boundary Lines (Separating asphalt from sidewalk, matching Image 1 & 2!)
-      ctx.strokeStyle = '#facc15';
-      ctx.lineWidth = Math.max(2, 4.5 * pRoadNearL.scale);
+      // White Road Boundary Lines on outer edges
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = Math.max(1.5, 4 * pRoadNearL.scale);
       ctx.beginPath();
       ctx.moveTo(pRoadNearL.x, pRoadNearL.y);
       ctx.lineTo(pRoadFarL.x, pRoadFarL.y);
       ctx.moveTo(pRoadNearR.x, pRoadNearR.y);
       ctx.lineTo(pRoadFarR.x, pRoadFarR.y);
       ctx.stroke();
-
-      // Bold Double Yellow Center Line down the middle of street (x = -0.06 & x = +0.06, matching Image 1 & 2!)
-      const pCenterNearL = project(-0.06, 0, nearZ, w, h, camZ, camY);
-      const pCenterFarL = project(-0.06, 0, farZ, w, h, camZ, camY);
-      const pCenterNearR = project(0.06, 0, nearZ, w, h, camZ, camY);
-      const pCenterFarR = project(0.06, 0, farZ, w, h, camZ, camY);
-
-      if (pCenterNearL && pCenterFarL && pCenterNearR && pCenterFarR) {
-        ctx.strokeStyle = '#eab308';
-        ctx.lineWidth = Math.max(1.8, 3.8 * pCenterNearL.scale);
-        ctx.beginPath();
-        ctx.moveTo(pCenterNearL.x, pCenterNearL.y);
-        ctx.lineTo(pCenterFarL.x, pCenterFarL.y);
-        ctx.moveTo(pCenterNearR.x, pCenterNearR.y);
-        ctx.lineTo(pCenterFarR.x, pCenterFarR.y);
-        ctx.stroke();
-      }
     }
 
-    // 5. DRAW ICONIC FLAMING OIL BARRELS ALONG SIDEWALK CURBS (Barris em Chamas das Imagens 1 & 2!)
-    const barrelStep = 75;
-    const startBarrelZ = Math.floor(camZ / barrelStep) * barrelStep;
-    for (let bz = startBarrelZ; bz < farZ; bz += barrelStep) {
-      if (bz < nearZ) continue;
+    // 5. DRAW REALISTIC URBAN STREET LAMPS & TREES ALONG SIDEWALKS (Rua Urbana Normal)
+    const lampStep = 95;
+    const startLampZ = Math.floor(camZ / lampStep) * lampStep;
+    for (let lz = startLampZ; lz < farZ; lz += lampStep) {
+      if (lz < nearZ) continue;
 
-      const barrelSides = [-2.15, 2.15];
-      barrelSides.forEach((bx) => {
-        const pB = project(bx, 0, bz, w, h, camZ, camY);
-        if (pB && pB.scale > 0.035) {
-          const bScale = pB.scale;
-          const bW = 16 * bScale;
-          const bH = 24 * bScale;
+      const lampSides = [-2.4, 2.4];
+      lampSides.forEach((lx) => {
+        const pL = project(lx, 0, lz, w, h, camZ, camY);
+        if (pL && pL.scale > 0.035) {
+          const lScale = pL.scale;
+          const poleH = 75 * lScale;
+          const isLeft = lx < 0;
 
-          // Warm fire ground glow on sidewalk
-          const fireGlowR = 30 * bScale;
-          const fireGlow = ctx.createRadialGradient(pB.x, pB.y, 2, pB.x, pB.y, fireGlowR);
-          fireGlow.addColorStop(0, 'rgba(249, 115, 22, 0.5)');
-          fireGlow.addColorStop(0.5, 'rgba(239, 68, 68, 0.2)');
-          fireGlow.addColorStop(1, 'rgba(249, 115, 22, 0)');
-          ctx.fillStyle = fireGlow;
+          // Warm street light cone pool on sidewalk
+          const glowR = 42 * lScale;
+          const lampGlow = ctx.createRadialGradient(pL.x, pL.y, 2, pL.x, pL.y, glowR);
+          lampGlow.addColorStop(0, 'rgba(254, 240, 138, 0.3)');
+          lampGlow.addColorStop(0.5, 'rgba(253, 224, 71, 0.12)');
+          lampGlow.addColorStop(1, 'rgba(254, 240, 138, 0)');
+          ctx.fillStyle = lampGlow;
           ctx.beginPath();
-          ctx.ellipse(pB.x, pB.y, fireGlowR, fireGlowR * 0.4, 0, 0, Math.PI * 2);
+          ctx.ellipse(pL.x, pL.y, glowR, glowR * 0.4, 0, 0, Math.PI * 2);
           ctx.fill();
 
-          // Black Steel Oil Barrel Body
-          const bGrad = ctx.createLinearGradient(pB.x - bW / 2, pB.y - bH, pB.x + bW / 2, pB.y);
-          bGrad.addColorStop(0, '#475569');
-          bGrad.addColorStop(0.3, '#1e293b');
-          bGrad.addColorStop(1, '#09090b');
-          ctx.fillStyle = bGrad;
+          // Metallic Lamp Pole
+          ctx.strokeStyle = '#475569';
+          ctx.lineWidth = Math.max(1.5, 3.5 * lScale);
           ctx.beginPath();
-          ctx.roundRect(pB.x - bW / 2, pB.y - bH, bW, bH, 3 * bScale);
-          ctx.fill();
-          ctx.strokeStyle = '#64748b';
-          ctx.lineWidth = Math.max(1, 1.5 * bScale);
+          ctx.moveTo(pL.x, pL.y);
+          ctx.lineTo(pL.x, pL.y - poleH);
+          const armDir = isLeft ? 1 : -1;
+          const armX = pL.x + armDir * 14 * lScale;
+          const armY = pL.y - poleH - 6 * lScale;
+          ctx.lineTo(armX, armY);
           ctx.stroke();
 
-          // Metal Rings on Barrel Body
-          ctx.strokeStyle = '#94a3b8';
-          ctx.lineWidth = Math.max(1, 1.2 * bScale);
-          ctx.beginPath();
-          ctx.moveTo(pB.x - bW / 2, pB.y - bH * 0.7);
-          ctx.lineTo(pB.x + bW / 2, pB.y - bH * 0.7);
-          ctx.moveTo(pB.x - bW / 2, pB.y - bH * 0.3);
-          ctx.lineTo(pB.x + bW / 2, pB.y - bH * 0.3);
-          ctx.stroke();
-
-          // Roaring Fire Flame on top of Barrel (Animated)
-          const flameTime = performance.now() * 0.009 + bz * 0.1;
-          const flameH = (20 + Math.sin(flameTime) * 5) * bScale;
-          const flameW = 14 * bScale;
-          const flameX = pB.x;
-          const flameY = pB.y - bH;
-
-          // Outer Orange/Red Flame
-          ctx.fillStyle = '#f97316';
-          ctx.beginPath();
-          ctx.moveTo(flameX - flameW / 2, flameY);
-          ctx.quadraticCurveTo(flameX - flameW * 0.4, flameY - flameH * 0.6, flameX, flameY - flameH);
-          ctx.quadraticCurveTo(flameX + flameW * 0.4, flameY - flameH * 0.6, flameX + flameW / 2, flameY);
-          ctx.closePath();
-          ctx.fill();
-
-          // Inner Bright Yellow Hot Flame Core
+          // Fixture / Lamp Bulb
           ctx.fillStyle = '#fef08a';
           ctx.beginPath();
-          ctx.moveTo(flameX - flameW * 0.28, flameY);
-          ctx.quadraticCurveTo(flameX, flameY - flameH * 0.7, flameX, flameY - flameH * 0.85);
-          ctx.quadraticCurveTo(flameX, flameY - flameH * 0.7, flameX + flameW * 0.28, flameY);
-          ctx.closePath();
+          ctx.arc(armX, armY, Math.max(2, 4.5 * lScale), 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+    }
+
+    // Urban Trees along sidewalks
+    const treeStep = 135;
+    const startTreeZ = Math.floor(camZ / treeStep) * treeStep + 45;
+    for (let tz = startTreeZ; tz < farZ; tz += treeStep) {
+      if (tz < nearZ) continue;
+
+      const treeSides = [-2.65, 2.65];
+      treeSides.forEach((tx) => {
+        const pT = project(tx, 0, tz, w, h, camZ, camY);
+        if (pT && pT.scale > 0.035) {
+          const tScale = pT.scale;
+          const trunkH = 50 * tScale;
+          const crownR = 24 * tScale;
+
+          // Tree trunk
+          ctx.fillStyle = '#451a03';
+          ctx.fillRect(pT.x - 3 * tScale, pT.y - trunkH, 6 * tScale, trunkH);
+
+          // Foliage crown
+          ctx.fillStyle = '#15803d';
+          ctx.beginPath();
+          ctx.arc(pT.x, pT.y - trunkH - crownR * 0.6, crownR, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Highlights on leaves
+          ctx.fillStyle = '#22c55e';
+          ctx.beginPath();
+          ctx.arc(pT.x - crownR * 0.3, pT.y - trunkH - crownR * 0.9, crownR * 0.5, 0, Math.PI * 2);
           ctx.fill();
         }
       });
@@ -1858,12 +1844,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const fanPositions: { x: number; z: number; hasIron: boolean; hasFirework: boolean }[] = [];
 
     for (let i = 0; i < maxFansDrawn; i++) {
-      // Tight golden spiral distribution clamped strictly inside asphalt road boundaries (X: -1.48 to 1.48)
+      // Tight golden spiral distribution clamped strictly inside asphalt road boundaries (X: -1.20 to 1.20)
       const angle = i * 2.39996;
       const dist = Math.sqrt((i + 1) / maxFansDrawn) * crowdSpread;
-      const spreadFactor = isTopDown ? 0.50 : 0.40;
+      const spreadFactor = isTopDown ? 0.42 : 0.30;
       const rawFx = s.playerX + Math.cos(angle) * dist * spreadFactor;
-      const maxFanRoadX = isTopDown ? 1.62 : 1.48;
+      const maxFanRoadX = isTopDown ? 1.35 : 1.20;
       const fx = Math.max(-maxFanRoadX, Math.min(maxFanRoadX, rawFx));
       const fz = s.playerZ + Math.sin(angle) * dist * (isTopDown ? 16 : 13);
 
@@ -1883,7 +1869,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           ctx,
           p.x,
           p.y,
-          isTopDown ? p.scale * 0.52 : p.scale * 0.70,
+          isTopDown ? p.scale * 0.52 : p.scale * 0.68,
           s.playerTeam,
           fan.hasIron,
           fan.hasFirework,
@@ -1946,88 +1932,58 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     }
 
     // DRAW CLASH ARENA TOP HUD (Clean minimalistic duel score)
-    // DRAW TOP SCOREBOARD HUD PILL (Matching Image 1 & 2!)
-    const hudY = 38;
-    const hudCenterX = w / 2;
+    if (s.stage === 'clash') {
+      const hudY = 42;
+      const hudCenterX = w / 2;
 
-    const pillW = Math.min(330, w * 0.82);
-    const sideBoxW = (pillW - 74) / 2;
-    const pillH = 40;
+      // Center VS Badge
+      const vsR = 22;
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.arc(hudCenterX, hudY, vsR, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 3;
+      ctx.stroke();
 
-    // Left Green Pill (Player Torcida Count, e.g. 530)
-    ctx.save();
-    ctx.fillStyle = '#22c55e'; // Vibrant Green matching Image 1
-    ctx.beginPath();
-    ctx.roundRect(hudCenterX - pillW / 2, hudY - pillH / 2, sideBoxW, pillH, 12);
-    ctx.fill();
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
+      ctx.fillStyle = '#000000';
+      ctx.font = "900 17px 'Teko', sans-serif";
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('VS', hudCenterX, hudY);
 
-    // Player Green Circle Icon
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.arc(hudCenterX - pillW / 2 + 18, hudY, 10, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#15803d';
-    ctx.beginPath();
-    ctx.arc(hudCenterX - pillW / 2 + 18, hudY, 7, 0, Math.PI * 2);
-    ctx.fill();
+      // Left Player Pill (Showing exact bonequinhos count, pista overall & power)
+      const pillWidth = 185;
+      const pillHeight = 36;
+      ctx.fillStyle = '#16a34a';
+      ctx.beginPath();
+      ctx.roundRect(hudCenterX - vsR - 8 - pillWidth, hudY - pillHeight / 2, pillWidth, pillHeight, 8);
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
 
-    // Player Count Text (e.g. 530)
-    ctx.fillStyle = '#ffffff';
-    ctx.font = "900 22px 'Teko', sans-serif";
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(`${s.crowdCount}`, hudCenterX - pillW / 2 + sideBoxW / 2 + 10, hudY + 1);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = "bold 17px 'Teko', sans-serif";
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`👥 ${s.crowdCount}  |  PISTA ${s.playerTeam.pistaOverall || 88}  |  ⚡${Math.round(s.clashPlayerPower)}`, hudCenterX - vsR - 8 - pillWidth / 2, hudY);
 
-    // Right Red Pill (Rival Torcida Count, e.g. 480)
-    ctx.fillStyle = '#ef4444'; // Vibrant Red matching Image 1
-    ctx.beginPath();
-    ctx.roundRect(hudCenterX + pillW / 2 - sideBoxW, hudY - pillH / 2, sideBoxW, pillH, 12);
-    ctx.fill();
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
+      // Right Rival Pill (Showing exact rival count, pista overall & power)
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      ctx.roundRect(hudCenterX + vsR + 8, hudY - pillHeight / 2, pillWidth, pillHeight, 8);
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
 
-    // Rival Red Circle Icon
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.arc(hudCenterX + pillW / 2 - 18, hudY, 10, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#b91c1c';
-    ctx.beginPath();
-    ctx.arc(hudCenterX + pillW / 2 - 18, hudY, 7, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Rival Count Text (e.g. 480)
-    ctx.fillStyle = '#ffffff';
-    ctx.font = "900 22px 'Teko', sans-serif";
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(`${s.stage === 'clash' ? Math.round(s.clashRivalPower) : s.rivalCount}`, hudCenterX + pillW / 2 - sideBoxW / 2 - 10, hudY + 1);
-
-    // Center VS Box & Level Text (Matching Image 1!)
-    ctx.fillStyle = '#1e293b';
-    ctx.beginPath();
-    ctx.roundRect(hudCenterX - 32, hudY - pillH / 2 - 2, 64, pillH + 4, 8);
-    ctx.fill();
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // "VS" Text
-    ctx.fillStyle = '#ffffff';
-    ctx.font = "900 18px 'Teko', sans-serif";
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('VS', hudCenterX, hudY - 5);
-
-    // "LEVEL X" Text
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = "bold 9px sans-serif";
-    ctx.fillText(`LEVEL ${s.level}`, hudCenterX, hudY + 9);
-    ctx.restore();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = "bold 17px 'Teko', sans-serif";
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`👥 ${s.rivalCount}  |  PISTA ${s.rivalTeam.pistaOverall || 88}  |  ⚡${Math.round(s.clashRivalPower)}`, hudCenterX + vsR + 8 + pillWidth / 2, hudY);
+    }
 
     // DRAW PARTICLES
     s.particles.forEach((p) => {
@@ -2366,8 +2322,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
     const deltaX = e.clientX - s.dragStartX;
     const canvasWidth = canvasRef.current?.clientWidth || window.innerWidth;
-    const normalizedDelta = (deltaX / (canvasWidth * 0.4)) * 1.6;
-    const maxSteer = s.cameraMode === 'top_down' ? 1.15 : 1.05;
+    const normalizedDelta = (deltaX / (canvasWidth * 0.4)) * 1.4;
+    const maxSteer = s.cameraMode === 'top_down' ? 0.95 : 0.85;
 
     s.targetX = Math.max(-maxSteer, Math.min(maxSteer, s.dragStartPlayerX + normalizedDelta));
   };
