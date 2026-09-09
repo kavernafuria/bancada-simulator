@@ -319,8 +319,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     // Generate items
     s.items = [];
     let itemId = 0;
-    for (let z = 140; z < len - 220; z += 90 + Math.random() * 70) {
-      if (s.gates.some((g) => Math.abs(g.z - z) < 60)) continue;
+    for (let z = 180; z < len - 220; z += 110 + Math.random() * 80) {
+      if (s.gates.some((g) => Math.abs(g.z - z) < 85)) continue;
       const roll = Math.random();
 
       if (roll < 0.38) {
@@ -1350,20 +1350,20 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       });
     }
 
-    // DRAW TRANSLUCENT ACRYLIC MULTIPLIER GATES (Idênticos à imagem 1!)
-    // DRAW TRANSLUCENT ACRYLIC MULTIPLIER GATES (Compact & Non-overlapping)
-    s.gates.forEach((gate) => {
-      if (gate.z < camZ || gate.z > camZ + 750) return;
+    // DRAW TRANSLUCENT ACRYLIC MULTIPLIER GATES (Z-Sorted & Perfectly Spaced)
+    const visibleGates = s.gates.filter((g) => g.z >= camZ && g.z <= camZ + 750);
+    visibleGates.sort((a, b) => b.z - a.z); // Render FAR gates first, NEAR gates last
 
-      const laneX = gate.lane === 'left' ? -0.68 : 0.68;
+    visibleGates.forEach((gate) => {
+      const laneX = gate.lane === 'left' ? -0.55 : 0.55;
       const pBottom = project(laneX, 0, gate.z, w, h, camZ, camY);
-      const pTop = project(laneX, 75, gate.z, w, h, camZ, camY);
+      const pTop = project(laneX, 70, gate.z, w, h, camZ, camY);
 
       if (!pBottom || !pTop) return;
 
       const isPositive = gate.type === 'add' || gate.type === 'mult';
-      const gateWidth = 115 * pBottom.scale;
-      const gateHeight = (pBottom.y - pTop.y);
+      const gateWidth = Math.min(w * 0.35, 68 * pBottom.scale);
+      const gateHeight = (pBottom.y - pTop.y) * 0.65;
 
       // Gate Ground Shadow (Soft colored tint on road)
       ctx.fillStyle = isPositive ? 'rgba(14, 165, 233, 0.2)' : 'rgba(239, 68, 68, 0.2)';
@@ -1414,10 +1414,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       ctx.fillText(valStr, pBottom.x, pTop.y + gateHeight * 0.48);
     });
 
-    // DRAW TRACK ITEMS (Compact, Elegant Size for Rojões, Barras & Bombas)
-    s.items.forEach((item) => {
-      if (item.collected || item.z < camZ || item.z > camZ + 700) return;
+    // DRAW TRACK ITEMS (Z-Sorted Compact Items)
+    const visibleItems = s.items.filter((item) => !item.collected && item.z >= camZ && item.z <= camZ + 700);
+    visibleItems.sort((a, b) => b.z - a.z);
 
+    visibleItems.forEach((item) => {
       const p = project(item.x, 8, item.z, w, h, camZ, camY);
       if (!p) return;
 
@@ -1917,14 +1918,14 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       }
     });
 
-    // Draw Crowd Counter Pill directly above the player mob
-    const pCenter = project(s.playerX, 70, s.playerZ, w, h, camZ, camY);
+    // Draw Crowd Counter Pill directly above the player mob heads (Compact Y height)
+    const pCenter = project(s.playerX, 32, s.playerZ, w, h, camZ, camY);
     if (pCenter && s.stage !== 'clash') {
       const labelText = `${s.crowdCount}`;
-      ctx.font = `bold ${Math.max(14, Math.round(26 * pCenter.scale))}px sans-serif`;
+      ctx.font = `900 ${Math.max(12, Math.round(20 * pCenter.scale))}px sans-serif`;
       const textWidth = ctx.measureText(labelText).width;
-      const pillW = textWidth + 30 * pCenter.scale;
-      const pillH = 32 * pCenter.scale;
+      const pillW = textWidth + 16 * pCenter.scale;
+      const pillH = 22 * pCenter.scale;
 
       ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
       ctx.strokeStyle = s.playerTeam.primaryColor;
