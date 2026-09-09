@@ -81,7 +81,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     isDragging: false,
     dragStartX: 0,
     dragStartPlayerX: 0,
-    trackLength: 2600 + Math.min(level * 400, 2000),
+    trackLength: 4200 + Math.min(level * 300, 1200),
     gates: [] as Gate[],
     items: [] as TrackItem[],
     projectiles: [] as Projectile[],
@@ -224,7 +224,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   // Generate track on mount or reset
   const initTrack = () => {
     const s = stateRef.current;
-    const len = 2600 + Math.min(s.level * 400, 2000);
+    const len = 4200 + Math.min(s.level * 300, 1200);
     s.trackLength = len;
     s.playerZ = 0;
     s.playerX = 0;
@@ -245,8 +245,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const basePlayerContingent = (s.playerTeam.contingent || 75) + s.upgrades.startingMembers * 2;
     s.crowdCount = basePlayerContingent;
 
-    // Generate gates: realistic reinforcements that respect the ±20% crowd dynamic
-    const gateZPositions = [350, 750, 1150, 1550, 1950, 2350, 2750].filter((z) => z < len - 300);
+    // Generate gates: realistic reinforcements spaced evenly along 20-25s percurso
+    const gateZPositions = [500, 1000, 1500, 2000, 2500, 3000, 3500, 3900].filter((z) => z < len - 250);
     s.gates = [];
 
     gateZPositions.forEach((z, idx) => {
