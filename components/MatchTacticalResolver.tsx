@@ -1045,7 +1045,17 @@ export const MatchTacticalResolver: React.FC<{
         />
       )}
       {activeMiniGame === 'whack' && (
-        <WhackCombat opponentTier={context.opponentTier} onFinish={handleMiniGameFinish} />
+        <Runner3DGame
+          playerTorcidaName={context.playerTorcidaName || "Torcida Organizada"}
+          playerClubName={context.playerClubName || "Nosso Clube"}
+          rivalTorcidaName={context.rivalTorcidaName || "Torcida Rival"}
+          rivalClubName={context.rivalClubName || "Rival FC"}
+          contingente={context.contingente ?? 50}
+          poderPista={context.poderPista ?? 50}
+          opponentTier={context.opponentTier}
+          gameMode="clash_bars"
+          onFinish={handleMiniGameFinish}
+        />
       )}
       {activeMiniGame === 'punch' && (
         <PunchFrontCombat opponentTier={context.opponentTier} onFinish={handleMiniGameFinish} />

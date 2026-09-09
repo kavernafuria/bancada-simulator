@@ -16,6 +16,7 @@ interface Runner3DGameProps {
   contingente: number; // Atributo Contingente do jogador (10 a 100)
   poderPista: number;  // Atributo Poder de Pista do jogador (10 a 100)
   opponentTier?: 'S' | 'A' | 'B';
+  gameMode?: 'runner' | 'clash_bars'; // 'runner' (Avanço na Pista - Visão 3D) ou 'clash_bars' (Confronto de Pista - Visão Top-Down)
   onFinish: (result: MiniGameResult) => void;
 }
 
@@ -30,6 +31,7 @@ export const Runner3DGame: React.FC<Runner3DGameProps> = ({
   contingente = 50,
   poderPista = 50,
   opponentTier = 'A',
+  gameMode = 'runner',
   onFinish,
 }) => {
   // Configuração dos times para o motor 3D
@@ -74,11 +76,11 @@ export const Runner3DGame: React.FC<Runner3DGameProps> = ({
   // Estados do jogo
   const [stage, setStage] = useState<'menu' | 'playing' | 'clash' | 'victory' | 'defeat'>('menu');
   const [crowdCount, setCrowdCount] = useState<number>(Math.max(12, Math.floor(contingente * 0.4)));
-  const [ironBars, setIronBars] = useState<number>(0);
+  const [ironBars, setIronBars] = useState<number>(gameMode === 'clash_bars' ? 5 : 0);
   const [fireworks, setFireworks] = useState<number>(3);
   const [flaresActive, setFlaresActive] = useState<number>(0);
   const [distanceProgress, setDistanceProgress] = useState<number>(0);
-  const [cameraMode, setCameraMode] = useState<CameraMode>('classic_3d');
+  const [cameraMode, setCameraMode] = useState<CameraMode>(gameMode === 'clash_bars' ? 'top_down' : 'classic_3d');
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [fireworkTriggerSignal, setFireworkTriggerSignal] = useState<number>(0);
   const [steerSignal, setSteerSignal] = useState<{ dir: 'left' | 'right'; timestamp: number } | undefined>(undefined);
@@ -219,7 +221,7 @@ export const Runner3DGame: React.FC<Runner3DGameProps> = ({
     // Transição direta para o Relatório Pós-Jogo e Crônica Principal do Simulador
     setTimeout(() => {
       onFinish({
-        gameType: 'runner_3d',
+        gameType: gameMode === 'clash_bars' ? 'whack' : 'runner_3d',
         modifier,
         rank,
         description,
@@ -232,10 +234,10 @@ export const Runner3DGame: React.FC<Runner3DGameProps> = ({
       {/* HEADER BAR */}
       <div className="w-full bg-zinc-900/90 border-b border-zinc-800 p-3 flex items-center justify-between z-20">
         <div className="flex items-center space-x-2">
-          <span className="text-xl">🏃</span>
+          <span className="text-xl">{gameMode === 'clash_bars' ? '⚔️' : '🏃'}</span>
           <div>
             <h3 className="text-xs font-black text-amber-400 uppercase tracking-wide">
-              RUNNER 3D DA LINHA DE FRENTE
+              {gameMode === 'clash_bars' ? 'CONFRONTO DE PISTA 3D • BARRA DE FERRO' : 'RUNNER 3D: AVANÇO NA PISTA'}
             </h3>
             <p className="text-[10px] text-zinc-400">
               {playerTorcidaName} vs {rivalTorcidaName}
@@ -288,7 +290,7 @@ export const Runner3DGame: React.FC<Runner3DGameProps> = ({
           <div className="absolute inset-0 bg-black/90 backdrop-blur-md flex flex-col items-center justify-between p-4 sm:p-6 text-center z-30 overflow-y-auto space-y-3 sm:space-y-4">
             <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 text-[10px] sm:text-xs font-black uppercase">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>MINIGAME RUNNER 3D DA LINHA DE FRENTE</span>
+              <span>{gameMode === 'clash_bars' ? 'CONFRONTO 3D • VISÃO TOP-DOWN' : 'RUNNER 3D • VISÃO 3D CLÁSSICA'}</span>
             </div>
 
             <h2 className="text-base sm:text-xl font-black text-white uppercase tracking-wider">
@@ -296,7 +298,9 @@ export const Runner3DGame: React.FC<Runner3DGameProps> = ({
             </h2>
 
             <p className="text-[11px] sm:text-xs text-zinc-300 max-w-md leading-relaxed">
-              Guie a linha de frente da torcida pela avenida! Passe pelos portões de reforço, recolha <strong className="text-amber-400">Barras de Ferro 🪵</strong> e <strong className="text-red-400">Rojões 🎆</strong>, desvie de bombas da PM e enfrente a emboscada rival.
+              {gameMode === 'clash_bars'
+                ? 'Comande a linha de frente de cima (visão top-down)! Use Barras de Ferro 🪵 e Rojões 🎆 para romper a contenção rival no confronto de pista.'
+                : 'Guie o bonde da torcida pela avenida (visão 3D clássica)! Passe pelos portões de reforço, desvie de obstáculos e avance em direção ao estádio.'}
             </p>
 
             <div className="grid grid-cols-2 gap-2.5 bg-zinc-900/90 border border-zinc-800 p-2.5 rounded-xl text-left text-xs w-full max-w-sm">
@@ -318,8 +322,8 @@ export const Runner3DGame: React.FC<Runner3DGameProps> = ({
               }}
               className="w-full max-w-xs py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black font-black text-xs sm:text-sm uppercase tracking-wider transition-all shadow-2xl active:scale-95 cursor-pointer flex items-center justify-center space-x-2 z-40 touch-manipulation my-1 shrink-0 sticky bottom-1 border-2 border-amber-300"
             >
-              <Play className="w-4 h-4 fill-black" />
-              <span>INICIAR MARCHA NA PISTA (3D)</span>
+              {gameMode === 'clash_bars' ? <Swords className="w-4 h-4 fill-black" /> : <Play className="w-4 h-4 fill-black" />}
+              <span>{gameMode === 'clash_bars' ? 'INICIAR CONFRONTO (TOP-DOWN)' : 'INICIAR MARCHA NA PISTA (3D)'}</span>
             </button>
           </div>
         )}
