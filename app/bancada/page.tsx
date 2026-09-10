@@ -55,12 +55,15 @@ import confetti from "canvas-confetti";
 import { MatchTacticalResolver, MatchContext } from "@/components/MatchTacticalResolver";
 import { TorcidaUnicaModal } from "@/components/TorcidaUnicaModal";
 import { PressConferenceModal } from "@/components/PressConferenceModal";
+import { ElectionCrisisModal } from "@/components/ElectionCrisisModal";
 import {
   GAME_BALANCE,
   getOfficialTorcidas,
   isPrincipalRival,
   getAlliancesData,
   createCustomTorcidaWithArchetype,
+  applyTierElectionCrisis,
+  ElectionCrisisInfo,
   getAnnualPipelineWithMatches,
   getActionStepEvents,
   getTransportOptions,
@@ -109,6 +112,7 @@ import {
   PressConference,
   PressConferenceChoice,
   getPressConference,
+  PRESS_CONFERENCES,
 } from "@/lib/bancada_engine";
 import { isInteriorSP } from "@/lib/season_events";
 
@@ -375,6 +379,8 @@ export default function App() {
   const [activeNewsReel, setActiveNewsReel] = useState<NewsReelEvent | null>(null);
   const [activeMilestoneDecision, setActiveMilestoneDecision] = useState<SeasonalMilestoneDefinition | null>(null);
   const [rivalPistaBonusMap, setRivalPistaBonusMap] = useState<Record<string, number>>({});
+  const [showElectionCrisisModal, setShowElectionCrisisModal] = useState<boolean>(false);
+  const [activeElectionCrisis, setActiveElectionCrisis] = useState<ElectionCrisisInfo | null>(null);
 
   const handleDownloadProjectZip = async () => {
     try {
@@ -563,18 +569,21 @@ export default function App() {
 
     if (startMode === "HISTORICA") {
       const selected = officialList.find((t) => t.torcida === selectedOfficialTorcidaName) || officialList[0];
-      const torcidaWithColors: OfficialTorcida = {
+      const baseTorcida: OfficialTorcida = {
         ...selected,
         primaryColor,
         secondaryColor,
       };
+
+      const torcidaWithColors = applyTierElectionCrisis(baseTorcida);
+
       setCurrentTorcida(torcidaWithColors);
       setStats({
-        contingente: selected.contingente,
-        pressao_bancada: selected.pressao_bancada,
-        poder_pista: selected.poder_pista,
-        caravana: selected.caravana,
-        autonomia_financeira: selected.autonomia_financeira,
+        contingente: torcidaWithColors.contingente,
+        pressao_bancada: torcidaWithColors.pressao_bancada,
+        poder_pista: torcidaWithColors.poder_pista,
+        caravana: torcidaWithColors.caravana,
+        autonomia_financeira: torcidaWithColors.autonomia_financeira,
       });
       setStateTrackers({
         moral: 75,
@@ -582,23 +591,36 @@ export default function App() {
         relacao_clube: 15,
         respeito_nacional: 80,
       });
-      setBankBalance(selected.autonomia_financeira * 700);
+      setBankBalance(torcidaWithColors.autonomia_financeira * 700);
       setIsBannedByMP(false);
       setDebtYears(0);
       setSeason(1);
       setPipelineIndex(0);
       const objectives = generateSeasonObjectives(1, torcidaWithColors, "LUTANDO_ACESSO");
       setSeasonObjectives(objectives);
-      setHistoryLog([
+
+      const historyEvents = [
         `[Ano 1 - Liderança Histórica] Você assumiu a diretoria da consagrada ${selected.torcida} nas cores oficiais apoiando o ${selected.clube}.`,
-      ]);
+      ];
+
+      if (torcidaWithColors.electionCrisis?.hasCrisis) {
+        setActiveElectionCrisis(torcidaWithColors.electionCrisis);
+        setShowElectionCrisisModal(true);
+        historyEvents.unshift(
+          `[Ano 1 - Racha Eleitoral] A eleição conturbada gerou dissidência política: desfiliação de ${torcidaWithColors.electionCrisis.lostContingente} associados e queda de pista (-${torcidaWithColors.electionCrisis.lostPista}).`
+        );
+      } else {
+        setActivePressConference(PRESS_CONFERENCES.ENTREVISTA_INICIAL_FESTIVA);
+      }
+
+      setHistoryLog(historyEvents);
       setHasOwnHeadquarters(selected.tier === "S" || selected.tier === "S-");
       setBateriaDurability(100);
       setPyroStockCount(0);
       setShowPresidentElectionModal(true);
       setIsGameOver(false);
-    setRetryUsedCurrentMatch(false);
-    setIsRetryWithAdAttempt(false);
+      setRetryUsedCurrentMatch(false);
+      setIsRetryWithAdAttempt(false);
       setIsStarted(true);
       return;
     }
@@ -615,26 +637,42 @@ export default function App() {
       primaryColor,
       secondaryColor
     );
-    setCurrentTorcida(torcida);
+
+    const torcidaWithCrisis = applyTierElectionCrisis(torcida);
+
+    setCurrentTorcida(torcidaWithCrisis);
     setStats({
-      contingente: torcida.contingente,
-      pressao_bancada: torcida.pressao_bancada,
-      poder_pista: torcida.poder_pista,
-      caravana: torcida.caravana,
-      autonomia_financeira: torcida.autonomia_financeira,
+      contingente: torcidaWithCrisis.contingente,
+      pressao_bancada: torcidaWithCrisis.pressao_bancada,
+      poder_pista: torcidaWithCrisis.poder_pista,
+      caravana: torcidaWithCrisis.caravana,
+      autonomia_financeira: torcidaWithCrisis.autonomia_financeira,
     });
     setStateTrackers(state);
 
-    setBankBalance(torcida.autonomia_financeira * 350);
+    setBankBalance(torcidaWithCrisis.autonomia_financeira * 350);
     setIsBannedByMP(false);
     setDebtYears(0);
     setSeason(1);
     setPipelineIndex(0);
-    const objectives = generateSeasonObjectives(1, torcida, "LUTANDO_ACESSO");
+    const objectives = generateSeasonObjectives(1, torcidaWithCrisis, "LUTANDO_ACESSO");
     setSeasonObjectives(objectives);
-    setHistoryLog([
+
+    const customHistoryEvents = [
       `[Ano 1 - Fundação] Fundada a nova torcida ${torcida.torcida} com pavilhão nas cores ${primaryColor} e ${secondaryColor} no perfil "${ARCHETYPES[selectedArchetype].name}" apoiando o ${torcida.clube}.`,
-    ]);
+    ];
+
+    if (torcidaWithCrisis.electionCrisis?.hasCrisis) {
+      setActiveElectionCrisis(torcidaWithCrisis.electionCrisis);
+      setShowElectionCrisisModal(true);
+      customHistoryEvents.unshift(
+        `[Ano 1 - Racha Eleitoral] Posse tumultuada da diretoria gerou dissidência: perda de ${torcidaWithCrisis.electionCrisis.lostContingente} membros e desaceleração de pista (-${torcidaWithCrisis.electionCrisis.lostPista}).`
+      );
+    } else {
+      setActivePressConference(PRESS_CONFERENCES.ENTREVISTA_INICIAL_FESTIVA);
+    }
+
+    setHistoryLog(customHistoryEvents);
     setHasOwnHeadquarters(false);
     setBateriaDurability(100);
     setPyroStockCount(0);
@@ -4285,6 +4323,18 @@ export default function App() {
             }
             setHistoryLog((prev) => [`[Coletiva de Imprensa] ${choice.log}`, ...prev]);
             setActivePressConference(null);
+          }}
+        />
+      )}
+
+      {/* ELECTION CRISIS / RACHA INTERNO MODAL */}
+      {showElectionCrisisModal && activeElectionCrisis && currentTorcida && (
+        <ElectionCrisisModal
+          torcida={currentTorcida}
+          crisis={activeElectionCrisis}
+          onDismiss={() => {
+            setShowElectionCrisisModal(false);
+            setActivePressConference(PRESS_CONFERENCES.ENTREVISTA_INICIAL_RACHA);
           }}
         />
       )}

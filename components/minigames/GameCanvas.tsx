@@ -2117,8 +2117,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       }
     });
 
-    // DRAW FLOATING TEXTS (SCREEN SPACE)
-    s.floatingTexts.forEach((ft) => {
+    // DRAW FLOATING TEXTS (SCREEN SPACE WITH STAGGER OFFSET)
+    s.floatingTexts.forEach((ft, idx) => {
       ctx.save();
       ctx.globalAlpha = Math.max(0, ft.alpha);
       ctx.font = `bold 22px 'Teko', sans-serif`;
@@ -2127,7 +2127,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       ctx.lineWidth = 4;
       ctx.textAlign = 'center';
       const screenX = w / 2 + ft.x;
-      const screenY = h * 0.4 + ft.y;
+      const verticalStackOffset = idx * -28;
+      const screenY = h * 0.4 + ft.y + verticalStackOffset;
       ctx.strokeText(ft.text, screenX, screenY);
       ctx.fillText(ft.text, screenX, screenY);
       ctx.restore();

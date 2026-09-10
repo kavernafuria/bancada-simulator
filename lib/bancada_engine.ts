@@ -215,6 +215,22 @@ export interface ArchetypeDefinition {
   stateModifiers: Partial<StateTrackers>;
 }
 
+export interface ElectionCrisisInfo {
+  hasCrisis: boolean;
+  originalContingente: number;
+  originalPista: number;
+  originalBancada: number;
+  originalCaravana: number;
+  originalAutonomia: number;
+  lostContingente: number;
+  lostPista: number;
+  lostBancada: number;
+  lostCaravana: number;
+  lostAutonomia: number;
+  headline: string;
+  subheadline: string;
+}
+
 export interface OfficialTorcida {
   clube: string;
   torcida: string;
@@ -230,6 +246,7 @@ export interface OfficialTorcida {
   eixo_alianca: string;
   primaryColor?: string;
   secondaryColor?: string;
+  electionCrisis?: ElectionCrisisInfo;
 }
 
 export interface TorcidaColorPreset {
@@ -513,6 +530,58 @@ export function getOfficialTorcidas(): OfficialTorcida[] {
 
 export function getAlliancesData() {
   return alliancesData;
+}
+
+export function applyTierElectionCrisis(t: OfficialTorcida): OfficialTorcida {
+  const normalizedTier = (t.tier || "B").toUpperCase().trim();
+  const isHighTier = normalizedTier === "S" || normalizedTier === "S-" || normalizedTier === "A+" || normalizedTier === "A";
+
+  if (!isHighTier) {
+    return t;
+  }
+
+  const originalContingente = t.contingente;
+  const originalPista = t.poder_pista;
+  const originalBancada = t.pressao_bancada;
+  const originalCaravana = t.caravana;
+  const originalAutonomia = t.autonomia_financeira;
+
+  // Deductions: Contingente -25%, Pista -25%, Bancada -15%, Caravana -10%, Autonomia -10%
+  const newContingente = Math.max(15, Math.round(originalContingente * 0.75));
+  const newPista = Math.max(15, Math.round(originalPista * 0.75));
+  const newBancada = Math.max(15, Math.round(originalBancada * 0.85));
+  const newCaravana = Math.max(15, Math.round(originalCaravana * 0.90));
+  const newAutonomia = Math.max(15, Math.round(originalAutonomia * 0.90));
+
+  const lostContingente = originalContingente - newContingente;
+  const lostPista = originalPista - newPista;
+  const lostBancada = originalBancada - newBancada;
+  const lostCaravana = originalCaravana - newCaravana;
+  const lostAutonomia = originalAutonomia - newAutonomia;
+
+  return {
+    ...t,
+    contingente: newContingente,
+    poder_pista: newPista,
+    pressao_bancada: newBancada,
+    caravana: newCaravana,
+    autonomia_financeira: newAutonomia,
+    electionCrisis: {
+      hasCrisis: true,
+      originalContingente,
+      originalPista,
+      originalBancada,
+      originalCaravana,
+      originalAutonomia,
+      lostContingente,
+      lostPista,
+      lostBancada,
+      lostCaravana,
+      lostAutonomia,
+      headline: `TURBULÊNCIA POLÍTICA NA POSSE DA ${t.torcida.toUpperCase()}`,
+      subheadline: `Nova diretoria assume sob forte racha eleitoral. Sub-sedes de bairro rompem com a gestão, resultando em debandada de sócios (-${lostContingente}) e enfraquecimento de pista (-${lostPista}), bancada (-${lostBancada}), caravana (-${lostCaravana}) e autonomia (-${lostAutonomia}).`,
+    },
+  };
 }
 
 // Diminishing Returns Curve Math - strictly progressive
@@ -4054,6 +4123,113 @@ export interface PressConference {
 }
 
 export const PRESS_CONFERENCES: Record<string, PressConference> = {
+  ENTREVISTA_INICIAL_RACHA: {
+    id: "ENTREVISTA_INICIAL_RACHA",
+    triggerEvent: "Posse da Diretoria Pós-Racha Eleitoral",
+    title: "🎙️ COLETIVA DE POSSE: DEBANDADA DE SÓCIOS & NOVO MANDATO",
+    journalist: "Diogo Defante",
+    outlet: "Cazé TV",
+    question: "Presidente, a eleição tumultuada provocou uma debandada violenta de associados e desestruturou a pista. Como a diretoria planeja trazer essa galera de volta e qual a meta principal para o próximo mandato?",
+    choices: [
+      {
+        id: "RESP_RACHA_RECONCILIACAO",
+        type: "INSTITUCIONAL",
+        label: "🤝 Diálogo & Anistia aos Sócios",
+        badgeText: "RECONCILIAÇÃO DE MASSA",
+        answerText: "Portas abertas para todos os irmãos. Vamos anistiar os desligados e mostrar que a instituição está acima de qualquer disputa de chapa.",
+        statEffects: { contingente: 6, poder_pista: -2 },
+        stateEffects: { moral: 5 },
+        cashDelta: 5000,
+        log: "Discurso de anistia atraiu sócios de volta (+6 Massa, +R$ 5.000 em mensalidades).",
+        formattedDeltas: [
+          { label: "Retorno de Sócios", value: "+6 Massa", isPositive: true },
+          { label: "Apoio de Mensalidade", value: "+R$ 5.000", isPositive: true },
+          { label: "Moral da Agremiação", value: "+5", isPositive: true }
+        ]
+      },
+      {
+        id: "RESP_RACHA_PISTA",
+        type: "RADICAL",
+        label: "🥊 Resgate da Força de Pista",
+        badgeText: "RESPEITO DE RUA & LINHA DE FRENTE",
+        answerText: "Quem quiser sair que saia. Nossa prioridade é reorganizar a linha de frente de rua e restabelecer o respeito que essa camisa exige nas rodovias.",
+        statEffects: { poder_pista: 8, pressao_bancada: 5 },
+        stateEffects: { risco_mp: -5 },
+        log: "Foco na segurança de rua e alinhamento do bonde (+8 Pista, +5 Bancada).",
+        formattedDeltas: [
+          { label: "Reorganização de Pista", value: "+8 Pista", isPositive: true },
+          { label: "Pressão de Bancada", value: "+5", isPositive: true }
+        ]
+      },
+      {
+        id: "RESP_RACHA_GESTORA",
+        type: "GESTORA",
+        label: "💼 Autonomia Financeira & Estrutura",
+        badgeText: "GESTÃO DE CAIXA & QUADRA SOCIAL",
+        answerText: "Vamos falar de trabalho e caixa. Com finanças fortes e sede estruturada, o respeito volta naturalmente e o título no próximo mandato virá.",
+        statEffects: { autonomia_financeira: 10 },
+        cashDelta: 10000,
+        log: "Discurso focado em finanças e quadra (+10 Autonomia Financeira, +R$ 10.000 no Caixa).",
+        formattedDeltas: [
+          { label: "Aporte Financeiro", value: "+R$ 10.000", isPositive: true },
+          { label: "Autonomia Financeira", value: "+10", isPositive: true }
+        ]
+      }
+    ]
+  },
+
+  ENTREVISTA_INICIAL_FESTIVA: {
+    id: "ENTREVISTA_INICIAL_FESTIVA",
+    triggerEvent: "Posse Oficial da Nova Diretoria",
+    title: "🎙️ COLETIVA DE IMPRENSA DE APRESENTAÇÃO",
+    journalist: "Vladimir Bianchini",
+    outlet: "ESPN",
+    question: "Presidente, você assume hoje a liderança da agremiação! Qual a visão da diretoria para fortalecer a torcida e qual o grande objetivo para o próximo mandato?",
+    choices: [
+      {
+        id: "RESP_FESTIVA_MASSA",
+        type: "INSTITUCIONAL",
+        label: "👥 Expansão de Massa no Bairro",
+        badgeText: "CRESCIMENTO SOCIAL E POPULAR",
+        answerText: "Queremos dobrar o quadro de associados e levar a nossa bandeira para cada quebrada e subsede do estado.",
+        statEffects: { contingente: 8 },
+        stateEffects: { moral: 5 },
+        log: "Definiu como meta a expansão social no bairro (+8 Massa, +5 Moral).",
+        formattedDeltas: [
+          { label: "Expansão de Sócios", value: "+8 Massa", isPositive: true },
+          { label: "Moral da Agremiação", value: "+5", isPositive: true }
+        ]
+      },
+      {
+        id: "RESP_FESTIVA_PISTA",
+        type: "RADICAL",
+        label: "🚌 Respeito nas Estradas e Pista",
+        badgeText: "PRESENÇA EM COMBOIO & CORTEJO",
+        answerText: "Nosso objetivo é garantir que nenhuma caravana nossa seja intimidada e que o pavilhão imponha respeito em qualquer estádio do país.",
+        statEffects: { poder_pista: 8, caravana: 5 },
+        log: "Foco em presença de caravana e escolta de pista (+8 Pista, +5 Caravana).",
+        formattedDeltas: [
+          { label: "Poder de Pista", value: "+8 Pista", isPositive: true },
+          { label: "Força de Caravana", value: "+5 Caravana", isPositive: true }
+        ]
+      },
+      {
+        id: "RESP_FESTIVA_GESTORA",
+        type: "GESTORA",
+        label: "🚩 Independência Financeira & Loja Oficial",
+        badgeText: "AUTONOMIA E SEDE PRÓPRIA",
+        answerText: "A meta é a independência financeira total. Ter sede própria estruturada, produtos oficiais de qualidade e caixa forte.",
+        statEffects: { autonomia_financeira: 8 },
+        cashDelta: 8000,
+        log: "Meta fixada na autonomia financeira e loja (+8 Autonomia, +R$ 8.000 Caixa).",
+        formattedDeltas: [
+          { label: "Injeção no Caixa", value: "+R$ 8.000", isPositive: true },
+          { label: "Autonomia Financeira", value: "+8", isPositive: true }
+        ]
+      }
+    ]
+  },
+
   ENTREVISTA_TORCIDA_UNICA: {
     id: "ENTREVISTA_TORCIDA_UNICA",
     triggerEvent: "Pós-Decreto de Torcida Única pelo Ministério Público",
