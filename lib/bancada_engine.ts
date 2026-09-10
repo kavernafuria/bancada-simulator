@@ -4093,7 +4093,6 @@ export function resolveTorcidaUnicaAction(
   };
 }
 
-
 // ==========================================
 // MÓDULO 2: COLETIVAS DE IMPRENSA (DAMAGE CONTROL)
 // ==========================================
@@ -4129,7 +4128,7 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
     title: "🎙️ COLETIVA DE POSSE: DEBANDADA DE SÓCIOS & NOVO MANDATO",
     journalist: "Diogo Defante",
     outlet: "Cazé TV",
-    question: "Presidente, a eleição tumultuada provocou uma debandada violenta de associados e desestruturou a pista. Como a diretoria planeja trazer essa galera de volta e qual a meta principal para o próximo mandato?",
+    question: "Presidente, a eleição tumultuada provocou uma debandada de associados e desestruturou a pista. Como a diretoria planeja trazer essa galera de volta e qual a meta principal para o próximo mandato?",
     choices: [
       {
         id: "RESP_RACHA_RECONCILIACAO",
@@ -4137,14 +4136,14 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🤝 Diálogo & Anistia aos Sócios",
         badgeText: "RECONCILIAÇÃO DE MASSA",
         answerText: "Portas abertas para todos os irmãos. Vamos anistiar os desligados e mostrar que a instituição está acima de qualquer disputa de chapa.",
-        statEffects: { contingente: 6, poder_pista: -2 },
-        stateEffects: { moral: 5 },
-        cashDelta: 5000,
-        log: "Discurso de anistia atraiu sócios de volta (+6 Massa, +R$ 5.000 em mensalidades).",
+        statEffects: { contingente: 2, poder_pista: -1 },
+        stateEffects: { moral: 2 },
+        cashDelta: 1500,
+        log: "Discurso de anistia atraiu sócios de volta (+2 Massa, +R$ 1.500 no caixa).",
         formattedDeltas: [
-          { label: "Retorno de Sócios", value: "+6 Massa", isPositive: true },
-          { label: "Apoio de Mensalidade", value: "+R$ 5.000", isPositive: true },
-          { label: "Moral da Agremiação", value: "+5", isPositive: true }
+          { label: "Retorno de Sócios", value: "+2 Massa", isPositive: true },
+          { label: "Apoio de Mensalidade", value: "+R$ 1.500", isPositive: true },
+          { label: "Moral da Agremiação", value: "+2 Moral", isPositive: true }
         ]
       },
       {
@@ -4153,12 +4152,12 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🥊 Resgate da Força de Pista",
         badgeText: "RESPEITO DE RUA & LINHA DE FRENTE",
         answerText: "Quem quiser sair que saia. Nossa prioridade é reorganizar a linha de frente de rua e restabelecer o respeito que essa camisa exige nas rodovias.",
-        statEffects: { poder_pista: 8, pressao_bancada: 5 },
-        stateEffects: { risco_mp: -5 },
-        log: "Foco na segurança de rua e alinhamento do bonde (+8 Pista, +5 Bancada).",
+        statEffects: { poder_pista: 3, pressao_bancada: 2 },
+        stateEffects: { risco_mp: -2 },
+        log: "Foco na segurança de rua e alinhamento do bonde (+3 Pista, +2 Bancada).",
         formattedDeltas: [
-          { label: "Reorganização de Pista", value: "+8 Pista", isPositive: true },
-          { label: "Pressão de Bancada", value: "+5", isPositive: true }
+          { label: "Reorganização de Pista", value: "+3 Pista", isPositive: true },
+          { label: "Pressão de Bancada", value: "+2 Bancada", isPositive: true }
         ]
       },
       {
@@ -4167,12 +4166,12 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "💼 Autonomia Financeira & Estrutura",
         badgeText: "GESTÃO DE CAIXA & QUADRA SOCIAL",
         answerText: "Vamos falar de trabalho e caixa. Com finanças fortes e sede estruturada, o respeito volta naturalmente e o título no próximo mandato virá.",
-        statEffects: { autonomia_financeira: 10 },
-        cashDelta: 10000,
-        log: "Discurso focado em finanças e quadra (+10 Autonomia Financeira, +R$ 10.000 no Caixa).",
+        statEffects: { autonomia_financeira: 3 },
+        cashDelta: 2500,
+        log: "Discurso focado em finanças e quadra (+3 Autonomia Financeira, +R$ 2.500 no Caixa).",
         formattedDeltas: [
-          { label: "Aporte Financeiro", value: "+R$ 10.000", isPositive: true },
-          { label: "Autonomia Financeira", value: "+10", isPositive: true }
+          { label: "Aporte Financeiro", value: "+R$ 2.500", isPositive: true },
+          { label: "Autonomia Financeira", value: "+3 Autonomia", isPositive: true }
         ]
       }
     ]
@@ -4192,12 +4191,12 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "👥 Expansão de Massa no Bairro",
         badgeText: "CRESCIMENTO SOCIAL E POPULAR",
         answerText: "Queremos dobrar o quadro de associados e levar a nossa bandeira para cada quebrada e subsede do estado.",
-        statEffects: { contingente: 8 },
-        stateEffects: { moral: 5 },
-        log: "Definiu como meta a expansão social no bairro (+8 Massa, +5 Moral).",
+        statEffects: { contingente: 3 },
+        stateEffects: { moral: 2 },
+        log: "Definiu como meta a expansão social no bairro (+3 Massa, +2 Moral).",
         formattedDeltas: [
-          { label: "Expansão de Sócios", value: "+8 Massa", isPositive: true },
-          { label: "Moral da Agremiação", value: "+5", isPositive: true }
+          { label: "Expansão de Sócios", value: "+3 Massa", isPositive: true },
+          { label: "Moral da Agremiação", value: "+2 Moral", isPositive: true }
         ]
       },
       {
@@ -4206,11 +4205,11 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🚌 Respeito nas Estradas e Pista",
         badgeText: "PRESENÇA EM COMBOIO & CORTEJO",
         answerText: "Nosso objetivo é garantir que nenhuma caravana nossa seja intimidada e que o pavilhão imponha respeito em qualquer estádio do país.",
-        statEffects: { poder_pista: 8, caravana: 5 },
-        log: "Foco em presença de caravana e escolta de pista (+8 Pista, +5 Caravana).",
+        statEffects: { poder_pista: 3, caravana: 2 },
+        log: "Foco em presença de caravana e escolta de pista (+3 Pista, +2 Caravana).",
         formattedDeltas: [
-          { label: "Poder de Pista", value: "+8 Pista", isPositive: true },
-          { label: "Força de Caravana", value: "+5 Caravana", isPositive: true }
+          { label: "Poder de Pista", value: "+3 Pista", isPositive: true },
+          { label: "Força de Caravana", value: "+2 Caravana", isPositive: true }
         ]
       },
       {
@@ -4219,12 +4218,12 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🚩 Independência Financeira & Loja Oficial",
         badgeText: "AUTONOMIA E SEDE PRÓPRIA",
         answerText: "A meta é a independência financeira total. Ter sede própria estruturada, produtos oficiais de qualidade e caixa forte.",
-        statEffects: { autonomia_financeira: 8 },
-        cashDelta: 8000,
-        log: "Meta fixada na autonomia financeira e loja (+8 Autonomia, +R$ 8.000 Caixa).",
+        statEffects: { autonomia_financeira: 3 },
+        cashDelta: 2000,
+        log: "Meta fixada na autonomia financeira e loja (+3 Autonomia, +R$ 2.000 Caixa).",
         formattedDeltas: [
-          { label: "Injeção no Caixa", value: "+R$ 8.000", isPositive: true },
-          { label: "Autonomia Financeira", value: "+8", isPositive: true }
+          { label: "Injeção no Caixa", value: "+R$ 2.000", isPositive: true },
+          { label: "Autonomia Financeira", value: "+3 Autonomia", isPositive: true }
         ]
       }
     ]
