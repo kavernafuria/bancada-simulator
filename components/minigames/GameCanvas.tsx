@@ -1415,24 +1415,32 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     visibleGates.sort((a, b) => b.z - a.z); // Render FAR gates first, NEAR gates last
 
     visibleGates.forEach((gate) => {
-      const laneX = gate.lane === 'left' ? -0.55 : 0.55;
-      const pBottom = project(laneX, 0, gate.z, w, h, camZ, camY);
-      const pTop = project(laneX, 70, gate.z, w, h, camZ, camY);
+      // Calculate precise left and right lane boundaries in world 3D space
+      // Road boundaries are -1.65 to +1.65. Left lane is [-1.55, -0.05], Right lane is [0.05, 1.55]
+      const laneLeftX = gate.lane === 'left' ? -1.55 : 0.05;
+      const laneRightX = gate.lane === 'left' ? -0.05 : 1.55;
+      const laneCenterX = (laneLeftX + laneRightX) / 2;
 
-      if (!pBottom || !pTop) return;
+      const pLeft = project(laneLeftX, 0, gate.z, w, h, camZ, camY);
+      const pRight = project(laneRightX, 0, gate.z, w, h, camZ, camY);
+      const pTop = project(laneCenterX, 60, gate.z, w, h, camZ, camY);
+      const pBottom = project(laneCenterX, 0, gate.z, w, h, camZ, camY);
+
+      if (!pLeft || !pRight || !pBottom || !pTop) return;
 
       const isPositive = gate.type === 'add' || gate.type === 'mult';
-      const gateWidth = Math.min(w * 0.35, 68 * pBottom.scale);
-      const gateHeight = (pBottom.y - pTop.y) * 0.65;
+      const gateWidth = Math.max(10, pRight.x - pLeft.x);
+      const gateHeight = Math.max(12, (pBottom.y - pTop.y) * 0.65);
+      const gateCenterX = (pLeft.x + pRight.x) / 2;
 
       // Gate Ground Shadow (Soft colored tint on road)
       ctx.fillStyle = isPositive ? 'rgba(14, 165, 233, 0.2)' : 'rgba(239, 68, 68, 0.2)';
       ctx.beginPath();
-      ctx.ellipse(pBottom.x, pBottom.y, gateWidth * 0.48, 5 * pBottom.scale, 0, 0, Math.PI * 2);
+      ctx.ellipse(gateCenterX, pBottom.y, gateWidth * 0.48, Math.max(2, 5 * pBottom.scale), 0, 0, Math.PI * 2);
       ctx.fill();
 
       // Translucent Glass Body with rounded corners
-      const glassGrad = ctx.createLinearGradient(pBottom.x - gateWidth / 2, pTop.y, pBottom.x + gateWidth / 2, pBottom.y);
+      const glassGrad = ctx.createLinearGradient(pLeft.x, pTop.y, pRight.x, pBottom.y);
       if (isPositive) {
         glassGrad.addColorStop(0, 'rgba(56, 189, 248, 0.6)');
         glassGrad.addColorStop(0.5, 'rgba(14, 165, 233, 0.4)');
@@ -1445,7 +1453,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
       ctx.fillStyle = glassGrad;
       ctx.beginPath();
-      ctx.roundRect(pBottom.x - gateWidth / 2, pTop.y, gateWidth, gateHeight, Math.max(3, 6 * pBottom.scale));
+      ctx.roundRect(pLeft.x, pTop.y, gateWidth, gateHeight, Math.max(3, 6 * pBottom.scale));
       ctx.fill();
 
       // Glass Edge Frame & Neon Glow
@@ -1454,24 +1462,36 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       ctx.stroke();
 
       // Vertical Glowing Neon Pillars on Left and Right edges
-      const pillarW = 4.5 * pBottom.scale;
+      const pillarW = Math.max(2, 4.5 * pBottom.scale);
       ctx.fillStyle = isPositive ? '#0ea5e9' : '#dc2626';
-      ctx.fillRect(pBottom.x - gateWidth / 2 - pillarW / 2, pTop.y - 3 * pBottom.scale, pillarW, gateHeight + 3 * pBottom.scale);
-      ctx.fillRect(pBottom.x + gateWidth / 2 - pillarW / 2, pTop.y - 3 * pBottom.scale, pillarW, gateHeight + 3 * pBottom.scale);
+      ctx.fillRect(pLeft.x - pillarW / 2, pTop.y - 3 * pBottom.scale, pillarW, gateHeight + 3 * pBottom.scale);
+      ctx.fillRect(pRight.x - pillarW / 2, pTop.y - 3 * pBottom.scale, pillarW, gateHeight + 3 * pBottom.scale);
 
       // Clean, Bold Centered Number Text
       const valStr = gate.type === 'mult' ? `×${gate.value}` : gate.value > 0 ? `+${gate.value}` : `${gate.value}`;
-      ctx.font = `900 ${Math.max(14, Math.round(34 * pBottom.scale))}px sans-serif`;
+      const fontPx = Math.max(11, Math.min(Math.floor(gateWidth * 0.45), Math.floor(gateHeight * 0.45)));
+      ctx.font = `900 ${fontPx}px sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
       // Soft text drop shadow
       ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-      ctx.fillText(valStr, pBottom.x + 1.5, pTop.y + gateHeight * 0.48 + 1.5);
+      ctx.fillText(valStr, gateCenterX + 1.5, pTop.y + gateHeight * 0.42 + 1.5);
 
       // Crisp White Number
       ctx.fillStyle = '#ffffff';
-      ctx.fillText(valStr, pBottom.x, pTop.y + gateHeight * 0.48);
+      ctx.fillText(valStr, gateCenterX, pTop.y + gateHeight * 0.42);
+
+      // Sublabel (e.g. BONDE, EMBOSCADA) if present
+      if (gate.label) {
+        const subLabel = gate.label.replace(/^[+-]?\d+\s*/, '').toUpperCase();
+        if (subLabel) {
+          const subFontPx = Math.max(8, Math.floor(fontPx * 0.38));
+          ctx.font = `800 ${subFontPx}px sans-serif`;
+          ctx.fillStyle = isPositive ? '#e0f2fe' : '#fee2e2';
+          ctx.fillText(subLabel, gateCenterX, pTop.y + gateHeight * 0.76);
+        }
+      }
     });
 
     // DRAW TRACK ITEMS (Z-Sorted Compact Items)
