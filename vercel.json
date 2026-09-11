@@ -1,0 +1,22 @@
+{
+  "buildCommand": "cd mapa/projeto-torcidas-mapa && npm install && npm run build",
+  "outputDirectory": "mapa/projeto-torcidas-mapa/dist",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/mapa/projeto-torcidas-mapa/api/index.ts"
+    },
+    {
+      "source": "/mapa/(.*)",
+      "destination": "/mapa/projeto-torcidas-mapa/dist/index.html"
+    },
+    {
+      "source": "/mapa",
+      "destination": "/mapa/projeto-torcidas-mapa/dist/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/mapa/projeto-torcidas-mapa/dist/index.html"
+    }
+  ]
+}
