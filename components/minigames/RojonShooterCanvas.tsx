@@ -14,7 +14,6 @@ export interface WeaponUpgrade {
   icon: string;
 }
 
-// BALANCED AUTHENTIC FIREWORK WEAPON LEVELS (Clean rhythm, fun challenge, no tank spam)
 export const WEAPON_LEVELS: WeaponUpgrade[] = [
   { level: 1, name: "Rojão Padrão", fireRate: 240, projectileCount: 1, damage: 9, color: "#f59e0b", icon: "🚀" },
   { level: 2, name: "Rojão 12 Tiros 🎆", fireRate: 170, projectileCount: 3, damage: 13, color: "#38bdf8", icon: "🎆" },
@@ -36,7 +35,7 @@ export interface RojonShooterProps {
 
 interface VerticalGate3D {
   id: string;
-  x: number; // -0.65 for Green (Left), +0.65 for Yellow (Right)
+  x: number;
   z: number;
   type: "member" | "weapon";
   val: number;
@@ -147,7 +146,7 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
     gameEnded: false,
   });
 
-  // 3D Third-Person Trailing Camera Projection
+  // Visão Aérea (High Aerial Top-Down Angle looking down at street)
   const project = (
     worldX: number,
     worldY: number,
@@ -159,11 +158,11 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
     const relZ = worldZ - camZ;
     if (relZ <= 10) return null;
 
-    const focalLength = 380;
+    const focalLength = 320;
     const scale = focalLength / relZ;
-    const horizonY = canvasHeight * 0.16;
-    const screenX = canvasWidth / 2 + worldX * (canvasWidth * 0.44) * scale;
-    const screenY = horizonY + (180 - worldY) * scale * 0.92;
+    const horizonY = canvasHeight * 0.10; // High aerial horizon
+    const screenX = canvasWidth / 2 + worldX * (canvasWidth * 0.42) * scale;
+    const screenY = horizonY + (240 - worldY) * scale * 0.90; // High aerial view angled down
 
     return { x: screenX, y: screenY, scale, depth: relZ };
   };
@@ -178,7 +177,7 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
     runnerIdx = 0,
     facingDown = false
   ) => {
-    const s = scale * 0.58;
+    const s = scale * 0.62;
     if (s <= 0.015) return;
 
     ctx.save();
@@ -268,7 +267,7 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
     });
   };
 
-  // Initialize Track Gates & Balanced Rival Mobs
+  // Initialize Track Gates & Rival Mobs
   const initTrack = () => {
     const s = stateRef.current;
     s.playerX = 0;
@@ -292,7 +291,7 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
     for (let i = 1; i <= 22; i++) {
       const gateZ = i * zSpacing;
 
-      // Left: Green 3D Vertical Gate (+5 MEMBROS, +10 MEMBROS, x2 BONDE)
+      // Left: Green 3D Vertical Gate (+5 MEMBROS)
       const memberVal = i % 4 === 0 ? 15 : i % 2 === 0 ? 10 : 5;
       s.gates.push({
         id: `gate_green_${i}`,
@@ -304,7 +303,7 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
         passed: false,
       });
 
-      // Right: Yellow 3D Vertical Gate (+ROJÕES / UPGRADE)
+      // Right: Yellow 3D Vertical Gate (+ROJÕES)
       const wLvl = Math.min(4, Math.floor(i / 2.2) + 1);
       const wInfo = WEAPON_LEVELS[wLvl - 1];
       s.gates.push({
@@ -335,7 +334,7 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
     }
   };
 
-  // Dynamically Spawn incoming Rival Waves (Balanced pacing: 2.2s)
+  // Dynamically Spawn incoming Rival Waves
   const spawnRivalWaveIfNeeded = (now: number) => {
     const s = stateRef.current;
     if (now - s.lastSpawnTime < 2200) return;
@@ -608,9 +607,9 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
           ctx.clearRect(0, 0, w, h);
 
           const camZ = s.trackZ - 160;
-          const horizonY = h * 0.16;
+          const horizonY = h * 0.10; // High aerial horizon
 
-          // 1. Stadium Backdrop at Horizon
+          // 1. Stadium & Sky Backdrop
           const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY + 20);
           skyGrad.addColorStop(0, "#020617");
           skyGrad.addColorStop(0.7, "#0f172a");
@@ -634,7 +633,7 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
             ctx.fill();
           });
 
-          // 2. Clean Graphite Asphalt Road
+          // 2. Clean Graphite Asphalt Road (Aerial Top-Down View)
           const farZ = s.trackZ + 750;
           const nearZ = Math.max(0, camZ + 40);
 
@@ -685,7 +684,7 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
             }
           }
 
-          // 3. Draw Vertical 3D Hologram Gates (Green on Left, Yellow on Right)
+          // 3. Draw Vertical 3D Hologram Gates
           s.gates.forEach((g) => {
             if (g.passed || g.z < camZ + 20 || g.z > camZ + 750) return;
 
@@ -798,57 +797,39 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
             }
           });
 
-          // 7. Draw Player Mounted Firework Cart & Torcida Bonde (At Bottom of Screen)
+          // 7. Draw Player Torcida Bonde Marching on Foot (Visão Aérea - NO CARRIAGE/CART)
           const pPlayer = project(s.playerX, 0, s.trackZ, w, h, camZ);
           if (pPlayer) {
-            const sP = pPlayer.scale;
+            const maxFansDrawn = Math.min(s.crowdCount, 26);
+            const fanPositions: { x: number; z: number }[] = [];
 
-            const cartW = Math.max(45, 110 * sP);
-            const cartH = Math.max(25, 60 * sP);
+            for (let i = 0; i < maxFansDrawn; i++) {
+              const angle = i * 2.39996;
+              const dist = Math.sqrt((i + 1) / maxFansDrawn) * 0.70;
+              const fx = s.playerX + Math.cos(angle) * dist * 0.32;
+              const fz = s.trackZ + Math.sin(angle) * dist * 14;
+              fanPositions.push({ x: fx, z: fz });
+            }
 
-            ctx.save();
-            ctx.translate(pPlayer.x, pPlayer.y);
+            fanPositions.sort((a, b) => b.z - a.z);
 
-            ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-            ctx.beginPath();
-            ctx.ellipse(0, 10 * sP, cartW * 0.6, 12 * sP, 0, 0, Math.PI * 2);
-            ctx.fill();
+            fanPositions.forEach((fan, idx) => {
+              const pFan = project(fan.x, 0, fan.z, w, h, camZ);
+              if (pFan) {
+                renderFanAvatar(ctx, pFan.x, pFan.y, pFan.scale * 1.1, playerTeam, idx, false);
+              }
+            });
 
-            // Cart Body
-            ctx.fillStyle = "#78350f";
-            ctx.beginPath();
-            ctx.roundRect(-cartW / 2, -cartH, cartW, cartH, 4 * sP);
-            ctx.fill();
-            ctx.strokeStyle = "#f59e0b";
-            ctx.lineWidth = Math.max(1.5, 3 * sP);
-            ctx.stroke();
-
-            // Mounted Firework Cannon
-            ctx.fillStyle = "#15803d";
-            ctx.fillRect(-8 * sP, -cartH - 22 * sP, 16 * sP, 26 * sP);
-            ctx.fillStyle = "#facc15";
-            ctx.fillRect(-8 * sP, -cartH - 18 * sP, 16 * sP, 5 * sP);
-
-            // Muzzle Flame Glow
+            // Firework Rocket Muzzle Spark at front of marching bonde when firing
             if (performance.now() - s.lastShotTime < 100) {
-              const fGlow = ctx.createRadialGradient(0, -cartH - 25 * sP, 2, 0, -cartH - 25 * sP, 18 * sP);
+              const fGlow = ctx.createRadialGradient(pPlayer.x, pPlayer.y - 25 * pPlayer.scale, 2, pPlayer.x, pPlayer.y - 25 * pPlayer.scale, 20 * pPlayer.scale);
               fGlow.addColorStop(0, "#fef08a");
               fGlow.addColorStop(0.5, "#f97316");
               fGlow.addColorStop(1, "rgba(0, 0, 0, 0)");
               ctx.fillStyle = fGlow;
               ctx.beginPath();
-              ctx.arc(0, -cartH - 25 * sP, 18 * sP, 0, Math.PI * 2);
+              ctx.arc(pPlayer.x, pPlayer.y - 25 * pPlayer.scale, 20 * pPlayer.scale, 0, Math.PI * 2);
               ctx.fill();
-            }
-
-            ctx.restore();
-
-            // Torcedores on Cart
-            const maxFansDrawn = Math.min(s.crowdCount, 12);
-            for (let f = 0; f < maxFansDrawn; f++) {
-              const fx = pPlayer.x + ((f % 5) - 2) * 14 * sP;
-              const fy = pPlayer.y - Math.floor(f / 5) * 12 * sP;
-              renderFanAvatar(ctx, fx, fy, sP * 1.05, playerTeam, f, false);
             }
           }
 
@@ -915,37 +896,37 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
       <div className="flex flex-col items-center bg-zinc-950 p-6 rounded-2xl border border-amber-500 text-white max-w-sm w-full select-none shadow-2xl space-y-4 text-center">
         <div className="border-b border-zinc-800 pb-2 w-full">
           <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block">
-            🎆 BATERIA DE ROJÕES 3D (30s DIVERSÃO)
+            🎆 BATERIA DE ROJÕES 3D (VISÃO AÉREA)
           </span>
           <h3 className="text-sm font-black text-white uppercase mt-0.5">
-            Ritmo Arcade & Desafio Equilibrado
+            Bonde Marchando a Pé na Rua
           </h3>
         </div>
 
         <p className="text-xs text-zinc-300 leading-relaxed text-left">
-          <strong>Como Jogar:</strong> Conduza o bonde na pista com tiros cadenciados e ritmo autêntico de rojões!
+          <strong>Como Jogar:</strong> Guie o <strong>bonde da torcida marchando a pé na rua</strong> em visão aérea!
         </p>
         <ul className="text-[11px] text-zinc-400 text-left space-y-1.5 list-disc pl-4">
           <li>
-            <span className="text-amber-400 font-bold">🚀 Rojão Inicial Ajustado</span>: Dano de 9 por tiro, suficiente para limpar os primeiros rivais sem metralhadora de tank!
+            <span className="text-emerald-400 font-bold">Bonde a Pé na Rua</span>: A massa de torcedores caminha junto no asfalto com disparo frontal de rojões.
           </li>
           <li>
-            <span className="text-sky-400 font-bold">🎆 Evolução Gradual</span>: Pegue portões amarelos e verdes para evoluir o leque de rojões e membros do bonde.
+            <span className="text-amber-400 font-bold">Visão Aérea</span>: Vista panorâmica de cima mostrando a rua, os portões verticais e os rivais.
           </li>
           <li>
-            <span className="text-red-400 font-bold">⏱️ 30s de Sobrevivência</span>: Mova-se para não ser cercado pela horda rival!
+            <span className="text-sky-400 font-bold">30 Segundos</span>: Deslize o dedo na tela para direcionar a marcha do bonde.
           </li>
         </ul>
 
         <div className="bg-zinc-900 border border-zinc-800 p-2.5 rounded-xl text-[10px] font-mono text-amber-400 w-full text-left">
-          ⏱️ Duração: 30s • Ritmo Equilibrado
+          ⏱️ Duração: 30s • Visão Aérea & Bonde a Pé
         </div>
 
         <button
           onClick={() => setIsTutorial(false)}
           className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer"
         >
-          ▶️ INICIAR JOGO EQUILIBRADO
+          ▶️ INICIAR BONDE NA RUA
         </button>
       </div>
     );
@@ -996,7 +977,7 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
 
       {/* Bottom HUD Footer */}
       <div className="flex justify-between items-center w-full text-[10px] text-zinc-400 font-semibold px-2">
-        <span>Deslize o dedo na tela para mover o bonde</span>
+        <span>Deslize o dedo na tela para guiar a marcha do bonde</span>
         <span className="text-amber-400 font-mono font-bold text-xs">{score} pts</span>
       </div>
     </div>
