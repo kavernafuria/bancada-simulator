@@ -14,11 +14,12 @@ export interface WeaponUpgrade {
   icon: string;
 }
 
+// BUFFED WEAPON LEVELS (High Impact, Fast Fire Rate & Satisfying Firepower)
 export const WEAPON_LEVELS: WeaponUpgrade[] = [
-  { level: 1, name: "Rojão Padrão", fireRate: 250, projectileCount: 1, damage: 7, color: "#f59e0b", icon: "🚀" },
-  { level: 2, name: "Rojão 12 Tiros 🎆", fireRate: 180, projectileCount: 3, damage: 12, color: "#38bdf8", icon: "🎆" },
-  { level: 3, name: "Rojão Trovão ⚡", fireRate: 120, projectileCount: 4, damage: 18, color: "#facc15", icon: "⚡" },
-  { level: 4, name: "Morteiro de Torcida 💣", fireRate: 85, projectileCount: 5, damage: 28, color: "#ef4444", icon: "💣" },
+  { level: 1, name: "Rojão Padrão", fireRate: 180, projectileCount: 2, damage: 12, color: "#f59e0b", icon: "🚀" },
+  { level: 2, name: "Rojão 12 Tiros 🎆", fireRate: 120, projectileCount: 3, damage: 20, color: "#38bdf8", icon: "🎆" },
+  { level: 3, name: "Rojão Trovão ⚡", fireRate: 80, projectileCount: 5, damage: 32, color: "#facc15", icon: "⚡" },
+  { level: 4, name: "Morteiro de Torcida 💣", fireRate: 50, projectileCount: 7, damage: 50, color: "#ef4444", icon: "💣" },
 ];
 
 export interface RojonShooterProps {
@@ -267,7 +268,27 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
     });
   };
 
-  // Initialize Track Gates & Dense Rival Waves along 30s run
+  // Trigger Instant Super Rocket Volley on Gate Upgrade!
+  const triggerSuperVolley = (color: string) => {
+    const s = stateRef.current;
+    soundManager.playFireworkExplosion();
+    for (let i = 0; i < 14; i++) {
+      const angle = (i - 6.5) * 0.12;
+      s.projectiles.push({
+        id: `super_${Date.now()}_${i}`,
+        x: s.playerX + Math.sin(angle) * 0.4,
+        y: 18,
+        z: s.trackZ + 25,
+        vx: Math.sin(angle) * 0.15,
+        vy: 0.05,
+        vz: 38,
+        damage: 40,
+        color,
+      });
+    }
+  };
+
+  // Initialize Track Gates & Balanced Rival Mobs
   const initTrack = () => {
     const s = stateRef.current;
     s.playerX = 0;
@@ -286,9 +307,9 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
     s.trackZ = 0;
     s.gameEnded = false;
 
-    // Sequenced Vertical 3D Gates along extended 30s track
-    const zSpacing = 260;
-    for (let i = 1; i <= 20; i++) {
+    // Sequenced Vertical 3D Gates along track
+    const zSpacing = 240;
+    for (let i = 1; i <= 22; i++) {
       const gateZ = i * zSpacing;
 
       // Left: Green 3D Vertical Gate (+5 MEMBROS, +10 MEMBROS, x2 BONDE)
@@ -304,7 +325,7 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
       });
 
       // Right: Yellow 3D Vertical Gate (+ROJÕES / UPGRADE)
-      const wLvl = Math.min(4, Math.floor(i / 2.2) + 1);
+      const wLvl = Math.min(4, Math.floor(i / 2.0) + 1);
       const wInfo = WEAPON_LEVELS[wLvl - 1];
       s.gates.push({
         id: `gate_yellow_${i}`,
@@ -318,15 +339,15 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
       });
     }
 
-    // Initial Dense Rival Mobs Stream
-    for (let j = 1; j <= 12; j++) {
-      const rZ = j * 260 + 140;
-      const count = (opponentTier === "S" ? 40 : opponentTier === "A" ? 30 : 22) + j * 4;
+    // Initial Rival Mobs Stream (Balanced entry density: 10 to 18 members)
+    for (let j = 1; j <= 10; j++) {
+      const rZ = j * 260 + 150;
+      const count = (opponentTier === "S" ? 22 : opponentTier === "A" ? 16 : 10) + j * 2;
       s.rivals.push({
         id: `rival_${j}`,
         x: (Math.random() - 0.5) * 0.35,
         z: rZ,
-        speed: 18 + j * 2.5,
+        speed: 15 + j * 1.5,
         count: Math.round(count),
         maxCount: Math.round(count),
         defeated: false,
@@ -334,21 +355,21 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
     }
   };
 
-  // Dynamically Spawn Heavy Incoming Rival Waves over the 30s duration
+  // Dynamically Spawn incoming Rival Waves with progressive scaling
   const spawnRivalWaveIfNeeded = (now: number) => {
     const s = stateRef.current;
-    if (now - s.lastSpawnTime < 1800) return; // Spawn heavy wave every 1.8s!
+    if (now - s.lastSpawnTime < 2400) return; // Spawn wave every 2.4s
 
     s.lastSpawnTime = now;
     const waveIndex = Math.floor(s.trackZ / 220);
-    const baseCount = (opponentTier === "S" ? 45 : opponentTier === "A" ? 35 : 25) + waveIndex * 3;
+    const baseCount = (opponentTier === "S" ? 28 : opponentTier === "A" ? 20 : 14) + waveIndex * 2;
     const spawnZ = s.trackZ + 720;
 
     s.rivals.push({
       id: `wave_${Date.now()}`,
-      x: (Math.random() - 0.5) * 0.4,
+      x: (Math.random() - 0.5) * 0.35,
       z: spawnZ,
-      speed: 24 + Math.min(25, waveIndex * 1.5),
+      speed: 18 + Math.min(18, waveIndex * 1.2),
       count: Math.round(baseCount),
       maxCount: Math.round(baseCount),
       defeated: false,
@@ -366,15 +387,15 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
 
     const count = wConfig.projectileCount;
     for (let p = 0; p < count; p++) {
-      const spreadX = count === 1 ? 0 : (p - (count - 1) / 2) * 0.14;
+      const spreadX = count === 1 ? 0 : (p - (count - 1) / 2) * 0.15;
       s.projectiles.push({
         id: `rocket_${Date.now()}_${p}`,
         x: s.playerX + spreadX,
         y: 18,
         z: s.trackZ + 25,
-        vx: spreadX * 0.05,
+        vx: spreadX * 0.06,
         vy: 0.04,
-        vz: 38, // Fast Z-axis flight
+        vz: 42, // Fast Z-axis flight
         damage: wConfig.damage,
         color: wConfig.color,
       });
@@ -469,7 +490,7 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
           s.trackZ += 95 * dt;
           s.playerX += (s.targetX - s.playerX) * 0.22;
 
-          // Auto Fire Rockets & Spawn Heavy Incoming Rival Waves
+          // Auto Fire Rockets & Spawn Incoming Rival Waves
           fireRockets(currentTime);
           spawnRivalWaveIfNeeded(currentTime);
 
@@ -505,11 +526,14 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
 
             // Hit check on Red Rival Mobs
             const hitRival = s.rivals.find(
-              (r) => !r.defeated && Math.abs(r.z - proj.z) < 32 && Math.abs(r.x - proj.x) < 0.65
+              (r) => !r.defeated && Math.abs(r.z - proj.z) < 34 && Math.abs(r.x - proj.x) < 0.68
             );
             if (hitRival) {
               s.projectiles.splice(i, 1);
-              hitRival.count -= Math.ceil(proj.damage / 2.5);
+
+              // BUFFED IMPACT: Each rocket hit eliminates 3 to 6 rival members!
+              const eliminated = Math.min(hitRival.count, Math.max(3, Math.floor(proj.damage / 3)));
+              hitRival.count -= eliminated;
 
               soundManager.playFireworkExplosion();
               for (let p = 0; p < 8; p++) {
@@ -530,11 +554,11 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
 
               if (hitRival.count <= 0) {
                 hitRival.defeated = true;
-                const pts = hitRival.maxCount * 12;
+                const pts = hitRival.maxCount * 14;
                 s.score += pts;
                 setScore(s.score);
                 addFloatingText(`+${pts} PTS!`, hitRival.x, 28, hitRival.z, "#facc15");
-                spawnKnockoutFans(6, hitRival.x, 8, hitRival.z, rivalTeam);
+                spawnKnockoutFans(5, hitRival.x, 8, hitRival.z, rivalTeam);
               }
               continue;
             }
@@ -567,36 +591,36 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
           s.gates.forEach((g) => {
             if (!g.passed && Math.abs(g.z - s.trackZ) < 26 && Math.abs(g.x - s.playerX) < 0.55) {
               g.passed = true;
-              soundManager.playGateSound(true);
 
               if (g.type === "member") {
                 const added = g.label.includes("x2") ? s.crowdCount : g.val;
                 s.crowdCount = Math.min(100, s.crowdCount + added);
                 setCrowdCount(s.crowdCount);
                 addFloatingText(`+${added} MEMBROS!`, s.playerX, 32, s.trackZ, "#22c55e");
+                triggerSuperVolley("#22c55e");
               } else if (g.type === "weapon" && g.weaponLevel) {
                 if (g.weaponLevel > s.weaponLevel) {
                   s.weaponLevel = g.weaponLevel;
                   setWeaponLevel(s.weaponLevel);
                   const wName = WEAPON_LEVELS[g.weaponLevel - 1].name;
                   addFloatingText(`UPGRADE: ${wName}!`, s.playerX, 36, s.trackZ, "#facc15");
+                  triggerSuperVolley(WEAPON_LEVELS[g.weaponLevel - 1].color);
                 }
               }
             }
           });
 
-          // --- CHECK RIVAL MOB OVERRUNNING PLAYER BONDE (HEAVY DAMAGE) ---
+          // --- CHECK RIVAL MOB OVERRUNNING PLAYER BONDE ---
           s.rivals.forEach((r) => {
             if (!r.defeated && Math.abs(r.z - s.trackZ) < 25 && Math.abs(r.x - s.playerX) < 0.55) {
               r.defeated = true;
-              const loss = Math.min(s.crowdCount, Math.max(8, Math.ceil(r.count * 0.5)));
+              const loss = Math.min(s.crowdCount, Math.max(5, Math.ceil(r.count * 0.4)));
               s.crowdCount -= loss;
               setCrowdCount(Math.max(0, s.crowdCount));
               soundManager.playGateSound(false);
-              addFloatingText(`-${loss} TORCEDORES ATROPELADOS!`, s.playerX, 32, s.trackZ, "#ef4444");
+              addFloatingText(`-${loss} TORCEDORES!`, s.playerX, 32, s.trackZ, "#ef4444");
               spawnKnockoutFans(loss, s.playerX, 6, s.trackZ, playerTeam);
 
-              // Immediate Defeat if Crowd is wiped out!
               if (s.crowdCount <= 0) {
                 endGame();
               }
@@ -645,7 +669,6 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
           if (pRoadNearL && pRoadNearR && pRoadFarL && pRoadFarR) {
             const nearY = Math.min(h, pRoadNearL.y);
 
-            // Road surface
             ctx.beginPath();
             ctx.moveTo(pRoadNearL.x, nearY);
             ctx.lineTo(pRoadFarL.x, pRoadFarL.y);
@@ -747,7 +770,7 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
             }
           });
 
-          // 5. Draw Small 3D Rocket Projectile Streaks
+          // 5. Draw 3D Rocket Projectile Streaks
           s.projectiles.forEach((proj) => {
             const pProj = project(proj.x, proj.y, proj.z, w, h, camZ);
             if (!pProj) return;
@@ -915,37 +938,37 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
       <div className="flex flex-col items-center bg-zinc-950 p-6 rounded-2xl border border-amber-500 text-white max-w-sm w-full select-none shadow-2xl space-y-4 text-center">
         <div className="border-b border-zinc-800 pb-2 w-full">
           <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block">
-            🎆 BATERIA DE ROJÕES 3D (30s SURVIVAL)
+            🎆 BATERIA DE ROJÕES 3D (BOOST BALANCEADO)
           </span>
           <h3 className="text-sm font-black text-white uppercase mt-0.5">
-            Defesa de Pista Contra Horda Rival
+            Super Rajadas & Poder de Fogo Aumentado
           </h3>
         </div>
 
         <p className="text-xs text-zinc-300 leading-relaxed text-left">
-          <strong>Como Jogar:</strong> Sobreviva por <strong>30 segundos</strong> à horda rival contínua!
+          <strong>Como Jogar:</strong> Pegar armas melhores agora concede <strong>super rajadas devastadoras</strong> para varrer a horda rival!
         </p>
         <ul className="text-[11px] text-zinc-400 text-left space-y-1.5 list-disc pl-4">
           <li>
-            <span className="text-red-400 font-bold">⚠️ Horda Rival Gigante</span>: Ficar parado causará o atropelamento do bonde! Mova-se para evoluir armas e recrutar reforços.
+            <span className="text-amber-400 font-bold">🚀 Rojão Inicial Turbinado</span>: Dispara 2 projéteis com alto dano desde o começo!
           </li>
           <li>
-            <span className="text-emerald-400 font-bold">Portões Verdes (+Membros)</span>: Aumentam os torcedores do bonde para aguentar o impacto.
+            <span className="text-sky-400 font-bold">🎆 Super Volley no Portão</span>: Ao passar por portões amarelos ou verdes, aciona uma rajada especial de 14 rojões!
           </li>
           <li>
-            <span className="text-amber-400 font-bold">Portões Amarelos (+Rojões)</span>: Evoluem para rojões 12 Tiros, Trovão e Morteiro para varrer as ondas.
+            <span className="text-red-400 font-bold">💣 Morteiro de Torcida (Nível 4)</span>: Dispara 7 projéteis ultra rápidos que varrem qualquer horda!
           </li>
         </ul>
 
         <div className="bg-zinc-900 border border-zinc-800 p-2.5 rounded-xl text-[10px] font-mono text-amber-400 w-full text-left">
-          ⏱️ Duração: 30s • Sobrevivência & Alta Intensidade
+          ⏱️ Duração: 30s • Poder de Fogo Rebalanceado
         </div>
 
         <button
           onClick={() => setIsTutorial(false)}
           className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer"
         >
-          ▶️ INICIAR DESAFIO 30s
+          ▶️ INICIAR DESAFIO REBALANCEADO
         </button>
       </div>
     );
