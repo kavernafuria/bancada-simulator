@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Runner3DGame } from './minigames/Runner3DGame';
+import { RojonShooterCanvas } from './minigames/RojonShooterCanvas';
 
 // ==========================================
 // 1. TIPOS & INTERFACES
@@ -691,230 +692,49 @@ export const MemoryMosaic: React.FC<MemoryMosaicProps> = ({ onFinish }) => {
 };
 
 // ==========================================
-// 5. MINI-GAME 4: GUERRA DE ROJÕES (RADAR BALÍSTICO X/Y - Approved)
+// 5. MINI-GAME 4: BATERIA DE ROJÕES (SHOOTER RUNNER 3D)
 // ==========================================
 interface RojonTargetProps {
+  opponentTier?: 'S' | 'A' | 'B';
   onFinish: (result: MiniGameResult) => void;
 }
 
-export const RojonTarget: React.FC<RojonTargetProps> = ({ onFinish }) => {
-  const [isTutorial, setIsTutorial] = useState(true);
-  const [timeLeft, setTimeLeft] = useState(10);
-  const [stage, setStage] = useState<'AZIMUTH' | 'ELEVATION' | 'RESULT'>('AZIMUTH');
-  const [azimuthX, setAzimuthX] = useState(15);
-  const [lockedX, setLockedX] = useState<number | null>(null);
-  const [elevationY, setElevationY] = useState(15);
-  const [lockedY, setLockedY] = useState<number | null>(null);
-  const [directHits, setDirectHits] = useState<number>(0);
-  const [proximityHits, setProximityHits] = useState<number>(0);
-  const [rocketsLeft, setRocketsLeft] = useState<number>(3);
-
-  useEffect(() => {
-    if (isTutorial) return;
-    let xInterval: NodeJS.Timeout;
-    if (stage === 'AZIMUTH') {
-      let dir = 1;
-      xInterval = setInterval(() => {
-        setAzimuthX((prev) => {
-          if (prev >= 85) dir = -1;
-          if (prev <= 15) dir = 1;
-          return prev + dir * 3.5;
-        });
-      }, 25);
-    }
-    return () => clearInterval(xInterval);
-  }, [isTutorial, stage]);
-
-  useEffect(() => {
-    if (isTutorial) return;
-    let yInterval: NodeJS.Timeout;
-    if (stage === 'ELEVATION') {
-      let dir = 1;
-      yInterval = setInterval(() => {
-        setElevationY((prev) => {
-          if (prev >= 85) dir = -1;
-          if (prev <= 15) dir = 1;
-          return prev + dir * 4.0;
-        });
-      }, 25);
-    }
-    return () => clearInterval(yInterval);
-  }, [isTutorial, stage]);
-
-  useEffect(() => {
-    if (isTutorial) return;
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [isTutorial]);
-
-  useEffect(() => {
-    if (!isTutorial && (timeLeft === 0 || rocketsLeft === 0)) {
-      if (directHits >= 1 || proximityHits >= 2) {
-        onFinish({
-          gameType: 'rojon',
-          modifier: 0.25,
-          rank: 'S',
-          description: 'Morteiros atingiram em cheio o comboio rival (+25% PEC)!',
-        });
-      } else if (proximityHits >= 1) {
-        onFinish({
-          gameType: 'rojon',
-          modifier: 0.10,
-          rank: 'B',
-          description: 'Disparo próximo dispersou a aproximação rival (+10% PEC).',
-        });
-      } else {
-        onFinish({
-          gameType: 'rojon',
-          modifier: -0.15,
-          rank: 'F',
-          penaltyMP: 10,
-          description: 'Rojões disparados fora do alvo chamaram a polícia (+10% Risco MP, -15% PEC).',
-        });
-      }
-    }
-  }, [timeLeft, rocketsLeft, directHits, proximityHits, isTutorial, onFinish]);
-
-  const handleLockAzimuth = () => {
-    if (stage !== 'AZIMUTH') return;
-    setLockedX(azimuthX);
-    setStage('ELEVATION');
+export const RojonTarget: React.FC<RojonTargetProps> = ({ opponentTier = 'A', onFinish }) => {
+  const defaultPlayerTeam = {
+    id: 'mancha',
+    name: 'Mancha Verde',
+    shortName: 'MAN',
+    club: 'Palmeiras',
+    primaryColor: '#16a34a',
+    secondaryColor: '#ffffff',
+    accentColor: '#15803d',
+    mascot: 'Mancha',
+    slogan: 'Cante e vibre!',
+    contingent: 75,
+    pistaOverall: 88,
   };
 
-  const handleFireRocket = () => {
-    if (stage !== 'ELEVATION' || lockedX === null) return;
-    const finalY = elevationY;
-    setLockedY(finalY);
-    setStage('RESULT');
-
-    const distX = Math.abs(lockedX - 50);
-    const distY = Math.abs(finalY - 50);
-    const totalDist = Math.hypot(distX, distY);
-
-    if (totalDist <= 24) {
-      setDirectHits((h) => h + 1);
-    } else if (totalDist <= 38) {
-      setProximityHits((p) => p + 1);
-    }
-
-    setTimeout(() => {
-      setRocketsLeft((r) => r - 1);
-      setLockedX(null);
-      setLockedY(null);
-      setStage('AZIMUTH');
-    }, 600);
+  const defaultRivalTeam = {
+    id: 'gavioes',
+    name: 'Gaviões da Fiel',
+    shortName: 'GAV',
+    club: 'Corinthians',
+    primaryColor: '#dc2626',
+    secondaryColor: '#000000',
+    accentColor: '#b91c1c',
+    mascot: 'Gavião',
+    slogan: 'Lealdade e Humildade',
+    contingent: 75,
+    pistaOverall: 88,
   };
-
-  if (isTutorial) {
-    return (
-      <div className="flex flex-col items-center bg-zinc-950 p-6 rounded-2xl border border-orange-700 text-white max-w-sm w-full select-none shadow-2xl space-y-4 text-center">
-        <div className="border-b border-zinc-800 pb-2 w-full">
-          <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest block">🚀 GUERRA DE ROJÕES</span>
-          <h3 className="text-sm font-black text-white uppercase mt-0.5">Radar Balístico de Morteiros</h3>
-        </div>
-
-        <p className="text-xs text-zinc-300 leading-relaxed text-left">
-          <strong>Como Jogar:</strong> Dispare até 3 morterios contra o comboio rival no centro.
-        </p>
-        <ul className="text-[11px] text-zinc-400 text-left space-y-1.5 list-disc pl-4">
-          <li>Clique em <span className="text-amber-400 font-bold">1️⃣ Travar Direção</span> para travar o Eixo X.</li>
-          <li>Clique em <span className="text-orange-400 font-bold">2️⃣ Disparar Morteiro</span> para lançar no Eixo Y!</li>
-        </ul>
-
-        <div className="bg-zinc-900 border border-zinc-800 p-2.5 rounded-xl text-[10px] font-mono text-amber-400 w-full text-left">
-          ⏱️ Duração: 10s • Meta Rank S: 1 Impacto Direto (+25% PEC)
-        </div>
-
-        <button
-          onClick={() => setIsTutorial(false)}
-          onTouchEnd={(e) => {
-            e.preventDefault();
-            setIsTutorial(false);
-          }}
-          className="w-full py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer touch-manipulation"
-        >
-          ▶️ INICIAR RADAR DE MORTEIROS
-        </button>
-      </div>
-    );
-  }
 
   return (
-    <div className="flex flex-col items-center bg-zinc-950 p-6 rounded-2xl border border-orange-700 text-white max-w-sm w-full select-none shadow-2xl space-y-3">
-      <div className="flex justify-between w-full text-xs font-black tracking-wider uppercase border-b border-zinc-800 pb-2">
-        <span className="text-orange-500">Morteiros: Radar Balístico ({rocketsLeft} Disparos)</span>
-        <span className="text-yellow-400 font-mono text-sm">{timeLeft}s</span>
-      </div>
-
-      <div className="relative w-full h-52 bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 flex items-center justify-center">
-        <div className="absolute w-24 h-24 rounded-full border-2 border-dashed border-red-500 bg-red-950/40 flex flex-col items-center justify-center animate-pulse">
-          <span className="text-[10px] font-black text-red-400 uppercase">ALVO</span>
-          <span className="text-base">🎯</span>
-        </div>
-
-        <div
-          className={`absolute top-0 bottom-0 w-1 transition-none ${
-            lockedX !== null ? 'bg-emerald-400 shadow-[0_0_10px_#10b981]' : 'bg-yellow-400'
-          }`}
-          style={{ left: `${lockedX !== null ? lockedX : azimuthX}%` }}
-        />
-
-        {stage !== 'AZIMUTH' && (
-          <div
-            className={`absolute left-0 right-0 h-1 transition-none ${
-              lockedY !== null ? 'bg-emerald-400 shadow-[0_0_10px_#10b981]' : 'bg-orange-500'
-            }`}
-            style={{ top: `${lockedY !== null ? lockedY : elevationY}%` }}
-          />
-        )}
-
-        {stage === 'RESULT' && lockedX !== null && lockedY !== null && (
-          <div
-            className="absolute text-4xl animate-ping pointer-events-none"
-            style={{ left: `${lockedX}%`, top: `${lockedY}%` }}
-          >
-            💥
-          </div>
-        )}
-      </div>
-
-      {stage === 'AZIMUTH' && (
-        <button
-          onClick={handleLockAzimuth}
-          className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider transition-all shadow-lg cursor-pointer"
-        >
-          1️⃣ TRAVAR DIREÇÃO HORIZONTAL (EIXO X)
-        </button>
-      )}
-
-      {stage === 'ELEVATION' && (
-        <button
-          onClick={handleFireRocket}
-          className="w-full py-3 rounded-xl bg-orange-500 hover:bg-orange-400 text-black font-black text-xs uppercase tracking-wider transition-all shadow-lg cursor-pointer animate-bounce"
-        >
-          2️⃣ DISPARAR MORTEIRO! (EIXO Y)
-        </button>
-      )}
-
-      {stage === 'RESULT' && (
-        <div className="w-full py-3 rounded-xl bg-zinc-800 text-zinc-300 font-black text-xs uppercase tracking-wider text-center">
-          🚀 Morteiro em Voo...
-        </div>
-      )}
-
-      <div className="flex justify-between items-center w-full text-xs text-zinc-400 border-t border-zinc-800 pt-2 font-semibold">
-        <span>Alvo Direto: <strong className="text-emerald-400">{directHits}</strong></span>
-        <span>Próximos: <strong className="text-amber-400">{proximityHits}</strong></span>
-      </div>
-    </div>
+    <RojonShooterCanvas
+      playerTeam={defaultPlayerTeam}
+      rivalTeam={defaultRivalTeam}
+      opponentTier={opponentTier}
+      onFinish={onFinish}
+    />
   );
 };
 
