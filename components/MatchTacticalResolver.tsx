@@ -30,6 +30,115 @@ export interface MatchContext {
 }
 
 // ==========================================
+// 1.5 COMPONENTE AVATAR DIVERSO DA LINHA DE FRENTE (SVG DIVERSITY)
+// ==========================================
+interface TorcedorAvatarProps {
+  isAlly?: boolean;
+  type?: 'ATTACK' | 'GUARD_OPEN' | 'ALLY';
+  seed?: number;
+}
+
+export const TorcedorFrontAvatar: React.FC<TorcedorAvatarProps> = ({ isAlly = false, type = 'ATTACK', seed = 0 }) => {
+  const skinTones = ['#3c2415', '#5c3a21', '#8d5524', '#c68642', '#e0ac69', '#f1c27d'];
+  const skinColor = skinTones[seed % skinTones.length];
+
+  const bodyTypes = ['GORDO', 'MUSCULOSO', 'ATLÉTICO', 'MAGRO'];
+  const bodyType = bodyTypes[seed % bodyTypes.length];
+
+  const hairStyles = ['DEGRADÊ', 'BLACK_POWER', 'BONÉ_TRÁS', 'DREADS', 'CARECA'];
+  const hairStyle = hairStyles[seed % hairStyles.length];
+
+  const jerseyColor = isAlly ? '#2563eb' : '#dc2626';
+  const accentColor = isAlly ? '#60a5fa' : '#f87171';
+
+  return (
+    <div className="relative w-16 h-20 flex flex-col items-center justify-center select-none pointer-events-none">
+      <svg viewBox="0 0 100 120" className="w-full h-full drop-shadow-md">
+        {/* Torso / Regata */}
+        {bodyType === 'GORDO' ? (
+          <path d="M 20,60 Q 50,45 80,60 L 85,110 Q 50,118 15,110 Z" fill={jerseyColor} />
+        ) : bodyType === 'MUSCULOSO' ? (
+          <path d="M 12,50 L 88,50 L 76,110 L 24,110 Z" fill={jerseyColor} />
+        ) : (
+          <path d="M 22,55 L 78,55 L 72,110 L 28,110 Z" fill={jerseyColor} />
+        )}
+
+        {/* Faixa Central */}
+        <path d="M 42,52 L 58,52 L 58,112 L 42,112 Z" fill={accentColor} opacity="0.85" />
+
+        {/* Braços Nus com Tatuagem */}
+        {bodyType === 'MUSCULOSO' ? (
+          <>
+            <circle cx="15" cy="54" r="10" fill={skinColor} />
+            <circle cx="85" cy="54" r="10" fill={skinColor} />
+            <path d="M 10,54 Q 15,62 12,70" stroke="#1e293b" strokeWidth="3" fill="none" opacity="0.7" />
+          </>
+        ) : bodyType === 'GORDO' ? (
+          <>
+            <circle cx="20" cy="62" r="12" fill={skinColor} />
+            <circle cx="80" cy="62" r="12" fill={skinColor} />
+            <path d="M 18,60 Q 22,68 20,74" stroke="#1e293b" strokeWidth="3" fill="none" opacity="0.7" />
+          </>
+        ) : (
+          <>
+            <circle cx="22" cy="58" r="8" fill={skinColor} />
+            <circle cx="78" cy="58" r="8" fill={skinColor} />
+          </>
+        )}
+
+        {/* Pescoço */}
+        <rect x="42" y="38" width="16" height="16" fill={skinColor} rx="2" />
+
+        {/* Cabeça & Orelhas */}
+        <circle cx="50" cy="30" r="18" fill={skinColor} />
+        <circle cx="31" cy="31" r="4" fill={skinColor} />
+        <circle cx="69" cy="31" r="4" fill={skinColor} />
+
+        {/* Estilo de Cabelo / Boné */}
+        {hairStyle === 'BLACK_POWER' ? (
+          <circle cx="50" cy="24" r="22" fill="#1e1b18" />
+        ) : hairStyle === 'BONÉ_TRÁS' ? (
+          <>
+            <path d="M 31,28 Q 50,10 69,28 Z" fill={accentColor} />
+            <rect x="34" y="30" width="32" height="5" fill={jerseyColor} rx="2" />
+          </>
+        ) : hairStyle === 'DREADS' ? (
+          <>
+            <path d="M 31,28 Q 50,12 69,28 Z" fill="#18181b" />
+            <rect x="28" y="24" width="6" height="20" fill="#18181b" rx="2" />
+            <rect x="66" y="24" width="6" height="20" fill="#18181b" rx="2" />
+          </>
+        ) : hairStyle === 'CARECA' ? (
+          <rect x="31" y="22" width="38" height="6" fill="#facc15" rx="1" />
+        ) : (
+          <path d="M 32,28 Q 50,12 68,28 Z" fill="#1e1b18" />
+        )}
+
+        {/* Olhos & Expressão de Linha de Frente */}
+        <rect x="40" y="28" width="5" height="4" fill="#0f172a" rx="1" />
+        <rect x="55" y="28" width="5" height="4" fill="#0f172a" rx="1" />
+
+        {type === 'ATTACK' ? (
+          <ellipse cx="50" cy="38" rx="5" ry="4" fill="#7f1d1d" />
+        ) : (
+          <ellipse cx="50" cy="37" rx="3.5" ry="3.5" fill="#450a0a" />
+        )}
+
+        {/* Soco de Ataque se em Ataque */}
+        {type === 'ATTACK' && (
+          <circle cx="50" cy="68" r="14" fill="#dc2626" stroke="#f87171" strokeWidth="2" />
+        )}
+
+        {/* Escudo se for Nosso Bonde Aliado */}
+        {isAlly && (
+          <path d="M 50,55 L 64,65 L 64,80 Q 50,92 36,80 L 36,65 Z" fill="#2563eb" stroke="#93c5fd" strokeWidth="2" />
+        )}
+      </svg>
+    </div>
+  );
+};
+
+// ==========================================
 // 2. MINI-GAME 1: BRIGA DE BARRAS DE FERRO / CLICAR NO RIVAL (WHACK COMBAT - 10s)
 // ==========================================
 interface WhackCombatProps {
@@ -146,18 +255,18 @@ export const WhackCombat: React.FC<WhackCombatProps> = ({ opponentTier, onFinish
             className={`rounded-xl flex flex-col items-center justify-center transition-all cursor-pointer ${
               activeSlot === slot
                 ? isAlly
-                  ? 'bg-blue-600 border-2 border-blue-300 scale-95 shadow-lg shadow-blue-900/60'
-                  : 'bg-red-600 border-2 border-red-300 scale-95 shadow-lg shadow-red-900/60'
+                  ? 'bg-blue-600/30 border-2 border-blue-300 scale-95 shadow-lg shadow-blue-900/60'
+                  : 'bg-red-600/30 border-2 border-red-300 scale-95 shadow-lg shadow-red-900/60'
                 : 'bg-zinc-900 border border-zinc-800 hover:border-zinc-700'
             }`}
           >
             {activeSlot === slot && (
-              <>
-                <span className="text-2xl">{isAlly ? '🛡️' : '👊'}</span>
-                <span className="text-[9px] font-black uppercase mt-1">
-                  {isAlly ? 'Nossos!' : 'Rival!'}
+              <div className="flex flex-col items-center">
+                <TorcedorFrontAvatar isAlly={isAlly} type={isAlly ? 'ALLY' : 'ATTACK'} seed={slot * 7 + (isAlly ? 3 : 1)} />
+                <span className="text-[9px] font-black uppercase mt-1 tracking-wider">
+                  {isAlly ? '🛡️ Nossos!' : '👊 Rival!'}
                 </span>
-              </>
+              </div>
             )}
           </button>
         ))}
@@ -299,21 +408,21 @@ export const PunchFrontCombat: React.FC<PunchFrontCombatProps> = ({ opponentTier
 
         {rivalState && (
           <div
-            className="absolute top-6 w-1/3 flex flex-col items-center justify-center transition-all duration-75"
+            className="absolute top-4 w-1/3 flex flex-col items-center justify-center transition-all duration-75"
             style={{ left: `${rivalState.lane * 33.33}%` }}
           >
             {rivalState.type === 'ATTACK' ? (
               <div className="flex flex-col items-center animate-bounce">
-                <span className="text-3xl">👊</span>
-                <span className="text-[9px] font-black bg-red-600 px-1.5 py-0.5 rounded text-white mt-1 shadow">
+                <TorcedorFrontAvatar isAlly={false} type="ATTACK" seed={rivalState.lane * 3 + 1} />
+                <span className="text-[9px] font-black bg-red-600 px-2 py-0.5 rounded text-white mt-1 shadow uppercase tracking-wider">
                   ⚠️ ATAQUE!
                 </span>
               </div>
             ) : (
               <div className="flex flex-col items-center animate-pulse">
-                <span className="text-3xl">🎯</span>
-                <span className="text-[9px] font-black bg-yellow-500 px-1.5 py-0.5 rounded text-black mt-1 shadow">
-                  GUARDA ABERTA!
+                <TorcedorFrontAvatar isAlly={false} type="GUARD_OPEN" seed={rivalState.lane * 5 + 2} />
+                <span className="text-[9px] font-black bg-yellow-500 px-2 py-0.5 rounded text-black mt-1 shadow uppercase tracking-wider">
+                  🎯 GUARDA ABERTA!
                 </span>
               </div>
             )}

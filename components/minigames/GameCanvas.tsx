@@ -2157,8 +2157,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     ctx.restore();
   };
 
-  // Helper to render stylized Fan with Team Jersey and Items
-  // High-fidelity 3D Running Model matching reference images
+  // Helper to render stylized Fan with Team Jersey, Items and Full Character Diversity
+  // High-fidelity 3D Running Model with 4 body types, 6 skin tones, tattoos, and fan gear
   const renderFanAvatar = (
     ctx: CanvasRenderingContext2D,
     x: number,
@@ -2175,61 +2175,90 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const s = scale;
     if (s <= 0.03) return;
 
-    // Running cycle calculation based on time, runner offset, and speed
+    // Running cycle calculation
     const runCycle = (performance.now() * 0.012 * speedFactor) + (runnerIdx * 1.35);
     const stride = Math.sin(runCycle);
     const strideBob = Math.abs(Math.sin(runCycle)) * 3.2 * s;
 
-    // Varied hair color palette across runners
-    const hairColors = ['#1e1b18', '#382216', '#261c14', '#451a03', '#1e293b'];
+    // 6 Realistic Melanin Skin Tones
+    const skinTones = [
+      '#3c2415', // Negra Escura / Retinta
+      '#5c3a21', // Negra Média
+      '#8d5524', // Pardo / Moreno Fechado
+      '#c68642', // Moreno Claro
+      '#e0ac69', // Bronzeado
+      '#f1c27d', // Pele Clara
+    ];
+    const skinColor = skinTones[runnerIdx % skinTones.length];
+
+    // Hair colors
+    const hairColors = ['#1e1b18', '#382216', '#18181b', '#451a03', '#0f172a'];
     const hairColor = hairColors[runnerIdx % hairColors.length];
 
-    // Varied skin tones
-    const skinTones = ['#fcd34d', '#f59e0b', '#fbbf24', '#e2a053', '#d97706'];
-    const skinColor = skinTones[runnerIdx % skinTones.length];
+    // 4 Distinct Body Types: 0 = Musculoso/Fortão, 1 = Rechonchudo/Gordo, 2 = Atlético, 3 = Magro/Alto
+    const bodyType = runnerIdx % 4;
+
+    let bodyW = 13.5 * s;
+    let bodyH = 14 * s;
+    let headR = 5.8 * s;
+    let armThickness = 3.2 * s;
+
+    if (bodyType === 0) {
+      // MUSCULOSO / FORTÃO
+      bodyW = 16.5 * s;
+      bodyH = 14.5 * s;
+      armThickness = 4.6 * s;
+    } else if (bodyType === 1) {
+      // RECHONCHUDO / GORDO
+      bodyW = 17.5 * s;
+      bodyH = 15.0 * s;
+      armThickness = 4.2 * s;
+    } else if (bodyType === 3) {
+      // MAGRO / ALTO
+      bodyW = 11.5 * s;
+      bodyH = 15.5 * s;
+      armThickness = 2.8 * s;
+    }
 
     // Anatomical anchor positions
     const groundY = y;
     const hipY = y - 13 * s - strideBob;
-    const torsoY = hipY - 13 * s;
-    const headY = torsoY - 8 * s;
-    const bodyW = 13 * s;
-    const bodyH = 14 * s;
-    const headR = 5.8 * s;
+    const torsoY = hipY - bodyH;
+    const headY = torsoY - headR - 2 * s;
 
-    // 1. SOFT CONTACT SHADOW ON ASPHALT (Dynamically stretches with stride)
+    // 1. SOFT CONTACT SHADOW ON ASPHALT
+    const shadowW = (bodyW * 0.7 + Math.abs(stride) * 1.8) * s;
     ctx.fillStyle = 'rgba(0, 0, 0, 0.42)';
     ctx.beginPath();
-    ctx.ellipse(x, groundY + 1 * s, (9 + Math.abs(stride) * 1.8) * s, 4.5 * s, 0, 0, Math.PI * 2);
+    ctx.ellipse(x, groundY + 1 * s, Math.max(6 * s, shadowW), 4.5 * s, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // 2. RUNNING LEGS & SHOES (True stride kinematics matching 3D runner images!)
-    // Left Leg
+    // 2. RUNNING LEGS & SHOES
     const legSwingL = stride;
-    const kneeLX = x - 3.4 * s + legSwingL * 3.2 * s;
+    const legSpacing = bodyW * 0.26;
+    const kneeLX = x - legSpacing + legSwingL * 3.2 * s;
     const kneeLY = hipY + 6.5 * s + (legSwingL > 0 ? -1.2 : 1) * s;
-    const footLX = x - 3.4 * s + legSwingL * 7.5 * s;
+    const footLX = x - legSpacing + legSwingL * 7.5 * s;
     const footLY = groundY - (legSwingL < -0.2 ? Math.abs(legSwingL) * 3.5 * s : 0);
 
-    // Right Leg (Opposite stride)
     const legSwingR = -stride;
-    const kneeRX = x + 3.4 * s + legSwingR * 3.2 * s;
+    const kneeRX = x + legSpacing + legSwingR * 3.2 * s;
     const kneeRY = hipY + 6.5 * s + (legSwingR > 0 ? -1.2 : 1) * s;
-    const footRX = x + 3.4 * s + legSwingR * 7.5 * s;
+    const footRX = x + legSpacing + legSwingR * 7.5 * s;
     const footRY = groundY - (legSwingR < -0.2 ? Math.abs(legSwingR) * 3.5 * s : 0);
 
-    // Draw Left Leg (Pants in dark athletic navy/black)
+    // Draw Left Leg
     ctx.strokeStyle = '#1e293b';
-    ctx.lineWidth = 3.6 * s;
+    ctx.lineWidth = bodyType === 1 ? 4.2 * s : bodyType === 0 ? 4.4 * s : 3.6 * s;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     ctx.beginPath();
-    ctx.moveTo(x - 3.4 * s, hipY);
+    ctx.moveTo(x - legSpacing, hipY);
     ctx.lineTo(kneeLX, kneeLY);
     ctx.lineTo(footLX, footLY);
     ctx.stroke();
 
-    // Left Athletic Running Shoe (Dark shoe with white sole accent)
+    // Left Athletic Running Shoe
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(footLX - 2.5 * s, footLY - 2.2 * s, 5 * s, 2.5 * s);
     ctx.fillStyle = '#ffffff';
@@ -2237,9 +2266,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
     // Draw Right Leg
     ctx.strokeStyle = '#1e293b';
-    ctx.lineWidth = 3.6 * s;
+    ctx.lineWidth = bodyType === 1 ? 4.2 * s : bodyType === 0 ? 4.4 * s : 3.6 * s;
     ctx.beginPath();
-    ctx.moveTo(x + 3.4 * s, hipY);
+    ctx.moveTo(x + legSpacing, hipY);
     ctx.lineTo(kneeRX, kneeRY);
     ctx.lineTo(footRX, footRY);
     ctx.stroke();
@@ -2250,45 +2279,78 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(footRX - 2.5 * s, footRY - 0.7 * s, 5 * s, 0.9 * s);
 
-    // 3. TORSO (Athletic Crew-Neck Jersey in team color)
+    // 3. TORSO (Regata da organizada ou camisa tradicional)
+    const isSleeveless = runnerIdx % 2 === 0; // Regata de torcida organizada
+
     ctx.fillStyle = team.primaryColor;
     ctx.beginPath();
-    ctx.roundRect(x - bodyW / 2, torsoY, bodyW, bodyH, 3 * s);
+    const cornerR = bodyType === 1 ? 6 * s : 3 * s;
+    ctx.roundRect(x - bodyW / 2, torsoY, bodyW, bodyH, cornerR);
     ctx.fill();
 
-    // Jersey Shading (Subtle top highlight and bottom shadow)
+    // Jersey Shading
     const jerseyGrad = ctx.createLinearGradient(0, torsoY, 0, torsoY + bodyH);
     jerseyGrad.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
     jerseyGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0)');
-    jerseyGrad.addColorStop(1, 'rgba(0, 0, 0, 0.25)');
+    jerseyGrad.addColorStop(1, 'rgba(0, 0, 0, 0.28)');
     ctx.fillStyle = jerseyGrad;
     ctx.beginPath();
-    ctx.roundRect(x - bodyW / 2, torsoY, bodyW, bodyH, 3 * s);
+    ctx.roundRect(x - bodyW / 2, torsoY, bodyW, bodyH, cornerR);
     ctx.fill();
 
     // Jersey central vertical stripe / team accent
     ctx.fillStyle = team.secondaryColor;
     ctx.fillRect(x - bodyW * 0.14, torsoY, bodyW * 0.28, bodyH);
 
-    // 4. ARMS & HANDS (Swinging in natural opposition to leg stride!)
-    const armSwingL = legSwingR; // Left arm swings with right leg
-    const armSwingR = legSwingL; // Right arm swings with left leg
+    // Se for Rechonchudo/Gordo: adicionar sombra de volume abdominal
+    if (bodyType === 1) {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
+      ctx.beginPath();
+      ctx.ellipse(x, torsoY + bodyH * 0.7, bodyW * 0.42, bodyH * 0.28, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
-    // Left Arm (Bare skin tone with sleeve cuff)
-    // Shoulder at (x - bodyW * 0.48, torsoY + 2 * s)
-    ctx.fillStyle = team.primaryColor;
-    ctx.beginPath();
-    ctx.arc(x - bodyW * 0.45, torsoY + 2.5 * s, 2.4 * s, 0, Math.PI * 2);
-    ctx.fill();
+    // 4. ARMS & HANDS (Com braços nus, tatuagens para fortões e gordos)
+    const armSwingL = legSwingR;
+    const armSwingR = legSwingL;
+    const shoulderX_L = x - bodyW * 0.48;
+    const shoulderX_R = x + bodyW * 0.48;
+    const shoulderY = torsoY + 2.5 * s;
 
+    // Ombros nus se for regata
+    if (isSleeveless) {
+      ctx.fillStyle = skinColor;
+      ctx.beginPath();
+      ctx.arc(shoulderX_L, shoulderY, armThickness * 0.7, 0, Math.PI * 2);
+      ctx.arc(shoulderX_R, shoulderY, armThickness * 0.7, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.fillStyle = team.primaryColor;
+      ctx.beginPath();
+      ctx.arc(shoulderX_L, shoulderY, armThickness * 0.7, 0, Math.PI * 2);
+      ctx.arc(shoulderX_R, shoulderY, armThickness * 0.7, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Left Arm
     ctx.strokeStyle = skinColor;
-    ctx.lineWidth = 3 * s;
+    ctx.lineWidth = armThickness;
     ctx.beginPath();
-    ctx.moveTo(x - bodyW * 0.45, torsoY + 2.5 * s);
-    const handLX = x - bodyW * 0.55 + armSwingL * 4.5 * s;
+    ctx.moveTo(shoulderX_L, shoulderY);
+    const handLX = shoulderX_L - 1 * s + armSwingL * 4.5 * s;
     const handLY = torsoY + 11 * s - Math.abs(armSwingL) * 2.5 * s;
     ctx.lineTo(handLX, handLY);
     ctx.stroke();
+
+    // Tatuagem no braço esquerdo para fortões e gordos (runnerIdx par)
+    if ((bodyType === 0 || bodyType === 1) && runnerIdx % 2 === 0) {
+      ctx.strokeStyle = 'rgba(30, 41, 59, 0.65)';
+      ctx.lineWidth = armThickness * 0.45;
+      ctx.beginPath();
+      ctx.moveTo(shoulderX_L, shoulderY + 3 * s);
+      ctx.lineTo(handLX * 0.7 + shoulderX_L * 0.3, handLY * 0.7 + shoulderY * 0.3);
+      ctx.stroke();
+    }
 
     // Left Hand Fist
     ctx.fillStyle = skinColor;
@@ -2297,23 +2359,16 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     ctx.fill();
 
     // Right Arm & Equipped Items
-    ctx.fillStyle = team.primaryColor;
-    ctx.beginPath();
-    ctx.arc(x + bodyW * 0.45, torsoY + 2.5 * s, 2.4 * s, 0, Math.PI * 2);
-    ctx.fill();
-
     if (hasIron) {
-      // Right arm raised holding 3D metallic iron bar forward!
       ctx.strokeStyle = skinColor;
-      ctx.lineWidth = 3 * s;
+      ctx.lineWidth = armThickness;
       ctx.beginPath();
-      ctx.moveTo(x + bodyW * 0.45, torsoY + 2.5 * s);
-      const ironHandX = x + bodyW * 0.65;
+      ctx.moveTo(shoulderX_R, shoulderY);
+      const ironHandX = shoulderX_R + 2 * s;
       const ironHandY = torsoY + 4 * s;
       ctx.lineTo(ironHandX, ironHandY);
       ctx.stroke();
 
-      // Hand holding the bar
       ctx.fillStyle = skinColor;
       ctx.beginPath();
       ctx.arc(ironHandX, ironHandY, 2 * s, 0, Math.PI * 2);
@@ -2337,33 +2392,28 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       ctx.lineWidth = Math.max(0.8, 1.2 * s);
       ctx.strokeRect(-1.8 * s, -18 * s, 3.6 * s, 24 * s);
 
-      // Glint highlight
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(-1.5 * s, -16 * s, 3 * s, 4 * s);
       ctx.restore();
     } else if (hasFirework) {
-      // Right arm raised holding festive rocket with sparkling tip!
       ctx.strokeStyle = skinColor;
-      ctx.lineWidth = 3 * s;
+      ctx.lineWidth = armThickness;
       ctx.beginPath();
-      ctx.moveTo(x + bodyW * 0.45, torsoY + 2.5 * s);
-      const fwHandX = x + bodyW * 0.6;
+      ctx.moveTo(shoulderX_R, shoulderY);
+      const fwHandX = shoulderX_R + 1.5 * s;
       const fwHandY = torsoY + 5 * s;
       ctx.lineTo(fwHandX, fwHandY);
       ctx.stroke();
 
-      // Wooden stick
       ctx.fillStyle = '#d97706';
       ctx.fillRect(fwHandX - 1 * s, fwHandY - 14 * s, 2 * s, 18 * s);
 
-      // Rocket cylinder body with stripes
       ctx.fillStyle = '#ef4444';
       ctx.fillRect(fwHandX - 2.5 * s, fwHandY - 20 * s, 5 * s, 8 * s);
 
       ctx.fillStyle = '#fef08a';
       ctx.fillRect(fwHandX - 2.5 * s, fwHandY - 17 * s, 5 * s, 2 * s);
 
-      // Rocket cone tip
       ctx.fillStyle = '#f59e0b';
       ctx.beginPath();
       ctx.moveTo(fwHandX, fwHandY - 25 * s);
@@ -2372,22 +2422,30 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       ctx.closePath();
       ctx.fill();
 
-      // Spark flame at fuse tip
       const sparkFlicker = (2.2 + Math.sin(performance.now() * 0.04) * 1.2) * s;
       ctx.fillStyle = '#fef08a';
       ctx.beginPath();
       ctx.arc(fwHandX, fwHandY - 26 * s, sparkFlicker, 0, Math.PI * 2);
       ctx.fill();
     } else {
-      // Natural running arm swing
       ctx.strokeStyle = skinColor;
-      ctx.lineWidth = 3 * s;
+      ctx.lineWidth = armThickness;
       ctx.beginPath();
-      ctx.moveTo(x + bodyW * 0.45, torsoY + 2.5 * s);
-      const handRX = x + bodyW * 0.55 + armSwingR * 4.5 * s;
+      ctx.moveTo(shoulderX_R, shoulderY);
+      const handRX = shoulderX_R + 1 * s + armSwingR * 4.5 * s;
       const handRY = torsoY + 11 * s - Math.abs(armSwingR) * 2.5 * s;
       ctx.lineTo(handRX, handRY);
       ctx.stroke();
+
+      // Tatuagem no braço direito para fortões (runnerIdx % 4 === 0)
+      if (bodyType === 0 && runnerIdx % 3 === 0) {
+        ctx.strokeStyle = 'rgba(30, 41, 59, 0.65)';
+        ctx.lineWidth = armThickness * 0.45;
+        ctx.beginPath();
+        ctx.moveTo(shoulderX_R, shoulderY + 3 * s);
+        ctx.lineTo(handRX * 0.7 + shoulderX_R * 0.3, handRY * 0.7 + shoulderY * 0.3);
+        ctx.stroke();
+      }
 
       ctx.fillStyle = skinColor;
       ctx.beginPath();
@@ -2395,50 +2453,71 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       ctx.fill();
     }
 
-    // 5. HEAD & CROPPED HAIR (Sculpted 3D hairstyle matching Image 1!)
-    // Smooth round head sphere in skin tone
+    // 5. HEAD & DIVERSE HAIRSTYLES / CAPS
     ctx.fillStyle = skinColor;
     ctx.beginPath();
     ctx.arc(x, headY, headR, 0, Math.PI * 2);
     ctx.fill();
 
-    // Small stylized ears on the sides
+    // Ears
     ctx.fillStyle = skinColor;
     ctx.beginPath();
     ctx.arc(x - headR * 0.95, headY + 0.5 * s, 1.6 * s, 0, Math.PI * 2);
     ctx.arc(x + headR * 0.95, headY + 0.5 * s, 1.6 * s, 0, Math.PI * 2);
     ctx.fill();
 
-    // Sculpted 3D cropped hair covering top, back, and sides of head
-    ctx.fillStyle = hairColor;
-    ctx.beginPath();
-    // Top crown of hair
-    ctx.arc(x, headY - 1.2 * s, headR * 0.98, Math.PI * 0.9, Math.PI * 2.1);
-    ctx.lineTo(x + headR * 0.9, headY + 0.5 * s);
-    ctx.lineTo(x - headR * 0.9, headY + 0.5 * s);
-    ctx.closePath();
-    ctx.fill();
+    const hairStyle = runnerIdx % 5;
+    if (hairStyle === 0) {
+      // Corte Degradê / Na Régua
+      ctx.fillStyle = hairColor;
+      ctx.beginPath();
+      ctx.arc(x, headY - 1.2 * s, headR * 0.98, Math.PI * 0.9, Math.PI * 2.1);
+      ctx.lineTo(x + headR * 0.9, headY + 0.5 * s);
+      ctx.lineTo(x - headR * 0.9, headY + 0.5 * s);
+      ctx.closePath();
+      ctx.fill();
+    } else if (hairStyle === 1) {
+      // Black Power / Afrocabelo Volumoso
+      ctx.fillStyle = '#1e1b18';
+      ctx.beginPath();
+      ctx.arc(x, headY - 1.5 * s, headR * 1.28, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (hairStyle === 2) {
+      // Boné de Torcida Virado para Trás
+      ctx.fillStyle = team.secondaryColor || '#ef4444';
+      ctx.beginPath();
+      ctx.arc(x, headY - 1.2 * s, headR * 1.05, Math.PI * 0.8, Math.PI * 2.2);
+      ctx.fill();
 
-    // Hair volume highlight on crown
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
-    ctx.beginPath();
-    ctx.ellipse(x, headY - headR * 0.6, headR * 0.6, 2 * s, 0, 0, Math.PI * 2);
-    ctx.fill();
+      // Aba virada para a nuca
+      ctx.fillStyle = team.primaryColor;
+      ctx.fillRect(x - headR * 0.8, headY + 1 * s, headR * 1.6, 2.2 * s);
+    } else if (hairStyle === 3) {
+      // Dreadlocks / Tranças
+      ctx.fillStyle = '#18181b';
+      ctx.beginPath();
+      ctx.arc(x, headY - 1.2 * s, headR * 1.02, Math.PI * 0.9, Math.PI * 2.1);
+      ctx.fill();
+      // Fios de dread caindo nas costas
+      ctx.fillRect(x - headR * 0.8, headY, 2.2 * s, 6 * s);
+      ctx.fillRect(x + headR * 0.4, headY, 2.2 * s, 6 * s);
+    } else {
+      // Raspado / Careca com Bandana
+      ctx.fillStyle = team.accentColor || '#facc15';
+      ctx.fillRect(x - headR * 0.9, headY - 1.8 * s, headR * 1.8, 3 * s);
+    }
 
-    // If facing player (rival torcida charging down towards screen)
+    // Rosto se estiver encarando a tela (Rival mob)
     if (facingDown) {
-      // Facial features: determined runner eyes and shouting mouth chanting
       ctx.fillStyle = '#1e293b';
       ctx.fillRect(x - 2.8 * s, headY - 0.5 * s, 1.6 * s, 1.4 * s);
       ctx.fillRect(x + 1.2 * s, headY - 0.5 * s, 1.6 * s, 1.4 * s);
 
-      // Shouting mouth
       ctx.fillStyle = '#7f1d1d';
       ctx.beginPath();
       ctx.ellipse(x, headY + 2.4 * s, 2 * s, 1.4 * s, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Front club crest on left chest
       ctx.fillStyle = team.secondaryColor;
       ctx.beginPath();
       ctx.arc(x - bodyW * 0.25, torsoY + 4 * s, 1.6 * s, 0, Math.PI * 2);
