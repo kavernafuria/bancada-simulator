@@ -15,9 +15,9 @@ export interface WeaponUpgrade {
 }
 
 export const WEAPON_LEVELS: WeaponUpgrade[] = [
-  { level: 1, name: "Rojão Padrão 🚀", fireRate: 240, projectileCount: 1, damage: 8, color: "#f59e0b", icon: "🚀" },
-  { level: 2, name: "Rojão 12 Tiros 🎆", fireRate: 160, projectileCount: 2, damage: 13, color: "#38bdf8", icon: "🎆" },
-  { level: 3, name: "Rojão Trovão ⚡", fireRate: 110, projectileCount: 3, damage: 18, color: "#facc15", icon: "⚡" },
+  { level: 1, name: "Rojão Padrão 🚀", fireRate: 250, projectileCount: 1, damage: 6, color: "#f59e0b", icon: "🚀" },
+  { level: 2, name: "Rojão 12 Tiros 🎆", fireRate: 200, projectileCount: 2, damage: 7, color: "#38bdf8", icon: "🎆" },
+  { level: 3, name: "Rojão Trovão ⚡", fireRate: 150, projectileCount: 2, damage: 10, color: "#facc15", icon: "⚡" },
 ];
 
 export interface RojonShooterProps {
@@ -72,6 +72,7 @@ interface RocketProjectile {
   vz: number;
   damage: number;
   color: string;
+  isRival?: boolean;
 }
 
 interface Particle {
@@ -141,6 +142,7 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
     weaponTimer: 0,
     score: 0,
     lastShotTime: 0,
+    lastRivalShotTime: 0,
     lastSpawnTime: 0,
     projectiles: [] as RocketProjectile[],
     gates: [] as VerticalGate3D[],
@@ -390,6 +392,37 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
     });
   };
 
+  // Spawner de tiros vindos dos rivais do meio pra frente
+  const fireRivalRockets = (now: number) => {
+    const s = stateRef.current;
+    if (now - s.lastRivalShotTime < 1200) return;
+
+    const shootingRivals = s.rivals.filter(
+      (r) => !r.defeated && r.z > s.trackZ + 120 && r.z < s.trackZ + 550
+    );
+    if (shootingRivals.length === 0) return;
+
+    s.lastRivalShotTime = now;
+    const shooters = shootingRivals.slice(0, 2);
+
+    shooters.forEach((r) => {
+      soundManager.playFireworkLaunch();
+      const aimX = (s.playerX - r.x) * 0.05;
+      s.projectiles.push({
+        id: `rival_rocket_${Date.now()}_${Math.random()}`,
+        x: r.x,
+        y: 16,
+        z: r.z - 10,
+        vx: aimX,
+        vy: -0.02,
+        vz: -28, // Movendo no sentido do jogador
+        damage: 4,
+        color: "#ef4444",
+        isRival: true,
+      });
+    });
+  };
+
   // Continuous Auto Firework Rockets Spawner
   const fireRockets = (now: number) => {
     const s = stateRef.current;
@@ -514,8 +547,9 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
             }
           }
 
-          // Auto Fire Rockets & Spawn Incoming Rival Waves
+          // Auto Fire Rockets, Fire Rival Rockets & Spawn Incoming Rival Waves
           fireRockets(currentTime);
+          fireRivalRockets(currentTime);
           spawnRivalWaveIfNeeded(currentTime);
 
           // Update Red Rivals Marching Downward
@@ -536,16 +570,56 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
               s.particles.push({
                 x: proj.x,
                 y: proj.y - 3,
-                z: proj.z - 5,
+                z: proj.z - (proj.isRival ? -5 : 5),
                 vx: (Math.random() - 0.5) * 0.1,
                 vy: (Math.random() - 0.5) * 0.1,
-                vz: -2,
-                color: "#f97316",
+                vz: proj.isRival ? 2 : -2,
+                color: proj.isRival ? "#ef4444" : "#f97316",
                 size: 3 + Math.random() * 3,
                 alpha: 0.8,
                 life: 0,
                 maxLife: 0.35,
               });
+            }
+
+            // Check incoming rival rocket hitting player bonde
+            if (proj.isRival) {
+              if (Math.abs(proj.z - s.trackZ) < 24 && Math.abs(proj.x - s.playerX) < 0.58) {
+                s.projectiles.splice(i, 1);
+                const loss = Math.min(s.crowdCount, 4);
+                s.crowdCount -= loss;
+                setCrowdCount(Math.max(0, s.crowdCount));
+                soundManager.playFireworkExplosion();
+
+                for (let p = 0; p < 8; p++) {
+                  s.particles.push({
+                    x: s.playerX + (Math.random() - 0.5) * 0.4,
+                    y: 10 + Math.random() * 6,
+                    z: s.trackZ,
+                    vx: (Math.random() - 0.5) * 0.3,
+                    vy: Math.random() * 0.3,
+                    vz: -1,
+                    color: "#ef4444",
+                    size: 4 + Math.random() * 4,
+                    alpha: 1.0,
+                    life: 0,
+                    maxLife: 0.4,
+                  });
+                }
+
+                addFloatingText(`-${loss} TORCEDORES (TIRO RIVAL)!`, s.playerX, 32, s.trackZ, "#ef4444");
+                spawnKnockoutFans(loss, s.playerX, 6, s.trackZ, playerTeam);
+
+                if (s.crowdCount <= 0) {
+                  endGame();
+                }
+                continue;
+              }
+
+              if (proj.z < s.trackZ - 50) {
+                s.projectiles.splice(i, 1);
+              }
+              continue;
             }
 
             // Hit check on Destructible Barricades 🚧
@@ -582,14 +656,14 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
               continue;
             }
 
-            // Hit check on Red Rival Mobs
+            // Hit check on Red Rival Mobs (Balanced elimination rate)
             const hitRival = s.rivals.find(
               (r) => !r.defeated && Math.abs(r.z - proj.z) < 32 && Math.abs(r.x - proj.x) < 0.65
             );
             if (hitRival) {
               s.projectiles.splice(i, 1);
 
-              const eliminated = Math.min(hitRival.count, Math.max(2, Math.floor(proj.damage / 3)));
+              const eliminated = Math.min(hitRival.count, Math.max(1, Math.floor(proj.damage / 5)));
               hitRival.count -= eliminated;
 
               soundManager.playFireworkExplosion();
@@ -917,17 +991,38 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
 
             const rSize = Math.max(5, 14 * pProj.scale);
 
-            ctx.strokeStyle = proj.color;
-            ctx.lineWidth = Math.max(1.5, 3 * pProj.scale);
-            ctx.beginPath();
-            ctx.moveTo(pProj.x, pProj.y);
-            ctx.lineTo(pProj.x, pProj.y - rSize);
-            ctx.stroke();
+            if (proj.isRival) {
+              // Incoming Red Fireball Rocket pointing downward toward player
+              ctx.strokeStyle = "rgba(239, 68, 68, 0.85)";
+              ctx.lineWidth = Math.max(2, 3.5 * pProj.scale);
+              ctx.beginPath();
+              ctx.moveTo(pProj.x, pProj.y);
+              ctx.lineTo(pProj.x, pProj.y + rSize * 1.2);
+              ctx.stroke();
 
-            ctx.fillStyle = "#fef08a";
-            ctx.beginPath();
-            ctx.arc(pProj.x, pProj.y - rSize, Math.max(2, 3.5 * pProj.scale), 0, Math.PI * 2);
-            ctx.fill();
+              ctx.fillStyle = "#ef4444";
+              ctx.beginPath();
+              ctx.arc(pProj.x, pProj.y + rSize * 1.2, Math.max(3, 5 * pProj.scale), 0, Math.PI * 2);
+              ctx.fill();
+
+              ctx.fillStyle = "#fef08a";
+              ctx.beginPath();
+              ctx.arc(pProj.x, pProj.y + rSize * 1.2, Math.max(1.5, 2.5 * pProj.scale), 0, Math.PI * 2);
+              ctx.fill();
+            } else {
+              // Player forward rocket
+              ctx.strokeStyle = proj.color;
+              ctx.lineWidth = Math.max(1.5, 3 * pProj.scale);
+              ctx.beginPath();
+              ctx.moveTo(pProj.x, pProj.y);
+              ctx.lineTo(pProj.x, pProj.y - rSize);
+              ctx.stroke();
+
+              ctx.fillStyle = "#fef08a";
+              ctx.beginPath();
+              ctx.arc(pProj.x, pProj.y - rSize, Math.max(2, 3.5 * pProj.scale), 0, Math.PI * 2);
+              ctx.fill();
+            }
           });
 
           // Particles
