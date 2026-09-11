@@ -15,10 +15,9 @@ export interface WeaponUpgrade {
 }
 
 export const WEAPON_LEVELS: WeaponUpgrade[] = [
-  { level: 1, name: "Rojão Padrão", fireRate: 240, projectileCount: 1, damage: 9, color: "#f59e0b", icon: "🚀" },
-  { level: 2, name: "Rojão 12 Tiros 🎆", fireRate: 170, projectileCount: 3, damage: 13, color: "#38bdf8", icon: "🎆" },
-  { level: 3, name: "Rojão Trovão ⚡", fireRate: 120, projectileCount: 4, damage: 18, color: "#facc15", icon: "⚡" },
-  { level: 4, name: "Morteiro de Torcida 💣", fireRate: 90, projectileCount: 5, damage: 26, color: "#ef4444", icon: "💣" },
+  { level: 1, name: "Rojão Padrão 🚀", fireRate: 240, projectileCount: 1, damage: 8, color: "#f59e0b", icon: "🚀" },
+  { level: 2, name: "Rojão 12 Tiros 🎆", fireRate: 160, projectileCount: 2, damage: 13, color: "#38bdf8", icon: "🎆" },
+  { level: 3, name: "Rojão Trovão ⚡", fireRate: 110, projectileCount: 3, damage: 18, color: "#facc15", icon: "⚡" },
 ];
 
 export interface RojonShooterProps {
@@ -42,6 +41,15 @@ interface VerticalGate3D {
   weaponLevel?: number;
   label: string;
   passed: boolean;
+}
+
+interface Barricade3D {
+  id: string;
+  x: number;
+  z: number;
+  hp: number;
+  maxHp: number;
+  destroyed: boolean;
 }
 
 interface RivalMob {
@@ -130,11 +138,13 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
     targetX: 0,
     crowdCount: 25,
     weaponLevel: 1,
+    weaponTimer: 0,
     score: 0,
     lastShotTime: 0,
     lastSpawnTime: 0,
     projectiles: [] as RocketProjectile[],
     gates: [] as VerticalGate3D[],
+    barricades: [] as Barricade3D[],
     rivals: [] as RivalMob[],
     particles: [] as Particle[],
     knockoutFans: [] as KnockoutFan[],
@@ -268,18 +278,20 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
     });
   };
 
-  // Initialize Track Gates & Rival Mobs
+  // Initialize Track Gates, Barricades & Rival Mobs
   const initTrack = () => {
     const s = stateRef.current;
     s.playerX = 0;
     s.targetX = 0;
     s.crowdCount = 25;
     s.weaponLevel = 1;
+    s.weaponTimer = 0;
     s.score = 0;
     s.lastShotTime = 0;
     s.lastSpawnTime = 0;
     s.projectiles = [];
     s.gates = [];
+    s.barricades = [];
     s.rivals = [];
     s.particles = [];
     s.knockoutFans = [];
@@ -287,7 +299,7 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
     s.trackZ = 0;
     s.gameEnded = false;
 
-    // Sequenced Vertical 3D Gates along track
+    // Sequenced Vertical 3D Gates & Barricades along track
     const zSpacing = 250;
     for (let i = 1; i <= 22; i++) {
       const gateZ = i * zSpacing;
@@ -304,8 +316,18 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
         passed: false,
       });
 
-      // Right: Yellow 3D Vertical Gate (+ROJÕES)
-      const wLvl = Math.min(4, Math.floor(i / 2.2) + 1);
+      // Barricade blocking the Green Gate (+5 MEMBROS)
+      s.barricades.push({
+        id: `barricade_gate_${i}`,
+        x: -0.65,
+        z: gateZ - 45,
+        hp: 12 + Math.min(10, i * 2),
+        maxHp: 12 + Math.min(10, i * 2),
+        destroyed: false,
+      });
+
+      // Right: Yellow 3D Vertical Gate (+ROJÕES BOOST 2s)
+      const wLvl = i % 2 === 0 ? 3 : 2;
       const wInfo = WEAPON_LEVELS[wLvl - 1];
       s.gates.push({
         id: `gate_yellow_${i}`,
@@ -314,9 +336,21 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
         type: "weapon",
         val: wLvl,
         weaponLevel: wLvl,
-        label: wInfo.name,
+        label: `${wInfo.name} (2s)`,
         passed: false,
       });
+
+      // Extra intermediate barricades along track
+      if (i % 2 === 0) {
+        s.barricades.push({
+          id: `barricade_mid_${i}`,
+          x: i % 3 === 0 ? 0 : 0.65,
+          z: gateZ - 130,
+          hp: 10 + i,
+          maxHp: 10 + i,
+          destroyed: false,
+        });
+      }
     }
 
     // Initial Rival Mobs Stream
@@ -469,6 +503,17 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
           s.trackZ += 90 * dt;
           s.playerX += (s.targetX - s.playerX) * 0.20;
 
+          // 2-Second Weapon Timer Boost Decay
+          if (s.weaponLevel > 1) {
+            s.weaponTimer -= dt;
+            if (s.weaponTimer <= 0) {
+              s.weaponTimer = 0;
+              s.weaponLevel = 1;
+              setWeaponLevel(1);
+              addFloatingText("BOOST EXPIRADO!", s.playerX, 36, s.trackZ, "#ef4444");
+            }
+          }
+
           // Auto Fire Rockets & Spawn Incoming Rival Waves
           fireRockets(currentTime);
           spawnRivalWaveIfNeeded(currentTime);
@@ -501,6 +546,40 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
                 life: 0,
                 maxLife: 0.35,
               });
+            }
+
+            // Hit check on Destructible Barricades 🚧
+            const hitBarricade = s.barricades.find(
+              (b) => !b.destroyed && Math.abs(b.z - proj.z) < 28 && Math.abs(b.x - proj.x) < 0.55
+            );
+            if (hitBarricade) {
+              s.projectiles.splice(i, 1);
+              hitBarricade.hp -= proj.damage;
+              soundManager.playFireworkExplosion();
+
+              for (let p = 0; p < 6; p++) {
+                s.particles.push({
+                  x: hitBarricade.x + (Math.random() - 0.5) * 0.4,
+                  y: 10 + Math.random() * 6,
+                  z: hitBarricade.z,
+                  vx: (Math.random() - 0.5) * 0.25,
+                  vy: Math.random() * 0.25,
+                  vz: -1,
+                  color: "#d97706",
+                  size: 3 + Math.random() * 3,
+                  alpha: 1.0,
+                  life: 0,
+                  maxLife: 0.35,
+                });
+              }
+
+              if (hitBarricade.hp <= 0) {
+                hitBarricade.destroyed = true;
+                s.score += 60;
+                setScore(s.score);
+                addFloatingText("BARRICADA DESTRUÍDA! +60", hitBarricade.x, 30, hitBarricade.z, "#facc15");
+              }
+              continue;
             }
 
             // Hit check on Red Rival Mobs
@@ -577,12 +656,29 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
                 setCrowdCount(s.crowdCount);
                 addFloatingText(`+${added} MEMBROS!`, s.playerX, 32, s.trackZ, "#22c55e");
               } else if (g.type === "weapon" && g.weaponLevel) {
-                if (g.weaponLevel > s.weaponLevel) {
-                  s.weaponLevel = g.weaponLevel;
-                  setWeaponLevel(s.weaponLevel);
-                  const wName = WEAPON_LEVELS[g.weaponLevel - 1].name;
-                  addFloatingText(`UPGRADE: ${wName}!`, s.playerX, 36, s.trackZ, "#facc15");
-                }
+                const targetLvl = Math.min(3, g.weaponLevel);
+                s.weaponLevel = targetLvl;
+                s.weaponTimer = 2.0; // 2 Segundos de duração!
+                setWeaponLevel(s.weaponLevel);
+                const wName = WEAPON_LEVELS[targetLvl - 1].name;
+                addFloatingText(`⚡ BOOST 2s: ${wName}!`, s.playerX, 36, s.trackZ, "#facc15");
+              }
+            }
+          });
+
+          // --- CHECK PLAYER COLLISION WITH BARRICADES ---
+          s.barricades.forEach((b) => {
+            if (!b.destroyed && Math.abs(b.z - s.trackZ) < 26 && Math.abs(b.x - s.playerX) < 0.60) {
+              b.destroyed = true;
+              const loss = Math.min(s.crowdCount, Math.max(5, Math.ceil(s.crowdCount * 0.25)));
+              s.crowdCount -= loss;
+              setCrowdCount(Math.max(0, s.crowdCount));
+              soundManager.playGateSound(false);
+              addFloatingText(`-${loss} TORCEDORES (BARRICADA)!`, s.playerX, 32, s.trackZ, "#ef4444");
+              spawnKnockoutFans(loss, s.playerX, 6, s.trackZ, playerTeam);
+
+              if (s.crowdCount <= 0) {
+                endGame();
               }
             }
           });
@@ -749,6 +845,56 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
             ctx.restore();
           });
 
+          // 3.5. Draw Destructible 3D Barricades 🚧
+          s.barricades.forEach((b) => {
+            if (b.destroyed || b.z < camZ + 20 || b.z > camZ + 750) return;
+
+            const pB = project(b.x, 15, b.z, w, h, camZ);
+            if (!pB) return;
+
+            const bW = Math.max(30, 85 * pB.scale);
+            const bH = Math.max(20, 45 * pB.scale);
+
+            ctx.save();
+            ctx.translate(pB.x, pB.y);
+
+            // Wooden/Concrete Barricade frame
+            ctx.fillStyle = "#78716c";
+            ctx.fillRect(-bW / 2, -bH / 2, bW, bH);
+            ctx.strokeStyle = "#292524";
+            ctx.lineWidth = Math.max(1.5, 3 * pB.scale);
+            ctx.strokeRect(-bW / 2, -bH / 2, bW, bH);
+
+            // Hazard Stripes
+            ctx.fillStyle = "#facc15";
+            ctx.fillRect(-bW / 2 + 3 * pB.scale, -bH / 2 + 3 * pB.scale, bW - 6 * pB.scale, bH / 3);
+            ctx.fillStyle = "#1c1917";
+            for (let stripe = -bW / 2 + 6 * pB.scale; stripe < bW / 2 - 6 * pB.scale; stripe += 14 * pB.scale) {
+              ctx.fillRect(stripe, -bH / 2 + 3 * pB.scale, 7 * pB.scale, bH / 3);
+            }
+
+            // Floating HP Bar above Barricade
+            const hpPct = Math.max(0, b.hp / b.maxHp);
+            const barW = bW * 0.95;
+            const barH = Math.max(4, 7 * pB.scale);
+            const barY = -bH / 2 - 12 * pB.scale;
+
+            ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+            ctx.fillRect(-barW / 2, barY, barW, barH);
+            ctx.fillStyle = hpPct > 0.5 ? "#22c55e" : hpPct > 0.25 ? "#facc15" : "#ef4444";
+            ctx.fillRect(-barW / 2, barY, barW * hpPct, barH);
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(-barW / 2, barY, barW, barH);
+
+            ctx.fillStyle = "#ffffff";
+            ctx.font = `bold ${Math.max(8, Math.floor(10 * pB.scale))}px sans-serif`;
+            ctx.textAlign = "center";
+            ctx.fillText("🚧 BARRICADA", 0, bH / 4);
+
+            ctx.restore();
+          });
+
           // 4. Draw Red Rival Mobs Stream
           s.rivals.forEach((r) => {
             if (r.defeated || r.z < camZ + 20 || r.z > camZ + 750) return;
@@ -815,7 +961,7 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
             }
           });
 
-          // 7. Draw Player Torcida Bonde Marching on Foot (WITH GREEN HIGHLIGHT BASE & BADGE)
+          // 7. Draw Player Torcida Bonde Marching on Foot (WITH GREEN HIGHLIGHT BASE)
           const pPlayer = project(s.playerX, 0, s.trackZ, w, h, camZ);
           if (pPlayer) {
             const sP = pPlayer.scale;
@@ -851,20 +997,6 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
                 renderFanAvatar(ctx, pFan.x, pFan.y, pFan.scale * 1.1, playerTeam, idx, false);
               }
             });
-
-            // Prominent "MEU BONDE" Badge Tag above player crowd
-            ctx.fillStyle = "#15803d";
-            ctx.beginPath();
-            ctx.roundRect(pPlayer.x - 48 * sP, pPlayer.y - 58 * sP, 96 * sP, 18 * sP, 4 * sP);
-            ctx.fill();
-            ctx.strokeStyle = "#4ade80";
-            ctx.lineWidth = 1.5 * sP;
-            ctx.stroke();
-
-            ctx.fillStyle = "#ffffff";
-            ctx.font = `bold ${Math.max(9, Math.floor(11 * sP))}px sans-serif`;
-            ctx.textAlign = "center";
-            ctx.fillText(`👥 MEU BONDE (${s.crowdCount})`, pPlayer.x, pPlayer.y - 45 * sP);
 
             // Rocket Muzzle Spark
             if (performance.now() - s.lastShotTime < 100) {
@@ -985,6 +1117,11 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
         <div className="flex items-center gap-1.5 text-amber-400">
           <span>{currentW.icon}</span>
           <span>{currentW.name}</span>
+          {weaponLevel > 1 && (
+            <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[9px] px-1.5 py-0.5 rounded-full animate-pulse ml-1">
+              ⚡ BOOST 2s
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-4">
           <span className="text-sky-400 font-mono">👥 {crowdCount} MEMBROS</span>
