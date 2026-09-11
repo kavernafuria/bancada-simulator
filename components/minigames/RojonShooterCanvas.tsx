@@ -16,8 +16,7 @@ export interface WeaponUpgrade {
 
 export const WEAPON_LEVELS: WeaponUpgrade[] = [
   { level: 1, name: "Rojão Padrão 🚀", fireRate: 240, projectileCount: 1, damage: 8, color: "#f59e0b", icon: "🚀" },
-  { level: 2, name: "Rojão 12 Tiros 🎆", fireRate: 150, projectileCount: 3, damage: 14, color: "#38bdf8", icon: "🎆" },
-  { level: 3, name: "Rojão Trovão ⚡", fireRate: 110, projectileCount: 4, damage: 20, color: "#facc15", icon: "⚡" },
+  { level: 2, name: "Cangalha de Morteiro 🎆", fireRate: 140, projectileCount: 3, damage: 16, color: "#38bdf8", icon: "🎆" },
 ];
 
 export interface RojonShooterProps {
@@ -328,9 +327,9 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
         destroyed: false,
       });
 
-      // Right: Yellow 3D Vertical Gate (+ROJÕES BOOST)
-      const wLvl = i <= 3 ? 2 : i % 2 === 0 ? 3 : 2;
-      const wInfo = WEAPON_LEVELS[wLvl - 1];
+      // Right: Yellow 3D Vertical Gate (+CANGALHA DE MORTEIRO BOOST 2s)
+      const wLvl = 2;
+      const wInfo = WEAPON_LEVELS[1];
       s.gates.push({
         id: `gate_yellow_${i}`,
         x: 0.65,
@@ -338,7 +337,7 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
         type: "weapon",
         val: wLvl,
         weaponLevel: wLvl,
-        label: `${wInfo.name} (${wLvl === 3 ? "2.5s" : "2s"})`,
+        label: `${wInfo.name} (2s)`,
         passed: false,
       });
 
@@ -730,11 +729,10 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
                 setCrowdCount(s.crowdCount);
                 addFloatingText(`+${added} MEMBROS!`, s.playerX, 32, s.trackZ, "#22c55e");
               } else if (g.type === "weapon" && g.weaponLevel) {
-                const targetLvl = Math.min(3, g.weaponLevel);
-                s.weaponLevel = targetLvl;
+                s.weaponLevel = 2;
                 s.weaponTimer = 2.0; // 2 Segundos de duração!
-                setWeaponLevel(s.weaponLevel);
-                const wName = WEAPON_LEVELS[targetLvl - 1].name;
+                setWeaponLevel(2);
+                const wName = WEAPON_LEVELS[1].name;
                 addFloatingText(`⚡ BOOST 2s: ${wName}!`, s.playerX, 36, s.trackZ, "#facc15");
               }
             }
