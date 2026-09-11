@@ -109,16 +109,33 @@ export const TorcidaRelationEditorModal: React.FC<TorcidaRelationEditorModalProp
     );
   });
 
+  const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
+
+  const showFeedback = (msg: string) => {
+    setFeedbackMsg(msg);
+    setTimeout(() => setFeedbackMsg(null), 2500);
+  };
+
+  const handleChangeBlocConfirm = (blocKey: AllianceBloc) => {
+    onChangeBloc(torcida.id, blocKey);
+    showFeedback(`Bloco alterado para "${BLOC_INFO[blocKey]?.name}"`);
+  };
+
   const handleAddAllianceConfirm = (targetTorcida: TorcidaNode) => {
     onAddConnection(torcida.id, targetTorcida.id, 'amizade', `Aliança: ${torcida.name} & ${targetTorcida.name}`);
-    setIsAddingAlliance(false);
     setAllianceSearch('');
+    showFeedback(`Amizade adicionada com ${targetTorcida.name}!`);
   };
 
   const handleAddRivalryConfirm = (targetTorcida: TorcidaNode) => {
     onAddConnection(torcida.id, targetTorcida.id, 'rivalidade', rivalryLabel || `Rivalidade: ${torcida.club} vs ${targetTorcida.club}`);
-    setIsAddingRivalry(false);
     setRivalrySearch('');
+    showFeedback(`Rivalidade adicionada com ${targetTorcida.name}!`);
+  };
+
+  const handleRemoveConnectionConfirm = (connectionId: string, name: string) => {
+    onRemoveConnection(connectionId);
+    showFeedback(`Conexão com ${name} removida.`);
   };
 
   return (
@@ -177,6 +194,14 @@ export const TorcidaRelationEditorModal: React.FC<TorcidaRelationEditorModalProp
           </div>
         </div>
 
+        {/* Feedback Toast Notification */}
+        {feedbackMsg && (
+          <div className="mb-3 px-3.5 py-2 rounded-xl bg-emerald-950/90 border border-emerald-500/50 text-emerald-300 text-xs font-bold flex items-center gap-2 shadow-lg animate-fadeIn">
+            <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>{feedbackMsg}</span>
+          </div>
+        )}
+
         {/* Scrollable Content */}
         <div className="overflow-y-auto pr-1 space-y-6 flex-1 custom-scrollbar">
           
@@ -202,7 +227,7 @@ export const TorcidaRelationEditorModal: React.FC<TorcidaRelationEditorModalProp
                 return (
                   <button
                     key={blocKey}
-                    onClick={() => onChangeBloc(torcida.id, blocKey)}
+                    onClick={() => handleChangeBlocConfirm(blocKey)}
                     className={`p-2.5 rounded-xl text-left border transition-all flex items-center justify-between ${
                       isCurrent
                         ? `${info.badgeClass} ring-2 ring-cyan-400 font-bold shadow-lg`
@@ -332,7 +357,7 @@ export const TorcidaRelationEditorModal: React.FC<TorcidaRelationEditorModalProp
                     </div>
 
                     <button
-                      onClick={() => onRemoveConnection(connection.id)}
+                      onClick={() => handleRemoveConnectionConfirm(connection.id, ally.name)}
                       className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-950/50 transition-all shrink-0"
                       title={`Remover amizade com ${ally.name}`}
                     >
@@ -463,7 +488,7 @@ export const TorcidaRelationEditorModal: React.FC<TorcidaRelationEditorModalProp
                     </div>
 
                     <button
-                      onClick={() => onRemoveConnection(connection.id)}
+                      onClick={() => handleRemoveConnectionConfirm(connection.id, rival.name)}
                       className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-950/50 transition-all shrink-0"
                       title={`Remover rivalidade com ${rival.name}`}
                     >

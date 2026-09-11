@@ -15,11 +15,12 @@ import {
   Swords,
   EyeOff,
   ChevronDown,
-  Download
+  Lock,
+  Unlock,
+  ShieldCheck
 } from 'lucide-react';
 import { AllianceBloc } from '../types';
 import { BLOC_INFO } from '../utils/torcidasStorage';
-import { DownloadModal } from './DownloadModal';
 
 export type LineFilterMode = 'all' | 'amizades' | 'rivalidades' | 'none';
 
@@ -41,6 +42,8 @@ interface HeaderProps {
   onResetCustomStorage?: () => void;
   onOpenDrawer: () => void;
   totalTorcidasCount: number;
+  isCollaborator?: boolean;
+  onOpenAuthModal?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -61,9 +64,10 @@ export const Header: React.FC<HeaderProps> = ({
   onResetCustomStorage,
   onOpenDrawer,
   totalTorcidasCount,
+  isCollaborator = false,
+  onOpenAuthModal,
 }) => {
   const [showMoreBlocs, setShowMoreBlocs] = useState(false);
-  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const moreBlocsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -82,9 +86,7 @@ export const Header: React.FC<HeaderProps> = ({
     selectedBloc !== 'punho_cruzado' &&
     selectedBloc !== 'dedo_pro_alto';
 
-  const otherBlocInfo = isOtherBlocActive && selectedBloc !== 'rivalries' && selectedBloc !== 'all' 
-    ? BLOC_INFO[selectedBloc] 
-    : null;
+  const otherBlocInfo = isOtherBlocActive ? BLOC_INFO[selectedBloc] : null;
   return (
     <header className="border-b border-slate-800/80 bg-[#090d16]/95 backdrop-blur-xl sticky top-0 z-30 px-3 sm:px-6 py-3 transition-all shadow-xl">
       <div className="max-w-[1920px] mx-auto flex flex-col xl:flex-row items-start xl:items-center justify-between gap-3 sm:gap-4">
@@ -435,25 +437,33 @@ export const Header: React.FC<HeaderProps> = ({
             </span>
           </button>
 
-          {/* ZIP Download Modal Trigger */}
+          {/* Collaborator Auth Trigger Button */}
           <button
-            onClick={() => setIsDownloadModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-extrabold bg-emerald-950/90 hover:bg-emerald-900 text-emerald-300 hover:text-emerald-200 border border-emerald-500/40 shadow-lg shadow-emerald-950/40 transition-all cursor-pointer"
-            title="Baixar ZIP completo do projeto para importar no Antigravity"
+            onClick={onOpenAuthModal}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer border ${
+              isCollaborator
+                ? 'bg-cyan-950/90 text-cyan-300 border-cyan-400/60 shadow-lg shadow-cyan-950/40'
+                : 'bg-slate-900/90 hover:bg-slate-800 text-slate-300 border-slate-700/60'
+            }`}
+            title={isCollaborator ? 'Modo Colaborador Ativo (Edição Liberada)' : 'Digitar Senha de Colaborador para Edição'}
           >
-            <Download className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="hidden sm:inline">Baixar ZIP</span>
+            {isCollaborator ? (
+              <>
+                <Unlock className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Colaborador</span>
+                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+              </>
+            ) : (
+              <>
+                <Lock className="w-3.5 h-3.5 text-amber-400" />
+                <span>Senha Colaborador</span>
+              </>
+            )}
           </button>
 
         </div>
 
       </div>
-
-      {/* Export / Download Modal */}
-      <DownloadModal 
-        isOpen={isDownloadModalOpen} 
-        onClose={() => setIsDownloadModalOpen(false)} 
-      />
     </header>
   );
 };

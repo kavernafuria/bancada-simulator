@@ -19,7 +19,7 @@ npm install
 ```bash
 npm run dev
 ```
-Acesse `http://localhost:3000` no seu navegador.
+Acesse `http://localhost:3005` no seu navegador.
 
 ### Build de Produção
 ```bash

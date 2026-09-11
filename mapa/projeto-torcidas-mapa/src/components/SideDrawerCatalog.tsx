@@ -442,7 +442,7 @@ export const SideDrawerCatalog: React.FC<SideDrawerCatalogProps> = ({
                         {d.club1} vs {d.club2}
                       </p>
                       <p className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">
-                        {d.description}
+                        {d.notes}
                       </p>
                     </button>
                   );

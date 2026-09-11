@@ -25,13 +25,40 @@ import { LegendAndFooter } from './components/LegendAndFooter';
 import { TorcidaDetailModal } from './components/TorcidaDetailModal';
 import { TorcidaRelationEditorModal } from './components/TorcidaRelationEditorModal';
 import { PresentationCanvas } from './components/PresentationCanvas';
-import { ChevronDown, ChevronUp, Layers } from 'lucide-react';
+import { CollaboratorAuthModal } from './components/CollaboratorAuthModal';
+import { SearchModal } from './components/SearchModal';
+import { 
+  isCollaboratorAuthenticated, 
+  fetchMapDataOnline, 
+  updateTorcidaBlocOnline, 
+  addConnectionOnline 
+} from './utils/torcidasApi';
+import { ChevronDown, ChevronUp, Layers, Search } from 'lucide-react';
 
 export default function App() {
   // Dynamic editable data state
   const [torcidas, setTorcidas] = useState<TorcidaNode[]>(() => loadSavedTorcidas());
   const [connections, setConnections] = useState<NetworkConnection[]>(() => loadSavedConnections());
   const [hasCustomChanges, setHasCustomChanges] = useState<boolean>(() => hasCustomStorage());
+
+  // Collaboration and Auth State
+  const [isCollaborator, setIsCollaborator] = useState<boolean>(() => isCollaboratorAuthenticated());
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [isOnlineServer, setIsOnlineServer] = useState<boolean>(false);
+
+  // Quick Search Modal State
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState<boolean>(false);
+
+  // Load online data on mount
+  React.useEffect(() => {
+    fetchMapDataOnline().then((data) => {
+      if (data.isOnline) {
+        setTorcidas(data.torcidas);
+        setConnections(data.connections);
+        setIsOnlineServer(true);
+      }
+    });
+  }, []);
 
   // Interactive filters and focus
   const [selectedTorcidaId, setSelectedTorcidaId] = useState<string | null>(null);
@@ -66,8 +93,21 @@ export default function App() {
     return torcidas.find((t) => t.id === editorModalTorcidaId) || null;
   }, [editorModalTorcidaId, torcidas]);
 
+  const handleOpenEditorModal = (torcidaId: string) => {
+    if (!isCollaborator) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    setEditorModalTorcidaId(torcidaId);
+  };
+
   // Handlers for modifying alliances and connections
   const handleChangeBloc = (torcidaId: string, newBloc: AllianceBloc) => {
+    if (!isCollaborator) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+
     const updated = torcidas.map((t) => {
       if (t.id === torcidaId) {
         return {
@@ -82,6 +122,13 @@ export default function App() {
     setTorcidas(updated);
     saveTorcidasToStorage(updated);
     setHasCustomChanges(true);
+
+    // Sync online with backend API
+    updateTorcidaBlocOnline(torcidaId, newBloc).then((res) => {
+      if (res.success && res.torcidas) {
+        setTorcidas(res.torcidas);
+      }
+    });
   };
 
   const handleAddConnection = (
@@ -90,6 +137,11 @@ export default function App() {
     type: ConnectionType,
     label?: string
   ) => {
+    if (!isCollaborator) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+
     const exists = connections.some(
       (c) =>
         ((c.source === sourceId && c.target === targetId) ||
@@ -111,6 +163,13 @@ export default function App() {
     setConnections(updated);
     saveConnectionsToStorage(updated);
     setHasCustomChanges(true);
+
+    // Sync online with backend API
+    addConnectionOnline(sourceId, targetId, type, label).then((res) => {
+      if (res.success && res.connections) {
+        setConnections(res.connections);
+      }
+    });
   };
 
   const handleRemoveConnection = (connectionId: string) => {
@@ -137,9 +196,6 @@ export default function App() {
     setSelectedDerby(null);
   };
 
-  const handleOpenEditorModal = (id: string) => {
-    setEditorModalTorcidaId(id);
-  };
 
   // Handle selecting a derby
   const handleSelectDerby = (derby: Derby) => {
@@ -188,6 +244,8 @@ export default function App() {
         onResetCustomStorage={handleResetCustomStorage}
         onOpenDrawer={() => setIsDrawerOpen(true)}
         totalTorcidasCount={torcidas.length}
+        isCollaborator={isCollaborator}
+        onOpenAuthModal={() => setIsAuthModalOpen(true)}
       />
 
       {/* Main Content Layout: Centered, Focused on the Map */}
@@ -347,6 +405,30 @@ export default function App() {
           onExit={() => setPresentationMode(false)}
         />
       )}
+
+      {/* Floating Corner Magnifying Glass Search Trigger */}
+      <button
+        onClick={() => setIsSearchModalOpen(true)}
+        className="fixed bottom-6 right-6 z-40 p-3.5 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-xl shadow-cyan-950/60 border border-cyan-400/40 transition-all hover:scale-110 active:scale-95 group"
+        title="Pesquisar torcida no mapa"
+      >
+        <Search className="w-5 h-5 text-white group-hover:rotate-12 transition-transform" />
+      </button>
+
+      {/* Quick Search Modal */}
+      <SearchModal
+        isOpen={isSearchModalOpen}
+        onClose={() => setIsSearchModalOpen(false)}
+        torcidas={torcidas}
+        onSelectTorcida={handleSelectTorcida}
+      />
+
+      {/* Collaborator Password Auth Modal */}
+      <CollaboratorAuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={() => setIsCollaborator(true)}
+      />
 
     </div>
   );
