@@ -152,6 +152,7 @@ export const WhackCombat: React.FC<WhackCombatProps> = ({ opponentTier, onFinish
   const [timeLeft, setTimeLeft] = useState(10);
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
   const [isAlly, setIsAlly] = useState(false);
+  const [feedbackMsg, setFeedbackMsg] = useState<{ text: string; isPositive: boolean } | null>(null);
 
   // Comfortable target speed
   const speed = opponentTier === 'S' ? 520 : opponentTier === 'A' ? 620 : 720;
@@ -200,8 +201,10 @@ export const WhackCombat: React.FC<WhackCombatProps> = ({ opponentTier, onFinish
     if (isTutorial || index !== activeSlot) return;
     if (isAlly) {
       setScore((s) => Math.max(0, s - 15));
+      setFeedbackMsg({ text: '💥 MEMBRO NOSSO CAIU NO CHÃO (-15)!', isPositive: false });
     } else {
       setScore((s) => s + 10);
+      setFeedbackMsg({ text: '👥 BONDE AVANÇANDO (+10)!', isPositive: true });
     }
     setActiveSlot(null);
   };
@@ -246,6 +249,15 @@ export const WhackCombat: React.FC<WhackCombatProps> = ({ opponentTier, onFinish
         <span className="text-red-500">Barras de Ferro: Golpeie o Rival</span>
         <span className="text-yellow-400 font-mono text-sm">{timeLeft}s</span>
       </div>
+
+      {/* Dynamic Feedback Banner */}
+      {feedbackMsg && (
+        <div className={`w-full py-1 text-center font-black text-[10px] uppercase rounded-lg animate-pulse ${
+          feedbackMsg.isPositive ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-red-500/20 text-red-400 border border-red-500/40'
+        }`}>
+          {feedbackMsg.text}
+        </div>
+      )}
 
       <div className="grid grid-cols-3 gap-2.5 w-full h-52">
         {[0, 1, 2, 3, 4, 5].map((slot) => (

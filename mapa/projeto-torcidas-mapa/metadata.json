@@ -1,0 +1,6 @@
+{
+  "name": "Amizades e Rivalidades das Torcidas no Brasil",
+  "description": "Infográfico editorial premium com panorama visual de alianças entre organizadas, rivalidades tradicionais e clássicos regionais do futebol brasileiro.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

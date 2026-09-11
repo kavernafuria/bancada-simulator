@@ -140,7 +140,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     stateRef.current.cameraMode = cameraMode;
   }, [stage, crowdCount, ironBars, fireworks, flaresActive, level, playerTeam, rivalTeam, upgrades, speedFactor, cameraMode]);
 
-  // Helper to spawn bonequinhos flying through the air when hit or defeated
+  // Helper to spawn bonequinhos flying through the air and getting left behind on the ground when hit
   const spawnKnockoutFans = (
     count: number,
     baseX: number,
@@ -150,21 +150,21 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     facingDown: boolean
   ) => {
     const s = stateRef.current;
-    const num = Math.min(8, Math.max(1, count));
+    const num = Math.min(10, Math.max(1, count));
     for (let k = 0; k < num; k++) {
       s.knockoutFans.push({
-        x: baseX + (Math.random() - 0.5) * 0.7,
-        y: baseY + (Math.random() - 0.5) * 4,
-        z: baseZ + (Math.random() - 0.5) * 12,
-        vx: (Math.random() - 0.5) * 0.14,
-        vy: -(4 + Math.random() * 5),
-        vz: (facingDown ? 1 : -1) * (1.5 + Math.random() * 3),
+        x: baseX + (Math.random() - 0.5) * 0.8,
+        y: baseY + 4 + Math.random() * 4,
+        z: baseZ + (Math.random() - 0.5) * 10,
+        vx: (Math.random() - 0.5) * 0.16,
+        vy: -(5 + Math.random() * 6),
+        vz: (facingDown ? 1 : -1) * (2.0 + Math.random() * 4),
         rotation: Math.random() * Math.PI,
-        vRot: (Math.random() - 0.5) * 0.3,
+        vRot: (Math.random() - 0.5) * 0.4,
         scale: 1,
         team,
         life: 0,
-        maxLife: 0.65,
+        maxLife: 2.2, // Linger on the asphalt getting left behind
         facingDown,
       });
     }
@@ -1001,13 +1001,19 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         }
       }
 
-      // UPDATE KNOCKOUT FANS
+      // UPDATE KNOCKOUT FANS (Tumbling & lying flat on asphalt getting left behind)
       for (let i = s.knockoutFans.length - 1; i >= 0; i--) {
         const kf = s.knockoutFans[i];
         kf.life += dt;
         kf.x += kf.vx * (dt * 60);
         kf.y += kf.vy * (dt * 60);
-        kf.vy += 0.35 * (dt * 60); // gravity
+        kf.vy += 0.45 * (dt * 60); // gravity
+        if (kf.y >= 0) {
+          kf.y = 0; // Clamp on asphalt ground
+          kf.vy = 0;
+          kf.vx *= 0.82;
+          kf.facingDown = true; // Lying flat on asphalt
+        }
         kf.z += kf.vz * (dt * 60);
         kf.rotation += kf.vRot * (dt * 60);
 
