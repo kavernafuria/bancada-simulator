@@ -74,7 +74,7 @@ export const Runner3DGame: React.FC<Runner3DGameProps> = ({
   };
 
   // Estados do jogo
-  const [stage, setStage] = useState<'menu' | 'playing' | 'clash' | 'victory' | 'defeat'>('menu');
+  const [stage, setStage] = useState<'menu' | 'playing' | 'clash' | 'victory' | 'defeat'>('playing');
   const [crowdCount, setCrowdCount] = useState<number>(Math.max(12, Math.floor(contingente * 0.4)));
   const [ironBars, setIronBars] = useState<number>(gameMode === 'clash_bars' ? 5 : 0);
   const [fireworks, setFireworks] = useState<number>(3);

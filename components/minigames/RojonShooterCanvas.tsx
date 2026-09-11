@@ -112,7 +112,7 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
   onFinish,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [isTutorial, setIsTutorial] = useState(true);
+  const [isTutorial, setIsTutorial] = useState(false);
   const [timeLeft, setTimeLeft] = useState(30);
   const [crowdCount, setCrowdCount] = useState(25);
   const [weaponLevel, setWeaponLevel] = useState(1);
@@ -146,7 +146,7 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
     gameEnded: false,
   });
 
-  // Visão Totalmente de Cima (True Top-Down Overhead View - estilo Mob Control Arcade)
+  // Visão Aérea de Cima (Top-Down Bird's Eye Projection)
   const project = (
     worldX: number,
     worldY: number,
@@ -156,13 +156,14 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
     camZ: number
   ) => {
     const relZ = worldZ - camZ;
-    if (relZ <= 10) return null;
+    if (relZ <= 5) return null;
 
-    const focalLength = 300;
+    const focalLength = 320;
     const scale = focalLength / relZ;
-    const horizonY = canvasHeight * 0.04; // Visão de cima puro
-    const screenX = canvasWidth / 2 + worldX * (canvasWidth * 0.45) * scale;
-    const screenY = horizonY + (300 - worldY) * scale * 0.88; // Ângulo íngreme olhando reto para o chão
+    const horizonY = canvasHeight * 0.08;
+    const screenX = canvasWidth / 2 + worldX * (canvasWidth * 0.42) * scale;
+    // Map relZ = 160 (player position) cleanly at lower 78% of canvas height
+    const screenY = horizonY + (170 - worldY) * scale * (canvasHeight / 480);
 
     return { x: screenX, y: screenY, scale, depth: relZ };
   };
@@ -586,7 +587,7 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
             }
           });
 
-          // --- CHECK RIVAL MOB OVERRUNNING PLAYER BONDE (HEAVY IMMEDIATE DAMAGE) ---
+          // --- CHECK RIVAL MOB OVERRUNNING PLAYER BONDE ---
           s.rivals.forEach((r) => {
             if (!r.defeated) {
               const touchesBonde = r.z <= s.trackZ + 35 && r.z >= s.trackZ - 30 && Math.abs(r.x - s.playerX) < 0.65;
@@ -624,7 +625,7 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
           ctx.clearRect(0, 0, w, h);
 
           const camZ = s.trackZ - 160;
-          const horizonY = h * 0.04; // Visão de Cima Puro
+          const horizonY = h * 0.12;
 
           // 1. Stadium & Sky Backdrop
           const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY + 20);
@@ -650,7 +651,7 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
             ctx.fill();
           });
 
-          // 2. Clean Graphite Asphalt Road (Steep Overhead View)
+          // 2. Clean Graphite Asphalt Road
           const farZ = s.trackZ + 750;
           const nearZ = Math.max(0, camZ + 40);
 
@@ -748,7 +749,7 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
             ctx.restore();
           });
 
-          // 4. Draw Red Rival Mobs Stream (Red/Black Jerseys)
+          // 4. Draw Red Rival Mobs Stream
           s.rivals.forEach((r) => {
             if (r.defeated || r.z < camZ + 20 || r.z > camZ + 750) return;
 
@@ -814,9 +815,23 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
             }
           });
 
-          // 7. Draw Player Torcida Bonde Marching on Foot (Visão de Cima)
+          // 7. Draw Player Torcida Bonde Marching on Foot (WITH GREEN HIGHLIGHT BASE & BADGE)
           const pPlayer = project(s.playerX, 0, s.trackZ, w, h, camZ);
           if (pPlayer) {
+            const sP = pPlayer.scale;
+
+            // Green Pulsing Highlight Aura under Player Bonde on Asphalt
+            const pulse = 0.5 + Math.sin(performance.now() * 0.01) * 0.35;
+            ctx.fillStyle = `rgba(34, 197, 94, ${0.35 + pulse * 0.25})`;
+            ctx.beginPath();
+            ctx.ellipse(pPlayer.x, pPlayer.y, 45 * sP, 18 * sP, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.strokeStyle = `rgba(134, 239, 172, ${0.8 + pulse * 0.2})`;
+            ctx.lineWidth = 2 * sP;
+            ctx.stroke();
+
+            // Draw Torcedores in Bonde Swarm
             const maxFansDrawn = Math.min(s.crowdCount, 26);
             const fanPositions: { x: number; z: number }[] = [];
 
@@ -837,15 +852,29 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
               }
             });
 
+            // Prominent "MEU BONDE" Badge Tag above player crowd
+            ctx.fillStyle = "#15803d";
+            ctx.beginPath();
+            ctx.roundRect(pPlayer.x - 48 * sP, pPlayer.y - 58 * sP, 96 * sP, 18 * sP, 4 * sP);
+            ctx.fill();
+            ctx.strokeStyle = "#4ade80";
+            ctx.lineWidth = 1.5 * sP;
+            ctx.stroke();
+
+            ctx.fillStyle = "#ffffff";
+            ctx.font = `bold ${Math.max(9, Math.floor(11 * sP))}px sans-serif`;
+            ctx.textAlign = "center";
+            ctx.fillText(`👥 MEU BONDE (${s.crowdCount})`, pPlayer.x, pPlayer.y - 45 * sP);
+
             // Rocket Muzzle Spark
             if (performance.now() - s.lastShotTime < 100) {
-              const fGlow = ctx.createRadialGradient(pPlayer.x, pPlayer.y - 25 * pPlayer.scale, 2, pPlayer.x, pPlayer.y - 25 * pPlayer.scale, 20 * pPlayer.scale);
+              const fGlow = ctx.createRadialGradient(pPlayer.x, pPlayer.y - 25 * sP, 2, pPlayer.x, pPlayer.y - 25 * sP, 20 * sP);
               fGlow.addColorStop(0, "#fef08a");
               fGlow.addColorStop(0.5, "#f97316");
               fGlow.addColorStop(1, "rgba(0, 0, 0, 0)");
               ctx.fillStyle = fGlow;
               ctx.beginPath();
-              ctx.arc(pPlayer.x, pPlayer.y - 25 * pPlayer.scale, 20 * pPlayer.scale, 0, Math.PI * 2);
+              ctx.arc(pPlayer.x, pPlayer.y - 25 * sP, 20 * sP, 0, Math.PI * 2);
               ctx.fill();
             }
           }
@@ -913,37 +942,37 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
       <div className="flex flex-col items-center bg-zinc-950 p-6 rounded-2xl border border-amber-500 text-white max-w-sm w-full select-none shadow-2xl space-y-4 text-center">
         <div className="border-b border-zinc-800 pb-2 w-full">
           <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block">
-            🎆 BATERIA DE ROJÕES 3D (VISÃO DE CIMA)
+            🎆 BATERIA DE ROJÕES 3D (BONDE EM DESTAQUE)
           </span>
           <h3 className="text-sm font-black text-white uppercase mt-0.5">
-            Visão De Cima & Dano de Impacto Real
+            Visão De Cima & Bonde Visível Na Tela
           </h3>
         </div>
 
         <p className="text-xs text-zinc-300 leading-relaxed text-left">
-          <strong>Como Jogar:</strong> Vista superior (top-down de cima) para melhor controle e visibilidade!
+          <strong>Como Jogar:</strong> Seu bonde verde aparece destacado na parte inferior da tela!
         </p>
         <ul className="text-[11px] text-zinc-400 text-left space-y-1.5 list-disc pl-4">
           <li>
-            <span className="text-red-400 font-bold">⚠️ Dano Imediato ao Tocar</span>: Se a horda rival tocar no bonde ou passar direto, você perde torcedores na hora com aviso vermelho!
+            <span className="text-emerald-400 font-bold">👥 MEU BONDE</span>: Destacado com indicador verde no asfalto e badge de identificação.
           </li>
           <li>
-            <span className="text-amber-400 font-bold">Visão de Cima</span>: Visão direta e clara por cima da pista e dos portões verticais.
+            <span className="text-red-400 font-bold">⚠️ Dano Imediato</span>: Se os rivais encostarem no bonde, causam baixas instantâneas.
           </li>
           <li>
-            <span className="text-sky-400 font-bold">Deslize para Mover</span>: Controle suave arrastando o dedo na tela.
+            <span className="text-amber-400 font-bold">Visão de Cima</span>: Projeção corrigida para visibilidade perfeita de toda a pista.
           </li>
         </ul>
 
         <div className="bg-zinc-900 border border-zinc-800 p-2.5 rounded-xl text-[10px] font-mono text-amber-400 w-full text-left">
-          ⏱️ Duração: 30s • Dano de Impacto Ativado
+          ⏱️ Duração: 30s • Bonde Destacado & 100% Visível
         </div>
 
         <button
           onClick={() => setIsTutorial(false)}
           className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer"
         >
-          ▶️ INICIAR JOGO DE CIMA
+          ▶️ INICIAR JOGO COM BONDE VISÍVEL
         </button>
       </div>
     );
