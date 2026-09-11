@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { soundManager } from "@/lib/runner_audio";
 import { RunnerTeam } from "@/lib/runner_types";
+import { Flame, Sparkles, Trophy, RotateCcw, ArrowLeft, ArrowRight, Shield, Swords } from "lucide-react";
 
 export interface WeaponUpgrade {
   level: number;
@@ -15,10 +16,10 @@ export interface WeaponUpgrade {
 }
 
 export const WEAPON_LEVELS: WeaponUpgrade[] = [
-  { level: 1, name: "Rojão Padrão", fireRate: 350, projectileCount: 1, damage: 5, color: "#f59e0b", icon: "🚀" },
-  { level: 2, name: "Rojão 12 Tiros 🎆", fireRate: 260, projectileCount: 3, damage: 8, color: "#38bdf8", icon: "🎆" },
-  { level: 3, name: "Rojão Trovão ⚡", fireRate: 180, projectileCount: 4, damage: 12, color: "#facc15", icon: "⚡" },
-  { level: 4, name: "Morteiro de Torcida 💣", fireRate: 120, projectileCount: 5, damage: 18, color: "#ef4444", icon: "💣" },
+  { level: 1, name: "Rojão Padrão", fireRate: 320, projectileCount: 1, damage: 6, color: "#f59e0b", icon: "🚀" },
+  { level: 2, name: "Rojão 12 Tiros 🎆", fireRate: 240, projectileCount: 3, damage: 10, color: "#38bdf8", icon: "🎆" },
+  { level: 3, name: "Rojão Trovão ⚡", fireRate: 160, projectileCount: 4, damage: 16, color: "#facc15", icon: "⚡" },
+  { level: 4, name: "Morteiro de Torcida 💣", fireRate: 110, projectileCount: 5, damage: 25, color: "#ef4444", icon: "💣" },
 ];
 
 export interface RojonShooterProps {
@@ -35,14 +36,13 @@ export interface RojonShooterProps {
 
 interface GateBlock {
   id: string;
-  x: number;
+  x: number; // -0.6 for left, +0.6 for right
   z: number;
   type: "member" | "weapon";
   val: number;
+  weaponLevel?: number;
   label: string;
   passed: boolean;
-  hp: number;
-  maxHp: number;
 }
 
 interface RivalBlock {
@@ -92,6 +92,17 @@ interface KnockoutFan {
   life: number;
   maxLife: number;
   facingDown: boolean;
+  team: RunnerTeam;
+}
+
+interface FloatingText {
+  id: string;
+  text: string;
+  x: number;
+  y: number;
+  z: number;
+  color: string;
+  alpha: number;
 }
 
 export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
@@ -106,28 +117,36 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
   const [crowdCount, setCrowdCount] = useState(30);
   const [weaponLevel, setWeaponLevel] = useState(1);
   const [score, setScore] = useState(0);
+  const [gameResult, setGameResult] = useState<{
+    rank: "S" | "B" | "C" | "F";
+    modifier: number;
+    score: number;
+    crowdCount: number;
+    weaponName: string;
+  } | null>(null);
 
   const stateRef = useRef({
     playerX: 0,
     targetX: 0,
     crowdCount: 30,
-    score: 0,
     weaponLevel: 1,
+    score: 0,
     lastShotTime: 0,
     projectiles: [] as RocketProjectile[],
     gates: [] as GateBlock[],
     rivals: [] as RivalBlock[],
     particles: [] as Particle[],
     knockoutFans: [] as KnockoutFan[],
+    floatingTexts: [] as FloatingText[],
     trackZ: 0,
-    trackLength: 3200,
+    trackLength: 3600,
     isDragging: false,
     dragStartX: 0,
     dragStartPlayerX: 0,
     gameEnded: false,
   });
 
-  // Project 3D coordinates to 2D screen
+  // 3D Perspective Projection
   const project = (
     worldX: number,
     worldY: number,
@@ -148,7 +167,7 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
     return { x: screenX, y: screenY, scale, depth: relZ };
   };
 
-  // Render Fan Avatar with full diversity
+  // Render authentic Torcida Fan Avatar matching GameCanvas design system
   const renderFanAvatar = (
     ctx: CanvasRenderingContext2D,
     x: number,
@@ -159,588 +178,811 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
     facingDown = false
   ) => {
     const s = scale;
-    if (s <= 0.03) return;
+    if (s <= 0.02) return;
 
-    const runCycle = performance.now() * 0.012 + runnerIdx * 1.35;
-    const stride = Math.sin(runCycle);
+    ctx.save();
+    ctx.translate(x, y);
 
-    const skinTones = ["#3c2415", "#5c3a21", "#8d5524", "#c68642", "#e0ac69", "#f1c27d"];
-    const skinColor = skinTones[runnerIdx % skinTones.length];
-    const hairColors = ["#1e1b18", "#382216", "#18181b", "#451a03", "#0f172a"];
-    const hairColor = hairColors[runnerIdx % hairColors.length];
-
-    const bodyType = runnerIdx % 4;
-    let bodyW = 13.5 * s;
-    let bodyH = 14 * s;
-    let headR = 5.8 * s;
-    let armThickness = 3.2 * s;
-
-    if (bodyType === 0) {
-      bodyW = 16.5 * s;
-      bodyH = 14.5 * s;
-      armThickness = 4.6 * s;
-    } else if (bodyType === 1) {
-      bodyW = 17.5 * s;
-      bodyH = 15.0 * s;
-      armThickness = 4.2 * s;
-    } else if (bodyType === 3) {
-      bodyW = 11.5 * s;
-      bodyH = 15.5 * s;
-      armThickness = 2.8 * s;
+    if (facingDown) {
+      ctx.rotate(Math.PI * 0.85);
     }
 
-    const groundY = y;
-    const hipY = y - 13 * s;
-    const torsoY = hipY - bodyH;
-    const headY = torsoY - headR - 2 * s;
-
-    // Contact shadow
-    ctx.fillStyle = "rgba(0, 0, 0, 0.42)";
+    // Shadow on asphalt
+    ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
     ctx.beginPath();
-    ctx.ellipse(x, groundY + 1 * s, Math.max(6 * s, bodyW * 0.7 * s), 4.5 * s, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 0, 14 * s, 6 * s, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Legs
-    ctx.strokeStyle = "#1e293b";
-    ctx.lineWidth = armThickness;
-    ctx.beginPath();
-    ctx.moveTo(x - bodyW * 0.25, hipY);
-    ctx.lineTo(x - bodyW * 0.25 + stride * 3 * s, groundY);
-    ctx.moveTo(x + bodyW * 0.25, hipY);
-    ctx.lineTo(x + bodyW * 0.25 - stride * 3 * s, groundY);
-    ctx.stroke();
+    // Fan Seed Attributes for Skin & Body Diversity
+    const skinTones = ["#3c2415", "#5c3a21", "#8d5524", "#c68642", "#e0ac69", "#f1c27d"];
+    const skinColor = skinTones[runnerIdx % skinTones.length];
+    const bodyTypes = ["GORDO", "MUSCULOSO", "ATLÉTICO", "MAGRO"];
+    const bodyType = bodyTypes[runnerIdx % bodyTypes.length];
+    const hairStyles = ["DEGRADÊ", "BLACK_POWER", "BONÉ_TRÁS", "DREADS", "CARECA"];
+    const hairStyle = hairStyles[runnerIdx % hairStyles.length];
 
-    // Torso (Regata)
-    ctx.fillStyle = team.primaryColor;
-    ctx.beginPath();
-    ctx.roundRect(x - bodyW / 2, torsoY, bodyW, bodyH, 3 * s);
-    ctx.fill();
+    const jerseyColor = team.primaryColor || "#16a34a";
+    const accentColor = team.secondaryColor || "#ffffff";
 
-    // Accent Stripe
-    ctx.fillStyle = team.secondaryColor;
-    ctx.fillRect(x - bodyW * 0.14, torsoY, bodyW * 0.28, bodyH);
+    // Legs / Shorts
+    ctx.fillStyle = "#1e293b";
+    ctx.fillRect(-6 * s, -12 * s, 5 * s, 12 * s);
+    ctx.fillRect(1 * s, -12 * s, 5 * s, 12 * s);
 
-    // Bare Arms
-    ctx.strokeStyle = skinColor;
-    ctx.lineWidth = armThickness;
-    ctx.beginPath();
-    ctx.moveTo(x - bodyW * 0.48, torsoY + 3 * s);
-    ctx.lineTo(x - bodyW * 0.6, torsoY + 12 * s);
-    ctx.moveTo(x + bodyW * 0.48, torsoY + 3 * s);
-    ctx.lineTo(x + bodyW * 0.6, torsoY + 5 * s); // Holding rocket
-    ctx.stroke();
-
-    // Tattoo on arm for fortões
-    if (bodyType === 0) {
-      ctx.strokeStyle = "rgba(30, 41, 59, 0.65)";
-      ctx.lineWidth = armThickness * 0.45;
+    // Torso / Regata (Chest)
+    ctx.fillStyle = jerseyColor;
+    if (bodyType === "GORDO") {
       ctx.beginPath();
-      ctx.moveTo(x - bodyW * 0.48, torsoY + 4 * s);
-      ctx.lineTo(x - bodyW * 0.55, torsoY + 9 * s);
+      ctx.roundRect(-13 * s, -34 * s, 26 * s, 23 * s, 4 * s);
+      ctx.fill();
+    } else if (bodyType === "MUSCULOSO") {
+      ctx.beginPath();
+      ctx.roundRect(-12 * s, -36 * s, 24 * s, 25 * s, 3 * s);
+      ctx.fill();
+    } else {
+      ctx.beginPath();
+      ctx.roundRect(-10 * s, -34 * s, 20 * s, 23 * s, 3 * s);
+      ctx.fill();
+    }
+
+    // Jersey Accent Stripe
+    ctx.fillStyle = accentColor;
+    ctx.fillRect(-3 * s, -34 * s, 6 * s, 23 * s);
+
+    // Bare Arms with Tattoos
+    ctx.fillStyle = skinColor;
+    const armW = bodyType === "MUSCULOSO" ? 6 * s : 4.5 * s;
+    ctx.fillRect(-15 * s, -32 * s, armW, 16 * s);
+    ctx.fillRect(11 * s, -32 * s, armW, 16 * s);
+
+    // Tattoos on arms
+    if (runnerIdx % 2 === 0) {
+      ctx.strokeStyle = "#0f172a";
+      ctx.lineWidth = 1.2 * s;
+      ctx.beginPath();
+      ctx.moveTo(-14 * s, -28 * s);
+      ctx.lineTo(-11 * s, -20 * s);
       ctx.stroke();
     }
 
-    // Rocket in hand
-    ctx.fillStyle = "#d97706";
-    ctx.fillRect(x + bodyW * 0.55, torsoY - 8 * s, 2 * s, 14 * s);
-    ctx.fillStyle = "#ef4444";
-    ctx.fillRect(x + bodyW * 0.5, torsoY - 14 * s, 4 * s, 6 * s);
-
-    // Head & Hair
-    ctx.fillStyle = skinColor;
+    // Neck & Head
+    ctx.fillRect(-4 * s, -40 * s, 8 * s, 7 * s); // Neck
     ctx.beginPath();
-    ctx.arc(x, headY, headR, 0, Math.PI * 2);
+    ctx.arc(0, -46 * s, 8.5 * s, 0, Math.PI * 2);
     ctx.fill();
 
-    const hairStyle = runnerIdx % 5;
-    if (hairStyle === 1) {
+    // Hair / Cap Diversity
+    if (hairStyle === "BLACK_POWER") {
       ctx.fillStyle = "#1e1b18";
       ctx.beginPath();
-      ctx.arc(x, headY - 1.5 * s, headR * 1.25, 0, Math.PI * 2);
+      ctx.arc(0, -48 * s, 11 * s, 0, Math.PI * 2);
       ctx.fill();
-    } else if (hairStyle === 2) {
-      ctx.fillStyle = team.secondaryColor || "#ef4444";
+    } else if (hairStyle === "BONÉ_TRÁS") {
+      ctx.fillStyle = team.accentColor || "#15803d";
       ctx.beginPath();
-      ctx.arc(x, headY - 1.2 * s, headR * 1.05, Math.PI * 0.8, Math.PI * 2.2);
+      ctx.arc(0, -48 * s, 9 * s, Math.PI, Math.PI * 2);
       ctx.fill();
-    } else {
-      ctx.fillStyle = hairColor;
+      // Visor at back
+      ctx.fillRect(-10 * s, -48 * s, 6 * s, 3 * s);
+    } else if (hairStyle === "DREADS") {
+      ctx.fillStyle = "#292524";
+      ctx.fillRect(-9 * s, -52 * s, 18 * s, 8 * s);
+      ctx.fillRect(-10 * s, -48 * s, 4 * s, 12 * s);
+      ctx.fillRect(6 * s, -48 * s, 4 * s, 12 * s);
+    } else if (hairStyle === "DEGRADÊ") {
+      ctx.fillStyle = "#1c1917";
       ctx.beginPath();
-      ctx.arc(x, headY - 1.2 * s, headR * 0.98, Math.PI * 0.9, Math.PI * 2.1);
-      ctx.closePath();
+      ctx.arc(0, -48 * s, 9 * s, Math.PI * 1.1, Math.PI * 1.9);
       ctx.fill();
     }
 
-    if (facingDown) {
-      ctx.fillStyle = "#1e293b";
-      ctx.fillRect(x - 2.5 * s, headY - 0.5 * s, 1.5 * s, 1.4 * s);
-      ctx.fillRect(x + 1.0 * s, headY - 0.5 * s, 1.5 * s, 1.4 * s);
-      ctx.fillStyle = "#7f1d1d";
-      ctx.beginPath();
-      ctx.ellipse(x, headY + 2.4 * s, 2 * s, 1.4 * s, 0, 0, Math.PI * 2);
-      ctx.fill();
+    // Waving Banner / Flag for rear fans
+    if (runnerIdx === 0) {
+      ctx.fillStyle = "#e2e8f0";
+      ctx.fillRect(-1 * s, -75 * s, 2 * s, 40 * s);
+      ctx.fillStyle = jerseyColor;
+      ctx.fillRect(1 * s, -75 * s, 22 * s, 14 * s);
+      ctx.fillStyle = accentColor;
+      ctx.fillRect(1 * s, -68 * s, 22 * s, 4 * s);
+    }
+
+    ctx.restore();
+  };
+
+  // Spawn Knockout Fans when damage occurs
+  const spawnKnockoutFans = (count: number, baseX: number, baseY: number, baseZ: number, team: RunnerTeam) => {
+    const s = stateRef.current;
+    const num = Math.min(8, Math.max(1, count));
+    for (let k = 0; k < num; k++) {
+      s.knockoutFans.push({
+        x: baseX + (Math.random() - 0.5) * 0.8,
+        y: baseY + Math.random() * 4,
+        z: baseZ + (Math.random() - 0.5) * 10,
+        vx: (Math.random() - 0.5) * 0.16,
+        vy: -(4 + Math.random() * 5),
+        vz: -(2.0 + Math.random() * 4),
+        rotation: Math.random() * Math.PI,
+        vRot: (Math.random() - 0.5) * 0.4,
+        life: 0,
+        maxLife: 2.5,
+        facingDown: Math.random() > 0.4,
+        team,
+      });
     }
   };
 
-  // Initialize track objects
+  // Add floating combat text (+10, -5, UPGRADE!)
+  const addFloatingText = (text: string, x: number, y: number, z: number, color: string) => {
+    stateRef.current.floatingTexts.push({
+      id: "ft_" + Math.random(),
+      text,
+      x,
+      y,
+      z,
+      color,
+      alpha: 1.0,
+    });
+  };
+
+  // Init track layout (Gates & Rival Mobs)
   const initTrack = () => {
     const s = stateRef.current;
-    s.gates = [];
-    s.rivals = [];
+    s.playerX = 0;
+    s.targetX = 0;
+    s.crowdCount = 30;
+    s.weaponLevel = 1;
+    s.score = 0;
+    s.lastShotTime = 0;
     s.projectiles = [];
     s.particles = [];
     s.knockoutFans = [];
+    s.floatingTexts = [];
     s.trackZ = 0;
-    s.crowdCount = 30;
-    s.weaponLevel = 1;
     s.gameEnded = false;
 
-    // Generate tracks with left member blocks and right weapon upgrade blocks
-    for (let z = 350; z < s.trackLength - 200; z += 320) {
-      // Left Member Block (+1, +3, +5, +10)
-      const memVal = Math.random() > 0.5 ? 5 : 3;
-      s.gates.push({
-        id: `mem_${z}`,
-        x: -0.72,
-        z,
+    // Create Split Parallel Upgrade Gates along the track
+    const gates: GateBlock[] = [];
+    const zSpacing = 320;
+    for (let i = 1; i <= 9; i++) {
+      const zPos = i * zSpacing;
+
+      // Left Lane: Torcida Member Reinforcements
+      const memberVal = i % 3 === 0 ? 10 : i % 2 === 0 ? 5 : 3;
+      gates.push({
+        id: `gate_m_${i}`,
+        x: -0.62,
+        z: zPos,
         type: "member",
-        val: memVal,
-        label: `+${memVal} BONDE`,
+        val: memberVal,
+        label: `+${memberVal} TORCEDORES`,
         passed: false,
-        hp: memVal * 10,
-        maxHp: memVal * 10,
       });
 
-      // Right Weapon Upgrade Block
-      const wLvl = Math.min(4, Math.floor(z / 700) + 2);
+      // Right Lane: Weapon Upgrades
+      const wLvl = Math.min(4, Math.floor(i / 2) + 1);
       const wInfo = WEAPON_LEVELS[wLvl - 1];
-      s.gates.push({
-        id: `weap_${z}`,
-        x: 0.72,
-        z,
+      gates.push({
+        id: `gate_w_${i}`,
+        x: 0.62,
+        z: zPos,
         type: "weapon",
         val: wLvl,
+        weaponLevel: wLvl,
         label: wInfo.name,
         passed: false,
-        hp: 40,
-        maxHp: 40,
       });
+    }
+    s.gates = gates;
 
-      // Rival Red Mob advancing in center/sides
-      if (z % 640 === 0) {
-        const rCount = 20 + Math.floor(Math.random() * 25);
-        s.rivals.push({
-          id: `riv_${z}`,
-          x: (Math.random() - 0.5) * 0.9,
-          z: z + 150,
-          count: rCount,
-          maxCount: rCount,
-          defeated: false,
-        });
-      }
+    // Create Rival Mobs along the track
+    const rivals: RivalBlock[] = [];
+    for (let j = 1; j <= 8; j++) {
+      const rZ = j * 360 + 160;
+      const count = (opponentTier === "S" ? 30 : opponentTier === "A" ? 22 : 15) + j * 3;
+      rivals.push({
+        id: `rival_${j}`,
+        x: (Math.random() - 0.5) * 0.8,
+        z: rZ,
+        count,
+        maxCount: count,
+        defeated: false,
+      });
+    }
+    s.rivals = rivals;
+  };
+
+  // Firework Rockets Spawner according to Weapon Level
+  const fireRockets = (now: number) => {
+    const s = stateRef.current;
+    const wConfig = WEAPON_LEVELS[s.weaponLevel - 1];
+    if (now - s.lastShotTime < wConfig.fireRate) return;
+
+    s.lastShotTime = now;
+    soundManager.playFireworkLaunch();
+
+    const count = wConfig.projectileCount;
+    for (let p = 0; p < count; p++) {
+      const spreadX = count === 1 ? 0 : (p - (count - 1) / 2) * 0.18;
+      s.projectiles.push({
+        id: `rocket_${Date.now()}_${p}`,
+        x: s.playerX + spreadX,
+        y: 16,
+        z: s.trackZ + 25,
+        vx: spreadX * 0.08,
+        vy: 0.05,
+        vz: 28,
+        damage: wConfig.damage,
+        color: wConfig.color,
+      });
     }
   };
 
-  useEffect(() => {
-    initTrack();
-  }, []);
-
-  // Timer countdown
+  // Main Canvas Game Loop
   useEffect(() => {
     if (isTutorial) return;
-    const timer = setInterval(() => {
+
+    initTrack();
+    setCrowdCount(30);
+    setWeaponLevel(1);
+    setScore(0);
+    setTimeLeft(15);
+    setGameResult(null);
+
+    let animationFrameId: number;
+    let lastTime = performance.now();
+
+    // 15-second game timer
+    const timerInterval = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          clearInterval(timer);
-          evaluateGameEnd();
+          clearInterval(timerInterval);
+          endGame();
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
 
-    return () => clearInterval(timer);
-  }, [isTutorial]);
-
-  const evaluateGameEnd = () => {
-    const s = stateRef.current;
-    if (s.gameEnded) return;
-    s.gameEnded = true;
-
-    const finalScore = s.crowdCount * 10 + s.weaponLevel * 50;
-    if (finalScore >= 450) {
-      onFinish({
-        gameType: "rojon",
-        modifier: 0.25,
-        rank: "S",
-        description: "Bateria de rojões atropelou a pista com rajadas de fogos (+25% PEC)!",
-      });
-    } else if (finalScore >= 280) {
-      onFinish({
-        gameType: "rojon",
-        modifier: 0.10,
-        rank: "B",
-        description: "Rajadas de rojão mantiveram o domínio da avenida (+10% PEC).",
-      });
-    } else if (finalScore >= 150) {
-      onFinish({
-        gameType: "rojon",
-        modifier: 0.0,
-        rank: "C",
-        description: "Fogo de rojão constante sem grandes avanços (0% PEC).",
-      });
-    } else {
-      onFinish({
-        gameType: "rojon",
-        modifier: -0.2,
-        rank: "F",
-        description: "Bateria de rojões recuou sob pressão rival (-20% PEC).",
-      });
-    }
-  };
-
-  // Main Render Loop
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let animId: number;
-    let lastTime = performance.now();
-
-    const resize = () => {
-      if (canvas.parentElement) {
-        canvas.width = canvas.parentElement.clientWidth;
-        canvas.height = canvas.parentElement.clientHeight;
-      }
-    };
-    resize();
-    window.addEventListener("resize", resize);
-
-    const loop = (now: number) => {
-      const dt = Math.min((now - lastTime) / 1000, 0.1);
-      lastTime = now;
-
+    const endGame = () => {
       const s = stateRef.current;
-      const w = canvas.width;
-      const h = canvas.height;
+      if (s.gameEnded) return;
+      s.gameEnded = true;
 
-      ctx.save();
-      ctx.fillStyle = "#0f172a";
-      ctx.fillRect(0, 0, w, h);
+      const finalScore = s.score;
+      const finalCrowd = s.crowdCount;
+      const finalW = WEAPON_LEVELS[s.weaponLevel - 1].name;
 
-      if (!isTutorial && !s.gameEnded) {
-        // Track moves forward
-        s.trackZ += 3.8 * (dt * 60);
+      let rank: "S" | "B" | "C" | "F" = "C";
+      let modifier = 0;
+      if (finalScore >= 500 && finalCrowd >= 40) {
+        rank = "S";
+        modifier = 0.25;
+      } else if (finalScore >= 300) {
+        rank = "B";
+        modifier = 0.12;
+      } else if (finalScore >= 150) {
+        rank = "C";
+        modifier = 0.05;
+      } else {
+        rank = "F";
+        modifier = -0.15;
+      }
 
-        // Smooth player lateral movement
-        s.playerX += (s.targetX - s.playerX) * 0.25;
+      setGameResult({
+        rank,
+        modifier,
+        score: finalScore,
+        crowdCount: finalCrowd,
+        weaponName: finalW,
+      });
 
-        // Auto-fire fireworks from player bonde
-        const currentWeapon = WEAPON_LEVELS[s.weaponLevel - 1];
-        if (now - s.lastShotTime >= currentWeapon.fireRate) {
-          s.lastShotTime = now;
-          soundManager.playFireworkLaunch();
+      onFinish({
+        gameType: "rojon",
+        modifier,
+        rank,
+        description: `Bateria de Rojões: ${finalScore} pts | ${finalCrowd} Torcedores | Armamento: ${finalW}`,
+      });
+    };
 
-          for (let p = 0; p < currentWeapon.projectileCount; p++) {
-            const spreadX = (p - (currentWeapon.projectileCount - 1) / 2) * 0.18;
-            s.projectiles.push({
-              id: `proj_${now}_${p}`,
-              x: s.playerX + spreadX,
-              y: 16,
-              z: s.trackZ + 35,
-              vx: spreadX * 0.05,
-              vy: 0.05,
-              vz: 16,
-              damage: currentWeapon.damage,
-              color: currentWeapon.color,
-            });
-          }
-        }
+    const render = (currentTime: number) => {
+      const dt = Math.min(0.05, (currentTime - lastTime) / 1000);
+      lastTime = currentTime;
 
-        // Update Projectiles & Check Collisions
-        for (let i = s.projectiles.length - 1; i >= 0; i--) {
-          const proj = s.projectiles[i];
-          proj.z += proj.vz * (dt * 60);
-          proj.x += proj.vx * (dt * 60);
+      const canvas = canvasRef.current;
+      const s = stateRef.current;
 
-          // Sparks trailing rocket
-          if (Math.random() < 0.6) {
-            s.particles.push({
-              x: proj.x,
-              y: proj.y,
-              z: proj.z - 6,
-              vx: (Math.random() - 0.5) * 0.04,
-              vy: (Math.random() - 0.5) * 0.04,
-              vz: -2,
-              color: proj.color,
-              size: 3.5,
-              alpha: 0.9,
-              life: 0,
-              maxLife: 0.35,
-            });
-          }
+      if (canvas && !s.gameEnded) {
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          const w = (canvas.width = canvas.clientWidth || 400);
+          const h = (canvas.height = canvas.clientHeight || 320);
 
-          // Check hit on Gate Blocks (Left Member Blocks & Right Weapon Upgrades)
-          const hitGate = s.gates.find(
-            (g) => !g.passed && Math.abs(g.z - proj.z) < 28 && Math.abs(g.x - proj.x) < 0.55
-          );
-          if (hitGate) {
-            proj.z = s.trackLength + 999; // Remove projectile
-            hitGate.hp -= proj.damage;
+          // Update Track Movement & Player X Interpolation
+          s.trackZ += 85 * dt;
+          s.playerX += (s.targetX - s.playerX) * 0.15;
 
-            // Spark explosion on block
-            for (let k = 0; k < 6; k++) {
+          // Auto Fire Rockets
+          fireRockets(currentTime);
+
+          // --- UPDATE PROJECTILES ---
+          for (let i = s.projectiles.length - 1; i >= 0; i--) {
+            const proj = s.projectiles[i];
+            proj.x += proj.vx;
+            proj.z += proj.vz;
+
+            // Rocket Smoke Trail
+            if (Math.random() < 0.6) {
               s.particles.push({
-                x: hitGate.x + (Math.random() - 0.5) * 0.3,
-                y: 12,
-                z: hitGate.z + (Math.random() - 0.5) * 6,
-                vx: (Math.random() - 0.5) * 0.08,
-                vy: (Math.random() - 0.5) * 0.08,
-                vz: 2,
-                color: hitGate.type === "member" ? "#38bdf8" : "#facc15",
-                size: 4,
-                alpha: 1,
+                x: proj.x,
+                y: proj.y - 2,
+                z: proj.z - 5,
+                vx: (Math.random() - 0.5) * 0.1,
+                vy: (Math.random() - 0.5) * 0.1,
+                vz: -2,
+                color: proj.color,
+                size: 4 + Math.random() * 4,
+                alpha: 0.7,
                 life: 0,
-                maxLife: 0.45,
+                maxLife: 0.4,
               });
             }
 
-            if (hitGate.hp <= 0 && !hitGate.passed) {
-              hitGate.passed = true;
-              if (hitGate.type === "member") {
-                s.crowdCount = Math.min(100, s.crowdCount + hitGate.val);
+            // Hit check on Rival Mobs
+            const hitRival = s.rivals.find(
+              (r) => !r.defeated && Math.abs(r.z - proj.z) < 35 && Math.abs(r.x - proj.x) < 0.75
+            );
+            if (hitRival) {
+              s.projectiles.splice(i, 1);
+              hitRival.count -= Math.ceil(proj.damage / 3);
+
+              // Explosion Sparks
+              soundManager.playFireworkExplosion();
+              for (let p = 0; p < 12; p++) {
+                s.particles.push({
+                  x: hitRival.x + (Math.random() - 0.5) * 0.5,
+                  y: 12 + Math.random() * 10,
+                  z: hitRival.z + (Math.random() - 0.5) * 10,
+                  vx: (Math.random() - 0.5) * 0.4,
+                  vy: (Math.random() - 0.5) * 0.4,
+                  vz: (Math.random() - 0.5) * 0.4,
+                  color: proj.color,
+                  size: 5 + Math.random() * 6,
+                  alpha: 1.0,
+                  life: 0,
+                  maxLife: 0.6,
+                });
+              }
+
+              if (hitRival.count <= 0) {
+                hitRival.defeated = true;
+                const pts = hitRival.maxCount * 8;
+                s.score += pts;
+                setScore(s.score);
+                addFloatingText(`+${pts} PTS!`, hitRival.x, 30, hitRival.z, "#facc15");
+                spawnKnockoutFans(6, hitRival.x, 10, hitRival.z, rivalTeam);
+              }
+              continue;
+            }
+
+            if (proj.z > s.trackZ + 750) {
+              s.projectiles.splice(i, 1);
+            }
+          }
+
+          // --- UPDATE KNOCKOUT FANS PHYSICS ---
+          for (let k = s.knockoutFans.length - 1; k >= 0; k--) {
+            const kf = s.knockoutFans[k];
+            kf.life += dt;
+            if (kf.y > 0) {
+              kf.y += kf.vy * dt * 25;
+              kf.vy += 9.8 * dt * 2;
+            } else {
+              kf.y = 0;
+            }
+            kf.x += kf.vx;
+            kf.z += kf.vz * dt * 15;
+            kf.rotation += kf.vRot;
+
+            if (kf.life >= kf.maxLife) {
+              s.knockoutFans.splice(k, 1);
+            }
+          }
+
+          // --- CHECK GATE COLLISIONS ---
+          s.gates.forEach((g) => {
+            if (!g.passed && Math.abs(g.z - s.trackZ) < 28 && Math.abs(g.x - s.playerX) < 0.65) {
+              g.passed = true;
+              soundManager.playGateSound(true);
+
+              if (g.type === "member") {
+                s.crowdCount = Math.min(100, s.crowdCount + g.val);
                 setCrowdCount(s.crowdCount);
-                soundManager.playGateSound(true);
-              } else {
-                s.weaponLevel = Math.min(4, hitGate.val);
-                setWeaponLevel(s.weaponLevel);
-                soundManager.playGateSound(true);
+                addFloatingText(`+${g.val} TORCEDORES!`, s.playerX, 35, s.trackZ, "#38bdf8");
+              } else if (g.type === "weapon" && g.weaponLevel) {
+                if (g.weaponLevel > s.weaponLevel) {
+                  s.weaponLevel = g.weaponLevel;
+                  setWeaponLevel(s.weaponLevel);
+                  const wName = WEAPON_LEVELS[g.weaponLevel - 1].name;
+                  addFloatingText(`UPGRADE: ${wName}!`, s.playerX, 40, s.trackZ, "#facc15");
+                }
               }
             }
-          }
+          });
 
-          // Check hit on Rival Mob
-          const hitRival = s.rivals.find(
-            (r) => !r.defeated && Math.abs(r.z - proj.z) < 30 && Math.abs(r.x - proj.x) < 0.65
-          );
-          if (hitRival) {
-            proj.z = s.trackLength + 999;
-            hitRival.count -= Math.ceil(proj.damage / 3);
-
-            if (hitRival.count <= 0) {
-              hitRival.defeated = true;
-              s.score += hitRival.maxCount * 5;
-              setScore(s.score);
-              soundManager.playFireworkExplosion();
-            }
-          }
-
-          if (proj.z > s.trackZ + 750) {
-            s.projectiles.splice(i, 1);
-          }
-        }
-
-        // Check Direct Collision of Player Mob with Gate Blocks
-        s.gates.forEach((g) => {
-          if (!g.passed && Math.abs(g.z - s.trackZ) < 32 && Math.abs(g.x - s.playerX) < 0.55) {
-            g.passed = true;
-            if (g.type === "member") {
-              s.crowdCount = Math.min(100, s.crowdCount + g.val);
+          // --- CHECK PLAYER MOB COLLISION WITH RIVAL MOBS ---
+          s.rivals.forEach((r) => {
+            if (!r.defeated && Math.abs(r.z - s.trackZ) < 30 && Math.abs(r.x - s.playerX) < 0.6) {
+              r.defeated = true;
+              const loss = Math.min(s.crowdCount - 5, Math.ceil(r.count * 0.4));
+              s.crowdCount = Math.max(5, s.crowdCount - loss);
               setCrowdCount(s.crowdCount);
-              soundManager.playGateSound(true);
+              soundManager.playGateSound(false);
+              addFloatingText(`-${loss} TORCEDORES`, s.playerX, 35, s.trackZ, "#ef4444");
+              spawnKnockoutFans(loss, s.playerX, 8, s.trackZ, playerTeam);
+            }
+          });
+
+          // --- DRAWING PASS ---
+          ctx.clearRect(0, 0, w, h);
+
+          const camZ = s.trackZ - 140;
+          const horizonY = h * 0.22;
+
+          // 1. Sky Gradient & City Backdrop
+          const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY + 30);
+          skyGrad.addColorStop(0, "#020617");
+          skyGrad.addColorStop(0.7, "#0f172a");
+          skyGrad.addColorStop(1, "#1e293b");
+          ctx.fillStyle = skyGrad;
+          ctx.fillRect(0, 0, w, horizonY + 30);
+
+          // City Building Facades Left & Right
+          const cityBlocksLeft = [
+            { x: 0.02, w: 0.12, h: 120, color: "#334155" },
+            { x: 0.13, w: 0.1, h: 150, color: "#1e293b" },
+            { x: 0.22, w: 0.08, h: 100, color: "#475569" },
+          ];
+          cityBlocksLeft.forEach((b) => {
+            const bx = b.x * w;
+            const bw = b.w * w;
+            ctx.fillStyle = b.color;
+            ctx.fillRect(bx, horizonY + 25 - b.h, bw, b.h + 30);
+            ctx.fillStyle = "rgba(254, 240, 138, 0.5)";
+            for (let wy = horizonY + 35 - b.h; wy < horizonY + 15; wy += 20) {
+              for (let wx = bx + 6; wx < bx + bw - 6; wx += 12) {
+                ctx.fillRect(wx, wy, 4, 7);
+              }
+            }
+          });
+
+          const cityBlocksRight = [
+            { x: 0.68, w: 0.08, h: 110, color: "#475569" },
+            { x: 0.77, w: 0.11, h: 160, color: "#1e293b" },
+            { x: 0.87, w: 0.11, h: 130, color: "#334155" },
+          ];
+          cityBlocksRight.forEach((b) => {
+            const bx = b.x * w;
+            const bw = b.w * w;
+            ctx.fillStyle = b.color;
+            ctx.fillRect(bx, horizonY + 25 - b.h, bw, b.h + 30);
+            ctx.fillStyle = "rgba(254, 240, 138, 0.5)";
+            for (let wy = horizonY + 35 - b.h; wy < horizonY + 15; wy += 20) {
+              for (let wx = bx + 6; wx < bx + bw - 6; wx += 12) {
+                ctx.fillRect(wx, wy, 4, 7);
+              }
+            }
+          });
+
+          // 2. Road Asphalt & Sidewalks
+          const farZ = s.trackZ + 750;
+          const nearZ = Math.max(0, camZ + 45);
+
+          const pRoadNearL = project(-1.65, 0, nearZ, w, h, camZ);
+          const pRoadNearR = project(1.65, 0, nearZ, w, h, camZ);
+          const pRoadFarL = project(-1.65, 0, farZ, w, h, camZ);
+          const pRoadFarR = project(1.65, 0, farZ, w, h, camZ);
+
+          const pSideNearL = project(-2.2, 0, nearZ, w, h, camZ);
+          const pSideFarL = project(-2.2, 0, farZ, w, h, camZ);
+          const pSideNearR = project(2.2, 0, nearZ, w, h, camZ);
+          const pSideFarR = project(2.2, 0, farZ, w, h, camZ);
+
+          if (pRoadNearL && pRoadNearR && pRoadFarL && pRoadFarR) {
+            const nearY = Math.min(h, pRoadNearL.y);
+
+            // Sidewalk Left
+            if (pSideNearL && pSideFarL) {
+              ctx.fillStyle = "#94a3b8";
+              ctx.beginPath();
+              ctx.moveTo(pSideNearL.x, nearY);
+              ctx.lineTo(pSideFarL.x, pSideFarL.y);
+              ctx.lineTo(pRoadFarL.x, pRoadFarL.y);
+              ctx.lineTo(pRoadNearL.x, nearY);
+              ctx.closePath();
+              ctx.fill();
+            }
+
+            // Sidewalk Right
+            if (pSideNearR && pSideFarR) {
+              ctx.fillStyle = "#94a3b8";
+              ctx.beginPath();
+              ctx.moveTo(pRoadNearR.x, nearY);
+              ctx.lineTo(pRoadFarR.x, pRoadFarR.y);
+              ctx.lineTo(pSideFarR.x, pSideFarR.y);
+              ctx.lineTo(pSideNearR.x, nearY);
+              ctx.closePath();
+              ctx.fill();
+            }
+
+            // Asphalt Road
+            ctx.beginPath();
+            ctx.moveTo(pRoadNearL.x, nearY);
+            ctx.lineTo(pRoadFarL.x, pRoadFarL.y);
+            ctx.lineTo(pRoadFarR.x, pRoadFarR.y);
+            ctx.lineTo(pRoadNearR.x, nearY);
+            ctx.closePath();
+
+            const roadGrad = ctx.createLinearGradient(0, pRoadFarL.y, 0, nearY);
+            roadGrad.addColorStop(0, "#334155");
+            roadGrad.addColorStop(0.5, "#475569");
+            roadGrad.addColorStop(1, "#64748b");
+            ctx.fillStyle = roadGrad;
+            ctx.fill();
+
+            // Lane Divider Markings
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = Math.max(2, 4 * pRoadNearL.scale);
+            ctx.beginPath();
+            ctx.moveTo(pRoadNearL.x, nearY);
+            ctx.lineTo(pRoadFarL.x, pRoadFarL.y);
+            ctx.moveTo(pRoadNearR.x, nearY);
+            ctx.lineTo(pRoadFarR.x, pRoadFarR.y);
+            ctx.stroke();
+
+            // Central Dashed Lane Line
+            const pCenterNear = project(0, 0, nearZ, w, h, camZ);
+            const pCenterFar = project(0, 0, farZ, w, h, camZ);
+            if (pCenterNear && pCenterFar) {
+              ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+              ctx.lineWidth = Math.max(1.5, 3 * pCenterNear.scale);
+              ctx.setLineDash([15, 15]);
+              ctx.beginPath();
+              ctx.moveTo(pCenterNear.x, pCenterNear.y);
+              ctx.lineTo(pCenterFar.x, pCenterFar.y);
+              ctx.stroke();
+              ctx.setLineDash([]);
+            }
+          }
+
+          // Street Lamps & Glow Pools on Sidewalks
+          const lampStep = 110;
+          const startLampZ = Math.floor(camZ / lampStep) * lampStep;
+          for (let lz = startLampZ; lz < farZ; lz += lampStep) {
+            if (lz < nearZ) continue;
+            [-2.35, 2.35].forEach((lx) => {
+              const pL = project(lx, 0, lz, w, h, camZ);
+              if (pL && pL.scale > 0.03) {
+                const poleH = 75 * pL.scale;
+                const glowR = 38 * pL.scale;
+
+                // Warm Light Glow
+                const lampGlow = ctx.createRadialGradient(pL.x, pL.y, 2, pL.x, pL.y, glowR);
+                lampGlow.addColorStop(0, "rgba(254, 240, 138, 0.35)");
+                lampGlow.addColorStop(1, "rgba(254, 240, 138, 0)");
+                ctx.fillStyle = lampGlow;
+                ctx.beginPath();
+                ctx.ellipse(pL.x, pL.y, glowR, glowR * 0.4, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Pole
+                ctx.strokeStyle = "#475569";
+                ctx.lineWidth = Math.max(1.5, 3 * pL.scale);
+                ctx.beginPath();
+                ctx.moveTo(pL.x, pL.y);
+                ctx.lineTo(pL.x, pL.y - poleH);
+                ctx.stroke();
+              }
+            });
+          }
+
+          // 3. Draw Knockout Fans on Asphalt
+          s.knockoutFans.forEach((kf) => {
+            const pKF = project(kf.x, kf.y, kf.z, w, h, camZ);
+            if (pKF) {
+              renderFanAvatar(ctx, pKF.x, pKF.y, pKF.scale * 0.7, kf.team, 1, kf.facingDown);
+            }
+          });
+
+          // 4. Draw Split Parallel Gate Blocks
+          s.gates.forEach((g) => {
+            if (g.passed || g.z < camZ + 30 || g.z > camZ + 750) return;
+
+            const pGate = project(g.x, 20, g.z, w, h, camZ);
+            if (!pGate) return;
+
+            const isMember = g.type === "member";
+            const gateW = Math.max(50, 140 * pGate.scale);
+            const gateH = Math.max(45, 110 * pGate.scale);
+
+            ctx.save();
+            ctx.translate(pGate.x, pGate.y);
+
+            // Neon Glass Panel
+            const glassGrad = ctx.createLinearGradient(0, -gateH / 2, 0, gateH / 2);
+            if (isMember) {
+              glassGrad.addColorStop(0, "rgba(56, 189, 248, 0.75)");
+              glassGrad.addColorStop(1, "rgba(2, 132, 199, 0.85)");
             } else {
-              s.weaponLevel = Math.min(4, g.val);
-              setWeaponLevel(s.weaponLevel);
-              soundManager.playGateSound(true);
+              glassGrad.addColorStop(0, "rgba(251, 191, 36, 0.75)");
+              glassGrad.addColorStop(1, "rgba(217, 119, 6, 0.85)");
             }
-          }
-        });
 
-        // Check Collision of Player Mob with Rival Mob
-        s.rivals.forEach((r) => {
-          if (!r.defeated && Math.abs(r.z - s.trackZ) < 32 && Math.abs(r.x - s.playerX) < 0.6) {
-            r.defeated = true;
-            const lost = Math.min(s.crowdCount - 5, Math.ceil(r.count * 0.4));
-            s.crowdCount = Math.max(5, s.crowdCount - lost);
-            setCrowdCount(s.crowdCount);
-            soundManager.playGateSound(false);
+            ctx.fillStyle = glassGrad;
+            ctx.beginPath();
+            ctx.roundRect(-gateW / 2, -gateH / 2, gateW, gateH, 6 * pGate.scale);
+            ctx.fill();
 
-            // Spawn knockout fans falling behind on ground
-            for (let k = 0; k < Math.min(6, lost); k++) {
-              s.knockoutFans.push({
-                x: s.playerX + (Math.random() - 0.5) * 0.8,
-                y: 8,
-                z: s.trackZ + (Math.random() - 0.5) * 8,
-                vx: (Math.random() - 0.5) * 0.14,
-                vy: -5,
-                vz: -2,
-                rotation: Math.random() * Math.PI,
-                vRot: 0.3,
-                life: 0,
-                maxLife: 2.2,
-                facingDown: true,
-              });
+            ctx.strokeStyle = isMember ? "#38bdf8" : "#facc15";
+            ctx.lineWidth = Math.max(2, 3.5 * pGate.scale);
+            ctx.stroke();
+
+            // Label Text
+            ctx.fillStyle = "#ffffff";
+            const fontPx = Math.max(10, Math.floor(gateH * 0.32));
+            ctx.font = `900 ${fontPx}px sans-serif`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            if (isMember) {
+              ctx.fillText(`+${g.val} TORCEDORES`, 0, -gateH * 0.12);
+              ctx.font = `700 ${Math.max(8, Math.floor(fontPx * 0.65))}px sans-serif`;
+              ctx.fillStyle = "#e0f2fe";
+              ctx.fillText("👥 AUMENTA BONDE", 0, gateH * 0.25);
+            } else {
+              const wIcon = WEAPON_LEVELS[(g.weaponLevel || 1) - 1]?.icon || "🚀";
+              ctx.fillText(`${wIcon} EVOLUÇÃO`, 0, -gateH * 0.15);
+              ctx.font = `700 ${Math.max(8, Math.floor(fontPx * 0.6))}px sans-serif`;
+              ctx.fillStyle = "#fef08a";
+              ctx.fillText(g.label, 0, gateH * 0.25);
             }
+
+            ctx.restore();
+          });
+
+          // 5. Draw Red Rival Mobs (Red Mob)
+          s.rivals.forEach((r) => {
+            if (r.defeated || r.z < camZ + 30 || r.z > camZ + 750) return;
+
+            const pRival = project(r.x, 0, r.z, w, h, camZ);
+            if (!pRival) return;
+
+            // Render formation of rival fans
+            const rivalCountDrawn = Math.min(12, Math.ceil(r.count / 2));
+            for (let rc = 0; rc < rivalCountDrawn; rc++) {
+              const rx = pRival.x + ((rc % 4) - 1.5) * 18 * pRival.scale;
+              const ry = pRival.y + Math.floor(rc / 4) * 12 * pRival.scale;
+              renderFanAvatar(ctx, rx, ry, pRival.scale * 0.65, rivalTeam, rc + 1, false);
+            }
+
+            // Rival Mob Health Bar & Counter
+            ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+            ctx.fillRect(pRival.x - 30 * pRival.scale, pRival.y - 45 * pRival.scale, 60 * pRival.scale, 14 * pRival.scale);
+            ctx.fillStyle = "#ef4444";
+            ctx.fillRect(
+              pRival.x - 28 * pRival.scale,
+              pRival.y - 43 * pRival.scale,
+              56 * pRival.scale * (r.count / r.maxCount),
+              10 * pRival.scale
+            );
+            ctx.fillStyle = "#ffffff";
+            ctx.font = `bold ${Math.max(9, Math.floor(11 * pRival.scale))}px sans-serif`;
+            ctx.textAlign = "center";
+            ctx.fillText(`RIVAIS: ${r.count}`, pRival.x, pRival.y - 50 * pRival.scale);
+          });
+
+          // 6. Draw Rockets & Particles
+          s.projectiles.forEach((proj) => {
+            const pProj = project(proj.x, proj.y, proj.z, w, h, camZ);
+            if (!pProj) return;
+
+            const rSize = Math.max(6, 18 * pProj.scale);
+
+            // Glowing halo
+            const glow = ctx.createRadialGradient(pProj.x, pProj.y, 2, pProj.x, pProj.y, rSize * 2.2);
+            glow.addColorStop(0, "#fef08a");
+            glow.addColorStop(0.5, proj.color);
+            glow.addColorStop(1, "rgba(0, 0, 0, 0)");
+            ctx.fillStyle = glow;
+            ctx.beginPath();
+            ctx.arc(pProj.x, pProj.y, rSize * 2.2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Rocket Body
+            ctx.fillStyle = proj.color;
+            ctx.beginPath();
+            ctx.arc(pProj.x, pProj.y, rSize * 0.6, 0, Math.PI * 2);
+            ctx.fill();
+          });
+
+          // Particles (Sparks & Smoke)
+          s.particles.forEach((pt, pIdx) => {
+            pt.life += dt;
+            pt.x += pt.vx;
+            pt.y += pt.vy;
+            pt.z += pt.vz;
+
+            const pPt = project(pt.x, pt.y, pt.z, w, h, camZ);
+            if (pPt) {
+              const alpha = Math.max(0, 1 - pt.life / pt.maxLife);
+              ctx.fillStyle = pt.color;
+              ctx.globalAlpha = alpha;
+              ctx.beginPath();
+              ctx.arc(pPt.x, pPt.y, pt.size * pPt.scale, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.globalAlpha = 1.0;
+            }
+
+            if (pt.life >= pt.maxLife) {
+              s.particles.splice(pIdx, 1);
+            }
+          });
+
+          // 7. Draw Player Torcida Bonde (Golden Spiral Swarm)
+          const pPlayer = project(s.playerX, 0, s.trackZ, w, h, camZ);
+          if (pPlayer) {
+            const maxFansDrawn = Math.min(s.crowdCount, 28);
+            const fanPositions: { x: number; z: number }[] = [];
+
+            for (let i = 0; i < maxFansDrawn; i++) {
+              const angle = i * 2.39996;
+              const dist = Math.sqrt((i + 1) / maxFansDrawn) * 0.75;
+              const fx = s.playerX + Math.cos(angle) * dist * 0.32;
+              const fz = s.trackZ + Math.sin(angle) * dist * 14;
+              fanPositions.push({ x: fx, z: fz });
+            }
+
+            fanPositions.sort((a, b) => b.z - a.z);
+
+            fanPositions.forEach((fan, idx) => {
+              const pFan = project(fan.x, 0, fan.z, w, h, camZ);
+              if (pFan) {
+                renderFanAvatar(ctx, pFan.x, pFan.y, pFan.scale * 0.68, playerTeam, idx, false);
+              }
+            });
           }
-        });
-      }
 
-      // DRAW SCENE (2.5D / 3D Canvas Rendering)
-      const camZ = s.trackZ - 140;
+          // 8. Floating Combat Texts
+          s.floatingTexts.forEach((ft, fIdx) => {
+            ft.y += 15 * dt;
+            ft.alpha -= 0.6 * dt;
 
-      // Draw Asphalt Road
-      const pRoadNearL = project(-1.65, 0, Math.max(0, camZ + 40), w, h, camZ);
-      const pRoadNearR = project(1.65, 0, Math.max(0, camZ + 40), w, h, camZ);
-      const pRoadFarL = project(-1.65, 0, camZ + 750, w, h, camZ);
-      const pRoadFarR = project(1.65, 0, camZ + 750, w, h, camZ);
+            const pFt = project(ft.x, ft.y, ft.z, w, h, camZ);
+            if (pFt && ft.alpha > 0) {
+              ctx.fillStyle = ft.color;
+              ctx.globalAlpha = ft.alpha;
+              ctx.font = `900 ${Math.max(12, Math.floor(18 * pFt.scale))}px sans-serif`;
+              ctx.textAlign = "center";
+              ctx.fillText(ft.text, pFt.x, pFt.y);
+              ctx.globalAlpha = 1.0;
+            }
 
-      if (pRoadNearL && pRoadNearR && pRoadFarL && pRoadFarR) {
-        ctx.fillStyle = "#334155";
-        ctx.beginPath();
-        ctx.moveTo(pRoadNearL.x, h);
-        ctx.lineTo(pRoadFarL.x, pRoadFarL.y);
-        ctx.lineTo(pRoadFarR.x, pRoadFarR.y);
-        ctx.lineTo(pRoadNearR.x, h);
-        ctx.closePath();
-        ctx.fill();
-
-        // White Road Lines
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(pRoadNearL.x, h);
-        ctx.lineTo(pRoadFarL.x, pRoadFarL.y);
-        ctx.moveTo(pRoadNearR.x, h);
-        ctx.lineTo(pRoadFarR.x, pRoadFarR.y);
-        ctx.stroke();
-      }
-
-      // Draw Gate Blocks (Left Member Blocks & Right Weapon Upgrade Blocks)
-      const visibleGates = s.gates.filter(
-        (g) => !g.passed && g.z >= camZ && g.z <= camZ + 750
-      );
-      visibleGates.sort((a, b) => b.z - a.z);
-
-      visibleGates.forEach((g) => {
-        const laneLeftX = g.x - 0.48;
-        const laneRightX = g.x + 0.48;
-        const pL = project(laneLeftX, 0, g.z, w, h, camZ);
-        const pR = project(laneRightX, 0, g.z, w, h, camZ);
-        const pTop = project(g.x, 50, g.z, w, h, camZ);
-        const pBot = project(g.x, 0, g.z, w, h, camZ);
-
-        if (!pL || !pR || !pTop || !pBot) return;
-
-        const gateW = Math.max(12, pR.x - pL.x);
-        const gateH = Math.max(16, (pBot.y - pTop.y) * 0.6);
-        const isMem = g.type === "member";
-
-        // Glass Body
-        ctx.fillStyle = isMem ? "rgba(14, 165, 233, 0.75)" : "rgba(234, 179, 8, 0.75)";
-        ctx.strokeStyle = isMem ? "#38bdf8" : "#fef08a";
-        ctx.lineWidth = Math.max(2, 3 * pBot.scale);
-
-        ctx.beginPath();
-        ctx.roundRect(pL.x, pTop.y, gateW, gateH, 6 * pBot.scale);
-        ctx.fill();
-        ctx.stroke();
-
-        // Label Text
-        const fontPx = Math.max(11, Math.floor(gateW * 0.28));
-        ctx.font = `900 ${fontPx}px sans-serif`;
-        ctx.fillStyle = "#ffffff";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(g.label, (pL.x + pR.x) / 2, pTop.y + gateH * 0.48);
-      });
-
-      // Draw Oncoming Rival Mobs (Red Mob)
-      const visibleRivals = s.rivals.filter(
-        (r) => !r.defeated && r.z >= camZ && r.z <= camZ + 750
-      );
-      visibleRivals.sort((a, b) => b.z - a.z);
-
-      visibleRivals.forEach((r) => {
-        const pR = project(r.x, 0, r.z, w, h, camZ);
-        if (pR) {
-          ctx.fillStyle = "rgba(239, 68, 68, 0.85)";
-          const mobW = Math.max(24, 80 * pR.scale);
-          const mobH = Math.max(28, 90 * pR.scale);
-          ctx.beginPath();
-          ctx.roundRect(pR.x - mobW / 2, pR.y - mobH, mobW, mobH, 8);
-          ctx.fill();
-
-          ctx.fillStyle = "#ffffff";
-          ctx.font = `900 ${Math.max(11, Math.round(18 * pR.scale))}px sans-serif`;
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.fillText(`👥 ${r.count}`, pR.x, pR.y - mobH * 0.5);
-        }
-      });
-
-      // Draw Flying Fireworks Projectiles
-      s.projectiles.forEach((proj) => {
-        const p = project(proj.x, proj.y, proj.z, w, h, camZ);
-        if (p) {
-          ctx.fillStyle = proj.color;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, Math.max(4, 10 * p.scale), 0, Math.PI * 2);
-          ctx.fill();
-        }
-      });
-
-      // Draw Particles
-      s.particles.forEach((pt) => {
-        const p = project(pt.x, pt.y, pt.z, w, h, camZ);
-        if (p) {
-          ctx.fillStyle = pt.color;
-          ctx.globalAlpha = pt.alpha;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, Math.max(1.5, pt.size * p.scale), 0, Math.PI * 2);
-          ctx.fill();
-          ctx.globalAlpha = 1.0;
-        }
-      });
-
-      // Draw Knockout Fans (Defeated members lying flat on ground)
-      s.knockoutFans.forEach((kf, idx) => {
-        kf.life += dt;
-        kf.y = Math.max(0, kf.y + kf.vy * (dt * 60));
-        kf.vy += 0.45 * (dt * 60);
-
-        const p = project(kf.x, kf.y, kf.z, w, h, camZ);
-        if (p) {
-          renderFanAvatar(ctx, p.x, p.y, p.scale * 0.65, playerTeam, idx, true);
-        }
-      });
-
-      // Draw Player Bonde (Positioned at bottom of screen sliding left/right)
-      const maxDrawn = Math.min(s.crowdCount, 26);
-      for (let i = 0; i < maxDrawn; i++) {
-        const angle = i * 2.4;
-        const dist = Math.sqrt((i + 1) / maxDrawn) * 0.55;
-        const fx = s.playerX + Math.cos(angle) * dist * 0.35;
-        const fz = s.trackZ + Math.sin(angle) * dist * 14;
-
-        const p = project(fx, 0, fz, w, h, camZ);
-        if (p) {
-          renderFanAvatar(ctx, p.x, p.y, p.scale * 0.72, playerTeam, i, false);
+            if (ft.alpha <= 0) {
+              s.floatingTexts.splice(fIdx, 1);
+            }
+          });
         }
       }
-
-      ctx.restore();
 
       if (!s.gameEnded) {
-        animId = requestAnimationFrame(loop);
+        animationFrameId = requestAnimationFrame(render);
       }
     };
 
-    animId = requestAnimationFrame(loop);
+    animationFrameId = requestAnimationFrame(render);
+
     return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener("resize", resize);
+      cancelAnimationFrame(animationFrameId);
+      clearInterval(timerInterval);
     };
   }, [isTutorial]);
 
@@ -765,6 +1007,8 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
     stateRef.current.isDragging = false;
   };
 
+  const currentW = WEAPON_LEVELS[weaponLevel - 1];
+
   if (isTutorial) {
     return (
       <div className="flex flex-col items-center bg-zinc-950 p-6 rounded-2xl border border-amber-500 text-white max-w-sm w-full select-none shadow-2xl space-y-4 text-center">
@@ -778,22 +1022,22 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
         </div>
 
         <p className="text-xs text-zinc-300 leading-relaxed text-left">
-          <strong>Como Jogar:</strong> Arraste o bonde para os lados para mirar e coletar!
+          <strong>Como Jogar:</strong> Arraste o bonde para os lados para guiar a torcida!
         </p>
         <ul className="text-[11px] text-zinc-400 text-left space-y-1.5 list-disc pl-4">
           <li>
-            <span className="text-sky-400 font-bold">Lado Azul (+Bonde)</span>: Aumenta o número de torcedores!
+            <span className="text-sky-400 font-bold">Pista Esquerda (Azul)</span>: Coleta mais torcedores para o Bonde!
           </li>
           <li>
-            <span className="text-amber-400 font-bold">Lado Amarelo (Evolução)</span>: Evolui os rojões (12 Tiros, Trovão, Morteiro)!
+            <span className="text-amber-400 font-bold">Pista Direita (Amarela)</span>: Evolui a bateria de rojões (12 Tiros, Trovão, Morteiro)!
           </li>
           <li>
-            <span className="text-red-400 font-bold">Massa Rival (Red Mob)</span>: Dispare rojões para destruir os rivais antes da colisão!
+            <span className="text-red-400 font-bold">Red Mob (Rivais)</span>: Dispare rojões e destrua a massa rival!
           </li>
         </ul>
 
         <div className="bg-zinc-900 border border-zinc-800 p-2.5 rounded-xl text-[10px] font-mono text-amber-400 w-full text-left">
-          ⏱️ Duração: 15s • Meta Rank S: 450+ Pts
+          ⏱️ Duração: 15s • Meta Rank S: 500+ Pts & 40+ Torcedores
         </div>
 
         <button
@@ -805,8 +1049,6 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
       </div>
     );
   }
-
-  const currentW = WEAPON_LEVELS[weaponLevel - 1];
 
   return (
     <div className="flex flex-col items-center bg-zinc-950 p-4 rounded-2xl border border-amber-500/50 text-white max-w-md w-full select-none shadow-2xl space-y-3">
@@ -831,11 +1073,47 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
         onPointerLeave={handlePointerUp}
       >
         <canvas ref={canvasRef} className="w-full h-full block" />
+
+        {/* Floating Game Result Overlay */}
+        {gameResult && (
+          <div className="absolute inset-0 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center p-4 text-center space-y-2 animate-fade-in">
+            <span className="text-xs font-black text-amber-400 uppercase tracking-widest">
+              FIM DA BATERIA DE ROJÕES!
+            </span>
+            <div className="text-3xl font-black text-white">
+              RANK <span className={gameResult.rank === "S" ? "text-emerald-400" : gameResult.rank === "B" ? "text-sky-400" : "text-amber-400"}>{gameResult.rank}</span>
+            </div>
+            <p className="text-xs text-zinc-300">
+              Pontuação: <strong className="text-amber-400">{gameResult.score} Pts</strong> | Bonde: <strong className="text-sky-400">{gameResult.crowdCount} Torcedores</strong>
+            </p>
+            <p className="text-[11px] text-zinc-400">
+              Armamento Alcançado: <strong>{gameResult.weaponName}</strong>
+            </p>
+          </div>
+        )}
       </div>
 
-      <div className="flex justify-between items-center w-full text-[10px] text-zinc-400 font-semibold px-1">
-        <span>Arraste para os lados para guiar o bonde</span>
-        <span className="text-amber-400 font-mono font-bold text-xs">{score} pts</span>
+      {/* Steer Touch Controls & Score */}
+      <div className="flex justify-between items-center w-full gap-2 pt-1">
+        <button
+          onClick={() => {
+            stateRef.current.targetX = Math.max(-0.95, stateRef.current.targetX - 0.35);
+          }}
+          className="flex-1 py-2 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-amber-500 text-zinc-300 hover:text-white font-bold text-xs flex items-center justify-center gap-1 active:scale-95 transition-all"
+        >
+          <ArrowLeft className="w-4 h-4 text-amber-400" /> Esquerda
+        </button>
+
+        <span className="text-amber-400 font-mono font-bold text-xs px-2">{score} pts</span>
+
+        <button
+          onClick={() => {
+            stateRef.current.targetX = Math.min(0.95, stateRef.current.targetX + 0.35);
+          }}
+          className="flex-1 py-2 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-amber-500 text-zinc-300 hover:text-white font-bold text-xs flex items-center justify-center gap-1 active:scale-95 transition-all"
+        >
+          Direita <ArrowRight className="w-4 h-4 text-amber-400" />
+        </button>
       </div>
     </div>
   );
