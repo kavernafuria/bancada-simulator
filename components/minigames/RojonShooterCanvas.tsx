@@ -15,9 +15,9 @@ export interface WeaponUpgrade {
 }
 
 export const WEAPON_LEVELS: WeaponUpgrade[] = [
-  { level: 1, name: "Rojão Padrão 🚀", fireRate: 250, projectileCount: 1, damage: 6, color: "#f59e0b", icon: "🚀" },
-  { level: 2, name: "Rojão 12 Tiros 🎆", fireRate: 200, projectileCount: 2, damage: 7, color: "#38bdf8", icon: "🎆" },
-  { level: 3, name: "Rojão Trovão ⚡", fireRate: 150, projectileCount: 2, damage: 10, color: "#facc15", icon: "⚡" },
+  { level: 1, name: "Rojão Padrão 🚀", fireRate: 240, projectileCount: 1, damage: 8, color: "#f59e0b", icon: "🚀" },
+  { level: 2, name: "Rojão 12 Tiros 🎆", fireRate: 150, projectileCount: 3, damage: 14, color: "#38bdf8", icon: "🎆" },
+  { level: 3, name: "Rojão Trovão ⚡", fireRate: 110, projectileCount: 4, damage: 20, color: "#facc15", icon: "⚡" },
 ];
 
 export interface RojonShooterProps {
@@ -328,8 +328,8 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
         destroyed: false,
       });
 
-      // Right: Yellow 3D Vertical Gate (+ROJÕES BOOST 2s)
-      const wLvl = i % 2 === 0 ? 3 : 2;
+      // Right: Yellow 3D Vertical Gate (+ROJÕES BOOST)
+      const wLvl = i <= 3 ? 2 : i % 2 === 0 ? 3 : 2;
       const wInfo = WEAPON_LEVELS[wLvl - 1];
       s.gates.push({
         id: `gate_yellow_${i}`,
@@ -338,7 +338,7 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
         type: "weapon",
         val: wLvl,
         weaponLevel: wLvl,
-        label: `${wInfo.name} (2s)`,
+        label: `${wInfo.name} (${wLvl === 3 ? "2.5s" : "2s"})`,
         passed: false,
       });
 
@@ -392,34 +392,34 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
     });
   };
 
-  // Spawner de tiros vindos dos rivais do meio pra frente
+  // Spawner de tiros vindos dos rivais (Apenas do meio para o final do jogo quando o bonde estiver maior)
   const fireRivalRockets = (now: number) => {
     const s = stateRef.current;
-    if (now - s.lastRivalShotTime < 1200) return;
+    // Só dispara tiros rivais se o bonde já avançou pra metade da pista (trackZ >= 1100) e tiver bonde formado (crowdCount >= 20)
+    if (s.trackZ < 1100 || s.crowdCount < 20) return;
+    if (now - s.lastRivalShotTime < 1800) return;
 
     const shootingRivals = s.rivals.filter(
-      (r) => !r.defeated && r.z > s.trackZ + 120 && r.z < s.trackZ + 550
+      (r) => !r.defeated && r.z > s.trackZ + 140 && r.z < s.trackZ + 550
     );
     if (shootingRivals.length === 0) return;
 
     s.lastRivalShotTime = now;
-    const shooters = shootingRivals.slice(0, 2);
+    const shooter = shootingRivals[0];
 
-    shooters.forEach((r) => {
-      soundManager.playFireworkLaunch();
-      const aimX = (s.playerX - r.x) * 0.05;
-      s.projectiles.push({
-        id: `rival_rocket_${Date.now()}_${Math.random()}`,
-        x: r.x,
-        y: 16,
-        z: r.z - 10,
-        vx: aimX,
-        vy: -0.02,
-        vz: -28, // Movendo no sentido do jogador
-        damage: 4,
-        color: "#ef4444",
-        isRival: true,
-      });
+    soundManager.playFireworkLaunch();
+    const aimX = (s.playerX - shooter.x) * 0.05;
+    s.projectiles.push({
+      id: `rival_rocket_${Date.now()}_${Math.random()}`,
+      x: shooter.x,
+      y: 16,
+      z: shooter.z - 10,
+      vx: aimX,
+      vy: -0.02,
+      vz: -26, // Movendo no sentido do jogador
+      damage: 3,
+      color: "#ef4444",
+      isRival: true,
     });
   };
 
