@@ -7,16 +7,8 @@
       "destination": "/mapa/projeto-torcidas-mapa/api/index.ts"
     },
     {
-      "source": "/mapa/(.*)",
-      "destination": "/mapa/projeto-torcidas-mapa/dist/index.html"
-    },
-    {
-      "source": "/mapa",
-      "destination": "/mapa/projeto-torcidas-mapa/dist/index.html"
-    },
-    {
       "source": "/(.*)",
-      "destination": "/mapa/projeto-torcidas-mapa/dist/index.html"
+      "destination": "/index.html"
     }
   ]
 }
