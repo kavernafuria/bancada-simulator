@@ -14,7 +14,7 @@ export function BrandHeader() {
           </span>
           <span className="text-zinc-400 dark:text-zinc-600 font-bold">|</span>
           <span className="text-zinc-800 dark:text-zinc-100 font-extrabold flex items-center gap-1">
-            Futebol ⚽
+            Simulador de Torcida ⚽
           </span>
         </div>
 

@@ -6,8 +6,8 @@ import { BrandFooter } from "@/components/BrandFooter";
 import { FloatingDock } from "@/components/FloatingDock";
 
 export const metadata: Metadata = {
-  title: "Kavers Games ⚽ Futebol • Elo Perdido & Quem Tem Mais?",
-  description: "Jogos diários e desafios de futebol do universo Kavers Games. Reúna a galera e desafie seus amigos!",
+  title: "Simulador de Torcida Organizada ⚽ Arquibancada & Pista",
+  description: "Gerencie sua torcida organizada, conquiste a pista, negocie com o MP e lidere a arquibancada rumo ao topo do futebol!",
 };
 
 export const viewport: Viewport = {

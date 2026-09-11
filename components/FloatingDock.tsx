@@ -42,51 +42,12 @@ export function FloatingDock() {
 
   return (
     <div className="fixed bottom-6 inset-x-0 mx-auto max-w-fit z-30 px-4">
-      <div className="flex items-center gap-1.5 p-1.5 rounded-full glass-panel shadow-2xl border border-kavers-border/60 backdrop-blur-xl">
-        {/* Elo Perdido Link */}
-        <Link
-          href="/"
-          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-black uppercase tracking-wider transition-all ${
-            isEloPerdido
-              ? "bg-kavers-purple text-white shadow-lg shadow-kavers-purple/20 scale-105"
-              : isDark
-              ? "text-zinc-400 hover:text-white hover:bg-kavers-card/80"
-              : "text-zinc-600 hover:text-black hover:bg-paper-border/50"
-          }`}
-        >
-          <Link2 className="w-3.5 h-3.5 stroke-[2.5]" />
-          <span>Elo Perdido</span>
-        </Link>
-
-        {/* Quem Tem Mais Link */}
-        <Link
-          href="/higher-lower"
-          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-black uppercase tracking-wider transition-all ${
-            isHigherLower
-              ? "bg-kavers-magenta text-white shadow-lg shadow-kavers-magenta/30 scale-105"
-              : isDark
-              ? "text-zinc-400 hover:text-white hover:bg-kavers-card/80"
-              : "text-zinc-600 hover:text-black hover:bg-paper-border/50"
-          }`}
-        >
-          <TrendingUp className="w-3.5 h-3.5 stroke-[2.5]" />
-          <span>Quem Tem Mais?</span>
-        </Link>
-
-        {/* Bancada Simulator Link */}
-        <Link
-          href="/bancada"
-          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-black uppercase tracking-wider transition-all ${
-            isBancada
-              ? "bg-amber-500 text-black shadow-lg shadow-amber-500/30 scale-105"
-              : isDark
-              ? "text-zinc-400 hover:text-white hover:bg-kavers-card/80"
-              : "text-zinc-600 hover:text-black hover:bg-paper-border/50"
-          }`}
-        >
-          <Drum className="w-3.5 h-3.5 stroke-[2.5]" />
-          <span>Bancada</span>
-        </Link>
+      <div className="flex items-center gap-2 p-1.5 rounded-full glass-panel shadow-2xl border border-kavers-border/60 backdrop-blur-xl">
+        {/* Simulador de Torcida Organizada Badge */}
+        <div className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500 text-black shadow-lg shadow-amber-500/30">
+          <Drum className="w-4 h-4 stroke-[2.5]" />
+          <span>Simulador de Torcida</span>
+        </div>
 
         {/* Theme Toggle Button */}
         <button
