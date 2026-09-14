@@ -873,6 +873,12 @@ export default function App() {
         ...st,
         moral: Math.min(100, st.moral + 10),
       }));
+    } else if (activeMatchMiniGameContext?.tacticalChoice === 'rhythm_bateria' || activeMatchMiniGameContext?.tacticalChoice === 'rhythm_mosaic') {
+      setBankBalance((prev) => prev + 1500);
+      setStateTrackers((st) => ({
+        ...st,
+        moral: Math.min(100, st.moral + 15),
+      }));
     }
 
     setMatchModalPhase("CLOSED");

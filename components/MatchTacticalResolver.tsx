@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Runner3DGame } from './minigames/Runner3DGame';
 import { RojonShooterCanvas } from './minigames/RojonShooterCanvas';
 import { RuadaFlagWavingModal } from './flag_waving/RuadaFlagWavingModal';
+import { RhythmBateriaModal } from './rhythm_bateria/RhythmBateriaModal';
 
 // ==========================================
 // 1. TIPOS & INTERFACES
 // ==========================================
-export type GameType = 'whack' | 'rojon' | 'rhythm' | 'dodge' | 'punch' | 'memory' | 'runner_3d' | 'flag_waving';
+export type GameType = 'whack' | 'rojon' | 'rhythm' | 'dodge' | 'punch' | 'memory' | 'runner_3d' | 'flag_waving' | 'rhythm_bateria';
 
 export interface MiniGameResult {
   gameType: GameType;
@@ -29,7 +30,8 @@ export interface MatchContext {
     | 'runner_3d'
     | 'evasion'
     | 'color_memory'
-    | 'flag_waving';
+    | 'flag_waving'
+    | 'rhythm_bateria';
   homeContingent: number;
   awayContingent: number;
   opponentTier: 'S' | 'A' | 'B';
@@ -984,6 +986,7 @@ export const MatchTacticalResolver: React.FC<{
     if (context.tacticalChoice === 'color_memory') setActiveMiniGame('memory');
     if (context.tacticalChoice === 'caravan_escape') setActiveMiniGame('dodge');
     if (context.tacticalChoice === 'flag_waving') setActiveMiniGame('flag_waving');
+    if (context.tacticalChoice === 'rhythm_bateria' || context.tacticalChoice === 'rhythm_mosaic') setActiveMiniGame('rhythm_bateria');
   }, [context, onMatchComplete]);
 
   const handleMiniGameFinish = (result: MiniGameResult) => {
@@ -1036,6 +1039,19 @@ export const MatchTacticalResolver: React.FC<{
           onClose={() => handleMiniGameFinish({ gameType: 'flag_waving', modifier: 0, rank: 'F', description: 'Cortejo cancelado pelo jogador.' })}
           onFinish={(res) => handleMiniGameFinish({
             gameType: 'flag_waving',
+            modifier: res.modifier,
+            rank: res.rank,
+            description: res.description,
+          })}
+          torcidaName={context.playerTorcidaName}
+          clubName={context.playerClubName}
+        />
+      )}
+      {activeMiniGame === 'rhythm_bateria' && (
+        <RhythmBateriaModal
+          onClose={() => handleMiniGameFinish({ gameType: 'rhythm_bateria', modifier: 0, rank: 'F', description: 'Festa de bateria cancelada.' })}
+          onFinish={(res) => handleMiniGameFinish({
+            gameType: 'rhythm_bateria',
             modifier: res.modifier,
             rank: res.rank,
             description: res.description,
