@@ -18,7 +18,16 @@ export interface MiniGameResult {
 export interface MatchContext {
   isHome: boolean;
   isAllyGame?: boolean;
-  tacticalChoice: 'gate_concentration' | 'front_charge' | 'punch_combat' | 'rojon_barrage' | 'rhythm_mosaic' | 'caravan_escape' | 'runner_3d';
+  tacticalChoice:
+    | 'gate_concentration'
+    | 'front_charge'
+    | 'punch_combat'
+    | 'rojon_barrage'
+    | 'rhythm_mosaic'
+    | 'caravan_escape'
+    | 'runner_3d'
+    | 'evasion'
+    | 'color_memory';
   homeContingent: number;
   awayContingent: number;
   opponentTier: 'S' | 'A' | 'B';
@@ -918,11 +927,24 @@ export const MatchTacticalResolver: React.FC<{
 
   useEffect(() => {
     // -------------------------------------------------------------
-    // REGRA: JOGOS DE AMIZADE COM TORCIDA ALIADA
+    // REGRA 1: OPÇÃO DE EVASÃO / PRESERVAÇÃO (FUGA PACÍFICA DE CONFRONTO)
+    // -------------------------------------------------------------
+    if (context.tacticalChoice === 'evasion') {
+      const message = 'Evasão de pista bem-sucedida! Entrada antecipada e deslocamento seguro preservando 100% dos associados sem confrontos.';
+      setStatusMessage(message);
+      onMatchComplete(message, 0.0);
+      return;
+    }
+
+    // -------------------------------------------------------------
+    // REGRA 2: JOGOS DE AMIZADE COM TORCIDA ALIADA
     // -------------------------------------------------------------
     if (context.isAllyGame) {
       if (context.tacticalChoice === 'rhythm_mosaic') {
         setActiveMiniGame('rhythm');
+        return;
+      } else if (context.tacticalChoice === 'color_memory') {
+        setActiveMiniGame('memory');
         return;
       } else {
         const message = 'Recepção pacífica e confraternização de irmandade com a torcida aliada. Sem confrontos de pista!';
@@ -933,7 +955,7 @@ export const MatchTacticalResolver: React.FC<{
     }
 
     // -------------------------------------------------------------
-    // REGRA: CONCENTRAÇÃO NO PORTÃO (JOGO EM CASA COM RIVAL)
+    // REGRA 3: CONCENTRAÇÃO NO PORTÃO (JOGO EM CASA COM RIVAL)
     // -------------------------------------------------------------
     if (context.isHome && context.tacticalChoice === 'gate_concentration') {
       const threshold = context.homeContingent * 0.8;
@@ -956,7 +978,8 @@ export const MatchTacticalResolver: React.FC<{
     if (context.tacticalChoice === 'front_charge') setActiveMiniGame('whack');
     if (context.tacticalChoice === 'punch_combat') setActiveMiniGame('punch');
     if (context.tacticalChoice === 'rojon_barrage') setActiveMiniGame('rojon');
-    if (context.tacticalChoice === 'rhythm_mosaic') setActiveMiniGame('memory');
+    if (context.tacticalChoice === 'rhythm_mosaic') setActiveMiniGame('rhythm');
+    if (context.tacticalChoice === 'color_memory') setActiveMiniGame('memory');
     if (context.tacticalChoice === 'caravan_escape') setActiveMiniGame('dodge');
   }, [context, onMatchComplete]);
 

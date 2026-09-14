@@ -203,7 +203,7 @@ export default function App() {
 
   const [currentTorcida, setCurrentTorcida] = useState<OfficialTorcida | null>(null);
   const [season, setSeason] = useState<number>(1);
-  const [bankBalance, setBankBalance] = useState<number>(30000);
+  const [bankBalance, setBankBalance] = useState<number>(15000);
   const [clubStatus, setClubStatus] = useState<ClubStatus>("LUTANDO_ACESSO");
 
   // Season Objectives
@@ -591,7 +591,7 @@ export default function App() {
         relacao_clube: 15,
         respeito_nacional: 80,
       });
-      setBankBalance(torcidaWithColors.autonomia_financeira * 700);
+      setBankBalance(torcidaWithColors.autonomia_financeira * 200);
       setIsBannedByMP(false);
       setDebtYears(0);
       setSeason(1);
@@ -650,7 +650,7 @@ export default function App() {
     });
     setStateTrackers(state);
 
-    setBankBalance(torcidaWithCrisis.autonomia_financeira * 350);
+    setBankBalance(torcidaWithCrisis.autonomia_financeira * 150);
     setIsBannedByMP(false);
     setDebtYears(0);
     setSeason(1);
@@ -811,19 +811,23 @@ export default function App() {
     let mappedChoice: MatchContext['tacticalChoice'] = 'front_charge';
     const tid = (tactic.id || "").toUpperCase();
 
-    if (tid.includes("RUNNER_3D") || tid === "ATAQUE_FRONTAL_RUNNER_3D") {
+    if (tid.startsWith("EVASAO") || tid.includes("ANTECIPADA") || tid.includes("CORTEJO_BLINDADO") || tid.includes("QUADRA_CLANDESTINA")) {
+      mappedChoice = 'evasion';
+    } else if (tid.includes("RUNNER_3D") || tid === "ATAQUE_FRONTAL_RUNNER_3D") {
       mappedChoice = 'runner_3d';
-    } else if (tactic.isMosaicTactic || tid.includes("MOSAICO") || tid.includes("FESTA") || tid.includes("SAMBA") || tid.includes("ALAMBRADO")) {
+    } else if (tactic.isMosaicTactic || tid.includes("MOSAICO") || tid.includes("BANDEIRAO") || tid.includes("FAIXAS_TIRANTES")) {
       mappedChoice = 'rhythm_mosaic';
+    } else if (tid.includes("BATERIA") || tid.includes("SAMBA") || tid.includes("RUAZAO") || tid.includes("FESTA") || tid.includes("ALAMBRADO")) {
+      mappedChoice = 'color_memory';
     } else if (tid.includes("ROJOES") || tid.includes("MORTEIROS")) {
       mappedChoice = 'rojon_barrage';
-    } else if (tid.includes("EMBOSCADA") || tid.includes("COMBOIO") || tid.includes("ESCOLTA") || tid.includes("FLANCO") || tid.includes("SURPRESA") || tid.includes("RODOVIA")) {
+    } else if (tid.includes("EMBOSCADA") || tid.includes("SURPRESA") || tid.includes("FLANCO") || tid.includes("RODOVIA")) {
       mappedChoice = 'caravan_escape';
     } else if (tid.includes("MAO_LIMPA") || tid.includes("LINHA_FRENTE") || tid.includes("SOCO") || tid.includes("DISPOSICAO")) {
       mappedChoice = 'punch_combat';
-    } else if (tid.includes("BARRA") || tid.includes("PERIMETRO")) {
+    } else if (tid.includes("BARRA") || tid.includes("CONFRONTO_BARRA_FERRO")) {
       mappedChoice = 'front_charge';
-    } else if (activeMatchDerby.isHome && (tid.includes("PORTAO") || tid.includes("PERIMETRO_LOCAL"))) {
+    } else if (activeMatchDerby.isHome && (tid.includes("PORTAO") || tid.includes("PERIMETRO_LOCAL") || tid.includes("CONCENTRADOS_PORTAO"))) {
       mappedChoice = 'gate_concentration';
     } else {
       mappedChoice = 'front_charge';
@@ -1062,30 +1066,23 @@ export default function App() {
         });
       }
 
-      // MÓDULO 1: Gatilho de Ativação do Torcida Única (Risco MP > 85% + Falha em Dérbi contra o Principal Rival, Apenas 1x na Carreira)
+      // MÓDULO 1: Gatilho de Ativação de Crise Judicial & Decreto de Torcida Única (Risco MP >= 75%, Apenas 1x na Carreira)
       if (
-        activeMatchDerby &&
-        !activeMatchDerby.isAllyGame &&
         !torcidaUnicaState.hasAlreadyServedTorcidaUnica &&
-        !torcidaUnicaState.isTorcidaUnica
+        !torcidaUnicaState.isTorcidaUnica &&
+        newMP >= 75
       ) {
-        const opponentClub = activeMatchDerby.isHome ? activeMatchDerby.awayClub : activeMatchDerby.homeClub;
-        const isRivalMatch = isPrincipalRival(currentTorcida?.clube || "", opponentClub || activeMatchDerby.rivalTorcida);
-        const isPistaFailure = !result.isVictoryPista || (result.membersLost && result.membersLost > 0) || result.mpAdded > 0;
-
-        if (newMP > 85 && isPistaFailure && isRivalMatch) {
-          setTorcidaUnicaState({
-            isTorcidaUnica: true,
-            torcidaUnicaCounter: 3,
-            permanentCostMult: 1.0,
-            hasPendingActivationNews: true,
-            hasAlreadyServedTorcidaUnica: true,
-          });
-          setActiveTorcidaUnicaModalMode("ACTIVATION_NEWS");
-          const conf = getPressConference("ENTREVISTA_TORCIDA_UNICA");
-          if (conf) {
-            setActivePressConference(conf);
-          }
+        setTorcidaUnicaState({
+          isTorcidaUnica: true,
+          torcidaUnicaCounter: 3,
+          permanentCostMult: 1.0,
+          hasPendingActivationNews: true,
+          hasAlreadyServedTorcidaUnica: true,
+        });
+        setActiveTorcidaUnicaModalMode("ACTIVATION_NEWS");
+        const conf = getPressConference("ENTREVISTA_CRISE_JUDICIAL_MP") || getPressConference("ENTREVISTA_TORCIDA_UNICA");
+        if (conf) {
+          setActivePressConference(conf);
         }
       }
 
