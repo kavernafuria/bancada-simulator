@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Runner3DGame } from './minigames/Runner3DGame';
 import { RojonShooterCanvas } from './minigames/RojonShooterCanvas';
+import { RuadaFlagWavingModal } from './flag_waving/RuadaFlagWavingModal';
 
 // ==========================================
 // 1. TIPOS & INTERFACES
 // ==========================================
-export type GameType = 'whack' | 'rojon' | 'rhythm' | 'dodge' | 'punch' | 'memory' | 'runner_3d';
+export type GameType = 'whack' | 'rojon' | 'rhythm' | 'dodge' | 'punch' | 'memory' | 'runner_3d' | 'flag_waving';
 
 export interface MiniGameResult {
   gameType: GameType;
   modifier: number; // Ex: -0.25 a +0.25
-  rank: 'S' | 'B' | 'C' | 'F';
+  rank: 'S' | 'A' | 'B' | 'C' | 'F';
   penaltyMP?: number; // Risco de Ministério Público adicional
   description: string;
 }
@@ -27,7 +28,8 @@ export interface MatchContext {
     | 'caravan_escape'
     | 'runner_3d'
     | 'evasion'
-    | 'color_memory';
+    | 'color_memory'
+    | 'flag_waving';
   homeContingent: number;
   awayContingent: number;
   opponentTier: 'S' | 'A' | 'B';
@@ -981,6 +983,7 @@ export const MatchTacticalResolver: React.FC<{
     if (context.tacticalChoice === 'rhythm_mosaic') setActiveMiniGame('rhythm');
     if (context.tacticalChoice === 'color_memory') setActiveMiniGame('memory');
     if (context.tacticalChoice === 'caravan_escape') setActiveMiniGame('dodge');
+    if (context.tacticalChoice === 'flag_waving') setActiveMiniGame('flag_waving');
   }, [context, onMatchComplete]);
 
   const handleMiniGameFinish = (result: MiniGameResult) => {
@@ -1028,6 +1031,19 @@ export const MatchTacticalResolver: React.FC<{
       {activeMiniGame === 'rhythm' && <MemoryMosaic onFinish={handleMiniGameFinish} />}
       {activeMiniGame === 'dodge' && <CaravanDodge onFinish={handleMiniGameFinish} />}
       {activeMiniGame === 'memory' && <ColorMemoryGame opponentTier={context.opponentTier} onFinish={handleMiniGameFinish} />}
+      {activeMiniGame === 'flag_waving' && (
+        <RuadaFlagWavingModal
+          onClose={() => handleMiniGameFinish({ gameType: 'flag_waving', modifier: 0, rank: 'F', description: 'Cortejo cancelado pelo jogador.' })}
+          onFinish={(res) => handleMiniGameFinish({
+            gameType: 'flag_waving',
+            modifier: res.modifier,
+            rank: res.rank,
+            description: res.description,
+          })}
+          torcidaName={context.playerTorcidaName}
+          clubName={context.playerClubName}
+        />
+      )}
     </div>
   );
 };

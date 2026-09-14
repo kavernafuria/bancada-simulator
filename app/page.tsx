@@ -811,7 +811,9 @@ export default function App() {
     let mappedChoice: MatchContext['tacticalChoice'] = 'front_charge';
     const tid = (tactic.id || "").toUpperCase();
 
-    if (tid.startsWith("EVASAO") || tid.includes("ANTECIPADA") || tid.includes("CORTEJO_BLINDADO") || tid.includes("QUADRA_CLANDESTINA")) {
+    if (selectedTransport?.id === "CORTEJO_ONIBUS_TIME" || tid.includes("CORTEJO") || tid.includes("RUADA") || tid.includes("FLAG_WAVING")) {
+      mappedChoice = 'flag_waving';
+    } else if (tid.startsWith("EVASAO") || tid.includes("ANTECIPADA") || tid.includes("CORTEJO_BLINDADO") || tid.includes("QUADRA_CLANDESTINA")) {
       mappedChoice = 'evasion';
     } else if (tid.includes("RUNNER_3D") || tid === "ATAQUE_FRONTAL_RUNNER_3D") {
       mappedChoice = 'runner_3d';
@@ -862,6 +864,14 @@ export default function App() {
       setStateTrackers((st) => ({
         ...st,
         risco_mp: Math.min(100, st.risco_mp + penaltyMP),
+      }));
+    }
+
+    if (selectedTransport?.id === 'CORTEJO_ONIBUS_TIME' || activeMatchMiniGameContext?.tacticalChoice === 'flag_waving') {
+      setBankBalance((prev) => prev + 1500);
+      setStateTrackers((st) => ({
+        ...st,
+        moral: Math.min(100, st.moral + 10),
       }));
     }
 
