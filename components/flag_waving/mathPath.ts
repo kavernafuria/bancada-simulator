@@ -80,8 +80,8 @@ export const PATH_PATTERNS: PathPattern[] = [
   {
     id: 1,
     name: 'Onda da Ruada',
-    subtitle: 'Etapa 1 de 3: Tremular Rítmico de Chegada',
-    description: 'Siga a onda inicial do corredor de fumaça, conduzindo o bandeirão de um lado ao outro.',
+    subtitle: 'Etapa 1 de 2: Tremular Rítmico de Entrada',
+    description: 'Siga a onda inicial do corredor de fumaça, conduzindo o bandeirão de um lado ao outro da avenida.',
     timeLimit: 8,
     generatePoints: (w: number, h: number): Point[] => {
       const points: Point[] = [];
@@ -94,7 +94,7 @@ export const PATH_PATTERNS: PathPattern[] = [
       for (let i = 0; i <= samples; i++) {
         const progress = i / samples;
         const x = padX + progress * usableW;
-        const wave = Math.sin(progress * Math.PI * 5);
+        const wave = Math.sin(progress * Math.PI * 4);
         const y = padY + usableH * 0.5 + wave * (usableH * 0.38);
         points.push({ x, y });
       }
@@ -106,58 +106,32 @@ export const PATH_PATTERNS: PathPattern[] = [
   },
   {
     id: 2,
-    name: 'Giro de Mastro no Cortejo',
-    subtitle: 'Etapa 2 de 3: Sinalizador em Oito',
-    description: 'O movimento clássico de mastro: desenhe a curva contínua em formato de 8 na avenida.',
-    timeLimit: 10,
+    name: 'Vagalhão de Fogo & Curva Cega',
+    subtitle: 'Etapa 2 de 2: Apogeu da Ruada (DIFÍCIL)',
+    description: 'O ônibus do time aponta na curva! Mantém o mastro firme e faça o contorno rápido sob fumaça densa!',
+    timeLimit: 7,
     generatePoints: (w: number, h: number): Point[] => {
       const points: Point[] = [];
       const samples = 220;
-      const cx = w * 0.5;
-      const cy = h * 0.5;
-      const rx = w * 0.36;
-      const ry = h * 0.32;
-
-      for (let i = 0; i <= samples; i++) {
-        const u = i / samples;
-        const t = -Math.PI / 2 + u * Math.PI * 2;
-        const x = cx + rx * Math.sin(t);
-        const y = cy + ry * Math.sin(t) * Math.cos(t) * 1.8;
-        points.push({ x, y });
-      }
-      return points;
-    },
-    svgPathD: (w: number, h: number): string => {
-      return pointsToSvgPath(PATH_PATTERNS[1].generatePoints(w, h));
-    },
-  },
-  {
-    id: 3,
-    name: 'Vagalhão de Fogo na Chegada do Ônibus',
-    subtitle: 'Etapa 3 de 3: Apogeu da Ruada',
-    description: 'O ônibus do time aponta na curva! Mantém o mastro firme e tremula no topo do vagalhão!',
-    timeLimit: 9,
-    generatePoints: (w: number, h: number): Point[] => {
-      const points: Point[] = [];
-      const samples = 200;
-      const padX = w * 0.12;
-      const padY = h * 0.15;
+      const padX = w * 0.10;
+      const padY = h * 0.14;
       const usableW = w - padX * 2;
       const usableH = h - padY * 2;
 
       for (let i = 0; i <= samples; i++) {
         const t = i / samples;
         const x = padX + t * usableW;
-        const y1 = Math.sin(t * Math.PI * 3.5);
-        const y2 = Math.cos(t * Math.PI * 1.5) * 0.3;
-        const wave = (y1 + y2) / 1.3;
-        const y = padY + usableH * 0.5 + wave * (usableH * 0.4);
+        // High frequency double-wave with sharp sinusoidal amplitude changes for high difficulty
+        const waveMain = Math.sin(t * Math.PI * 7);
+        const waveAccent = Math.cos(t * Math.PI * 3.5) * 0.45;
+        const waveCombined = (waveMain + waveAccent) / 1.35;
+        const y = padY + usableH * 0.5 + waveCombined * (usableH * 0.42);
         points.push({ x, y });
       }
       return points;
     },
     svgPathD: (w: number, h: number): string => {
-      return pointsToSvgPath(PATH_PATTERNS[2].generatePoints(w, h));
+      return pointsToSvgPath(PATH_PATTERNS[1].generatePoints(w, h));
     },
   },
 ];

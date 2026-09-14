@@ -214,7 +214,7 @@ export const RuadaFlagWavingModal: React.FC<RuadaFlagWavingModalProps> = ({
                   <div className="text-2xl font-black text-amber-400 mt-1">
                     {finalStats.finalScore}%
                   </div>
-                  <span className="text-[9px] text-zinc-500 font-mono">Média das 3 Etapas</span>
+                  <span className="text-[9px] text-zinc-500 font-mono">Média das 2 Etapas</span>
                 </div>
 
                 <div className="bg-zinc-900/90 border border-emerald-500/40 rounded-2xl p-3.5 text-center shadow">
