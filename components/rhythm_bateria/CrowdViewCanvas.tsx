@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Flame, Volume2, VolumeX, Music } from 'lucide-react';
+import { Flame, Volume2, VolumeX, Music } from 'lucide-react';
 import { FeedbackType } from './types';
 
 interface CrowdViewCanvasProps {
@@ -12,6 +12,99 @@ interface CrowdViewCanvasProps {
   isPlaying: boolean;
   torcidaName?: string;
 }
+
+interface FanPersonProps {
+  seed: number;
+  isUp: boolean;
+  isMissed: boolean;
+  row: 'back' | 'mid' | 'front';
+}
+
+const FanPersonFigure: React.FC<FanPersonProps> = ({ seed, isUp, isMissed, row }) => {
+  const skinTones = ['#5c3a21', '#8d5524', '#c68642', '#e0ac69', '#f1c27d'];
+  const skinColor = skinTones[seed % skinTones.length];
+
+  const jerseyColors = ['#f59e0b', '#18181b', '#ffffff', '#dc2626', '#16a34a'];
+  const jerseyColor = jerseyColors[seed % jerseyColors.length];
+  const accentColor = seed % 2 === 0 ? '#fbbf24' : '#ffffff';
+
+  const hasCap = seed % 3 === 0;
+  const capColor = seed % 2 === 0 ? '#18181b' : '#f59e0b';
+  const hasSunglasses = seed % 4 === 1;
+  const holdsFlag = seed % 3 === 0 && row === 'front';
+
+  return (
+    <div
+      className={`relative transition-all duration-100 ease-out flex flex-col items-center justify-end select-none pointer-events-none ${
+        row === 'front'
+          ? 'w-8 sm:w-11 h-24 sm:h-28'
+          : row === 'mid'
+          ? 'w-7 sm:w-9 h-20 sm:h-24 opacity-90'
+          : 'w-6 sm:w-7 h-16 sm:h-20 opacity-70'
+      } ${isUp ? '-translate-y-5 sm:-translate-y-7' : 'translate-y-0'} ${
+        isMissed ? 'translate-y-2 opacity-40 grayscale' : ''
+      }`}
+    >
+      <svg viewBox="0 0 100 130" className="w-full h-full drop-shadow-md">
+        {/* Braços Erguidos Pulando */}
+        {isUp ? (
+          <g>
+            <path d="M 30,55 Q 18,30 12,12" stroke={skinColor} strokeWidth="12" strokeLinecap="round" fill="none" />
+            <circle cx="10" cy="10" r="7" fill={skinColor} />
+
+            <path d="M 70,55 Q 82,30 88,12" stroke={skinColor} strokeWidth="12" strokeLinecap="round" fill="none" />
+            <circle cx="90" cy="10" r="7" fill={skinColor} />
+
+            {holdsFlag && (
+              <g className="animate-pulse">
+                <line x1="90" y1="10" x2="90" y2="-20" stroke="#d97706" strokeWidth="4" />
+                <polygon points="90,-20 115,-10 90,0" fill="#f59e0b" />
+              </g>
+            )}
+          </g>
+        ) : (
+          <g>
+            <path d="M 30,58 Q 20,70 35,78" stroke={skinColor} strokeWidth="11" strokeLinecap="round" fill="none" />
+            <path d="M 70,58 Q 80,70 65,78" stroke={skinColor} strokeWidth="11" strokeLinecap="round" fill="none" />
+          </g>
+        )}
+
+        {/* Tronco / Regata de Torcida */}
+        <path d="M 24,52 L 76,52 L 70,125 L 30,125 Z" fill={jerseyColor} />
+        <path d="M 45,52 L 55,52 L 55,125 L 45,125 Z" fill={accentColor} opacity="0.85" />
+
+        {/* Pescoço */}
+        <rect x="42" y="36" width="16" height="18" fill={skinColor} rx="3" />
+
+        {/* Cabeça */}
+        <circle cx="50" cy="30" r="17" fill={skinColor} />
+
+        {/* Olhos ou Juliet (Óculos Escuros) */}
+        {hasSunglasses ? (
+          <path d="M 38,28 Q 50,30 62,28" stroke="#f59e0b" strokeWidth="5" strokeLinecap="round" fill="none" />
+        ) : (
+          <>
+            <circle cx="43" cy="29" r="2.2" fill="#18181b" />
+            <circle cx="57" cy="29" r="2.2" fill="#18181b" />
+          </>
+        )}
+
+        {/* Boca Cantando / Gritando na Torcida */}
+        <ellipse cx="50" cy="37" rx={isUp ? "5" : "3.5"} ry={isUp ? "4" : "2"} fill="#18181b" />
+
+        {/* Cabelo ou Boné */}
+        {hasCap ? (
+          <g>
+            <path d="M 31,27 Q 50,11 69,27 Z" fill={capColor} />
+            <path d="M 62,27 L 78,30 L 62,33 Z" fill={capColor} />
+          </g>
+        ) : (
+          <path d="M 33,26 Q 50,12 67,26 Q 50,22 33,26 Z" fill="#18181b" />
+        )}
+      </svg>
+    </div>
+  );
+};
 
 export const CrowdViewCanvas: React.FC<CrowdViewCanvasProps> = ({
   feedback,
@@ -109,53 +202,53 @@ export const CrowdViewCanvas: React.FC<CrowdViewCanvasProps> = ({
         )}
       </div>
 
-      {/* TORCIDA ANIMATION - JUMPING FANS SYNCHRONIZED TO BEAT */}
+      {/* REALISTIC HUMAN TORCIDA ANIMATION - JUMPING FANS */}
       <div className="absolute bottom-0 inset-x-0 h-44 flex flex-col justify-end px-4 overflow-hidden pointer-events-none z-10">
         
-        {/* Back Row - Sync with Upbeat */}
-        <div className="flex justify-between items-end opacity-60 transform scale-90 -mb-2">
+        {/* Back Row */}
+        <div className="flex justify-between items-end opacity-75 transform scale-90 -mb-3">
           {backRow.map((idx) => {
             const isUp = isJumping || (isPlaying && (beatTick + idx) % 4 === 2);
             return (
-              <div
+              <FanPersonFigure
                 key={`back-${idx}`}
-                className={`w-5 sm:w-6 rounded-t-full bg-zinc-700 transition-transform duration-100 ease-out ${
-                  isUp ? '-translate-y-5 h-14' : 'h-10'
-                } ${isMissed ? 'translate-y-2 opacity-50' : ''}`}
+                seed={idx + 10}
+                isUp={isUp}
+                isMissed={isMissed}
+                row="back"
               />
             );
           })}
         </div>
 
-        {/* Mid Row - Sync with Surdo Downbeats */}
-        <div className="flex justify-around items-end opacity-85 transform scale-95 -mb-2">
+        {/* Mid Row */}
+        <div className="flex justify-around items-end opacity-90 transform scale-95 -mb-3">
           {midRow.map((idx) => {
             const isUp = isJumping || (isPlaying && (beatTick % 4 === 0 || (beatTick + idx) % 4 === 0));
             return (
-              <div
+              <FanPersonFigure
                 key={`mid-${idx}`}
-                className={`w-6 sm:w-8 rounded-t-full bg-amber-600 border-t-2 border-amber-400 transition-transform duration-100 ease-out ${
-                  isUp ? '-translate-y-6 h-16' : 'h-12'
-                } ${isMissed ? 'translate-y-2 opacity-50' : ''}`}
+                seed={idx + 25}
+                isUp={isUp}
+                isMissed={isMissed}
+                row="mid"
               />
             );
           })}
         </div>
 
-        {/* Front Row - Sync on Every Surdo Beat & Hit */}
+        {/* Front Row */}
         <div className="flex justify-between items-end px-2">
           {frontRow.map((idx) => {
             const isUp = isJumping || (isPlaying && beatTick % 4 === 0);
             return (
-              <div
+              <FanPersonFigure
                 key={`front-${idx}`}
-                className={`w-7 sm:w-10 rounded-t-full bg-zinc-100 border-t-4 border-amber-500 shadow-md transition-transform duration-100 ease-out flex flex-col items-center justify-start pt-1 ${
-                  isUp ? '-translate-y-7 h-20 shadow-amber-500/50' : 'h-14'
-                } ${isMissed ? 'translate-y-2 opacity-40' : ''}`}
-              >
-                <div className="w-2 h-2 rounded-full bg-zinc-900 mb-1" />
-                <div className="w-4 h-1 bg-amber-500 rounded-full" />
-              </div>
+                seed={idx + 50}
+                isUp={isUp}
+                isMissed={isMissed}
+                row="front"
+              />
             );
           })}
         </div>
