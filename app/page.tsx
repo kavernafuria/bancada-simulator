@@ -2106,12 +2106,21 @@ export default function App() {
         />
         <div className="fixed inset-0 pointer-events-none bg-gradient-to-b from-zinc-950/85 via-zinc-950/60 to-zinc-950/95 z-0" />
 
-        <div className="max-w-md w-full bg-zinc-900/90 backdrop-blur-md border border-amber-500/50 rounded-3xl p-6 shadow-2xl text-center space-y-4 max-h-[90vh] overflow-y-auto relative z-10">
-          <img
-            src="/bancada_logo.png"
-            alt="Bancada Simulator Logo"
-            className="w-48 sm:w-56 h-auto mx-auto object-contain filter drop-shadow-lg"
-          />
+        <div className="max-w-md w-full bg-zinc-900/90 backdrop-blur-md border border-amber-500/50 rounded-3xl p-6 shadow-2xl text-center space-y-4 max-h-[90vh] overflow-y-auto relative z-10 overflow-hidden">
+          {/* Header Image Illustration */}
+          <div className="relative -mx-6 -mt-6 mb-2 h-52 overflow-hidden border-b border-amber-500/40">
+            <img
+              src="/images/fim_15_temporadas.jpeg"
+              alt="Fim das 15 Temporadas Legado Ultras"
+              className="w-full h-full object-cover opacity-90"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/30 to-transparent" />
+            <div className="absolute bottom-2.5 left-6">
+              <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest bg-amber-950/90 px-2.5 py-0.5 rounded border border-amber-800 shadow">
+                🏆 LEGADO CONCLUÍDO • 15 TEMPORADAS DE MANDATO
+              </span>
+            </div>
+          </div>
 
           <div className="mx-auto w-14 h-14 rounded-2xl bg-amber-500 text-black flex items-center justify-center shadow-xl animate-bounce">
             <Trophy className="w-7 h-7" />
@@ -3634,11 +3643,25 @@ export default function App() {
       {activeMatchResult && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fade-in">
           <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 text-center shadow-2xl space-y-3 relative max-h-[85vh] overflow-y-auto pb-12 overflow-hidden">
-            {/* Header Image Illustration (Dynamic Victory / Defeat) */}
-            {activeMatchResult.isVictoryPista ? (
+            {/* Header Image Illustration (Dynamic: Faixa Capturada / Vitória / Derrota) */}
+            {activeMatchResult.bannerCaptured ? (
+              <div className="relative -mx-5 -mt-5 mb-2 h-48 overflow-hidden border-b border-amber-500/40">
+                <img
+                  src="/images/faixa_capturada.jpeg"
+                  alt="Faixa Rival Capturada e Tomada"
+                  className="w-full h-full object-cover opacity-90"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/30 to-transparent" />
+                <div className="absolute bottom-2 left-4">
+                  <span className="text-[9px] font-black text-amber-300 uppercase tracking-widest bg-amber-950/90 px-2.5 py-0.5 rounded border border-amber-500/50 shadow">
+                    🏴‍☠️ FAIXA RIVAL CAPTURADA & TOMADA DE PISTA!
+                  </span>
+                </div>
+              </div>
+            ) : activeMatchResult.isVictoryPista ? (
               <div className="relative -mx-5 -mt-5 mb-2 h-44 overflow-hidden border-b border-amber-500/30">
                 <img
-                  src="/images/vitoria01.jpeg"
+                  src="/images/vitoria02.jpeg"
                   alt="Festa da Vitória e Sinalizadores"
                   className="w-full h-full object-cover opacity-85"
                 />
@@ -3815,7 +3838,22 @@ export default function App() {
       {/* 7.B. SEASONAL MILESTONE DECISION MODAL (SEASONS 3, 6, 9, 12, 15) */}
       {activeMilestoneDecision && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-[100] animate-fade-in">
-          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-4 text-center max-h-[85vh] overflow-y-auto pb-12 relative">
+          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-4 text-center max-h-[85vh] overflow-y-auto pb-12 relative overflow-hidden">
+            {/* Header Image Illustration */}
+            <div className="relative -mx-5 -mt-5 mb-2 h-44 overflow-hidden border-b border-amber-500/30">
+              <img
+                src="/images/julgamento.jpeg"
+                alt="Decisão Estratégica e Julgamento do MP/Tribunal"
+                className="w-full h-full object-cover opacity-85"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/30 to-transparent" />
+              <div className="absolute bottom-2.5 left-4 text-left">
+                <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest bg-amber-950/90 px-2.5 py-0.5 rounded border border-amber-800 shadow">
+                  ⚖️ MARCO ESTRATÉGICO DA DÉCADA
+                </span>
+              </div>
+            </div>
+
             <div className="border-b border-zinc-800 pb-3 text-left">
               <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block">
                 {activeMilestoneDecision.title}
@@ -4234,7 +4272,22 @@ export default function App() {
       {/* PRESIDENTIAL ELECTION MODAL */}
       {showPresidentElectionModal && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[100] flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl p-6 max-w-xl w-full shadow-2xl space-y-5 max-h-[85vh] overflow-y-auto pb-12">
+          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl p-6 max-w-xl w-full shadow-2xl space-y-5 max-h-[85vh] overflow-y-auto pb-12 overflow-hidden relative">
+            {/* Header Image Illustration */}
+            <div className="relative -mx-6 -mt-6 mb-3 h-48 overflow-hidden border-b border-amber-500/30">
+              <img
+                src="/images/tipo_presidente.jpeg"
+                alt="Perfis de Liderança de Torcida"
+                className="w-full h-full object-cover opacity-85"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/30 to-transparent" />
+              <div className="absolute bottom-2.5 left-6">
+                <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest bg-amber-950/90 px-2.5 py-0.5 rounded border border-amber-800">
+                  🗳️ ELEIÇÃO DE DIRETORIA & PERFIL DE GESTÃO
+                </span>
+              </div>
+            </div>
+
             <div className="flex items-center gap-3 border-b border-zinc-800 pb-4">
               <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500 flex items-center justify-center text-2xl">
                 🗳️

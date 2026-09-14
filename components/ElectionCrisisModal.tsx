@@ -14,6 +14,21 @@ export function ElectionCrisisModal({ torcida, crisis, onDismiss }: ElectionCris
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200">
       <div className="relative my-auto w-full max-w-xl overflow-hidden rounded-2xl border border-red-500/50 bg-zinc-950 p-6 shadow-2xl">
+        {/* Header Illustration */}
+        <div className="relative mb-4 -mx-6 -mt-6 h-40 overflow-hidden border-b border-red-600/40">
+          <img
+            src="/images/protesto.jpeg"
+            alt="Protesto de Torcida e Crise Política"
+            className="h-full w-full object-cover opacity-85"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/30 to-transparent" />
+          <div className="absolute bottom-2.5 left-6 flex items-center gap-2">
+            <span className="rounded bg-red-600 px-2.5 py-0.5 text-[10px] font-black text-white uppercase tracking-wider shadow">
+              🔥 CRISE DE DIRETORIA & PROTESTOS
+            </span>
+          </div>
+        </div>
+
         {/* Top Header */}
         <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
           <div className="flex items-center gap-3">
