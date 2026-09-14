@@ -109,48 +109,48 @@ export const CrowdViewCanvas: React.FC<CrowdViewCanvasProps> = ({
         )}
       </div>
 
-      {/* TORCIDA ANIMATION - JUMPING FANS */}
+      {/* TORCIDA ANIMATION - JUMPING FANS SYNCHRONIZED TO BEAT */}
       <div className="absolute bottom-0 inset-x-0 h-44 flex flex-col justify-end px-4 overflow-hidden pointer-events-none z-10">
         
-        {/* Back Row */}
+        {/* Back Row - Sync with Upbeat */}
         <div className="flex justify-between items-end opacity-60 transform scale-90 -mb-2">
           {backRow.map((idx) => {
-            const isUp = isJumping || (isPlaying && (beatTick + idx) % 2 === 0);
+            const isUp = isJumping || (isPlaying && (beatTick + idx) % 4 === 2);
             return (
               <div
                 key={`back-${idx}`}
-                className={`w-5 sm:w-6 rounded-t-full bg-zinc-700 transition-transform duration-150 ${
-                  isUp ? '-translate-y-4 h-14' : 'h-10'
+                className={`w-5 sm:w-6 rounded-t-full bg-zinc-700 transition-transform duration-100 ease-out ${
+                  isUp ? '-translate-y-5 h-14' : 'h-10'
                 } ${isMissed ? 'translate-y-2 opacity-50' : ''}`}
               />
             );
           })}
         </div>
 
-        {/* Mid Row */}
+        {/* Mid Row - Sync with Surdo Downbeats */}
         <div className="flex justify-around items-end opacity-85 transform scale-95 -mb-2">
           {midRow.map((idx) => {
-            const isUp = isJumping || (isPlaying && (beatTick + idx) % 2 === 1);
+            const isUp = isJumping || (isPlaying && (beatTick % 4 === 0 || (beatTick + idx) % 4 === 0));
             return (
               <div
                 key={`mid-${idx}`}
-                className={`w-6 sm:w-8 rounded-t-full bg-amber-600 border-t-2 border-amber-400 transition-transform duration-150 ${
-                  isUp ? '-translate-y-5 h-16' : 'h-12'
+                className={`w-6 sm:w-8 rounded-t-full bg-amber-600 border-t-2 border-amber-400 transition-transform duration-100 ease-out ${
+                  isUp ? '-translate-y-6 h-16' : 'h-12'
                 } ${isMissed ? 'translate-y-2 opacity-50' : ''}`}
               />
             );
           })}
         </div>
 
-        {/* Front Row */}
+        {/* Front Row - Sync on Every Surdo Beat & Hit */}
         <div className="flex justify-between items-end px-2">
           {frontRow.map((idx) => {
-            const isUp = isJumping || (isPlaying && beatTick % 2 === 0);
+            const isUp = isJumping || (isPlaying && beatTick % 4 === 0);
             return (
               <div
                 key={`front-${idx}`}
-                className={`w-7 sm:w-10 rounded-t-full bg-zinc-100 border-t-4 border-amber-500 shadow-md transition-transform duration-150 flex flex-col items-center justify-start pt-1 ${
-                  isUp ? '-translate-y-6 h-20' : 'h-14'
+                className={`w-7 sm:w-10 rounded-t-full bg-zinc-100 border-t-4 border-amber-500 shadow-md transition-transform duration-100 ease-out flex flex-col items-center justify-start pt-1 ${
+                  isUp ? '-translate-y-7 h-20 shadow-amber-500/50' : 'h-14'
                 } ${isMissed ? 'translate-y-2 opacity-40' : ''}`}
               >
                 <div className="w-2 h-2 rounded-full bg-zinc-900 mb-1" />

@@ -134,11 +134,11 @@ export const RhythmBateriaModal: React.FC<RhythmBateriaModalProps> = ({
   // Performance calculation
   const calculateCrowdScore = (): number => {
     const total = totalHits + totalMisses;
-    if (total === 0) return 50;
+    if (total === 0) return 60;
     const accuracy = totalHits / total;
-    const comboBonus = Math.min(maxCombo * 4, 40);
-    const score = Math.round(accuracy * 60 + comboBonus);
-    return Math.min(Math.max(score, 10), 100);
+    const comboBonus = Math.min(maxCombo * 5, 45);
+    const score = Math.round(accuracy * 65 + comboBonus);
+    return Math.min(Math.max(score, 20), 100);
   };
 
   const finalScore = calculateCrowdScore();

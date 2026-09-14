@@ -19,10 +19,11 @@ export const RhythmBarCanvas: React.FC<RhythmBarCanvasProps> = ({
   bpm,
   isPlaying,
 }) => {
-  const TARGET_START = 40;
-  const TARGET_END = 60;
-  const PERFECT_START = 46;
-  const PERFECT_END = 54;
+  // Target Zone bounds (25%+ easier target zone)
+  const TARGET_START = 35;
+  const TARGET_END = 65;
+  const PERFECT_START = 42;
+  const PERFECT_END = 58;
   const POINTER_HALF_WIDTH = 1.8;
 
   const posRef = useRef<number>(10);
@@ -35,8 +36,9 @@ export const RhythmBarCanvas: React.FC<RhythmBarCanvasProps> = ({
   const [cursorPos, setCursorPos] = useState<number>(10);
   const [isOverlapping, setIsOverlapping] = useState<boolean>(false);
 
-  const comboMultiplier = Math.min(Math.pow(1.1, combo), 4.5);
-  const speed = (bpm * 0.95) * comboMultiplier;
+  // 25% easier speed scaling
+  const comboMultiplier = Math.min(Math.pow(1.05, combo), 2.8);
+  const speed = (bpm * 0.68) * comboMultiplier;
 
   const handleInteraction = useCallback(() => {
     if (!isPlaying) return;
