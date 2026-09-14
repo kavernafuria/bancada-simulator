@@ -38,6 +38,21 @@ export function TorcidaUnicaModal({
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md animate-in fade-in duration-200">
         <div className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-red-500/40 bg-zinc-950 p-6 shadow-2xl">
+          {/* Header Image Banner */}
+          <div className="relative mb-4 -mx-6 -mt-6 h-40 overflow-hidden border-b border-red-600/40">
+            <img
+              src="/images/torcidaproibida.jpeg"
+              alt="Torcida Proibida Decreto MP"
+              className="h-full w-full object-cover object-center opacity-80"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/30 to-transparent" />
+            <div className="absolute bottom-3 left-6 flex items-center gap-2">
+              <span className="rounded bg-red-600 px-2 py-0.5 text-[10px] font-black text-white uppercase tracking-wider">
+                DECRETO JUDICIAL DO MP
+              </span>
+            </div>
+          </div>
+
           {/* Top Bar */}
           <div className="flex items-center gap-2 border-b border-red-900/40 pb-3 text-red-500">
             <AlertTriangle className="h-6 w-6 animate-pulse" />
@@ -160,6 +175,21 @@ export function TorcidaUnicaModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200">
       <div className="relative my-auto w-full max-w-2xl overflow-hidden rounded-2xl border border-red-500/50 bg-zinc-950 p-6 shadow-2xl">
+        {/* Header Illustration */}
+        <div className="relative mb-4 -mx-6 -mt-6 h-36 overflow-hidden border-b border-red-600/40">
+          <img
+            src="/images/torcidaproibida.jpeg"
+            alt="Portões Trancados Torcida Única"
+            className="h-full w-full object-cover object-center opacity-75"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
+          <div className="absolute bottom-3 left-6 flex items-center gap-2">
+            <span className="rounded bg-red-600/90 px-2 py-0.5 text-[10px] font-black text-white uppercase tracking-wider">
+              CRISE MP & RESTRITION
+            </span>
+          </div>
+        </div>
+
         {/* Header Bar */}
         <div className="flex items-center justify-between border-b border-red-900/50 pb-4">
           <div className="flex items-center gap-3">

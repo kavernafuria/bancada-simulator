@@ -2475,6 +2475,23 @@ export default function App() {
               </div>
             )}
 
+            {/* Action Card Illustration Header */}
+            {currentStep.type === "action" && (
+              <div className="relative -mx-4 -mt-4 mb-3 h-28 overflow-hidden rounded-t-2xl border-b border-zinc-800">
+                <img
+                  src="/images/preparativos.jpeg"
+                  alt="Preparativos na Sede e Galpão da Torcida"
+                  className="w-full h-full object-cover opacity-75"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/30 to-transparent" />
+                <div className="absolute bottom-2 left-3">
+                  <span className="text-[8px] font-black text-amber-400 uppercase tracking-widest bg-zinc-950/80 px-2 py-0.5 rounded border border-zinc-800">
+                    SEDE & BANCADA EM PREPARAÇÃO
+                  </span>
+                </div>
+              </div>
+            )}
+
             <div className="flex items-center justify-between mb-2">
               <span className="bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider">
                 ANO {season} • ETAPA {pipelineIndex + 1} DE 13
@@ -3294,7 +3311,22 @@ export default function App() {
       {/* 2. KEY GAME STAGE 1: REUNIÃO COM A POLÍCIA & SEGURANÇA */}
       {matchModalPhase === "POLICE_MEETING" && activeMatchDerby && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fade-in">
-          <div className="bg-zinc-900 border border-blue-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-3 max-h-[85vh] overflow-y-auto pb-12">
+          <div className="bg-zinc-900 border border-blue-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-3 max-h-[85vh] overflow-y-auto pb-12 overflow-hidden relative">
+            {/* Header Image Illustration */}
+            <div className="relative -mx-5 -mt-5 mb-3 h-36 overflow-hidden border-b border-blue-500/30">
+              <img
+                src="/images/escolta.jpeg"
+                alt="Escolta Policial e Choque"
+                className="w-full h-full object-cover opacity-80"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/30 to-transparent" />
+              <div className="absolute bottom-2 left-4">
+                <span className="text-[9px] font-black text-blue-400 uppercase tracking-widest bg-blue-950/80 px-2 py-0.5 rounded border border-blue-800">
+                  REUNIÃO DE SEGURANÇA DE CAMPO
+                </span>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <span className="text-[9px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-1">
                 <Shield className="w-3.5 h-3.5" /> PASSO 1 DE 4 • REUNIÃO DE SEGURANÇA
@@ -3361,7 +3393,22 @@ export default function App() {
       {/* 3. KEY GAME STAGE 2: ESCOLHA DE TRANSPORTE & CONDUÇÃO */}
       {matchModalPhase === "TRANSPORT" && activeMatchDerby && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fade-in">
-          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-3 max-h-[85vh] overflow-y-auto pb-12">
+          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-3 max-h-[85vh] overflow-y-auto pb-12 overflow-hidden relative">
+            {/* Header Image Illustration */}
+            <div className="relative -mx-5 -mt-5 mb-3 h-36 overflow-hidden border-b border-amber-500/30">
+              <img
+                src="/images/caravana.jpeg"
+                alt="Caravana e Condução da Torcida"
+                className="w-full h-full object-cover opacity-80"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/30 to-transparent" />
+              <div className="absolute bottom-2 left-4">
+                <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800">
+                  DESLOCAMENTO E LOGÍSTICA DE BANDEIRAS
+                </span>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
               <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest flex items-center gap-1">
                 <Bus className="w-3.5 h-3.5" /> PASSO 2 DE 4 • ESCOLHA DO TRANSPORTE
@@ -3586,10 +3633,25 @@ export default function App() {
       {/* 6. MATCH RESULT & GEMINI CHRONICLE MODAL */}
       {activeMatchResult && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fade-in">
-          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 text-center shadow-2xl space-y-3 relative max-h-[85vh] overflow-y-auto pb-12">
+          <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 text-center shadow-2xl space-y-3 relative max-h-[85vh] overflow-y-auto pb-12 overflow-hidden">
+            {/* Header Image Illustration */}
+            <div className="relative -mx-5 -mt-5 mb-2 h-40 overflow-hidden border-b border-amber-500/30">
+              <img
+                src="/images/vitoria01.jpeg"
+                alt="Festa da Vitória e Sinalizadores"
+                className="w-full h-full object-cover opacity-85"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/40 to-transparent" />
+              <div className="absolute bottom-2 left-4">
+                <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800">
+                  FESTA DE ARQUIBANCADA & RESULTADO FINAL
+                </span>
+              </div>
+            </div>
+
             <button
               onClick={() => setActiveMatchResult(null)}
-              className="absolute top-4 right-4 text-zinc-400 hover:text-white p-1 rounded-full bg-zinc-800 cursor-pointer"
+              className="absolute top-4 right-4 text-zinc-400 hover:text-white p-1 rounded-full bg-zinc-800/80 backdrop-blur z-10 cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>

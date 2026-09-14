@@ -26,6 +26,21 @@ export function PressConferenceModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200">
       <div className="relative my-auto w-full max-w-2xl overflow-hidden rounded-2xl border border-sky-500/40 bg-zinc-950 p-6 shadow-2xl">
+        {/* Header Illustration */}
+        <div className="relative mb-4 -mx-6 -mt-6 h-36 overflow-hidden border-b border-sky-500/30">
+          <img
+            src="/images/coletiva.jpeg"
+            alt="Coletiva de Imprensa"
+            className="h-full w-full object-cover object-center opacity-70"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
+          <div className="absolute bottom-3 left-6 flex items-center gap-2">
+            <span className="rounded bg-sky-500/80 px-2 py-0.5 text-[10px] font-black text-black uppercase tracking-wider">
+              SALA DE IMPRENSA
+            </span>
+          </div>
+        </div>
+
         {/* Top Header */}
         <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
           <div className="flex items-center gap-3">
