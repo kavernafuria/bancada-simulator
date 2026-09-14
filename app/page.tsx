@@ -811,16 +811,14 @@ export default function App() {
     let mappedChoice: MatchContext['tacticalChoice'] = 'front_charge';
     const tid = (tactic.id || "").toUpperCase();
 
-    if (selectedTransport?.id === "CORTEJO_ONIBUS_TIME" || tid.includes("CORTEJO") || tid.includes("RUADA") || tid.includes("FLAG_WAVING")) {
+    if (selectedTransport?.id === "CORTEJO_ONIBUS_TIME" || selectedTransport?.id === "CAMINHADA_PRACA_ESTADIO" || tid.includes("CORTEJO") || tid.includes("RUADA") || tid.includes("RUAZAO") || tid.includes("FLAG_WAVING")) {
       mappedChoice = 'flag_waving';
     } else if (tid.startsWith("EVASAO") || tid.includes("ANTECIPADA") || tid.includes("CORTEJO_BLINDADO") || tid.includes("QUADRA_CLANDESTINA")) {
       mappedChoice = 'evasion';
     } else if (tid.includes("RUNNER_3D") || tid === "ATAQUE_FRONTAL_RUNNER_3D") {
       mappedChoice = 'runner_3d';
-    } else if (tactic.isMosaicTactic || tid.includes("MOSAICO") || tid.includes("BANDEIRAO") || tid.includes("FAIXAS_TIRANTES")) {
-      mappedChoice = 'rhythm_mosaic';
-    } else if (tid.includes("BATERIA") || tid.includes("SAMBA") || tid.includes("RUAZAO") || tid.includes("FESTA") || tid.includes("ALAMBRADO")) {
-      mappedChoice = 'color_memory';
+    } else if (tactic.isMosaicTactic || selectedTransport?.id === "CONCENTRACAO_SEDE_BAR" || tid.includes("BATERIA") || tid.includes("MOSAICO") || tid.includes("BANDEIRAO") || tid.includes("FAIXAS") || tid.includes("SAMBA") || tid.includes("FESTA") || tid.includes("ALAMBRADO")) {
+      mappedChoice = 'rhythm_bateria';
     } else if (tid.includes("ROJOES") || tid.includes("MORTEIROS")) {
       mappedChoice = 'rojon_barrage';
     } else if (tid.includes("EMBOSCADA") || tid.includes("SURPRESA") || tid.includes("FLANCO") || tid.includes("RODOVIA")) {
