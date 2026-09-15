@@ -4273,17 +4273,16 @@ export default function App() {
       {showPresidentElectionModal && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[100] flex items-center justify-center p-4">
           <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl p-6 max-w-xl w-full shadow-2xl space-y-5 max-h-[85vh] overflow-y-auto pb-12 overflow-hidden relative">
-            {/* Header Image Illustration (Uncropped Square Display) */}
-            <div className="relative -mx-6 -mt-6 mb-3 bg-zinc-950 border-b border-amber-500/40 p-3 flex flex-col items-center justify-center">
-              <div className="relative w-full max-w-sm aspect-square overflow-hidden rounded-xl border border-zinc-800 shadow-xl">
-                <img
-                  src="/images/tipodepresidemte.jpeg"
-                  alt="Perfis de Liderança de Torcida"
-                  className="w-full h-full object-contain bg-zinc-950"
-                />
-              </div>
-              <div className="mt-2 text-center">
-                <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest bg-amber-950/90 px-3 py-1 rounded-full border border-amber-800/80 shadow">
+            {/* Header Image Illustration (Widescreen 16:9 Banner Display) */}
+            <div className="relative -mx-6 -mt-6 mb-3 h-52 sm:h-60 overflow-hidden border-b border-amber-500/40">
+              <img
+                src="/images/tipopresidentes.jpeg"
+                alt="Perfis de Liderança de Torcida"
+                className="w-full h-full object-cover object-center opacity-90"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/30 to-transparent" />
+              <div className="absolute bottom-2.5 left-6">
+                <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest bg-amber-950/90 px-2.5 py-0.5 rounded border border-amber-800 shadow">
                   🗳️ ELEIÇÃO DE DIRETORIA & PERFIL DE GESTÃO
                 </span>
               </div>
