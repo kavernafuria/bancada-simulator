@@ -811,26 +811,34 @@ export default function App() {
     let mappedChoice: MatchContext['tacticalChoice'] = 'front_charge';
     const tid = (tactic.id || "").toUpperCase();
 
-    if (selectedTransport?.id === "CORTEJO_ONIBUS_TIME" || selectedTransport?.id === "CAMINHADA_PRACA_ESTADIO" || tid.includes("CORTEJO") || tid.includes("RUADA") || tid.includes("RUAZAO") || tid.includes("FLAG_WAVING")) {
-      mappedChoice = 'flag_waving';
-    } else if (tid.startsWith("EVASAO") || tid.includes("ANTECIPADA") || tid.includes("CORTEJO_BLINDADO") || tid.includes("QUADRA_CLANDESTINA")) {
-      mappedChoice = 'evasion';
-    } else if (tid.includes("RUNNER_3D") || tid === "ATAQUE_FRONTAL_RUNNER_3D") {
+    // Prioridade Total para a Tática Selecionada no Passo 4:
+    if (tid.includes("RUNNER_3D") || tid === "ATAQUE_FRONTAL_RUNNER_3D") {
       mappedChoice = 'runner_3d';
-    } else if (tactic.isMosaicTactic || selectedTransport?.id === "CONCENTRACAO_SEDE_BAR" || tid.includes("BATERIA") || tid.includes("MOSAICO") || tid.includes("BANDEIRAO") || tid.includes("FAIXAS") || tid.includes("SAMBA") || tid.includes("FESTA") || tid.includes("ALAMBRADO")) {
-      mappedChoice = 'rhythm_bateria';
+    } else if (tid.includes("MAO_LIMPA") || tid.includes("SOCO") || tid.includes("DISPOSICAO")) {
+      mappedChoice = 'punch_combat';
+    } else if (tid.includes("BARRA") || tid.includes("CONFRONTO_BARRA_FERRO") || tid.includes("LINHA_FRENTE")) {
+      mappedChoice = 'front_charge'; // Minigame 3D Linha de Frente com Barras
     } else if (tid.includes("ROJOES") || tid.includes("MORTEIROS")) {
       mappedChoice = 'rojon_barrage';
     } else if (tid.includes("EMBOSCADA") || tid.includes("SURPRESA") || tid.includes("FLANCO") || tid.includes("RODOVIA")) {
       mappedChoice = 'caravan_escape';
-    } else if (tid.includes("MAO_LIMPA") || tid.includes("LINHA_FRENTE") || tid.includes("SOCO") || tid.includes("DISPOSICAO")) {
-      mappedChoice = 'punch_combat';
-    } else if (tid.includes("BARRA") || tid.includes("CONFRONTO_BARRA_FERRO")) {
-      mappedChoice = 'front_charge';
+    } else if (tid.includes("CORTEJO") || tid.includes("RUADA") || tid.includes("RUAZAO") || tid.includes("FLAG_WAVING")) {
+      mappedChoice = 'flag_waving';
+    } else if (tactic.isMosaicTactic || tid.includes("BATERIA") || tid.includes("MOSAICO") || tid.includes("BANDEIRAO") || tid.includes("FAIXAS") || tid.includes("SAMBA") || tid.includes("FESTA") || tid.includes("ALAMBRADO")) {
+      mappedChoice = 'rhythm_bateria';
+    } else if (tid.startsWith("EVASAO") || tid.includes("ANTECIPADA") || tid.includes("CORTEJO_BLINDADO") || tid.includes("QUADRA_CLANDESTINA")) {
+      mappedChoice = 'evasion';
     } else if (activeMatchDerby.isHome && (tid.includes("PORTAO") || tid.includes("PERIMETRO_LOCAL") || tid.includes("CONCENTRADOS_PORTAO"))) {
       mappedChoice = 'gate_concentration';
     } else {
-      mappedChoice = 'front_charge';
+      // Fallback por transporte se a tática for neutra
+      if (selectedTransport?.id === "CORTEJO_ONIBUS_TIME" || selectedTransport?.id === "CAMINHADA_PRACA_ESTADIO") {
+        mappedChoice = 'flag_waving';
+      } else if (selectedTransport?.id === "CONCENTRACAO_SEDE_BAR") {
+        mappedChoice = 'rhythm_bateria';
+      } else {
+        mappedChoice = 'front_charge';
+      }
     }
 
     const opponentTier: MatchContext['opponentTier'] = activeScoutIntel.rivalMembersWaiting > 3000 ? 'S' : activeScoutIntel.rivalMembersWaiting > 1500 ? 'A' : 'B';
