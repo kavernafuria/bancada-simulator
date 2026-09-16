@@ -454,6 +454,7 @@ export interface MatchExecutionResult {
   effectiveForceRival: number;
   isVictoryPista: boolean;
   isVictoryBancada: boolean;
+  isPistaFight?: boolean;
   statusTitle: string;
   membersLost: number;
   medicalCost: number;
@@ -2225,6 +2226,7 @@ export function executeCompleteMatch(
       effectiveForceRival: 100,
       isVictoryPista: true,
       isVictoryBancada: true,
+      isPistaFight: false,
       statusTitle,
       membersLost: 0,
       medicalCost: 0,
@@ -2276,6 +2278,7 @@ export function executeCompleteMatch(
         effectiveForceRival: 35,
         isVictoryPista: true,
         isVictoryBancada: true,
+        isPistaFight: true,
         statusTitle,
         membersLost,
         medicalCost,
@@ -2319,6 +2322,7 @@ export function executeCompleteMatch(
       effectiveForceRival: 92,
       isVictoryPista: false,
       isVictoryBancada: false,
+      isPistaFight: true,
       statusTitle,
       membersLost,
       medicalCost,
@@ -2358,6 +2362,7 @@ export function executeCompleteMatch(
         effectiveForceRival: 35,
         isVictoryPista: true,
         isVictoryBancada: true,
+        isPistaFight: false,
         statusTitle,
         membersLost: 0,
         medicalCost: 0,
@@ -2380,7 +2385,7 @@ export function executeCompleteMatch(
       const chronicleText = `Com a nossa diretoria concentrada apenas na montagem do mosaico interno, o bonde visitante do ${derby.rivalTorcida} chegou com contingente pesado nas imediações do estádio e causou um incidente grave com associados desprevenidos no entorno. Houve abalo moral e perdas materiais.`;
       
       const deltas: FormattedDelta[] = [
-        { label: "Resultado de Pista", value: "Incidente por Casa Desguarnecida", isPositive: false },
+        { label: "Resultado de Arquibancada", value: "Incidente por Casa Desguarnecida", isPositive: false },
         { label: "Baixas Médicas", value: `-${membersLost} feridos`, isPositive: false },
         { label: "Moral da Tropa", value: "-12", isPositive: false },
         { label: "Placar do Jogo", value: `${scorePlayerClub} x ${scoreRivalClub}`, isPositive: false },
@@ -2394,6 +2399,7 @@ export function executeCompleteMatch(
         effectiveForceRival: 75,
         isVictoryPista: false,
         isVictoryBancada: false,
+        isPistaFight: false,
         statusTitle,
         membersLost,
         medicalCost,
@@ -2447,7 +2453,7 @@ export function executeCompleteMatch(
       : `Ao avistar o avanço da linha de frente adversária da ${derby.rivalTorcida}, o bonde local iniciou corrida de proteção em direção à frota de veículos. O recuo imediato evitou baixas graves contra uma superpotência de pista, registrando apenas pequenas escoriações e despesas médicas de R$ ${medicalCost.toLocaleString()}.`;
 
     const deltas: FormattedDelta[] = [
-      { label: "Resultado de Pista", value: isPoliceIntervention ? "Intervenção da PM (Confronto Evitado)" : "Recuo e Proteção dos Veículos", isPositive: false },
+      { label: "Resultado de Arquibancada", value: isPoliceIntervention ? "Intervenção da PM (Confronto Evitado)" : "Recuo e Proteção dos Veículos", isPositive: false },
       { label: "Diretriz de Perfil", value: "Prioridade: Família & Massa (Pista < 40)", isPositive: true },
       { label: "Efetivo Presente", value: `${playerMembers.toLocaleString()} vs ${rivalMembers.toLocaleString()}`, isPositive: false },
       { label: "Placar do Jogo", value: `${scorePlayerClub} x ${scoreRivalClub}`, isPositive: false },
@@ -2462,6 +2468,7 @@ export function executeCompleteMatch(
       effectiveForceRival: 85,
       isVictoryPista: false,
       isVictoryBancada: false,
+      isPistaFight: false,
       statusTitle,
       membersLost,
       medicalCost,
@@ -2522,6 +2529,7 @@ export function executeCompleteMatch(
       effectiveForceRival: 50,
       isVictoryPista: true,
       isVictoryBancada: true,
+      isPistaFight: false,
       statusTitle,
       membersLost: 0,
       medicalCost: 0,
@@ -2536,7 +2544,10 @@ export function executeCompleteMatch(
     };
   }
 
-const ratio = playerMembers / Math.max(1, rivalMembers);
+  // ------------------------------------------------------------------------
+  // 1.B. FÓRMULA DE PODER EFETIVO DE COMBATE (PEC)
+  // ------------------------------------------------------------------------
+  const ratio = playerMembers / Math.max(1, rivalMembers);
   const presidentCombatMult = presidentProfile === "LINHA_FRENTE" ? 1.15 : 1.0;
 
   // Força Base = (Poder Pista * Coeficiente Tier) * (Bonde Presente / 100)
@@ -2639,9 +2650,25 @@ const ratio = playerMembers / Math.max(1, rivalMembers);
     moralChange += 10;
   }
 
-  let statusTitle = isVictoryPista
-    ? `VITÓRIA & CONTROLE EM ${derby.stadium.toUpperCase()}`
-    : `CONFRONTO ADVERSO & CONTENÇÃO EM ${derby.stadium.toUpperCase()}`;
+  const isPistaFight = !derby.isAllyGame &&
+    !isFestaTactic &&
+    !isEvasionTactic &&
+    !tactic.isMosaicTactic &&
+    !tid.includes("CALDEIRAO") &&
+    !tid.includes("FLAG_WAVING") &&
+    !tid.includes("BATERIA") &&
+    !tid.includes("SAMBA") &&
+    !tid.includes("MOSAICO") &&
+    !tid.includes("CHURRASCO") &&
+    !tid.includes("ANTECIPADA");
+
+  let statusTitle = isPistaFight
+    ? (isVictoryPista
+      ? `VITÓRIA & CONTROLE EM ${derby.stadium.toUpperCase()}`
+      : `CONFRONTO ADVERSO & CONTENÇÃO EM ${derby.stadium.toUpperCase()}`)
+    : (isVictoryPista
+      ? `VITÓRIA & FESTA NA ARQUIBANCADA EM ${derby.stadium.toUpperCase()}`
+      : `DESEMPENHO IRREGULAR NA ARQUIBANCADA EM ${derby.stadium.toUpperCase()}`);
 
   if (bannerCaptured) {
     statusTitle = `🏴‍☠️ VITÓRIA COM FAIXA RIVAL CAPTURADA EM ${derby.stadium.toUpperCase()}!`;
@@ -2651,9 +2678,19 @@ const ratio = playerMembers / Math.max(1, rivalMembers);
   }
 
   const deltas: FormattedDelta[] = [
-    { label: "Resultado de Pista", value: isVictoryPista ? (bannerCaptured ? "Vitória & Faixa Capturada" : "Vitória e Domínio") : "Contenção / Recuo", isPositive: isVictoryPista },
+    {
+      label: isPistaFight ? "Resultado de Pista" : "Resultado de Arquibancada",
+      value: isVictoryPista
+        ? (bannerCaptured ? "Vitória & Faixa Capturada" : (isPistaFight ? "Vitória e Domínio" : "Vitória e Show de Bancada"))
+        : (isPistaFight ? "Contenção / Recuo" : "Contenção de Bancada"),
+      isPositive: isVictoryPista,
+    },
     { label: "Efetivo na Rua", value: `${playerMembers.toLocaleString()} vs ${rivalMembers.toLocaleString()} (${ratio >= 1 ? `+${Math.round((ratio - 1) * 100)}%` : `-${Math.round((1 - ratio) * 100)}%`})`, isPositive: ratio >= 1 },
-    { label: "Força de Pista", value: `${playerForce} pts vs ${rivalForce} pts`, isPositive: isVictoryPista },
+    {
+      label: isPistaFight ? "Força de Pista" : "Pressão de Arquibancada",
+      value: `${playerForce} pts vs ${rivalForce} pts`,
+      isPositive: isVictoryPista,
+    },
     { label: "Placar do Jogo", value: `${scorePlayerClub} x ${scoreRivalClub}`, isPositive: scorePlayerClub >= scoreRivalClub },
     { label: "Moral da Tropa", value: moralChange >= 0 ? `+${moralChange}` : `${moralChange}`, isPositive: moralChange >= 0 },
     { label: "Custos do Jogo", value: `R$ ${extraExpenses.toLocaleString()}`, isPositive: extraExpenses === 0 },
@@ -2687,6 +2724,7 @@ const ratio = playerMembers / Math.max(1, rivalMembers);
     effectiveForceRival: rivalForce,
     isVictoryPista,
     isVictoryBancada,
+    isPistaFight,
     statusTitle,
     membersLost,
     medicalCost,
@@ -3079,6 +3117,15 @@ export async function generateGeminiChronicle(payload: any): Promise<string> {
       `Um espetáculo de união que ficará gravado na memória da bancada. A diretoria e os antenas organizaram a escolta de gala para recepcionar a caravana da ${payload.rivalTorcida || "aliada"} no trevo da rodovia com festa de fumaça.\n\nO encontro na praça foi embalado por uma roda de samba monumental, muita cerveja gelada e abraços fraternos entre as lideranças. Dentro do ${payload.stadium || "estádio"}, as duas torcidas fizeram um show à parte, cantando em uníssono e demonstrando a grandeza das nossas cores.`,
     ];
     return allyStories[Math.floor(Math.random() * allyStories.length)];
+  }
+
+  // 1.5. NON-PISTA / PEACEFUL MATCH FALLBACK
+  if (payload.isPeacefulMatch || payload.isPistaFight === false) {
+    if (payload.isVictory || payload.isVictoryBancada) {
+      return `Um espetáculo inesquecível de arquibancada marcou a partida no estádio ${payload.stadium || "estádio"}. A ${payload.torcida || "nossa torcida"} deu um show vibrante de apoio com bandeiras no alto, sinalizadores e cantos contagiantes do primeiro ao último minuto.\n\nA massa cobriu os setores e ditou o ritmo das bancadas em clima de pura festa e celebração das nossas cores!`;
+    } else {
+      return `Apesar do empenho e da presença vibrante da ${payload.torcida || "nossa torcida"} no estádio ${payload.stadium || "estádio"}, o resultado das arquibancadas ficou aquém do esperado nesta rodada.\n\nA diretoria e os associados mantêm o foco total nos preparativos para retomar a energia contagiante nas próximas partidas.`;
+    }
   }
 
   // 2. SPECIAL SANTO ANDRÉ vs GLADIADORES FALLBACK

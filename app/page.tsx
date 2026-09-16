@@ -1024,6 +1024,8 @@ export default function App() {
         isVictory: result.isVictoryPista,
         isVictoryPista: result.isVictoryPista,
         isVictoryBancada: result.isVictoryBancada,
+        isPistaFight: result.isPistaFight ?? false,
+        isPeacefulMatch: !result.isPistaFight,
         score: `${result.scorePlayerClub} x ${result.scoreRivalClub}`,
         playerAttendance: activeScoutIntel.playerMembersPresent,
         rivalAttendance: activeScoutIntel.rivalMembersWaiting,
@@ -3680,7 +3682,7 @@ export default function App() {
       {activeMatchResult && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fade-in">
           <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 text-center shadow-2xl space-y-3 relative max-h-[85vh] overflow-y-auto pb-12 overflow-hidden">
-            {/* Header Image Illustration (Dynamic: Faixa Capturada / Vitória / Derrota) */}
+            {/* Header Image Illustration (Dynamic: Faixa Capturada / Linha de Frente Pista / Festa Arquibancada / Derrota) */}
             {activeMatchResult.bannerCaptured ? (
               <div className="relative -mx-5 -mt-5 mb-2 h-48 overflow-hidden border-b border-amber-500/40">
                 <img
@@ -3695,17 +3697,47 @@ export default function App() {
                   </span>
                 </div>
               </div>
-            ) : activeMatchResult.isVictoryPista ? (
+            ) : activeMatchResult.isPistaFight ? (
+              activeMatchResult.isVictoryPista ? (
+                <div className="relative -mx-5 -mt-5 mb-2 h-44 overflow-hidden border-b border-amber-500/30">
+                  <img
+                    src="/images/linha_de_frente.jpeg"
+                    alt="Vitória e Domínio de Pista"
+                    className="w-full h-full object-cover opacity-85"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/40 to-transparent" />
+                  <div className="absolute bottom-2 left-4">
+                    <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800">
+                      💥 VITÓRIA & DOMÍNIO DE PISTA
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="relative -mx-5 -mt-5 mb-2 h-44 overflow-hidden border-b border-red-600/40">
+                  <img
+                    src="/images/derrota.jpeg"
+                    alt="Derrota e Conseqüências de Pista"
+                    className="w-full h-full object-cover opacity-90"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/40 to-transparent" />
+                  <div className="absolute bottom-2 left-4">
+                    <span className="text-[9px] font-black text-red-400 uppercase tracking-widest bg-red-950/90 px-2 py-0.5 rounded border border-red-800">
+                      💀 DERROTA & REVÉS NA PISTA
+                    </span>
+                  </div>
+                </div>
+              )
+            ) : activeMatchResult.isVictoryPista || activeMatchResult.isVictoryBancada ? (
               <div className="relative -mx-5 -mt-5 mb-2 h-44 overflow-hidden border-b border-amber-500/30">
                 <img
-                  src="/images/vitoria02.jpeg"
+                  src="/images/vitoria01.jpeg"
                   alt="Festa da Vitória e Sinalizadores"
                   className="w-full h-full object-cover opacity-85"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/40 to-transparent" />
                 <div className="absolute bottom-2 left-4">
                   <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800">
-                    🔥 FESTA DE ARQUIBANCADA & VITÓRIA DE PISTA
+                    🔥 FESTA & VITÓRIA NA ARQUIBANCADA
                   </span>
                 </div>
               </div>
@@ -3713,13 +3745,13 @@ export default function App() {
               <div className="relative -mx-5 -mt-5 mb-2 h-44 overflow-hidden border-b border-red-600/40">
                 <img
                   src="/images/derrota.jpeg"
-                  alt="Derrota e Conseqüências"
+                  alt="Desempenho Irregular na Arquibancada"
                   className="w-full h-full object-cover opacity-90"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/40 to-transparent" />
                 <div className="absolute bottom-2 left-4">
                   <span className="text-[9px] font-black text-red-400 uppercase tracking-widest bg-red-950/90 px-2 py-0.5 rounded border border-red-800">
-                    💀 DERROTA & COBRANÇA NA BANCADA
+                    ⚠️ DESEMPENHO IRREGULAR NA ARQUIBANCADA
                   </span>
                 </div>
               </div>
@@ -4154,7 +4186,7 @@ export default function App() {
                     <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 space-y-1 text-xs text-left">
                       <span className="text-[9px] font-black text-amber-400 block uppercase">RETROSPECTO DIRETO</span>
                       <p className="text-zinc-300 text-[11px]">
-                        {rec.totalConfrontos} jogos disputados • {rec.vitoriasPista} vitórias de pista • {rec.derrotasPista} derrotas • {rec.jogosDaPaz} jogos da paz
+                        {rec.totalConfrontos} jogos disputados • {rec.vitoriasPista} vitórias • {rec.derrotasPista} derrotas • {rec.jogosDaPaz} jogos da paz
                       </p>
                       <div className="flex gap-2 pt-1 text-[10px] font-bold">
                         <span className="text-emerald-400">Faixas Tomadas: {rec.faixasTomadas}</span>

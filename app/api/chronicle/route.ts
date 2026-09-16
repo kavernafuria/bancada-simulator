@@ -17,6 +17,7 @@ export async function POST(req: Request) {
       score,
       isVictoryPista,
       isVictoryBancada,
+      isPistaFight = false,
       tacticTitle,
       policeStance,
       extraCost,
@@ -32,6 +33,18 @@ export async function POST(req: Request) {
     // Try Gemini API if key is configured
     if (apiKey) {
       try {
+        const gameTypeDesc = isAllyGame
+          ? "FESTA DE ALIANÇA & UNIDADE"
+          : isPistaFight
+          ? "CONFRONTO DE PISTA & RIVALIDADE"
+          : "FESTA PACÍFICA DE ARQUIBANCADA & APOIO";
+
+        const resultTypeDesc = statusTitle
+          ? statusTitle
+          : isPistaFight
+          ? (isVictoryPista ? "Vitória e Domínio de Rua" : "Pressão e Revés Tático")
+          : (isVictoryPista || isVictoryBancada ? "Vitória e Show de Bancada" : "Desempenho Irregular de Bancada");
+
         const prompt = `Você é um líder histórico e cronista de rua de uma torcida organizada do futebol brasileiro. 
 Escreva uma crônica empolgante, crua e visceral de 1 parágrafo vibrante (4 a 6 frases) sobre o jogo ocorrido.
 
@@ -42,20 +55,21 @@ DADOS DA PARTIDA:
 - Oponente: ${rivalTorcida} (${rivalClub})
 - Estádio: ${stadium} (${cityState})
 - Mando: ${isHome ? "Mandante (Nosso Caldeirão)" : "Visitante (Caravana / Invasão)"}
-- Tipo de Jogo: ${isAllyGame ? "FESTA DE ALIANÇA & UNIDADE" : "CONFRONTO DE PISTA & RIVALIDADE"}
+- Tipo de Jogo: ${gameTypeDesc}
 - Placar do Jogo: ${score}
-- Resultado de Pista: ${statusTitle || (isVictoryPista ? "Vitória e Domínio de Rua" : "Pressão e Revés Tático")}
+- Resultado: ${resultTypeDesc}
 - Tática Usada: ${tacticTitle}
 - Postura da PM: ${policeStance}
 - Saldo Moral: ${moralChange >= 0 ? "+" + moralChange : moralChange}
 - Feridos/Baixas: ${desertion} integrantes
 
 REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
-1. Use gírias autênticas das torcidas brasileiras como: "bonde", "pista", "caldeirão", "alçapão", "linha de frente", "bateria", "cortejo", "ruada", "disposição", "sem amarelada", "trocação", "panos", "bandeirões", "resenha na sede", "chopp gelado", "comboio de ônibus", "antenas", "respeito de rua".
+1. Use gírias autênticas das torcidas brasileiras como: "bonde", "caldeirão", "alçapão", "linha de frente", "bateria", "cortejo", "ruada", "disposição", "panos", "bandeirões", "resenha na sede", "chopp gelado", "comboio de ônibus", "respeito de rua".
 2. Se for JOGO DE ALIANÇA: Exalte o churrasco de costela no fogo de chão, o respeito entre as agremiações, as baterias tocando juntas o mesmo samba e a festa unificada sem divisórias.
-3. Se for RIVALIDADE: Exalte o empenho da massa, o grito ensurdecedor nos 90 minutos, a imponência dos nossos panos e a postura firme da linha de frente.
-4. NUNCA coloque siglas genéricas entre parênteses como (TGF), (FJV), (TJS).
-5. Retorne APENAS um parágrafo corrido de texto puro, sem tópicos ou markdown.`;
+3. Se o jogo for PACÍFICO ou de ARQUIBANCADA (sem briga de pista): NUNCA mencione briga de rua, emboscada, trocação de soco, rojões ou violência. Foque exclusivamente no show de cantos, festa visual, sinalizadores, mosaico, batuque da bateria e apoio incondicional ao clube.
+4. Se for CONFRONTO DE PISTA (briga de rua): Exalte o empenho da massa, a postura da linha de frente e o grito ensurdecedor nas ruas e arquibancadas.
+5. NUNCA coloque siglas genéricas entre parênteses como (TGF), (FJV), (TJS).
+6. Retorne APENAS um parágrafo corrido de texto puro, sem tópicos ou markdown.`;
 
         const geminiRes = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -126,6 +140,48 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
     const homeStr = isHome
       ? `defendendo o nosso alçapão no estádio ${stadium}`
       : `em caravana de invasão ao setor visitante do estádio ${stadium} em ${cityState}`;
+
+    // Non-Pista / Peaceful Arquibancada Matches (No Street Fight)
+    if (!isPistaFight) {
+      if (isVictoryPista || isVictoryBancada) {
+        const standOpenings = [
+          `[Ano ${season} - ${competition || "Campeonato"}] Dia de festa inesquecível para a ${torcida} ${homeStr} contra o ${rivalClub} (${rivalTorcida}).`,
+          `[Ano ${season} - ${competition || "Campeonato"}] A atmosfera do ${stadium} ficou contagiante com o show da ${torcida} ${homeStr} diante do ${rivalClub} (${rivalTorcida}).`,
+          `[Ano ${season} - ${competition || "Campeonato"}] Com casa cheia e pulsando forte, a ${torcida} viveu um espetáculo de arquibancada ${homeStr} enfrentando o ${rivalClub} (${rivalTorcida}).`,
+        ];
+        const standMiddles = [
+          `A tática de ${tacticTitle} funcionou perfeitamente, unindo a força da bateria, os bandeirões e a massa cantando em uníssono os 90 minutos.`,
+          `O espetáculo pirotécnico e a festa visual cobriram o setor, empurrando o time com energia contagiante do primeiro ao último segundo.`,
+          `A resposta nas arquibancadas refletiu-se no placar de ${score}, com a bateria ditando o ritmo e os associados fazendo um verdadeiro caldeirão.`,
+        ];
+        const standClosings = [
+          `${statusTitle || "Espetáculo de arquibancada"}. Moral da bancada em alta (+${moralChange}) e festa generalizada dos associados.`,
+          `Mais uma jornada vitoriosa celebrando a tradição, a organização e a paixão das nossas cores nas arquibancadas.`,
+          `Ao apito final, a comemoração estendeu-se pela sede social celebrando mais um capítulo inesquecível no nosso pavilhão.`,
+        ];
+        const op = standOpenings[Math.floor(Math.random() * standOpenings.length)];
+        const mi = standMiddles[Math.floor(Math.random() * standMiddles.length)];
+        const cl = standClosings[Math.floor(Math.random() * standClosings.length)];
+        return NextResponse.json({ chronicle: `${op} ${mi} ${cl}` });
+      } else {
+        const standDefeatOpenings = [
+          `[Ano ${season} - ${competition || "Campeonato"}] Jornada desafiadora nas bancadas para a ${torcida} ${homeStr} diante do ${rivalClub} (${rivalTorcida}).`,
+          `[Ano ${season} - ${competition || "Campeonato"}] O embate de cantos no estádio ${stadium} exigiu dedicação extra da ${torcida} no confronto contra o ${rivalClub} (${rivalTorcida}).`,
+        ];
+        const standDefeatMiddles = [
+          `Apesar do apoio incondicional da bateria e da presença dos associados, o volume de cantos esbarrou na resposta da torcida rival.`,
+          `A tentativa de embalar a festa com a tática de ${tacticTitle} esbarrou na pressão do jogo em campo e nas restrições de materiais.`,
+        ];
+        const standDefeatClosings = [
+          `${statusTitle || "Desempenho irregular"}. A diretoria reavalia os preparativos para recuperar a vibração nas próximas partidas.`,
+          `Apesar do revés, a bancada mantém-se firme no compromisso inabalável de apoiar o clube em qualquer situação.`,
+        ];
+        const op = standDefeatOpenings[Math.floor(Math.random() * standDefeatOpenings.length)];
+        const mi = standDefeatMiddles[Math.floor(Math.random() * standDefeatMiddles.length)];
+        const cl = standDefeatClosings[Math.floor(Math.random() * standDefeatClosings.length)];
+        return NextResponse.json({ chronicle: `${op} ${mi} ${cl}` });
+      }
+    }
 
     if (isVictoryPista) {
       const vicOpenings = [

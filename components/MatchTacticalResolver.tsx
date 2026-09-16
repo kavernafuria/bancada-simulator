@@ -936,7 +936,7 @@ export const MatchTacticalResolver: React.FC<{
     // REGRA 1: OPÇÃO DE EVASÃO / PRESERVAÇÃO (FUGA PACÍFICA DE CONFRONTO)
     // -------------------------------------------------------------
     if (context.tacticalChoice === 'evasion') {
-      const message = 'Evasão de pista bem-sucedida! Entrada antecipada e deslocamento seguro preservando 100% dos associados sem confrontos.';
+      const message = 'Evasão estratégica bem-sucedida! Entrada antecipada e deslocamento seguro preservando 100% dos associados sem confrontos.';
       setStatusMessage(message);
       onMatchComplete(message, 0.0);
       return;
@@ -953,7 +953,7 @@ export const MatchTacticalResolver: React.FC<{
         setActiveMiniGame('memory');
         return;
       } else {
-        const message = 'Recepção pacífica e confraternização de irmandade com a torcida aliada. Sem confrontos de pista!';
+        const message = 'Recepção pacífica e confraternização de irmandade com a torcida aliada. União total nas bancadas!';
         setStatusMessage(message);
         onMatchComplete(message, 0.0);
         return;
