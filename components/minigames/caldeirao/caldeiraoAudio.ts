@@ -3,6 +3,7 @@
 class CaldeiraoAudioSynthesizer {
   private ctx: AudioContext | null = null;
   public enabled: boolean = true;
+  private bgAudio: HTMLAudioElement | null = null;
   private ambientSource: AudioBufferSourceNode | null = null;
   private ambientGain: GainNode | null = null;
 
@@ -21,35 +22,63 @@ class CaldeiraoAudioSynthesizer {
   }
 
   /**
-   * Continuous Stadium Crowd Ambiance Sound
-   * Synthesizes low-pass filtered stadium crowd murmur & rumble.
+   * Continuous Stadium Crowd Ambiance Audio Track
+   * Plays the real YouTube stadium crowd ambiance audio track (/sounds/stadium_ambient.webm)
+   * with fallbacks to Web Audio API synthesis.
    */
   public startAmbientStadiumSound() {
     if (!this.enabled) return;
+
+    if (typeof window !== "undefined") {
+      try {
+        if (!this.bgAudio) {
+          this.bgAudio = new Audio("/sounds/stadium_ambient.webm");
+          this.bgAudio.loop = true;
+          this.bgAudio.volume = 0.5;
+        }
+        this.bgAudio.play().catch(() => {
+          this.startSynthAmbient();
+        });
+      } catch (e) {
+        this.startSynthAmbient();
+      }
+    }
+  }
+
+  public stopAmbientStadiumSound() {
+    if (this.bgAudio) {
+      try {
+        this.bgAudio.pause();
+        this.bgAudio.currentTime = 0;
+      } catch (e) {
+        // Ignore pause errors
+      }
+    }
+    this.stopSynthAmbient();
+  }
+
+  private startSynthAmbient() {
+    if (!this.enabled) return;
     this.initCtx();
-    if (!this.ctx) return;
-    if (this.ambientSource) return; // Already playing
+    if (!this.ctx || this.ambientSource) return;
 
     try {
-      // 3-second noise buffer looped continuously
       const bufferSize = this.ctx.sampleRate * 3;
       const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
       const data = buffer.getChannelData(0);
 
-      // Generate brownian/pink noise for stadium murmur
       let lastOut = 0.0;
       for (let i = 0; i < bufferSize; i++) {
         const white = Math.random() * 2 - 1;
         data[i] = (lastOut + 0.02 * white) / 1.02;
         lastOut = data[i];
-        data[i] *= 3.5; // Boost amplitude before filter
+        data[i] *= 3.5;
       }
 
       this.ambientSource = this.ctx.createBufferSource();
       this.ambientSource.buffer = buffer;
       this.ambientSource.loop = true;
 
-      // Lowpass filter for deep stadium crowd roar (350Hz cutoff)
       const filter = this.ctx.createBiquadFilter();
       filter.type = "lowpass";
       filter.frequency.setValueAtTime(350, this.ctx.currentTime);
@@ -64,11 +93,11 @@ class CaldeiraoAudioSynthesizer {
 
       this.ambientSource.start();
     } catch (e) {
-      console.warn("Ambient audio start error", e);
+      console.warn("Synth audio error", e);
     }
   }
 
-  public stopAmbientStadiumSound() {
+  private stopSynthAmbient() {
     try {
       if (this.ambientSource) {
         this.ambientSource.stop();
@@ -80,7 +109,7 @@ class CaldeiraoAudioSynthesizer {
         this.ambientGain = null;
       }
     } catch (e) {
-      console.warn("Ambient audio stop error", e);
+      // Ignore cleanup error
     }
   }
 
