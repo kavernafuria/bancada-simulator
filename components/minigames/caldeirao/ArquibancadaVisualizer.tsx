@@ -32,7 +32,7 @@ export const ArquibancadaVisualizer: React.FC<ArquibancadaVisualizerProps> = ({
   const secondaryCol = homeTeam.secondaryColor || "#f59e0b";
 
   return (
-    <div className="relative w-full h-72 rounded-2xl overflow-hidden border border-zinc-800 bg-[#070c18] shadow-2xl flex flex-col justify-between p-4 select-none">
+    <div className="relative w-full h-80 sm:h-84 rounded-2xl overflow-hidden border border-zinc-800 bg-[#070c18] shadow-2xl flex flex-col justify-between px-4 pt-4 pb-0 select-none">
       {/* Header Bar inside Visualizer */}
       <div className="relative z-30 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -57,12 +57,12 @@ export const ArquibancadaVisualizer: React.FC<ArquibancadaVisualizerProps> = ({
         <div
           className="absolute inset-0 pointer-events-none mix-blend-screen opacity-80 animate-pulse z-15"
           style={{
-            background: `radial-gradient(circle at 50% 100%, ${secondaryCol}, rgba(239, 68, 68, 0.7) 45%, transparent 85%)`,
+            background: `radial-gradient(circle at 50% 100%, ${secondaryCol}, rgba(239, 68, 68, 0.75) 45%, transparent 85%)`,
           }}
         />
       )}
 
-      {/* Faixas Verticais descendo pelo setor (Estilo Exato do AI Studio) */}
+      {/* Faixas Verticais descendo pelo setor */}
       {(hasVerticalStripes || isAbove85) && (
         <div className="absolute inset-0 flex justify-around pointer-events-none opacity-90 z-20">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -77,22 +77,28 @@ export const ArquibancadaVisualizer: React.FC<ArquibancadaVisualizerProps> = ({
         </div>
       )}
 
-      {/* Subida do Bandeirão Gigante de Pavilhão */}
-      {isBannerUp && (
-        <div
-          className="absolute inset-x-6 bottom-4 top-14 rounded-xl border-2 border-white/80 shadow-2xl z-25 overflow-hidden flex flex-col items-center justify-center animate-in zoom-in-95 duration-300"
-          style={{ backgroundColor: primaryCol }}
-        >
-          <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center border-4 border-amber-400/50 bg-black/40">
-            <span className="text-2xl sm:text-3xl font-black uppercase text-white tracking-widest drop-shadow-md">
-              {homeTeam.name}
-            </span>
-            <span className="text-[10px] font-bold text-amber-300 uppercase tracking-widest mt-1">
-              PAVILHÃO PRINCIPAL • APOIO ININTERRUPTO
-            </span>
-          </div>
+      {/* SUBIDA DO BANDEIRÃO GIGANTE DE PAVILHÃO (Cobrir todas as Pessoas) */}
+      <div
+        className={`absolute inset-x-2 top-10 bottom-0 z-40 rounded-t-2xl shadow-2xl border-t-4 border-amber-400 overflow-hidden flex flex-col items-center justify-center transition-all duration-700 ease-out transform ${
+          isBannerUp ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
+        }`}
+        style={{
+          background: `linear-gradient(135deg, ${primaryCol} 0%, ${secondaryCol} 50%, ${primaryCol} 100%)`,
+        }}
+      >
+        <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-black/40 backdrop-blur-xs border-2 border-amber-400/40 relative">
+          {/* Efeito de brilho do tecido */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/15 via-transparent to-black/70 pointer-events-none" />
+
+          <span className="text-3xl sm:text-4xl font-black uppercase text-white tracking-widest drop-shadow-[0_4px_10px_rgba(0,0,0,0.9)] z-10 animate-pulse">
+            {homeTeam.name}
+          </span>
+          <div className="h-1 w-36 bg-amber-400 my-2.5 rounded-full shadow-lg z-10" />
+          <span className="text-xs font-black text-amber-300 uppercase tracking-widest z-10 drop-shadow">
+            ★ PAVILHÃO PRINCIPAL • APOIO ININTERRUPTO ★
+          </span>
         </div>
-      )}
+      </div>
 
       {/* Mosaico Superior */}
       {hasMosaic && (
@@ -111,7 +117,7 @@ export const ArquibancadaVisualizer: React.FC<ArquibancadaVisualizerProps> = ({
 
       {/* Cântico Ecoando na Bancada */}
       {activeChantText && (
-        <div className="relative z-30 self-center max-w-md w-full px-4 py-2 bg-black/90 backdrop-blur-md rounded-2xl border border-amber-400 text-center shadow-xl animate-in fade-in duration-200">
+        <div className="relative z-30 self-center max-w-md w-full px-4 py-2 bg-black/90 backdrop-blur-md rounded-2xl border border-amber-400 text-center shadow-xl">
           <div className="text-[10px] font-black text-amber-400 uppercase tracking-widest">
             📢 CANTO OFICIAL DA TORCIDA
           </div>
@@ -121,13 +127,16 @@ export const ArquibancadaVisualizer: React.FC<ArquibancadaVisualizerProps> = ({
         </div>
       )}
 
-      {/* Torcida de Arquibancada (3 Tiers com Estilo AI Studio) */}
-      <div className="relative z-10 w-full h-40 mt-auto flex flex-col justify-end gap-1.5 pb-2 pointer-events-none">
-        {/* Tier 3 (Fundo / Mais Alto) */}
+      {/* TORCIDA DE ARQUIBANCADA (3 Tiers com Corpos & Cabeças 100% Visíveis) */}
+      <div className="relative z-10 w-full h-48 mt-auto flex flex-col justify-end gap-2 pb-1 pointer-events-none">
+        {/* Tier 3 (Fundo / Degrau Superior) */}
         <div className="flex justify-around items-end opacity-75">
           {Array.from({ length: 15 }).map((_, i) => (
             <div key={`row3-${i}`} className="flex flex-col items-center">
-              <div className="w-2.5 h-2.5 rounded-full bg-white shadow-sm" />
+              <div
+                className="w-2.5 h-2.5 rounded-full border border-white/40 shadow-sm"
+                style={{ backgroundColor: i % 2 === 0 ? secondaryCol : "#ffffff" }}
+              />
               <div
                 className="w-3.5 h-5 rounded-t-sm"
                 style={{ backgroundColor: i % 2 === 0 ? primaryCol : secondaryCol }}
@@ -136,44 +145,49 @@ export const ArquibancadaVisualizer: React.FC<ArquibancadaVisualizerProps> = ({
           ))}
         </div>
 
-        {/* Tier 2 (Meio) */}
+        {/* Tier 2 (Meio / Degrau Intermediário) */}
         <div className="flex justify-around items-end opacity-90">
           {Array.from({ length: 16 }).map((_, i) => (
             <div
               key={`row2-${i}`}
               className={`flex flex-col items-center transition-transform duration-200 ${
-                isDrumming ? "animate-bounce" : ""
+                isDrumming ? "-translate-y-2" : ""
               }`}
             >
               <div
-                className="w-3 h-3 rounded-full border border-white/40 shadow-sm"
+                className="w-3.5 h-3.5 rounded-full border border-white/50 shadow-sm"
                 style={{ backgroundColor: i % 3 === 0 ? "#ffffff" : secondaryCol }}
               />
               <div
-                className="w-4 h-6 rounded-t-sm"
+                className="w-4 h-6.5 rounded-t-sm shadow"
                 style={{ backgroundColor: i % 2 === 0 ? primaryCol : "#ffffff" }}
               />
             </div>
           ))}
         </div>
 
-        {/* Tier 1 (Frente / Principal) */}
+        {/* Tier 1 (Frente / Degrau Principal - Corpos Inteiros Visíveis com Braços) */}
         <div className="flex justify-around items-end">
           {Array.from({ length: 16 }).map((_, i) => (
             <div
               key={`row1-${i}`}
-              className={`flex flex-col items-center transition-transform duration-300 ${
-                isChanting ? "animate-bounce" : ""
+              className={`flex flex-col items-center transition-all duration-200 ${
+                isChanting ? "-translate-y-2.5" : ""
               }`}
             >
+              {/* Cabeça do Torcedor */}
               <div
-                className="w-3.5 h-3.5 rounded-full border border-white/60 shadow"
+                className="w-4 h-4 rounded-full border-2 border-white/70 shadow-md relative z-10"
                 style={{ backgroundColor: i % 2 === 0 ? secondaryCol : "#ffffff" }}
               />
+              {/* Corpo / Tronco do Torcedor */}
               <div
-                className="w-4.5 h-7 rounded-t-sm shadow-md"
+                className="w-5.5 h-9 rounded-t-md shadow-xl border-t border-white/40 relative flex items-center justify-center"
                 style={{ backgroundColor: i % 2 === 0 ? primaryCol : secondaryCol }}
-              />
+              >
+                {/* Detalhe da Camisa da Torcida */}
+                <div className="w-1.5 h-full bg-white/30" />
+              </div>
             </div>
           ))}
         </div>
