@@ -1121,6 +1121,14 @@ export default function App() {
         }
       }
 
+      // MÓDULO 3: Gatilho de Inquérito Emergencial do MP APENAS em FAIXA TOMADA
+      if (result.bannerCaptured) {
+        setActiveInquiryTrigger({
+          triggerReason: `Investigação ciber-digital emergencial instaurada pela DRADE após a captura de faixa/patrimônio da torcida ${activeMatchDerby.rivalTorcida || "rival"}.`,
+          initialConvictionBase: 30,
+        });
+      }
+
       advancePipeline();
     }, 2200);
   };
