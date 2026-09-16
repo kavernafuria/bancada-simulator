@@ -817,7 +817,9 @@ export default function App() {
     const tid = (tactic.id || "").toUpperCase();
 
     // Prioridade Total para a Tática Selecionada no Passo 4:
-    if (tid.includes("RUNNER_3D") || tid === "ATAQUE_FRONTAL_RUNNER_3D") {
+    if (tid.includes("CALDEIRAO") || tid.includes("CAMPINHO") || tid === "FESTA_CALDEIRAO_CAMPINHO") {
+      mappedChoice = 'caldeirao_pitch';
+    } else if (tid.includes("RUNNER_3D") || tid === "ATAQUE_FRONTAL_RUNNER_3D") {
       mappedChoice = 'runner_3d';
     } else if (tid.includes("MAO_LIMPA") || tid.includes("SOCO") || tid.includes("DISPOSICAO")) {
       mappedChoice = 'punch_combat';
@@ -896,6 +898,13 @@ export default function App() {
       setStateTrackers((st) => ({
         ...st,
         moral: Math.min(100, st.moral + 15),
+      }));
+    } else if (activeMatchMiniGameContext?.tacticalChoice === 'caldeirao_pitch') {
+      setBankBalance((prev) => prev + 2000);
+      setStateTrackers((st) => ({
+        ...st,
+        moral: Math.min(100, st.moral + 15),
+        respeito_nacional: Math.min(100, st.respeito_nacional + 8),
       }));
     }
 

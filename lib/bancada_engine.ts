@@ -2010,6 +2010,25 @@ export function getTacticalBattleChoices(
   if (stance === "ESCOLTA_TOTAL" || stance === "DIPLOMATICA") {
     return [
       {
+        id: "FESTA_CALDEIRAO_CAMPINHO",
+        title: "🏟️ [MINIGAME CALDEIRÃO] Comando da Bancada & Pressão no Campinho (>85%)",
+        description: "Assuma o comando da arquibancada nos 90 min! Mantenha o caldeirão fervendo acima dos 85% para incendiar o campinho tático e bombardear o gol rival em tempo real.",
+        pistaMod: -2,
+        moralMod: 8,
+        mpPenalty: -10,
+        costRisk: 2000,
+        injuryRisk: 0,
+        isMosaicTactic: true,
+        tacticalLog: "Comandou o caldeirão de arquibancada sustentando a pressão no auge e impulsionando o time no campinho tático.",
+        formattedDeltas: [
+          { label: "Bônus no Placar (PEC)", value: "Até +25%", isPositive: true },
+          { label: "Moral da Torcida", value: "+8", isPositive: true },
+          { label: "Pressão de Bancada", value: "+8", isPositive: true },
+          { label: "Risco MP", value: "-10% (Paz)", isPositive: true },
+          { label: "Arsenal & Adereços", value: "-R$ 2.000", isPositive: false },
+        ],
+      },
+      {
         id: isHome ? "EVASAO_ENTRADA_ANTECIPADA_CASA" : "EVASAO_CORTEJO_BLINDADO_FORA",
         title: isHome ? "🛡️ [OPÇÃO FUGA / PRESERVAÇÃO] Entrada Antecipada 2h Antes pelo Portão Principal" : "🛡️ [OPÇÃO FUGA / PRESERVAÇÃO] Cortejo de Ônibus Blindado com Escolta de Rodovia",
         description: isHome

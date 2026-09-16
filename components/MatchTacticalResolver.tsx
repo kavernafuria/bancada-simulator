@@ -3,11 +3,12 @@ import { Runner3DGame } from './minigames/Runner3DGame';
 import { RojonShooterCanvas } from './minigames/RojonShooterCanvas';
 import { RuadaFlagWavingModal } from './flag_waving/RuadaFlagWavingModal';
 import { RhythmBateriaModal } from './rhythm_bateria/RhythmBateriaModal';
+import { ArquibancadaMinigame } from './minigames/caldeirao/ArquibancadaMinigame';
 
 // ==========================================
 // 1. TIPOS & INTERFACES
 // ==========================================
-export type GameType = 'whack' | 'rojon' | 'rhythm' | 'dodge' | 'punch' | 'memory' | 'runner_3d' | 'flag_waving' | 'rhythm_bateria';
+export type GameType = 'whack' | 'rojon' | 'rhythm' | 'dodge' | 'punch' | 'memory' | 'runner_3d' | 'flag_waving' | 'rhythm_bateria' | 'caldeirao_pitch';
 
 export interface MiniGameResult {
   gameType: GameType;
@@ -31,7 +32,8 @@ export interface MatchContext {
     | 'evasion'
     | 'color_memory'
     | 'flag_waving'
-    | 'rhythm_bateria';
+    | 'rhythm_bateria'
+    | 'caldeirao_pitch';
   homeContingent: number;
   awayContingent: number;
   opponentTier: 'S' | 'A' | 'B';
@@ -978,6 +980,7 @@ export const MatchTacticalResolver: React.FC<{
     }
 
     // Seleção de mini-game conforme tática padrão
+    if (context.tacticalChoice === 'caldeirao_pitch') setActiveMiniGame('caldeirao_pitch');
     if (context.tacticalChoice === 'runner_3d') setActiveMiniGame('runner_3d');
     if (context.tacticalChoice === 'front_charge') setActiveMiniGame('whack');
     if (context.tacticalChoice === 'punch_combat') setActiveMiniGame('punch');
@@ -1000,6 +1003,22 @@ export const MatchTacticalResolver: React.FC<{
         <div className="bg-zinc-900 border border-zinc-700 p-4 rounded-xl text-center text-sm text-zinc-300 max-w-sm mb-4">
           {statusMessage}
         </div>
+      )}
+
+      {activeMiniGame === 'caldeirao_pitch' && (
+        <ArquibancadaMinigame
+          homeTeam={{
+            name: context.playerTorcidaName || "Torcida Organizada",
+            primaryColor: "#000000",
+            secondaryColor: "#f59e0b",
+          }}
+          awayTeam={{
+            name: context.rivalTorcidaName || "Torcida Rival",
+            primaryColor: "#dc2626",
+            secondaryColor: "#18181b",
+          }}
+          onFinish={handleMiniGameFinish}
+        />
       )}
 
       {activeMiniGame === 'runner_3d' && (
