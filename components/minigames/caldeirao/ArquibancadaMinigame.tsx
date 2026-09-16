@@ -353,7 +353,7 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
             <div className="text-[10px] font-black font-mono text-amber-400 bg-amber-950/90 border border-amber-500/80 px-2 py-0.5 rounded shadow-md whitespace-nowrap">
               ZONA CALDEIRÃO (&gt;85%)
             </div>
-            <div className="w-1.5 h-2.5 bg-amber-400 clip-triangle" />
+            <div className="w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[6px] border-t-amber-400" />
           </div>
 
           {/* Bar Track */}
@@ -426,8 +426,8 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
                   cooldowns.grito && cooldowns.grito > 0
                     ? "bg-zinc-900/50 border-zinc-800 opacity-60 cursor-not-allowed"
                     : energy < 14
-                    ? "bg-zinc-900/40 border-zinc-850 opacity-40 cursor-not-allowed"
-                    : "bg-zinc-900 border-zinc-800 hover:border-amber-400/60 hover:bg-zinc-850 active:scale-95"
+                    ? "bg-zinc-900/40 border-zinc-800/60 opacity-40 cursor-not-allowed"
+                    : "bg-zinc-900 border-zinc-800 hover:border-amber-400/60 hover:bg-zinc-800 active:scale-95"
                 }`}
               >
                 {cooldowns.grito && cooldowns.grito > 0 && (
@@ -452,8 +452,8 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
                   cooldowns.bandeirao && cooldowns.bandeirao > 0
                     ? "bg-zinc-900/50 border-zinc-800 opacity-60 cursor-not-allowed"
                     : energy < 28
-                    ? "bg-zinc-900/40 border-zinc-850 opacity-40 cursor-not-allowed"
-                    : "bg-zinc-900 border-zinc-800 hover:border-amber-400/60 hover:bg-zinc-850 active:scale-95"
+                    ? "bg-zinc-900/40 border-zinc-800/60 opacity-40 cursor-not-allowed"
+                    : "bg-zinc-900 border-zinc-800 hover:border-amber-400/60 hover:bg-zinc-800 active:scale-95"
                 }`}
               >
                 {cooldowns.bandeirao && cooldowns.bandeirao > 0 && (
@@ -480,8 +480,8 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
                   cooldowns.faixas && cooldowns.faixas > 0
                     ? "bg-zinc-900/50 border-zinc-800 opacity-60 cursor-not-allowed"
                     : energy < 16
-                    ? "bg-zinc-900/40 border-zinc-850 opacity-40 cursor-not-allowed"
-                    : "bg-zinc-900 border-zinc-800 hover:border-amber-400/60 hover:bg-zinc-850 active:scale-95"
+                    ? "bg-zinc-900/40 border-zinc-800/60 opacity-40 cursor-not-allowed"
+                    : "bg-zinc-900 border-zinc-800 hover:border-amber-400/60 hover:bg-zinc-800 active:scale-95"
                 }`}
               >
                 {cooldowns.faixas && cooldowns.faixas > 0 && (
@@ -508,8 +508,8 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
                   cooldowns.sinalizadores && cooldowns.sinalizadores > 0
                     ? "bg-zinc-900/50 border-zinc-800 opacity-60 cursor-not-allowed"
                     : energy < 24
-                    ? "bg-zinc-900/40 border-zinc-850 opacity-40 cursor-not-allowed"
-                    : "bg-zinc-900 border-zinc-800 hover:border-amber-400/60 hover:bg-zinc-850 active:scale-95"
+                    ? "bg-zinc-900/40 border-zinc-800/60 opacity-40 cursor-not-allowed"
+                    : "bg-zinc-900 border-zinc-800 hover:border-amber-400/60 hover:bg-zinc-800 active:scale-95"
                 }`}
               >
                 {cooldowns.sinalizadores && cooldowns.sinalizadores > 0 && (
@@ -536,8 +536,8 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
                   cooldowns.bateria && cooldowns.bateria > 0
                     ? "bg-zinc-900/50 border-zinc-800 opacity-60 cursor-not-allowed"
                     : energy < 10
-                    ? "bg-zinc-900/40 border-zinc-850 opacity-40 cursor-not-allowed"
-                    : "bg-zinc-900 border-zinc-800 hover:border-amber-400/60 hover:bg-zinc-850 active:scale-95"
+                    ? "bg-zinc-900/40 border-zinc-800/60 opacity-40 cursor-not-allowed"
+                    : "bg-zinc-900 border-zinc-800 hover:border-amber-400/60 hover:bg-zinc-800 active:scale-95"
                 }`}
               >
                 {cooldowns.bateria && cooldowns.bateria > 0 && (
@@ -563,7 +563,7 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
                 className={`relative flex flex-col items-center justify-center p-2.5 rounded-xl border transition-all ${
                   cooldowns.descanso && cooldowns.descanso > 0
                     ? "bg-zinc-900/50 border-zinc-800 opacity-60 cursor-not-allowed"
-                    : "bg-zinc-900 border-zinc-800 hover:border-emerald-400/60 hover:bg-zinc-850 active:scale-95"
+                    : "bg-zinc-900 border-zinc-800 hover:border-emerald-400/60 hover:bg-zinc-800 active:scale-95"
                 }`}
               >
                 {cooldowns.descanso && cooldowns.descanso > 0 && (
