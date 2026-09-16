@@ -122,10 +122,10 @@ export const MockAdModal: React.FC<MockAdModalProps> = ({ onComplete, onCancel }
           </span>
         </div>
 
-        {/* Clickable Video Container */}
+        {/* Clickable Video Container (TikTok / Reels Vertical Portrait 9:16) */}
         <div
           onClick={handleAdClick}
-          className="group relative bg-black rounded-2xl border-2 border-zinc-800 overflow-hidden cursor-pointer shadow-inner transition-all hover:border-amber-500/80 aspect-video flex items-center justify-center"
+          className="group relative bg-black rounded-2xl border-2 border-amber-500/50 overflow-hidden cursor-pointer shadow-2xl transition-all hover:border-amber-400 aspect-[9/16] w-full max-w-[250px] mx-auto max-h-[48vh] flex items-center justify-center"
           title="Clique em qualquer lugar do anúncio para abrir na Shopee"
         >
           <video

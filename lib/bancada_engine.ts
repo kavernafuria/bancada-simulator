@@ -2600,24 +2600,6 @@ export function executeCompleteMatch(
     isVictoryPista = false;
   }
 
-  // ------------------------------------------------------------------------
-  // 2. REGRAS RESTRITIVAS PARA CAPTURA E PERDA DE FAIXAS
-  // ------------------------------------------------------------------------
-  // 1) Vitória Esmagadora (PEC Jogador >= PEC Rival * 1.8)
-  // 2) Emboscada com batedores OU Desvantagem Numérica Crítica do Rival (playerMembers >= rivalMembers * 1.8)
-  // 3) Torcidas Tier C ou Pista < 50 NUNCA podem tomar faixa de Tier S/A
-  // 4) Chance base máxima: 5% a 8% (Math.random() < 0.08)
-  const isOverwhelmingVictory = playerForce >= rivalForce * 1.8;
-  const isRivalDisadvantaged = tactic.id === "ATAQUE_SURPRESA_EMBOSCADA" || playerMembers >= rivalMembers * 1.8;
-  const isTierEligible = !( (playerTier === "C" || playerTier === "C+" || stats.poder_pista < 50) && (rivalTier === "S" || rivalTier === "S-" || rivalTier === "A+" || rivalTier === "A") );
-
-  // REGRA ABSOLUTA — REWARDED AD: Na segunda tentativa, NUNCA pode conquistar a faixa do rival
-  const bannerCaptured = !isRetryWithAd && isVictoryPista && isOverwhelmingVictory && isRivalDisadvantaged && isTierEligible && Math.random() < 0.08;
-
-  // Condição para PERDER FAIXA:
-  const isSeverePistaLoss = !isVictoryPista && (rivalForce >= playerForce * 1.8) && !derby.isHome && (coefTierRival > coefTierPlayer);
-  const bannerLost = isSeverePistaLoss && Math.random() < 0.12;
-
   // Football match result calculation based on Ultras Pressão de Bancada + Moral + Police alignment + Tactic
   const scorePower =
     stats.pressao_bancada * 0.45 +
@@ -2646,10 +2628,6 @@ export function executeCompleteMatch(
     ? Math.min(15, Math.max(3, 7 + tactic.moralMod + (police ? police.moralMod : 0)))
     : Math.min(-2, -8 + tactic.moralMod + (police ? police.moralMod : 0));
 
-  if (bannerCaptured) {
-    moralChange += 10;
-  }
-
   const isPistaFight = !derby.isAllyGame &&
     !isFestaTactic &&
     !isEvasionTactic &&
@@ -2660,7 +2638,38 @@ export function executeCompleteMatch(
     !tid.includes("SAMBA") &&
     !tid.includes("MOSAICO") &&
     !tid.includes("CHURRASCO") &&
-    !tid.includes("ANTECIPADA");
+    !tid.includes("ANTECIPADA") &&
+    !tid.includes("PACTO") &&
+    !tid.includes("ACORDO") &&
+    !tid.includes("ESCOLTA") &&
+    (
+      tactic.pistaMod >= 10 ||
+      (police && police.stance === "COMBATIVA") ||
+      tid.includes("COMBATE") ||
+      tid.includes("EMBOSCADA") ||
+      tid.includes("ROJOES") ||
+      tid.includes("FRONTAL") ||
+      tid.includes("RUNNER_3D") ||
+      tid.includes("TROCA_SOCOS") ||
+      tid.includes("PISTA")
+    );
+
+  // ------------------------------------------------------------------------
+  // 2. REGRAS RESTRITIVAS PARA CAPTURA E PERDA DE FAIXAS (APENAS EM JOGOS DE PISTA)
+  // ------------------------------------------------------------------------
+  const isOverwhelmingVictory = playerForce >= rivalForce * 1.8;
+  const isRivalDisadvantaged = tactic.id === "ATAQUE_SURPRESA_EMBOSCADA" || playerMembers >= rivalMembers * 1.8;
+  const isTierEligible = !( (playerTier === "C" || playerTier === "C+" || stats.poder_pista < 50) && (rivalTier === "S" || rivalTier === "S-" || rivalTier === "A+" || rivalTier === "A") );
+
+  // REGRA ABSOLUTA — REWARDED AD: Na segunda tentativa, NUNCA pode conquistar a faixa do rival
+  const bannerCaptured = !isRetryWithAd && isPistaFight && isVictoryPista && isOverwhelmingVictory && isRivalDisadvantaged && isTierEligible && Math.random() < 0.08;
+  if (bannerCaptured) {
+    moralChange += 10;
+  }
+
+  // Condição para PERDER FAIXA:
+  const isSeverePistaLoss = !isVictoryPista && (rivalForce >= playerForce * 1.8) && !derby.isHome && (coefTierRival > coefTierPlayer);
+  const bannerLost = isPistaFight && isSeverePistaLoss && Math.random() < 0.12;
 
   let statusTitle = isPistaFight
     ? (isVictoryPista
