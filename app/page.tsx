@@ -3747,28 +3747,28 @@ export default function App() {
             ) : activeMatchResult.isVictoryPista || activeMatchResult.isVictoryBancada ? (
               <div className="relative -mx-5 -mt-5 mb-2 h-44 overflow-hidden border-b border-amber-500/30">
                 <img
-                  src="/images/vitoria01.jpeg"
-                  alt="Festa da Vitória e Sinalizadores"
+                  src="/images/vitoriajogo.jpeg"
+                  alt="Festa da Vitória no Jogo"
                   className="w-full h-full object-cover opacity-85"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/40 to-transparent" />
                 <div className="absolute bottom-2 left-4">
                   <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800">
-                    🔥 FESTA & VITÓRIA NA ARQUIBANCADA
+                    🔥 FESTA & VITÓRIA NO JOGO
                   </span>
                 </div>
               </div>
             ) : (
               <div className="relative -mx-5 -mt-5 mb-2 h-44 overflow-hidden border-b border-red-600/40">
                 <img
-                  src="/images/derrota.jpeg"
-                  alt="Desempenho Irregular na Arquibancada"
+                  src="/images/derrotajogo.jpeg"
+                  alt="Derrota no Jogo"
                   className="w-full h-full object-cover opacity-90"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/40 to-transparent" />
                 <div className="absolute bottom-2 left-4">
                   <span className="text-[9px] font-black text-red-400 uppercase tracking-widest bg-red-950/90 px-2 py-0.5 rounded border border-red-800">
-                    ⚠️ DESEMPENHO IRREGULAR NA ARQUIBANCADA
+                    ⚠️ DERROTA NO JOGO
                   </span>
                 </div>
               </div>
