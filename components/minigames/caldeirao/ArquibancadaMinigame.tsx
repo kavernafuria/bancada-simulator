@@ -296,35 +296,31 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
   const currentDecayText = pressure >= 85 ? "-5.0%/s" : "-2.0%/s";
 
   return (
-    <div className="w-full max-w-6xl mx-auto flex flex-col gap-2 sm:gap-4 bg-[#090d16] p-2 sm:p-5 rounded-xl sm:rounded-3xl border border-zinc-800 text-white shadow-2xl font-sans select-none overflow-x-hidden">
-      {/* 1. TOP HEADER BAR (Ultra-Compact on Mobile) */}
-      <div className="flex flex-row items-center justify-between gap-1.5 sm:gap-3 p-2 sm:p-3.5 rounded-lg sm:rounded-2xl bg-zinc-950/80 border border-zinc-800/80 shadow-lg w-full">
+    <div className="w-full max-w-6xl mx-auto flex flex-col gap-1.5 sm:gap-4 bg-[#090d16] p-1.5 sm:p-5 rounded-xl sm:rounded-3xl border border-zinc-800 text-white shadow-2xl font-sans select-none overflow-x-hidden">
+      {/* 1. TOP HEADER BAR (Ultra-Compact Mobile Layout) */}
+      <div className="flex flex-row items-center justify-between gap-1 sm:gap-3 p-1.5 sm:p-3.5 rounded-lg sm:rounded-2xl bg-zinc-950/80 border border-zinc-800/80 shadow-lg w-full">
         {/* Left Team Badge Info */}
-        <div className="flex items-center gap-1.5 sm:gap-3 flex-wrap">
+        <div className="flex items-center gap-1 sm:gap-3 shrink-0">
           <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-sky-500 shadow-sm shrink-0" />
-          <span className="text-[11px] sm:text-sm font-black text-white tracking-tight sm:tracking-wide truncate max-w-[90px] sm:max-w-none">
+          <span className="text-[10px] sm:text-sm font-black text-white tracking-tight sm:tracking-wide truncate max-w-[70px] sm:max-w-none">
             {homeTeam.name}
           </span>
-          <span className="text-[9px] sm:text-xs font-bold text-zinc-500 lowercase">vs</span>
-          <span className="text-[11px] sm:text-sm font-black text-white tracking-tight sm:tracking-wide truncate max-w-[90px] sm:max-w-none">
+          <span className="text-[8px] sm:text-xs font-bold text-zinc-500 lowercase">vs</span>
+          <span className="text-[10px] sm:text-sm font-black text-white tracking-tight sm:tracking-wide truncate max-w-[70px] sm:max-w-none">
             {awayTeam.name}
           </span>
           <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-red-600 shadow-sm shrink-0" />
-
-          <span className="text-[9px] sm:text-[11px] font-mono text-zinc-300 bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 sm:py-1 rounded-md hidden md:inline">
-            Estádio Monumental
-          </span>
         </div>
 
         {/* Right Status Controls (Time, Score, Mute) */}
-        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-          <div className="flex items-center gap-1 sm:gap-2 bg-zinc-900 px-2 sm:px-3.5 py-1 sm:py-1.5 rounded-lg sm:rounded-xl border border-zinc-800 font-mono text-[10px] sm:text-xs font-bold text-white">
-            <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-pink-500 animate-pulse shrink-0" />
+        <div className="flex items-center gap-1 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-0.5 sm:gap-2 bg-zinc-900 px-1.5 sm:px-3.5 py-0.5 sm:py-1.5 rounded sm:rounded-xl border border-zinc-800 font-mono text-[9px] sm:text-xs font-bold text-white">
+            <Clock className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-pink-500 animate-pulse shrink-0" />
             <span>{matchMinute}&apos;</span>
           </div>
 
-          <div className="flex items-center gap-1 sm:gap-2 bg-zinc-900 px-2 sm:px-3.5 py-1 sm:py-1.5 rounded-lg sm:rounded-xl border border-zinc-800 font-mono text-[10px] sm:text-xs font-bold text-white">
-            <Trophy className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400 shrink-0" />
+          <div className="flex items-center gap-0.5 sm:gap-2 bg-zinc-900 px-1.5 sm:px-3.5 py-0.5 sm:py-1.5 rounded sm:rounded-xl border border-zinc-800 font-mono text-[9px] sm:text-xs font-bold text-white">
+            <Trophy className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-emerald-400 shrink-0" />
             <span>
               <span className="hidden sm:inline">Nota: </span>
               <span className="text-cyan-400">{standScore} pts</span>
@@ -333,7 +329,7 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
 
           <button
             onClick={toggleSound}
-            className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl border transition-all flex items-center gap-1 ${
+            className={`p-1 sm:p-2 rounded sm:rounded-xl border transition-all flex items-center gap-1 ${
               soundEnabled
                 ? "bg-amber-500/20 border-amber-500/60 text-amber-400"
                 : "bg-zinc-900 border-zinc-800 text-zinc-600"
@@ -342,30 +338,30 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
           >
             {soundEnabled ? (
               <>
-                <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 animate-pulse" />
+                <Volume2 className="w-3 h-3 sm:w-4 sm:h-4 text-amber-400 animate-pulse" />
                 <span className="text-[9px] sm:text-[10px] font-mono font-bold uppercase text-amber-300 hidden md:inline">
                   SOM ON
                 </span>
               </>
             ) : (
-              <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-600" />
+              <VolumeX className="w-3 h-3 sm:w-4 sm:h-4 text-zinc-600" />
             )}
           </button>
         </div>
       </div>
 
       {/* 2. BARRA DE PRESSÃO & ENTUSIASMO DA BANCADA (Compact Mobile Layout) */}
-      <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-zinc-950/90 border border-zinc-800/90 shadow-xl flex flex-col gap-2">
+      <div className="p-1.5 sm:p-4 rounded-lg sm:rounded-2xl bg-zinc-950/90 border border-zinc-800/90 shadow-xl flex flex-col gap-1 sm:gap-2">
         {/* Title Row */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 fill-amber-400/20 shrink-0" />
-            <h3 className="text-xs sm:text-sm font-black uppercase text-white tracking-wide">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <Flame className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-amber-400 fill-amber-400/20 shrink-0" />
+            <h3 className="text-[10px] sm:text-sm font-black uppercase text-white tracking-wide">
               PRESSÃO DA BANCADA
             </h3>
           </div>
 
-          <span className="text-lg sm:text-2xl font-black font-mono text-white tracking-wider">
+          <span className="text-base sm:text-2xl font-black font-mono text-white tracking-wider">
             {pressure}%
           </span>
         </div>
@@ -376,36 +372,36 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
         </p>
 
         {/* Progress Bar Container with 85% Pin Marker */}
-        <div className="relative w-full mt-0.5 sm:mt-1">
+        <div className="relative w-full mt-0.5">
           {/* 85% Zone Pin Pointer */}
           <div
-            className="absolute -top-5 sm:-top-6 -translate-x-1/2 flex flex-col items-center z-20 pointer-events-none"
+            className="absolute -top-4 sm:-top-6 -translate-x-1/2 flex flex-col items-center z-20 pointer-events-none"
             style={{ left: "85%" }}
           >
-            <div className="text-[8px] sm:text-[10px] font-black font-mono text-amber-400 bg-amber-950/90 border border-amber-500/80 px-1.5 sm:px-2 py-0.5 rounded shadow-md whitespace-nowrap">
+            <div className="text-[7px] sm:text-[10px] font-black font-mono text-amber-400 bg-amber-950/90 border border-amber-500/80 px-1 sm:px-2 py-0.2 sm:py-0.5 rounded shadow-md whitespace-nowrap">
               CALDEIRÃO (&gt;85%)
             </div>
-            <div className="w-0 h-0 border-l-[4px] sm:border-l-[5px] border-l-transparent border-r-[4px] sm:border-r-[5px] border-r-transparent border-t-[5px] sm:border-t-[6px] border-t-amber-400" />
+            <div className="w-0 h-0 border-l-[3px] sm:border-l-[5px] border-l-transparent border-r-[3px] sm:border-r-[5px] border-r-transparent border-t-[4px] sm:border-t-[6px] border-t-amber-400" />
           </div>
 
           {/* Bar Track */}
-          <div className="w-full h-3 sm:h-4 bg-zinc-900 rounded-full overflow-hidden border border-zinc-800 relative shadow-inner">
+          <div className="w-full h-2.5 sm:h-4 bg-zinc-900 rounded-full overflow-hidden border border-zinc-800 relative shadow-inner">
             <div
               className="h-full rounded-full transition-all duration-300 bg-gradient-to-r from-teal-500 via-emerald-400 to-amber-400"
               style={{ width: `${pressure}%` }}
             />
             {/* Vertical Marker Line inside Bar */}
             <div
-              className="absolute top-0 bottom-0 w-1 bg-amber-400 shadow-md z-10 -translate-x-1/2"
+              className="absolute top-0 bottom-0 w-0.5 sm:w-1 bg-amber-400 shadow-md z-10 -translate-x-1/2"
               style={{ left: "85%" }}
             />
           </div>
         </div>
 
         {/* Progress Bar Footer Indicators */}
-        <div className="flex items-center justify-between text-[10px] sm:text-xs font-mono text-zinc-400 mt-0.5">
-          <div className="flex items-center gap-1 text-amber-400/90 font-medium">
-            <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+        <div className="flex items-center justify-between text-[9px] sm:text-xs font-mono text-zinc-400 mt-0.5">
+          <div className="flex items-center gap-0.5 text-amber-400/90 font-medium">
+            <Zap className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
             <span>Queda: {currentDecayText}</span>
           </div>
 
@@ -416,232 +412,228 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
         </div>
       </div>
 
-      {/* 3. MIDDLE GRID DUPLO: Arquibancada + Campinho Tático */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4">
-        {/* COLUNA ESQUERDA: Visualizador da Arquibancada & Comandos da Torcida */}
-        <div className="flex flex-col gap-2 sm:gap-4">
-          <ArquibancadaVisualizer
-            homeTeam={homeTeam}
-            isBannerUp={isBannerUp}
-            hasVerticalStripes={hasVerticalStripes}
-            hasFlares={hasFlares}
-            isChanting={isChanting}
-            isDrumming={isDrumming}
-            hasMosaic={hasMosaic}
-            activeChantText={activeChantText}
-            decibels={decibels}
-            isAbove85={isAbove85}
-          />
+      {/* 3. MIDDLE GRID DUPLO: Lado a Lado no Celular (Visualizador Esquerda + Campinho Direita) */}
+      <div className="grid grid-cols-2 gap-1.5 sm:gap-4">
+        {/* Lado Esquerdo: Visualizador da Arquibancada */}
+        <ArquibancadaVisualizer
+          homeTeam={homeTeam}
+          isBannerUp={isBannerUp}
+          hasVerticalStripes={hasVerticalStripes}
+          hasFlares={hasFlares}
+          isChanting={isChanting}
+          isDrumming={isDrumming}
+          hasMosaic={hasMosaic}
+          activeChantText={activeChantText}
+          decibels={decibels}
+          isAbove85={isAbove85}
+        />
 
-          {/* COMANDOS DA TORCIDA (6 Action Cards Compactos no Celular) */}
-          <div className="p-2 sm:p-4 rounded-xl sm:rounded-2xl bg-zinc-950/90 border border-zinc-800/90 shadow-xl flex flex-col gap-2">
-            <div className="flex items-center justify-between px-1">
-              <div className="flex items-center gap-1.5">
-                <Zap className="w-3.5 h-3.5 text-amber-400" />
-                <h4 className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-white">
-                  COMANDOS DA TORCIDA
-                </h4>
-              </div>
+        {/* Lado Direito: Simulador de Ataque (Campinho Tático) */}
+        <TacticalPitch
+          homeTeam={homeTeam}
+          awayTeam={awayTeam}
+          pressure={pressure}
+          isAbove85={isAbove85}
+          timeInZone85={timeInZone85}
+          recentAttackEvent={recentAttackEvent}
+          chancesCreated={chancesCreated}
+        />
+      </div>
 
-              <div className="text-[10px] sm:text-xs font-mono font-bold text-zinc-300">
-                Fôlego: <span className="text-amber-400">{energy}%</span>
-              </div>
-            </div>
+      {/* 4. COMANDOS DA TORCIDA (6 Action Cards em 1 Linha na Base) */}
+      <div className="p-1.5 sm:p-4 rounded-lg sm:rounded-2xl bg-zinc-950/90 border border-zinc-800/90 shadow-xl flex flex-col gap-1 sm:gap-2">
+        <div className="flex items-center justify-between px-0.5 sm:px-1">
+          <div className="flex items-center gap-1 sm:gap-1.5">
+            <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400" />
+            <h4 className="text-[9px] sm:text-xs font-black uppercase tracking-wider text-white">
+              COMANDOS DA TORCIDA
+            </h4>
+          </div>
 
-            {/* 6 Action Cards (Ultra-Fit em 6 Colunas) */}
-            <div className="grid grid-cols-6 gap-1 sm:gap-2">
-              {/* 1. GRITO */}
-              <button
-                onClick={() => handleAction("grito")}
-                disabled={energy < 14 || (cooldowns.grito ? cooldowns.grito > 0 : false)}
-                className={`relative flex flex-col items-center justify-center p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl border transition-all ${
-                  cooldowns.grito && cooldowns.grito > 0
-                    ? "bg-zinc-900/50 border-zinc-800 opacity-60 cursor-not-allowed"
-                    : energy < 14
-                    ? "bg-zinc-900/40 border-zinc-800/60 opacity-40 cursor-not-allowed"
-                    : "bg-zinc-900 border-zinc-800 hover:border-amber-400/60 hover:bg-zinc-800 active:scale-95"
-                }`}
-              >
-                {cooldowns.grito && cooldowns.grito > 0 && (
-                  <span className="absolute top-0.5 right-0.5 px-0.5 sm:px-1 py-0.2 sm:py-0.5 rounded bg-pink-950/90 border border-pink-600 text-pink-300 text-[7px] sm:text-[9px] font-bold font-mono">
-                    {cooldowns.grito}s
-                  </span>
-                )}
-                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-pink-950/40 border border-pink-500/30 flex items-center justify-center text-pink-400 text-xs sm:text-sm mb-0.5 sm:mb-1">
-                  📢
-                </div>
-                <span className="text-[8px] sm:text-[10px] font-black uppercase text-zinc-200">GRITO</span>
-                <span className="text-[7px] sm:text-[9px] font-mono font-bold text-amber-400 mt-0.5">
-                  -14 EN
-                </span>
-              </button>
-
-              {/* 2. BANDEIRÃO */}
-              <button
-                onClick={() => handleAction("bandeirao")}
-                disabled={energy < 28 || (cooldowns.bandeirao ? cooldowns.bandeirao > 0 : false)}
-                className={`relative flex flex-col items-center justify-center p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl border transition-all ${
-                  cooldowns.bandeirao && cooldowns.bandeirao > 0
-                    ? "bg-zinc-900/50 border-zinc-800 opacity-60 cursor-not-allowed"
-                    : energy < 28
-                    ? "bg-zinc-900/40 border-zinc-800/60 opacity-40 cursor-not-allowed"
-                    : "bg-zinc-900 border-zinc-800 hover:border-amber-400/60 hover:bg-zinc-800 active:scale-95"
-                }`}
-              >
-                {cooldowns.bandeirao && cooldowns.bandeirao > 0 && (
-                  <span className="absolute top-0.5 right-0.5 px-0.5 sm:px-1 py-0.2 sm:py-0.5 rounded bg-pink-950/90 border border-pink-600 text-pink-300 text-[7px] sm:text-[9px] font-bold font-mono">
-                    {cooldowns.bandeirao}s
-                  </span>
-                )}
-                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-red-950/40 border border-red-500/30 flex items-center justify-center text-red-400 text-xs sm:text-sm mb-0.5 sm:mb-1">
-                  🚩
-                </div>
-                <span className="text-[8px] sm:text-[10px] font-black uppercase text-zinc-200 truncate max-w-full">
-                  BANDEIRÃO
-                </span>
-                <span className="text-[7px] sm:text-[9px] font-mono font-bold text-amber-400 mt-0.5">
-                  -28 EN
-                </span>
-              </button>
-
-              {/* 3. FAIXAS */}
-              <button
-                onClick={() => handleAction("faixas")}
-                disabled={energy < 16 || (cooldowns.faixas ? cooldowns.faixas > 0 : false)}
-                className={`relative flex flex-col items-center justify-center p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl border transition-all ${
-                  cooldowns.faixas && cooldowns.faixas > 0
-                    ? "bg-zinc-900/50 border-zinc-800 opacity-60 cursor-not-allowed"
-                    : energy < 16
-                    ? "bg-zinc-900/40 border-zinc-800/60 opacity-40 cursor-not-allowed"
-                    : "bg-zinc-900 border-zinc-800 hover:border-amber-400/60 hover:bg-zinc-800 active:scale-95"
-                }`}
-              >
-                {cooldowns.faixas && cooldowns.faixas > 0 && (
-                  <span className="absolute top-0.5 right-0.5 px-0.5 sm:px-1 py-0.2 sm:py-0.5 rounded bg-pink-950/90 border border-pink-600 text-pink-300 text-[7px] sm:text-[9px] font-bold font-mono">
-                    {cooldowns.faixas}s
-                  </span>
-                )}
-                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-zinc-950 border border-amber-400/50 flex items-center justify-center gap-0.5 sm:gap-1 overflow-hidden p-0.5 sm:p-1 shadow-inner mb-0.5 sm:mb-1">
-                  <div className="w-1 sm:w-1.5 h-full bg-amber-400 rounded-xs" />
-                  <div className="w-1 sm:w-1.5 h-full bg-sky-500 rounded-xs" />
-                  <div className="w-1 sm:w-1.5 h-full bg-amber-400 rounded-xs" />
-                </div>
-                <span className="text-[8px] sm:text-[10px] font-black uppercase text-zinc-200">FAIXAS</span>
-                <span className="text-[7px] sm:text-[9px] font-mono font-bold text-zinc-400 mt-0.5">
-                  {cooldowns.faixas && cooldowns.faixas > 0
-                    ? `${cooldowns.faixas}s`
-                    : "-16 EN"}
-                </span>
-              </button>
-
-              {/* 4. SINALIZADOR */}
-              <button
-                onClick={() => handleAction("sinalizadores")}
-                disabled={energy < 24 || (cooldowns.sinalizadores ? cooldowns.sinalizadores > 0 : false)}
-                className={`relative flex flex-col items-center justify-center p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl border transition-all ${
-                  cooldowns.sinalizadores && cooldowns.sinalizadores > 0
-                    ? "bg-zinc-900/50 border-zinc-800 opacity-60 cursor-not-allowed"
-                    : energy < 24
-                    ? "bg-zinc-900/40 border-zinc-800/60 opacity-40 cursor-not-allowed"
-                    : "bg-zinc-900 border-zinc-800 hover:border-amber-400/60 hover:bg-zinc-800 active:scale-95"
-                }`}
-              >
-                {cooldowns.sinalizadores && cooldowns.sinalizadores > 0 && (
-                  <span className="absolute top-0.5 right-0.5 px-0.5 sm:px-1 py-0.2 sm:py-0.5 rounded bg-pink-950/90 border border-pink-600 text-pink-300 text-[7px] sm:text-[9px] font-bold font-mono">
-                    {cooldowns.sinalizadores}s
-                  </span>
-                )}
-                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-orange-950/40 border border-orange-500/30 flex items-center justify-center text-orange-400 text-xs sm:text-sm mb-0.5 sm:mb-1">
-                  🔥
-                </div>
-                <span className="text-[8px] sm:text-[10px] font-black uppercase text-zinc-200 truncate max-w-full">
-                  SINALIZADOR
-                </span>
-                <span className="text-[7px] sm:text-[9px] font-mono font-bold text-amber-400 mt-0.5">
-                  -24 EN
-                </span>
-              </button>
-
-              {/* 5. BATERIA */}
-              <button
-                onClick={() => handleAction("bateria")}
-                disabled={energy < 10 || (cooldowns.bateria ? cooldowns.bateria > 0 : false)}
-                className={`relative flex flex-col items-center justify-center p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl border transition-all ${
-                  cooldowns.bateria && cooldowns.bateria > 0
-                    ? "bg-zinc-900/50 border-zinc-800 opacity-60 cursor-not-allowed"
-                    : energy < 10
-                    ? "bg-zinc-900/40 border-zinc-800/60 opacity-40 cursor-not-allowed"
-                    : "bg-zinc-900 border-zinc-800 hover:border-amber-400/60 hover:bg-zinc-800 active:scale-95"
-                }`}
-              >
-                {cooldowns.bateria && cooldowns.bateria > 0 && (
-                  <span className="absolute top-0.5 right-0.5 px-0.5 sm:px-1 py-0.2 sm:py-0.5 rounded bg-pink-950/90 border border-pink-600 text-pink-300 text-[7px] sm:text-[9px] font-bold font-mono">
-                    {cooldowns.bateria}s
-                  </span>
-                )}
-                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-indigo-950/40 border border-indigo-500/30 flex items-center justify-center text-indigo-400 text-xs sm:text-sm mb-0.5 sm:mb-1">
-                  🎵
-                </div>
-                <span className="text-[8px] sm:text-[10px] font-black uppercase text-zinc-200">
-                  BATERIA
-                </span>
-                <span className="text-[7px] sm:text-[9px] font-mono font-bold text-amber-400 mt-0.5">
-                  -10 EN
-                </span>
-              </button>
-
-              {/* 6. HIDRATAR */}
-              <button
-                onClick={() => handleAction("descanso")}
-                disabled={cooldowns.descanso ? cooldowns.descanso > 0 : false}
-                className={`relative flex flex-col items-center justify-center p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl border transition-all ${
-                  cooldowns.descanso && cooldowns.descanso > 0
-                    ? "bg-zinc-900/50 border-zinc-800 opacity-60 cursor-not-allowed"
-                    : "bg-zinc-900 border-zinc-800 hover:border-emerald-400/60 hover:bg-zinc-800 active:scale-95"
-                }`}
-              >
-                {cooldowns.descanso && cooldowns.descanso > 0 && (
-                  <span className="absolute top-0.5 right-0.5 px-0.5 sm:px-1 py-0.2 sm:py-0.5 rounded bg-pink-950/90 border border-pink-600 text-pink-300 text-[7px] sm:text-[9px] font-bold font-mono">
-                    {cooldowns.descanso}s
-                  </span>
-                )}
-                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xs sm:text-sm mb-0.5 sm:mb-1">
-                  ☕
-                </div>
-                <span className="text-[8px] sm:text-[10px] font-black uppercase text-zinc-200">
-                  HIDRATAR
-                </span>
-                <span className="text-[7px] sm:text-[9px] font-mono font-bold text-emerald-400 mt-0.5">
-                  {energy >= 95 ? "Cheio" : "+30 EN"}
-                </span>
-              </button>
-            </div>
+          <div className="text-[9px] sm:text-xs font-mono font-bold text-zinc-300">
+            Fôlego: <span className="text-amber-400">{energy}%</span>
           </div>
         </div>
 
-        {/* COLUNA DIREITA: Simulador de Ataque (Campinho Tático) + Live Action Feed */}
-        <div className="flex flex-col gap-2 sm:gap-4">
-          <TacticalPitch
-            homeTeam={homeTeam}
-            awayTeam={awayTeam}
-            pressure={pressure}
-            isAbove85={isAbove85}
-            timeInZone85={timeInZone85}
-            recentAttackEvent={recentAttackEvent}
-            chancesCreated={chancesCreated}
-          />
-
-          {/* BARRA DE NOTIFICAÇÃO DAS AÇÕES DA TORCIDA */}
-          <div className="p-2 sm:p-3.5 rounded-xl sm:rounded-2xl bg-zinc-950/90 border border-zinc-800/90 shadow-xl flex items-center justify-between transition-all">
-            <div className="flex items-center gap-2 text-[10px] sm:text-xs font-semibold text-zinc-200">
-              <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-lg bg-pink-950/70 border border-pink-500/40 flex items-center justify-center text-pink-400 shrink-0">
-                📢
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="text-xs sm:text-sm">{liveActionFeed.icon}</span>
-                <span className="text-zinc-300">{liveActionFeed.message}</span>
-              </div>
+        {/* 6 Action Cards em 1 Linha Horizontal */}
+        <div className="grid grid-cols-6 gap-1 sm:gap-2">
+          {/* 1. GRITO */}
+          <button
+            onClick={() => handleAction("grito")}
+            disabled={energy < 14 || (cooldowns.grito ? cooldowns.grito > 0 : false)}
+            className={`relative flex flex-col items-center justify-center p-1 sm:p-2.5 rounded sm:rounded-xl border transition-all ${
+              cooldowns.grito && cooldowns.grito > 0
+                ? "bg-zinc-900/50 border-zinc-800 opacity-60 cursor-not-allowed"
+                : energy < 14
+                ? "bg-zinc-900/40 border-zinc-800/60 opacity-40 cursor-not-allowed"
+                : "bg-zinc-900 border-zinc-800 hover:border-amber-400/60 hover:bg-zinc-800 active:scale-95"
+            }`}
+          >
+            {cooldowns.grito && cooldowns.grito > 0 && (
+              <span className="absolute top-0.5 right-0.5 px-0.5 sm:px-1 py-0.2 rounded bg-pink-950/90 border border-pink-600 text-pink-300 text-[6px] sm:text-[9px] font-bold font-mono">
+                {cooldowns.grito}s
+              </span>
+            )}
+            <div className="w-5 h-5 sm:w-8 sm:h-8 rounded sm:rounded-lg bg-pink-950/40 border border-pink-500/30 flex items-center justify-center text-pink-400 text-[10px] sm:text-sm mb-0.5">
+              📢
             </div>
+            <span className="text-[7px] sm:text-[10px] font-black uppercase text-zinc-200">GRITO</span>
+            <span className="text-[6px] sm:text-[9px] font-mono font-bold text-amber-400 mt-0.5">
+              -14 EN
+            </span>
+          </button>
+
+          {/* 2. BANDEIRÃO */}
+          <button
+            onClick={() => handleAction("bandeirao")}
+            disabled={energy < 28 || (cooldowns.bandeirao ? cooldowns.bandeirao > 0 : false)}
+            className={`relative flex flex-col items-center justify-center p-1 sm:p-2.5 rounded sm:rounded-xl border transition-all ${
+              cooldowns.bandeirao && cooldowns.bandeirao > 0
+                ? "bg-zinc-900/50 border-zinc-800 opacity-60 cursor-not-allowed"
+                : energy < 28
+                ? "bg-zinc-900/40 border-zinc-800/60 opacity-40 cursor-not-allowed"
+                : "bg-zinc-900 border-zinc-800 hover:border-amber-400/60 hover:bg-zinc-800 active:scale-95"
+            }`}
+          >
+            {cooldowns.bandeirao && cooldowns.bandeirao > 0 && (
+              <span className="absolute top-0.5 right-0.5 px-0.5 sm:px-1 py-0.2 rounded bg-pink-950/90 border border-pink-600 text-pink-300 text-[6px] sm:text-[9px] font-bold font-mono">
+                {cooldowns.bandeirao}s
+              </span>
+            )}
+            <div className="w-5 h-5 sm:w-8 sm:h-8 rounded sm:rounded-lg bg-red-950/40 border border-red-500/30 flex items-center justify-center text-red-400 text-[10px] sm:text-sm mb-0.5">
+              🚩
+            </div>
+            <span className="text-[7px] sm:text-[10px] font-black uppercase text-zinc-200 truncate max-w-full">
+              BANDEIRÃO
+            </span>
+            <span className="text-[6px] sm:text-[9px] font-mono font-bold text-amber-400 mt-0.5">
+              -28 EN
+            </span>
+          </button>
+
+          {/* 3. FAIXAS */}
+          <button
+            onClick={() => handleAction("faixas")}
+            disabled={energy < 16 || (cooldowns.faixas ? cooldowns.faixas > 0 : false)}
+            className={`relative flex flex-col items-center justify-center p-1 sm:p-2.5 rounded sm:rounded-xl border transition-all ${
+              cooldowns.faixas && cooldowns.faixas > 0
+                ? "bg-zinc-900/50 border-zinc-800 opacity-60 cursor-not-allowed"
+                : energy < 16
+                ? "bg-zinc-900/40 border-zinc-800/60 opacity-40 cursor-not-allowed"
+                : "bg-zinc-900 border-zinc-800 hover:border-amber-400/60 hover:bg-zinc-800 active:scale-95"
+            }`}
+          >
+            {cooldowns.faixas && cooldowns.faixas > 0 && (
+              <span className="absolute top-0.5 right-0.5 px-0.5 sm:px-1 py-0.2 rounded bg-pink-950/90 border border-pink-600 text-pink-300 text-[6px] sm:text-[9px] font-bold font-mono">
+                {cooldowns.faixas}s
+              </span>
+            )}
+            <div className="w-5 h-5 sm:w-8 sm:h-8 rounded sm:rounded-lg bg-zinc-950 border border-amber-400/50 flex items-center justify-center gap-0.5 sm:gap-1 overflow-hidden p-0.5 sm:p-1 shadow-inner mb-0.5">
+              <div className="w-0.5 sm:w-1.5 h-full bg-amber-400 rounded-xs" />
+              <div className="w-0.5 sm:w-1.5 h-full bg-sky-500 rounded-xs" />
+              <div className="w-0.5 sm:w-1.5 h-full bg-amber-400 rounded-xs" />
+            </div>
+            <span className="text-[7px] sm:text-[10px] font-black uppercase text-zinc-200">FAIXAS</span>
+            <span className="text-[6px] sm:text-[9px] font-mono font-bold text-zinc-400 mt-0.5">
+              {cooldowns.faixas && cooldowns.faixas > 0
+                ? `${cooldowns.faixas}s`
+                : "-16 EN"}
+            </span>
+          </button>
+
+          {/* 4. SINALIZADOR */}
+          <button
+            onClick={() => handleAction("sinalizadores")}
+            disabled={energy < 24 || (cooldowns.sinalizadores ? cooldowns.sinalizadores > 0 : false)}
+            className={`relative flex flex-col items-center justify-center p-1 sm:p-2.5 rounded sm:rounded-xl border transition-all ${
+              cooldowns.sinalizadores && cooldowns.sinalizadores > 0
+                ? "bg-zinc-900/50 border-zinc-800 opacity-60 cursor-not-allowed"
+                : energy < 24
+                ? "bg-zinc-900/40 border-zinc-800/60 opacity-40 cursor-not-allowed"
+                : "bg-zinc-900 border-zinc-800 hover:border-amber-400/60 hover:bg-zinc-800 active:scale-95"
+            }`}
+          >
+            {cooldowns.sinalizadores && cooldowns.sinalizadores > 0 && (
+              <span className="absolute top-0.5 right-0.5 px-0.5 sm:px-1 py-0.2 rounded bg-pink-950/90 border border-pink-600 text-pink-300 text-[6px] sm:text-[9px] font-bold font-mono">
+                {cooldowns.sinalizadores}s
+              </span>
+            )}
+            <div className="w-5 h-5 sm:w-8 sm:h-8 rounded sm:rounded-lg bg-orange-950/40 border border-orange-500/30 flex items-center justify-center text-orange-400 text-[10px] sm:text-sm mb-0.5">
+              🔥
+            </div>
+            <span className="text-[7px] sm:text-[10px] font-black uppercase text-zinc-200 truncate max-w-full">
+              SINALIZADOR
+            </span>
+            <span className="text-[6px] sm:text-[9px] font-mono font-bold text-amber-400 mt-0.5">
+              -24 EN
+            </span>
+          </button>
+
+          {/* 5. BATERIA */}
+          <button
+            onClick={() => handleAction("bateria")}
+            disabled={energy < 10 || (cooldowns.bateria ? cooldowns.bateria > 0 : false)}
+            className={`relative flex flex-col items-center justify-center p-1 sm:p-2.5 rounded sm:rounded-xl border transition-all ${
+              cooldowns.bateria && cooldowns.bateria > 0
+                ? "bg-zinc-900/50 border-zinc-800 opacity-60 cursor-not-allowed"
+                : energy < 10
+                ? "bg-zinc-900/40 border-zinc-800/60 opacity-40 cursor-not-allowed"
+                : "bg-zinc-900 border-zinc-800 hover:border-amber-400/60 hover:bg-zinc-800 active:scale-95"
+            }`}
+          >
+            {cooldowns.bateria && cooldowns.bateria > 0 && (
+              <span className="absolute top-0.5 right-0.5 px-0.5 sm:px-1 py-0.2 rounded bg-pink-950/90 border border-pink-600 text-pink-300 text-[6px] sm:text-[9px] font-bold font-mono">
+                {cooldowns.bateria}s
+              </span>
+            )}
+            <div className="w-5 h-5 sm:w-8 sm:h-8 rounded sm:rounded-lg bg-indigo-950/40 border border-indigo-500/30 flex items-center justify-center text-indigo-400 text-[10px] sm:text-sm mb-0.5">
+              🎵
+            </div>
+            <span className="text-[7px] sm:text-[10px] font-black uppercase text-zinc-200">
+              BATERIA
+            </span>
+            <span className="text-[6px] sm:text-[9px] font-mono font-bold text-amber-400 mt-0.5">
+              -10 EN
+            </span>
+          </button>
+
+          {/* 6. HIDRATAR */}
+          <button
+            onClick={() => handleAction("descanso")}
+            disabled={cooldowns.descanso ? cooldowns.descanso > 0 : false}
+            className={`relative flex flex-col items-center justify-center p-1 sm:p-2.5 rounded sm:rounded-xl border transition-all ${
+              cooldowns.descanso && cooldowns.descanso > 0
+                ? "bg-zinc-900/50 border-zinc-800 opacity-60 cursor-not-allowed"
+                : "bg-zinc-900 border-zinc-800 hover:border-emerald-400/60 hover:bg-zinc-800 active:scale-95"
+            }`}
+          >
+            {cooldowns.descanso && cooldowns.descanso > 0 && (
+              <span className="absolute top-0.5 right-0.5 px-0.5 sm:px-1 py-0.2 rounded bg-pink-950/90 border border-pink-600 text-pink-300 text-[6px] sm:text-[9px] font-bold font-mono">
+                {cooldowns.descanso}s
+              </span>
+            )}
+            <div className="w-5 h-5 sm:w-8 sm:h-8 rounded sm:rounded-lg bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-[10px] sm:text-sm mb-0.5">
+              ☕
+            </div>
+            <span className="text-[7px] sm:text-[10px] font-black uppercase text-zinc-200">
+              HIDRATAR
+            </span>
+            <span className="text-[6px] sm:text-[9px] font-mono font-bold text-emerald-400 mt-0.5">
+              {energy >= 95 ? "Cheio" : "+30 EN"}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {/* 5. BARRA DE NOTIFICAÇÃO DAS AÇÕES DA TORCIDA (Rodapé Compacto) */}
+      <div className="p-1.5 sm:p-3.5 rounded-lg sm:rounded-2xl bg-zinc-950/90 border border-zinc-800/90 shadow-xl flex items-center justify-between transition-all">
+        <div className="flex items-center gap-1.5 text-[9px] sm:text-xs font-semibold text-zinc-200">
+          <div className="w-4 h-4 sm:w-7 sm:h-7 rounded bg-pink-950/70 border border-pink-500/40 flex items-center justify-center text-pink-400 shrink-0 text-[10px] sm:text-xs">
+            📢
+          </div>
+          <div className="flex items-center gap-1 truncate">
+            <span className="text-xs sm:text-sm">{liveActionFeed.icon}</span>
+            <span className="text-zinc-300 truncate">{liveActionFeed.message}</span>
           </div>
         </div>
       </div>

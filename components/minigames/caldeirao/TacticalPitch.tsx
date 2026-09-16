@@ -118,7 +118,7 @@ export const TacticalPitch: React.FC<TacticalPitchProps> = ({
       </div>
 
       {/* O Gramado Oficial */}
-      <div className="relative w-full h-40 sm:h-52 lg:h-64 p-2 sm:p-3 bg-gradient-to-b from-emerald-950 via-emerald-900 to-emerald-950 overflow-hidden flex items-center justify-center select-none">
+      <div className="relative w-full h-36 sm:h-52 lg:h-64 p-1.5 sm:p-3 bg-gradient-to-b from-emerald-950 via-emerald-900 to-emerald-950 overflow-hidden flex items-center justify-center select-none">
         {/* Faixas de grama alternadas */}
         <div className="absolute inset-0 flex opacity-40 pointer-events-none">
           {Array.from({ length: 12 }).map((_, i) => (
