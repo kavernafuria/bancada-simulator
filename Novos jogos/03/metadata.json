@@ -1,0 +1,6 @@
+{
+  "name": "Bancada Simulator",
+  "description": "Simulador de torcida de futebol com minigames de arquibancada e motor de cálculo de impacto da torcida.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

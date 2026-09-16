@@ -56,6 +56,7 @@ import { MatchTacticalResolver, MatchContext } from "@/components/MatchTacticalR
 import { TorcidaUnicaModal } from "@/components/TorcidaUnicaModal";
 import { PressConferenceModal } from "@/components/PressConferenceModal";
 import { ElectionCrisisModal } from "@/components/ElectionCrisisModal";
+import { InquiryModal, InquiryResultPayload } from "@/components/InquiryModal";
 import {
   GAME_BALANCE,
   getOfficialTorcidas,
@@ -248,6 +249,10 @@ export default function App() {
   const [activePressConference, setActivePressConference] = useState<PressConference | null>(null);
   const [shownPressConferenceIds, setShownPressConferenceIds] = useState<string[]>([]);
   const [rivalAngry, setRivalAngry] = useState<boolean>(false);
+  const [activeInquiryTrigger, setActiveInquiryTrigger] = useState<{
+    triggerReason: string;
+    initialConvictionBase: number;
+  } | null>(null);
 
   // MATCH WORKFLOW STATE
   // Phase: "CLOSED" | "POLICE_MEETING" | "TRANSPORT" | "SCOUT_INTEL" | "TACTICAL" | "MINIGAME" | "RESULT"
@@ -4437,7 +4442,15 @@ export default function App() {
             setTorcidaUnicaActionAppliedForStep(pipelineIndex);
             setMatchModalPhase("CLOSED");
             setActiveTorcidaUnicaModalMode(null);
-            advancePipeline();
+
+            if (res.id === "CACADA_CLANDESTINA") {
+              setActiveInquiryTrigger({
+                triggerReason: res.narrative || "Confronto clandestino de rua em dia de Torcida Única",
+                initialConvictionBase: res.rngOutcome === "FAIL_CRITICAL" ? 35 : 20,
+              });
+            } else {
+              advancePipeline();
+            }
           }}
         />
       )}
@@ -4485,6 +4498,41 @@ export default function App() {
           onDismiss={() => {
             setShowElectionCrisisModal(false);
             setActivePressConference(PRESS_CONFERENCES.ENTREVISTA_INICIAL_RACHA);
+          }}
+        />
+      )}
+
+      {/* MÓDULO 3: INQUÉRITO EMERGENCIAIS DO MP / DRADE */}
+      {activeInquiryTrigger && (
+        <InquiryModal
+          triggerReason={activeInquiryTrigger.triggerReason}
+          initialConvictionBase={activeInquiryTrigger.initialConvictionBase}
+          onFinishInquiry={(result: InquiryResultPayload) => {
+            const totalCost = result.totalLawyerFees + result.totalFine;
+            if (totalCost > 0) {
+              setBankBalance((prev) => Math.max(0, prev - totalCost));
+            }
+
+            setStats((prev) => ({
+              ...prev,
+              poder_pista: Math.min(100, Math.max(0, prev.poder_pista + result.accumulatedPistaDelta)),
+              contingente: Math.min(100, Math.max(0, prev.contingente + result.accumulatedContingenteDelta)),
+            }));
+
+            setStateTrackers((prev) => ({
+              ...prev,
+              moral: Math.min(100, Math.max(0, prev.moral + result.accumulatedMoralDelta)),
+              risco_mp: Math.min(100, Math.max(0, prev.risco_mp + result.accumulatedRiscoMPDelta)),
+              respeito_nacional: Math.min(100, Math.max(0, prev.respeito_nacional + result.accumulatedRespectDelta)),
+            }));
+
+            setHistoryLog((prev) => [
+              `[Inquérito MP] ${result.verdict.title} - Custo Jurídico/Multa: R$ ${totalCost.toLocaleString("pt-BR")}`,
+              ...prev,
+            ]);
+
+            setActiveInquiryTrigger(null);
+            advancePipeline();
           }}
         />
       )}

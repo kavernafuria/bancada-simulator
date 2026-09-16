@@ -1,0 +1,13 @@
+=== BANCADA SIMULATOR - RITMO & GUITAR HERO ===
+
+Arquivos inclusos:
+- src/components/RhythmBar.tsx: Lógica de 60fps com requestAnimationFrame, detecção de acerto/erro, zona central (40%-60%) e escala de velocidade Guitar Hero.
+- src/components/CrowdView.tsx: Animação dos torcedores pulando no BPM e reagindo aos combos.
+- src/components/ScoreBoard.tsx: Cronômetro de 20s e painel de estatísticas.
+- src/utils/simulation.ts: Motor matemático (75% Time + 25% Torcida) e narrativa de 3 parágrafos.
+- src/utils/audio.ts: Sintetizador Web Audio API de bateria e cânticos de estádio.
+- src/types.ts: Tipagens completas do TypeScript.
+
+Como usar no Antigravity:
+1. Copie o conteúdo de 'simulation.ts' para o cálculo matemático da partida.
+2. Copie 'RhythmBar.tsx' para o minigame da torcida.

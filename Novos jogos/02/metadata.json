@@ -1,0 +1,6 @@
+{
+  "name": "Tremular Bandeirão",
+  "description": "Minigame de precisão por toque simulando o movimento de tremular um bandeirão de estádio com cálculo de precisão e saída de pontuação.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

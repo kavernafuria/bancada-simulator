@@ -4956,4 +4956,234 @@ export function getPressConference(id: string): PressConference | null {
   return PRESS_CONFERENCES[id] || null;
 }
 
+// ==========================================
+// SISTEMA DE INQUÉRITO EMERGENCIAIS & DEPOIMENTO (MP / POLÍCIA)
+// ==========================================
+
+export interface InquiryQuestionOption {
+  id: string;
+  type: "DEFESA" | "NEUTRAL" | "HOSTIL";
+  title: string;
+  text: string;
+  convictionDelta: number;
+  moralDelta: number;
+  riscoMPDelta: number;
+  lawyerFee: number;
+  pistaDelta?: number;
+  respectDelta?: number;
+  contingenteDelta?: number;
+}
+
+export interface InquiryQuestion {
+  id: string;
+  phase: number;
+  phaseTitle: string;
+  phaseSubtitle: string;
+  evidenceType: "AUDIO" | "SOCIAL_MEDIA" | "CCTV";
+  evidenceBadge: string;
+  evidenceDescription: string;
+  questionText: string;
+  options: InquiryQuestionOption[];
+}
+
+export interface InquiryVerdict {
+  type: "ARQUIVADO" | "MULTA_ALTA" | "MEMBROS_PRESOS";
+  title: string;
+  headline: string;
+  description: string;
+  verdictText: string;
+  fineCost: number;
+  lawyerCost: number;
+  pistaPenalty: number;
+  riscoMPDelta: number;
+  moralDelta: number;
+  respectDelta: number;
+  membersArrestedCount?: number;
+}
+
+export const INQUIRY_QUESTIONS: InquiryQuestion[] = [
+  {
+    id: "FASE_1_AUDIO_VAZADO",
+    phase: 1,
+    phaseTitle: "FASE 1: ÁUDIOS VAZADOS & GRUPOS DE MENSAGEM",
+    phaseSubtitle: "Perícia Ciber-Digital da Polícia Civil (DRADE / Telegram)",
+    evidenceType: "AUDIO",
+    evidenceBadge: "📱 MENSAGEM DE ÁUDIO INTERCEPTADA • TELEGRAM / WHATSAPP",
+    evidenceDescription: "Áudio vazado de liderança regional convocando bonde de roupa neutra/preta nas imediações da estação.",
+    questionText: "A perícia da polícia interceptou áudios vazados no Telegram onde membros chamam a tropa para ir de 'roupa preta e neutra' no entorno do estádio. Como a diretoria explica essa convocação clandestina?",
+    options: [
+      {
+        id: "Q1_DEFESA",
+        type: "DEFESA",
+        title: "🟢 Defesa Institucional (Desautorizar Convocação)",
+        text: "Esse grupo de mensagem não é oficial da organizada. Já emitimos nota oficial repudiando qualquer convocação paralela fora dos canais da diretoria.",
+        convictionDelta: -15,
+        moralDelta: -5,
+        riscoMPDelta: 0,
+        lawyerFee: 2000,
+      },
+      {
+        id: "Q1_NEUTRAL",
+        type: "NEUTRAL",
+        title: "🟡 Omissão & Relativização",
+        text: "No meio de 30 mil torcedores, existem centenas de grupos de conversa. A diretoria não administra telefones particulares de membros.",
+        convictionDelta: 5,
+        moralDelta: 0,
+        riscoMPDelta: 0,
+        lawyerFee: 2000,
+        respectDelta: 0,
+      },
+      {
+        id: "Q1_HOSTIL",
+        type: "HOSTIL",
+        title: "🔴 Hostil / Desafiar a Prova Jurídica",
+        text: "Áudios de internet sem perícia oficial não provam nada. A polícia quer incriminar a torcida sem apresentar provas legais.",
+        convictionDelta: 20,
+        moralDelta: 8,
+        riscoMPDelta: 10,
+        lawyerFee: 2000,
+      }
+    ]
+  },
+  {
+    id: "FASE_2_REDES_SOCIAIS",
+    phase: 2,
+    phaseTitle: "FASE 2: STORIES, LIVES & PÁGINAS DE PISTA",
+    phaseSubtitle: "Monitoramento Ciber-Digital de Mídias Sociais",
+    evidenceType: "SOCIAL_MEDIA",
+    evidenceBadge: "📸 PRINTS DE REDES SOCIAIS & FOTOS DE TROFÉU DE RUA",
+    evidenceDescription: "Foto publicada em página de torcida com 20 homens de agasalho escuro comemorando na rua após emboscada.",
+    questionText: "Páginas de arquibancada publicaram fotos de 20 homens de agasalho escuro comemorando na rua logo após a briga. Três deles foram marcados em perfis pessoais de diretores. Quem são eles?",
+    options: [
+      {
+        id: "Q2_DEFESA",
+        type: "DEFESA",
+        title: "🟢 Apontar Culpados & Expulsão de Cadastro",
+        text: "Identificamos os perfis e suspendemos imediatamente o cadastro desses sócios. Entregamos a qualificação completa ao MP.",
+        convictionDelta: -15,
+        moralDelta: 0,
+        riscoMPDelta: 0,
+        lawyerFee: 2000,
+        contingenteDelta: -5,
+      },
+      {
+        id: "Q2_NEUTRAL",
+        type: "NEUTRAL",
+        title: "🟡 Negar Identificação (Rostos Cobertos)",
+        text: "Rostos cobertos e roupas pretas genéricas não permitem identificar ninguém. Qualquer jovem na cidade veste agasalho escuro.",
+        convictionDelta: 10,
+        moralDelta: 0,
+        riscoMPDelta: 5,
+        lawyerFee: 2000,
+      },
+      {
+        id: "Q2_HOSTIL",
+        type: "HOSTIL",
+        title: "🔴 Orgulho da Tropa (Não Entregar Irmão)",
+        text: "Se a torcida rival tentou invadir nosso bairro, a rapaziada se defendeu. Não vamos entregar nenhum irmão da arquibancada.",
+        convictionDelta: 25,
+        moralDelta: 10,
+        riscoMPDelta: 0,
+        lawyerFee: 2000,
+        pistaDelta: 5,
+      }
+    ]
+  },
+  {
+    id: "FASE_3_RECONHECIMENTO_CAMERAS",
+    phase: 3,
+    phaseTitle: "FASE 3: CÂMERAS DE TRÂNSITO & RECONHECIMENTO FACIAL",
+    phaseSubtitle: "Cruzamento do Sistema de Monitoramento Urbano",
+    evidenceType: "CCTV",
+    evidenceBadge: "🎥 RECONSTITUIÇÃO DIGITAL & CÂMERAS DE MONITORAMENTO URBANO",
+    evidenceDescription: "Câmeras de trânsito registram deslocamento do bonde saindo dos arredores da sede antes do confronto.",
+    questionText: "As câmeras do sistema de trânsito mostram o bonde saindo dos arredores da sede social antes do confronto. A diretoria assinará o acordo de fiscalização ciber-digital e colaborará com as investigações?",
+    options: [
+      {
+        id: "Q3_DEFESA",
+        type: "DEFESA",
+        title: "🟢 Colaboração Total / Assinatura de Termo (TAC)",
+        text: "Colaboraremos 100% com a investigação ciber-digital e abriremos os registros de frequência da sede para a polícia.",
+        convictionDelta: -20,
+        moralDelta: 0,
+        riscoMPDelta: -15,
+        lawyerFee: 2000,
+      },
+      {
+        id: "Q3_NEUTRAL",
+        type: "NEUTRAL",
+        title: "🟡 Colaboração Parcial sob Limites Legais",
+        text: "Fornecemos os documentos solicitados mediante mandado judicial específico para resguardar a privacidade dos associados.",
+        convictionDelta: 0,
+        moralDelta: 0,
+        riscoMPDelta: 0,
+        lawyerFee: 2000,
+        respectDelta: 5,
+      },
+      {
+        id: "Q3_HOSTIL",
+        type: "HOSTIL",
+        title: "🔴 Recusa Peremptória",
+        text: "Não transformaremos nossa sede em delegacia. A responsabilidade por crimes de rua é do Estado, não da diretoria.",
+        convictionDelta: 30,
+        moralDelta: 12,
+        riscoMPDelta: 15,
+        lawyerFee: 2000,
+      }
+    ]
+  }
+];
+
+export function resolveInquiryVerdict(finalConviction: number): InquiryVerdict {
+  const score = Math.max(0, Math.min(100, finalConviction));
+
+  if (score <= 35) {
+    return {
+      type: "ARQUIVADO",
+      title: "🟢 INQUÉRITO ARQUIVADO POR INSUFICIÊNCIA DE PROVAS",
+      headline: "📰 INQUÉRITO ARQUIVADO! MP NÃO ENCONTRA PROVAS DE ENVOLVIMENTO DA DIRETORIA NO CONFRONTO À PAISANA!",
+      description: "A defesa técnica fundamentada e a colaboração institucional desarticularam a tese do Ministério Público. O inquérito foi oficialmente arquivado sem indiciamento da diretoria.",
+      verdictText: "Processo arquivado por insuficiência de elementos probatórios. Honorários advocatícios reduzidos.",
+      fineCost: 0,
+      lawyerCost: 2500,
+      pistaPenalty: 0,
+      riscoMPDelta: -15,
+      moralDelta: 0,
+      respectDelta: 8,
+      membersArrestedCount: 0,
+    };
+  } else if (score <= 70) {
+    return {
+      type: "MULTA_ALTA",
+      title: "🟡 CONDENAÇÃO ADMINISTRATIVA E APLICAÇÃO DE MULTA SEVERA",
+      headline: "📰 MP APLICA MULTA PESADA À ORGANIZADA POR CUMPLICIDADE EM AÇÕES CLANDESTINAS DE RUA!",
+      description: "O Promotor concluiu que a diretoria agiu com omissão voluntária ao permitir que bondes descaracterizados se organizassem a partir das adjacências da sede.",
+      verdictText: "Condenação administrativa pecuniária imposta à torcida, além de honorários de representação jurídica.",
+      fineCost: 20000,
+      lawyerCost: 3500,
+      pistaPenalty: 0,
+      riscoMPDelta: 0,
+      moralDelta: -5,
+      respectDelta: 0,
+      membersArrestedCount: 0,
+    };
+  } else {
+    return {
+      type: "MEMBROS_PRESOS",
+      title: "🔴 PRISÃO PREVENTIVA DA LINHA DE FRENTE DA TORCIDA",
+      headline: "📰 PRISÃO PREVENTIVA! OPERAÇÃO DA POLÍCIA PRENDE INTEGRANTES DA LINHA DE FRENTE IDENTIFICADOS NA INTERNET!",
+      description: "A posture irredutível da diretoria e as evidências ciber-digitais robustas levaram o Juiz a expedir mandados de prisão preventiva. A linha de frente foi severamente desarticulada.",
+      verdictText: "Operação da DRADE executa 8 mandados de prisão preventiva. Linha de frente desmantelada e Risco MP no limite.",
+      fineCost: 0,
+      lawyerCost: 5000,
+      pistaPenalty: -18,
+      riscoMPDelta: 20,
+      moralDelta: -12,
+      respectDelta: -5,
+      membersArrestedCount: 8,
+    };
+  }
+}
+
+
 
