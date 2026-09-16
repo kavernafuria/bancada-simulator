@@ -7,15 +7,7 @@ import {
   Flame,
   Trophy,
   Clock,
-  Activity,
   Zap,
-  Megaphone,
-  Flag,
-  FlameIcon,
-  Music,
-  Coffee,
-  Info,
-  Award,
 } from "lucide-react";
 import { caldeiraoSound } from "./caldeiraoAudio";
 import { ArquibancadaVisualizer } from "./ArquibancadaVisualizer";
@@ -53,20 +45,20 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
 
   // Visual state flags
   const [isBannerUp, setIsBannerUp] = useState<boolean>(false);
-  const [hasVerticalStripes, setHasVerticalStripes] = useState<boolean>(true);
+  const [hasVerticalStripes, setHasVerticalStripes] = useState<boolean>(false); // Faixas apenas quando acionado
   const [hasFlares, setHasFlares] = useState<boolean>(false);
   const [isChanting, setIsChanting] = useState<boolean>(false);
   const [isDrumming, setIsDrumming] = useState<boolean>(false);
   const [hasMosaic, setHasMosaic] = useState<boolean>(false);
   const [activeChantText, setActiveChantText] = useState<string | null>(null);
 
-  // Action Live Notification Feed (matches Google AI Studio screenshot footer banner)
+  // Action Live Notification Feed
   const [liveActionFeed, setLiveActionFeed] = useState<{
     icon: string;
     message: string;
   }>({
-    icon: "🎗️",
-    message: "Faixas verticais descendo! Arquibancada em festa constante.",
+    icon: "🏟️",
+    message: "Pressão de arquibancada ativa! Puxe cantos e comande a festa.",
   });
 
   const [recentAttackEvent, setRecentAttackEvent] = useState<string | null>(null);
@@ -75,11 +67,29 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
   pressureRef.current = pressure;
   const isAbove85 = pressure >= 85;
 
+  // Sound toggle & Ambient Stadium Sound Controller
   const toggleSound = () => {
     const next = !soundEnabled;
     setSoundEnabled(next);
     caldeiraoSound.enabled = next;
+    if (!next) {
+      caldeiraoSound.stopAmbientStadiumSound();
+    } else if (!isGameOver) {
+      caldeiraoSound.startAmbientStadiumSound();
+    }
   };
+
+  // Continuous Ambient Stadium Sound
+  useEffect(() => {
+    if (soundEnabled && !isGameOver) {
+      caldeiraoSound.startAmbientStadiumSound();
+    } else {
+      caldeiraoSound.stopAmbientStadiumSound();
+    }
+    return () => {
+      caldeiraoSound.stopAmbientStadiumSound();
+    };
+  }, [soundEnabled, isGameOver]);
 
   // Cooldown countdown timer
   useEffect(() => {
@@ -113,6 +123,7 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
         const nextMin = prev + 2;
         if (nextMin >= 90) {
           setIsGameOver(true);
+          caldeiraoSound.stopAmbientStadiumSound();
           return 90;
         }
         return nextMin;
@@ -189,7 +200,7 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
 
       setLiveActionFeed({
         icon: "🚩",
-        message: "Pavilhão gigante desfraldado no setor principal! (+22% de pressão)",
+        message: "Pavilhão gigante desfraldado cobrindo o setor principal! (+22% de pressão)",
       });
       setCooldowns((cd) => ({ ...cd, bandeirao: 6 }));
     } else if (actionId === "faixas") {
@@ -197,13 +208,16 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
       caldeiraoSound.playClap();
       setEnergy((prev) => Math.max(0, prev - 16));
       setPressure((prev) => Math.min(100, prev + 14));
+
+      // As faixas aparecem por 5 segundos ao acionar a ação
       setHasVerticalStripes(true);
+      setTimeout(() => setHasVerticalStripes(false), 5000);
 
       setLiveActionFeed({
         icon: "🎗️",
-        message: "Faixas verticais descendo! Arquibancada em festa constante.",
+        message: "Faixas verticais descendo pelo setor! Arquibancada em festa constante.",
       });
-      setCooldowns((cd) => ({ ...cd, faixas: 2 }));
+      setCooldowns((cd) => ({ ...cd, faixas: 4 }));
     } else if (actionId === "sinalizadores") {
       if (energy < 24) return;
       caldeiraoSound.playFlare();
@@ -245,6 +259,7 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
   };
 
   const handleFinishMinigame = () => {
+    caldeiraoSound.stopAmbientStadiumSound();
     let rank: "S" | "B" | "C" | "F" = "F";
     let modifier = -0.15;
     let desc = "A torcida não conseguiu incendiar a arquibancada (-15% PEC).";
@@ -275,7 +290,7 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
 
   return (
     <div className="w-full max-w-6xl mx-auto flex flex-col gap-4 bg-[#090d16] p-4 sm:p-6 rounded-3xl border border-zinc-800 text-white shadow-2xl font-sans select-none">
-      {/* 1. TOP HEADER BAR (Exata como a Imagem do Google AI Studio) */}
+      {/* 1. TOP HEADER BAR */}
       <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-zinc-950/80 border border-zinc-800/80 shadow-lg">
         {/* Left Team Badge Info */}
         <div className="flex items-center gap-3">
@@ -310,11 +325,20 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
 
           <button
             onClick={toggleSound}
-            className="p-2 rounded-xl bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800 transition-all hover:bg-zinc-800"
-            title={soundEnabled ? "Mutar Sons" : "Ativar Sons"}
+            className={`p-2 rounded-xl border transition-all flex items-center gap-1.5 ${
+              soundEnabled
+                ? "bg-amber-500/20 border-amber-500/60 text-amber-400"
+                : "bg-zinc-900 border-zinc-800 text-zinc-600"
+            }`}
+            title={soundEnabled ? "Mutar Sons do Estádio" : "Ativar Sons do Estádio"}
           >
             {soundEnabled ? (
-              <Volume2 className="w-4 h-4 text-amber-400" />
+              <>
+                <Volume2 className="w-4 h-4 text-amber-400 animate-pulse" />
+                <span className="text-[10px] font-mono font-bold uppercase text-amber-300 hidden sm:inline">
+                  SOM ON
+                </span>
+              </>
             ) : (
               <VolumeX className="w-4 h-4 text-zinc-600" />
             )}
@@ -322,7 +346,7 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
         </div>
       </div>
 
-      {/* 2. BARRA DE PRESSÃO & ENTUSIASMO DA BANCADA (Full Width - Réplica Exata do AI Studio) */}
+      {/* 2. BARRA DE PRESSÃO & ENTUSIASMO DA BANCADA */}
       <div className="p-4 sm:p-5 rounded-2xl bg-zinc-950/90 border border-zinc-800/90 shadow-xl flex flex-col gap-3">
         {/* Title Row */}
         <div className="flex items-start justify-between">
@@ -401,7 +425,7 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
             isAbove85={isAbove85}
           />
 
-          {/* COMANDOS DA TORCIDA (Exatamente como na Imagem) */}
+          {/* COMANDOS DA TORCIDA */}
           <div className="p-4 rounded-2xl bg-zinc-950/90 border border-zinc-800/90 shadow-xl flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -472,7 +496,7 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
                 </span>
               </button>
 
-              {/* 3. FAIXAS */}
+              {/* 3. FAIXAS (Ícone Estilizado de Faixas Verticais de Torcida) */}
               <button
                 onClick={() => handleAction("faixas")}
                 disabled={energy < 16 || (cooldowns.faixas ? cooldowns.faixas > 0 : false)}
@@ -489,8 +513,11 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
                     {cooldowns.faixas}s
                   </span>
                 )}
-                <div className="w-8 h-8 rounded-lg bg-amber-950/40 border border-amber-500/30 flex items-center justify-center text-amber-400 text-sm mb-1">
-                  🎗️
+                {/* Ícone customizado de Faixas Verticais */}
+                <div className="w-8 h-8 rounded-lg bg-zinc-950 border border-amber-400/50 flex items-center justify-center gap-1 overflow-hidden p-1 shadow-inner mb-1">
+                  <div className="w-1.5 h-full bg-amber-400 rounded-xs" />
+                  <div className="w-1.5 h-full bg-sky-500 rounded-xs" />
+                  <div className="w-1.5 h-full bg-amber-400 rounded-xs" />
                 </div>
                 <span className="text-[10px] font-black uppercase text-zinc-200">FAIXAS</span>
                 <span className="text-[9px] font-mono font-bold text-zinc-400 mt-0.5">
@@ -597,7 +624,7 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
             chancesCreated={chancesCreated}
           />
 
-          {/* BARRA DE NOTIFICAÇÃO DAS AÇÕES DA TORCIDA (Exata do Google AI Studio) */}
+          {/* BARRA DE NOTIFICAÇÃO DAS AÇÕES DA TORCIDA */}
           <div className="p-3.5 rounded-2xl bg-zinc-950/90 border border-zinc-800/90 shadow-xl flex items-center justify-between transition-all">
             <div className="flex items-center gap-2.5 text-xs font-semibold text-zinc-200">
               <div className="w-7 h-7 rounded-lg bg-pink-950/70 border border-pink-500/40 flex items-center justify-center text-pink-400 shrink-0">

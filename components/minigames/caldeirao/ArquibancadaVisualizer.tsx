@@ -44,8 +44,9 @@ export const ArquibancadaVisualizer: React.FC<ArquibancadaVisualizerProps> = ({
           </span>
         </div>
 
-        <div className="px-3 py-1 rounded-lg bg-zinc-900/90 border border-zinc-700/80 text-xs font-mono font-bold text-cyan-400 shadow">
-          {decibels} dB
+        <div className="px-3 py-1 rounded-lg bg-zinc-900/90 border border-zinc-700/80 text-xs font-mono font-bold text-cyan-400 shadow flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+          <span>{decibels} dB</span>
         </div>
       </div>
 
@@ -55,20 +56,20 @@ export const ArquibancadaVisualizer: React.FC<ArquibancadaVisualizerProps> = ({
       {/* Sinalizadores & Fumaça de Fogo */}
       {hasFlares && (
         <div
-          className="absolute inset-0 pointer-events-none mix-blend-screen opacity-80 animate-pulse z-15"
+          className="absolute inset-0 pointer-events-none mix-blend-screen opacity-85 animate-pulse z-15"
           style={{
-            background: `radial-gradient(circle at 50% 100%, ${secondaryCol}, rgba(239, 68, 68, 0.75) 45%, transparent 85%)`,
+            background: `radial-gradient(circle at 50% 100%, ${secondaryCol}, rgba(239, 68, 68, 0.8) 45%, transparent 85%)`,
           }}
         />
       )}
 
-      {/* Faixas Verticais descendo pelo setor */}
-      {(hasVerticalStripes || isAbove85) && (
-        <div className="absolute inset-0 flex justify-around pointer-events-none opacity-90 z-20">
+      {/* FAIXAS VERTICAIS: Aparecem APENAS ao acionar o comando FAIXAS (hasVerticalStripes) */}
+      {hasVerticalStripes && (
+        <div className="absolute inset-0 flex justify-around pointer-events-none opacity-95 z-20 animate-in fade-in duration-300">
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={`stripe-${i}`}
-              className="w-4 sm:w-5 h-full shadow-lg border-x border-amber-400/60 bg-gradient-to-b from-amber-400 via-sky-500 to-amber-400 opacity-80"
+              className="w-4 sm:w-5 h-full shadow-2xl border-x-2 border-amber-400/80 bg-gradient-to-b from-amber-400 via-sky-500 to-amber-400 opacity-90 animate-pulse"
               style={{
                 backgroundColor: i % 2 === 0 ? secondaryCol : primaryCol,
               }}
@@ -87,7 +88,6 @@ export const ArquibancadaVisualizer: React.FC<ArquibancadaVisualizerProps> = ({
         }}
       >
         <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-black/40 backdrop-blur-xs border-2 border-amber-400/40 relative">
-          {/* Efeito de brilho do tecido */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/15 via-transparent to-black/70 pointer-events-none" />
 
           <span className="text-3xl sm:text-4xl font-black uppercase text-white tracking-widest drop-shadow-[0_4px_10px_rgba(0,0,0,0.9)] z-10 animate-pulse">
@@ -127,12 +127,17 @@ export const ArquibancadaVisualizer: React.FC<ArquibancadaVisualizerProps> = ({
         </div>
       )}
 
-      {/* TORCIDA DE ARQUIBANCADA (3 Tiers com Corpos & Cabeças 100% Visíveis) */}
+      {/* TORCIDA DE ARQUIBANCADA (3 Tiers com Movimento Contínuo e Vibrante) */}
       <div className="relative z-10 w-full h-48 mt-auto flex flex-col justify-end gap-2 pb-1 pointer-events-none">
-        {/* Tier 3 (Fundo / Degrau Superior) */}
-        <div className="flex justify-around items-end opacity-75">
+        {/* Tier 3 (Fundo / Degrau Superior - Movimento Continuo) */}
+        <div className="flex justify-around items-end opacity-80">
           {Array.from({ length: 15 }).map((_, i) => (
-            <div key={`row3-${i}`} className="flex flex-col items-center">
+            <div
+              key={`row3-${i}`}
+              className={`flex flex-col items-center transition-transform duration-300 ${
+                i % 2 === 0 ? "animate-pulse" : ""
+              }`}
+            >
               <div
                 className="w-2.5 h-2.5 rounded-full border border-white/40 shadow-sm"
                 style={{ backgroundColor: i % 2 === 0 ? secondaryCol : "#ffffff" }}
@@ -145,13 +150,13 @@ export const ArquibancadaVisualizer: React.FC<ArquibancadaVisualizerProps> = ({
           ))}
         </div>
 
-        {/* Tier 2 (Meio / Degrau Intermediário) */}
+        {/* Tier 2 (Meio / Degrau Intermediário - Alternado Pulando/Balançando) */}
         <div className="flex justify-around items-end opacity-90">
           {Array.from({ length: 16 }).map((_, i) => (
             <div
               key={`row2-${i}`}
-              className={`flex flex-col items-center transition-transform duration-200 ${
-                isDrumming ? "-translate-y-2" : ""
+              className={`flex flex-col items-center transition-transform duration-300 ${
+                isDrumming || i % 2 === 0 ? "animate-bounce" : "animate-pulse"
               }`}
             >
               <div
@@ -166,13 +171,17 @@ export const ArquibancadaVisualizer: React.FC<ArquibancadaVisualizerProps> = ({
           ))}
         </div>
 
-        {/* Tier 1 (Frente / Degrau Principal - Corpos Inteiros Visíveis com Braços) */}
+        {/* Tier 1 (Frente / Degrau Principal - Torcida Ativa Vibrando sem Parar) */}
         <div className="flex justify-around items-end">
           {Array.from({ length: 16 }).map((_, i) => (
             <div
               key={`row1-${i}`}
-              className={`flex flex-col items-center transition-all duration-200 ${
-                isChanting ? "-translate-y-2.5" : ""
+              className={`flex flex-col items-center transition-all duration-300 ${
+                isChanting || i % 3 === 0
+                  ? "-translate-y-3.5 animate-bounce"
+                  : i % 2 === 0
+                  ? "-translate-y-1 animate-pulse"
+                  : ""
               }`}
             >
               {/* Cabeça do Torcedor */}
