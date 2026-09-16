@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Tv, Sparkles, X, CheckCircle2, ExternalLink, Volume2, VolumeX, Lock } from "lucide-react";
+import { Tv, Sparkles, X, CheckCircle2, ExternalLink, Volume2, VolumeX, Lock, Play } from "lucide-react";
 
 interface MockAdModalProps {
   onComplete: () => void;
@@ -11,9 +11,10 @@ interface MockAdModalProps {
 export const MockAdModal: React.FC<MockAdModalProps> = ({ onComplete, onCancel }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isFinished, setIsFinished] = useState(false);
-  const [duration, setDuration] = useState(0);
+  const [duration, setDuration] = useState(20);
   const [currentTime, setCurrentTime] = useState(0);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
 
   const shopeeUrl = "https://shopee.com.br/product/336227879/22899347329/";
 
@@ -21,8 +22,27 @@ export const MockAdModal: React.FC<MockAdModalProps> = ({ onComplete, onCancel }
     const video = videoRef.current;
     if (!video) return;
 
+    // Fallback timer interval (ticks every 1s)
+    const timer = setInterval(() => {
+      if (video.currentTime) {
+        setCurrentTime(video.currentTime);
+        if (video.duration && !isNaN(video.duration)) setDuration(video.duration);
+        if (video.currentTime >= (video.duration || 20) - 0.5) {
+          setIsFinished(true);
+        }
+      } else {
+        setCurrentTime((prev) => {
+          const next = prev + 1;
+          if (next >= 20) setIsFinished(true);
+          return next;
+        });
+      }
+    }, 1000);
+
     const handleLoadedMetadata = () => {
-      setDuration(video.duration || 0);
+      if (video.duration && !isNaN(video.duration)) {
+        setDuration(video.duration);
+      }
     };
 
     const handleTimeUpdate = () => {
@@ -40,19 +60,35 @@ export const MockAdModal: React.FC<MockAdModalProps> = ({ onComplete, onCancel }
     video.addEventListener("timeupdate", handleTimeUpdate);
     video.addEventListener("ended", handleEnded);
 
-    // Try playing video with sound, fallback to muted if autoplay policy intervenes
-    video.play().catch(() => {
-      setIsMuted(true);
-      video.muted = true;
-      video.play().catch((err) => console.warn("Autoplay blocked:", err));
-    });
+    // Modern browsers allow muted autoplay reliably
+    video.muted = true;
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          setIsPaused(false);
+        })
+        .catch(() => {
+          setIsPaused(true);
+        });
+    }
 
     return () => {
+      clearInterval(timer);
       video.removeEventListener("loadedmetadata", handleLoadedMetadata);
       video.removeEventListener("timeupdate", handleTimeUpdate);
       video.removeEventListener("ended", handleEnded);
     };
   }, []);
+
+  const handleStartPlay = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (videoRef.current) {
+      videoRef.current.muted = false;
+      setIsMuted(false);
+      videoRef.current.play().then(() => setIsPaused(false)).catch(() => {});
+    }
+  };
 
   const toggleMute = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -66,8 +102,9 @@ export const MockAdModal: React.FC<MockAdModalProps> = ({ onComplete, onCancel }
     window.open(shopeeUrl, "_blank");
   };
 
-  const remainingSeconds = Math.max(0, Math.ceil(duration - currentTime));
-  const progressPct = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
+  const totalSeconds = duration > 0 ? duration : 20;
+  const remainingSeconds = Math.max(0, Math.ceil(totalSeconds - currentTime));
+  const progressPct = totalSeconds > 0 ? Math.min(100, (currentTime / totalSeconds) * 100) : 0;
 
   return (
     <div className="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-md flex items-center justify-center p-4 select-none animate-fade-in">
@@ -93,12 +130,29 @@ export const MockAdModal: React.FC<MockAdModalProps> = ({ onComplete, onCancel }
         >
           <video
             ref={videoRef}
-            src="/videos/videoanuncio.mp4"
             autoPlay
             playsInline
             muted={isMuted}
+            preload="auto"
             className="w-full h-full object-cover"
-          />
+          >
+            <source src="/videos/videoanuncio.mp4" type="video/mp4" />
+          </video>
+
+          {/* Pause / Autoplay Play Trigger Button Overlay */}
+          {isPaused && (
+            <button
+              onClick={handleStartPlay}
+              className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-2 text-white font-black z-30 cursor-pointer"
+            >
+              <div className="w-12 h-12 rounded-full bg-amber-500 text-black flex items-center justify-center shadow-lg transform transition group-hover:scale-110">
+                <Play className="w-6 h-6 ml-1 fill-black" />
+              </div>
+              <span className="text-xs uppercase tracking-wider bg-amber-500 text-black px-2.5 py-0.5 rounded-full">
+                ▶ TOQUE PARA ASSISTIR COM SOM
+              </span>
+            </button>
+          )}
 
           {/* Click Shopee Watermark Overlay */}
           <div className="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none z-10">

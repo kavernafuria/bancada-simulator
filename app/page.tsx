@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ENDGAME_INVESTMENTS, EndGameInvestment, triggerRandomUnforeseenExpense, UnforeseenExpense } from "@/lib/bancada_engine";
 import { AgeGateService } from "@/lib/age_gate_service";
@@ -244,6 +244,7 @@ export default function App() {
 
   // MÓDULO 1 & 2 STATE
   const [torcidaUnicaState, setTorcidaUnicaState] = useState<TorcidaUnicaState>(INITIAL_TORCIDA_UNICA_STATE);
+  const hasServedTorcidaUnicaRef = useRef<boolean>(false);
   const [activeTorcidaUnicaModalMode, setActiveTorcidaUnicaModalMode] = useState<"ACTIVATION_NEWS" | "REVOCATION_NEWS" | "MATCHDAY_CRISIS" | null>(null);
   const [torcidaUnicaActionAppliedForStep, setTorcidaUnicaActionAppliedForStep] = useState<number | null>(null);
   const [activePressConference, setActivePressConference] = useState<PressConference | null>(null);
@@ -443,6 +444,12 @@ export default function App() {
           if (parsed.challengedRivalTorcida) {
             setChallengedRivalTorcida(parsed.challengedRivalTorcida);
           }
+          if (parsed.torcidaUnicaState) {
+            setTorcidaUnicaState(parsed.torcidaUnicaState);
+            if (parsed.torcidaUnicaState.hasAlreadyServedTorcidaUnica || parsed.torcidaUnicaState.isTorcidaUnica) {
+              hasServedTorcidaUnicaRef.current = true;
+            }
+          }
           if (parsed.seasonObjectives && parsed.seasonObjectives.length > 0) {
             setSeasonObjectives(parsed.seasonObjectives);
           } else {
@@ -498,6 +505,7 @@ export default function App() {
           hasOwnHeadquarters,
           bateriaDurability,
           pyroStockCount,
+          torcidaUnicaState,
         })
       );
     }
@@ -520,6 +528,7 @@ export default function App() {
     hasOwnHeadquarters,
     bateriaDurability,
     pyroStockCount,
+    torcidaUnicaState,
   ]);
 
   const pipeline = currentTorcida
@@ -571,6 +580,9 @@ export default function App() {
 
   const handleStartCareer = () => {
     if (soundEnabled) playStadiumSound("drum");
+
+    hasServedTorcidaUnicaRef.current = false;
+    setTorcidaUnicaState(INITIAL_TORCIDA_UNICA_STATE);
 
     if (startMode === "HISTORICA") {
       const selected = officialList.find((t) => t.torcida === selectedOfficialTorcidaName) || officialList[0];
@@ -1113,17 +1125,20 @@ export default function App() {
 
       // MÓDULO 1: Gatilho de Ativação de Crise Judicial & Decreto de Torcida Única (Risco MP >= 75%, Apenas 1x na Carreira)
       if (
+        !hasServedTorcidaUnicaRef.current &&
         !torcidaUnicaState.hasAlreadyServedTorcidaUnica &&
         !torcidaUnicaState.isTorcidaUnica &&
         newMP >= 75
       ) {
-        setTorcidaUnicaState({
+        hasServedTorcidaUnicaRef.current = true;
+        setTorcidaUnicaState((prev) => ({
+          ...prev,
           isTorcidaUnica: true,
           torcidaUnicaCounter: 3,
           permanentCostMult: 1.0,
           hasPendingActivationNews: true,
           hasAlreadyServedTorcidaUnica: true,
-        });
+        }));
         setActiveTorcidaUnicaModalMode("ACTIVATION_NEWS");
         const conf = getPressConference("ENTREVISTA_CRISE_JUDICIAL_MP") || getPressConference("ENTREVISTA_TORCIDA_UNICA");
         if (conf) {
@@ -1635,6 +1650,8 @@ export default function App() {
 
   const handleRestartGame = () => {
     localStorage.removeItem("bancada_ultra_v2_save");
+    hasServedTorcidaUnicaRef.current = false;
+    setTorcidaUnicaState(INITIAL_TORCIDA_UNICA_STATE);
     setIsStarted(false);
     setIsGameOver(false);
     setRetryUsedCurrentMatch(false);
