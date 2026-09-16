@@ -848,6 +848,13 @@ export default function App() {
 
     const opponentTier: MatchContext['opponentTier'] = activeScoutIntel.rivalMembersWaiting > 3000 ? 'S' : activeScoutIntel.rivalMembersWaiting > 1500 ? 'A' : 'B';
 
+    // Se a tática for Rompimento de Escolta no Perímetro, apenas uma pequena fração rebelde participa (40% do contingente),
+    // pois a maioria do bonde estava desarmada e escoltada. Quando falta à reunião da PM, 100% do contingente marcha preparado.
+    const isPerimeterBreach = tid.includes("COMBATE_LINHA_FRENTE_PORTAO") || tid.includes("PERIMETRO");
+    const effectiveContingente = isPerimeterBreach
+      ? Math.max(15, Math.round(stats.contingente * 0.4))
+      : stats.contingente;
+
     setActiveSelectedTactic(tactic);
     setActiveMatchMiniGameContext({
       isHome: activeMatchDerby.isHome,
@@ -860,8 +867,8 @@ export default function App() {
       playerClubName: currentTorcida.clube,
       rivalTorcidaName: activeMatchDerby.rivalTorcida || "Torcida Rival",
       rivalClubName: activeMatchDerby.isHome ? activeMatchDerby.awayClub : activeMatchDerby.homeClub,
-      contingente: stats.contingente,
-      poderPista: stats.poder_pista,
+      contingente: effectiveContingente,
+      poderPista: isPerimeterBreach ? Math.max(15, Math.round(stats.poder_pista * 0.7)) : stats.poder_pista,
     });
     setMatchModalPhase("MINIGAME");
   };
