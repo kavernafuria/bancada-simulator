@@ -289,22 +289,22 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
   const currentDecayText = pressure >= 85 ? "-5.0%/s" : "-2.0%/s";
 
   return (
-    <div className="w-full max-w-6xl mx-auto flex flex-col gap-4 bg-[#090d16] p-4 sm:p-6 rounded-3xl border border-zinc-800 text-white shadow-2xl font-sans select-none">
+    <div className="w-full max-w-6xl mx-auto flex flex-col gap-3 sm:gap-4 bg-[#090d16] p-2.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-zinc-800 text-white shadow-2xl font-sans select-none overflow-x-hidden">
       {/* 1. TOP HEADER BAR */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-zinc-950/80 border border-zinc-800/80 shadow-lg">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3 p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-zinc-950/80 border border-zinc-800/80 shadow-lg w-full">
         {/* Left Team Badge Info */}
-        <div className="flex items-center gap-3">
-          <div className="w-3 h-3 rounded-full bg-sky-500 shadow-sm" />
-          <span className="text-sm font-black text-white tracking-wide">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-center sm:justify-start">
+          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-sky-500 shadow-sm shrink-0" />
+          <span className="text-xs sm:text-sm font-black text-white tracking-wide">
             {homeTeam.name}
           </span>
-          <span className="text-xs font-bold text-zinc-500 lowercase">vs</span>
-          <span className="text-sm font-black text-white tracking-wide">
+          <span className="text-[10px] sm:text-xs font-bold text-zinc-500 lowercase">vs</span>
+          <span className="text-xs sm:text-sm font-black text-white tracking-wide">
             {awayTeam.name}
           </span>
-          <div className="w-3 h-3 rounded-full bg-red-600 shadow-sm" />
+          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-600 shadow-sm shrink-0" />
 
-          <span className="text-[11px] font-mono text-zinc-300 bg-zinc-900 border border-zinc-800 px-2.5 py-1 rounded-md ml-1">
+          <span className="text-[9px] sm:text-[11px] font-mono text-zinc-300 bg-zinc-900 border border-zinc-800 px-2 py-0.5 sm:py-1 rounded-md">
             Estádio Monumental
           </span>
         </div>

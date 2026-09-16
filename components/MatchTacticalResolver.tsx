@@ -998,7 +998,7 @@ export const MatchTacticalResolver: React.FC<{
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-2 w-full">
+    <div className="flex flex-col items-center justify-center p-0 sm:p-1 w-full min-w-0">
       {statusMessage && (
         <div className="bg-zinc-900 border border-zinc-700 p-4 rounded-xl text-center text-sm text-zinc-300 max-w-sm mb-4">
           {statusMessage}
