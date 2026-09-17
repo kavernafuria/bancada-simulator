@@ -22,22 +22,10 @@ export const MockAdModal: React.FC<MockAdModalProps> = ({ onComplete, onCancel }
     const video = videoRef.current;
     if (!video) return;
 
-    // Fallback timer interval (ticks every 1s)
-    const timer = setInterval(() => {
-      if (video.currentTime) {
-        setCurrentTime(video.currentTime);
-        if (video.duration && !isNaN(video.duration)) setDuration(video.duration);
-        if (video.currentTime >= (video.duration || 20) - 0.5) {
-          setIsFinished(true);
-        }
-      } else {
-        setCurrentTime((prev) => {
-          const next = prev + 1;
-          if (next >= 20) setIsFinished(true);
-          return next;
-        });
-      }
-    }, 1000);
+    // Explicitly load video for mobile compatibility
+    try {
+      video.load();
+    } catch {}
 
     const handleLoadedMetadata = () => {
       if (video.duration && !isNaN(video.duration)) {
@@ -60,7 +48,7 @@ export const MockAdModal: React.FC<MockAdModalProps> = ({ onComplete, onCancel }
     video.addEventListener("timeupdate", handleTimeUpdate);
     video.addEventListener("ended", handleEnded);
 
-    // Modern browsers allow muted autoplay reliably
+    // Muted autoplay attempt for mobile Safari/Chrome
     video.muted = true;
     const playPromise = video.play();
     if (playPromise !== undefined) {
@@ -72,6 +60,23 @@ export const MockAdModal: React.FC<MockAdModalProps> = ({ onComplete, onCancel }
           setIsPaused(true);
         });
     }
+
+    // Fallback timer interval (ticks every 1s)
+    const timer = setInterval(() => {
+      if (video.currentTime) {
+        setCurrentTime(video.currentTime);
+        if (video.duration && !isNaN(video.duration)) setDuration(video.duration);
+        if (video.currentTime >= (video.duration || 20) - 0.5) {
+          setIsFinished(true);
+        }
+      } else {
+        setCurrentTime((prev) => {
+          const next = prev + 1;
+          if (next >= 20) setIsFinished(true);
+          return next;
+        });
+      }
+    }, 1000);
 
     return () => {
       clearInterval(timer);
@@ -107,8 +112,8 @@ export const MockAdModal: React.FC<MockAdModalProps> = ({ onComplete, onCancel }
   const progressPct = totalSeconds > 0 ? Math.min(100, (currentTime / totalSeconds) * 100) : 0;
 
   return (
-    <div className="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-md flex items-center justify-center p-3 select-none animate-fade-in">
-      <div className="bg-zinc-950 border-2 border-amber-500/80 rounded-3xl max-w-[340px] w-full h-[88vh] max-h-[650px] p-3.5 shadow-2xl flex flex-col justify-between text-center relative overflow-hidden">
+    <div className="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 select-none animate-fade-in overflow-y-auto">
+      <div className="bg-zinc-950 border-2 border-amber-500/80 rounded-2xl sm:rounded-3xl w-full max-w-[360px] h-[92vh] max-h-[720px] p-3 shadow-2xl flex flex-col justify-between text-center relative overflow-hidden my-auto">
         {/* Ad Header Banner */}
         <div className="flex items-center justify-between bg-amber-950/90 border border-amber-500/50 rounded-xl px-3 py-2 text-left z-10 shrink-0">
           <div className="flex items-center gap-1.5">
@@ -122,19 +127,20 @@ export const MockAdModal: React.FC<MockAdModalProps> = ({ onComplete, onCancel }
           </span>
         </div>
 
-        {/* Vertical Portrait Video Container (TikTok / Reels Style - Full Uncropped Video) */}
+        {/* Vertical Portrait Video Container (TikTok / Reels Style 9:16 Aspect Ratio) */}
         <div
           onClick={handleAdClick}
-          className="group relative flex-1 w-full bg-black rounded-2xl border border-zinc-800 overflow-hidden cursor-pointer shadow-2xl transition-all hover:border-amber-400/80 flex items-center justify-center my-2.5 min-h-0"
+          className="group relative flex-1 w-full bg-black rounded-xl border border-zinc-800 overflow-hidden cursor-pointer shadow-2xl transition-all hover:border-amber-400/80 flex items-center justify-center my-2 min-h-0 aspect-[9/16]"
           title="Clique em qualquer lugar do anúncio para abrir na Shopee"
         >
           <video
             ref={videoRef}
+            src="/videos/videoanuncio.mp4"
             autoPlay
             playsInline
             muted={isMuted}
             preload="auto"
-            className="w-full h-full object-contain bg-black"
+            className="w-full h-full object-cover rounded-xl bg-black"
           >
             <source src="/videos/videoanuncio.mp4" type="video/mp4" />
           </video>
@@ -143,12 +149,12 @@ export const MockAdModal: React.FC<MockAdModalProps> = ({ onComplete, onCancel }
           {isPaused && (
             <button
               onClick={handleStartPlay}
-              className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-2 text-white font-black z-30 cursor-pointer"
+              className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-2 text-white font-black z-30 cursor-pointer p-4 text-center"
             >
               <div className="w-14 h-14 rounded-full bg-amber-500 text-black flex items-center justify-center shadow-lg transform transition group-hover:scale-110">
                 <Play className="w-7 h-7 ml-1 fill-black" />
               </div>
-              <span className="text-xs uppercase tracking-wider bg-amber-500 text-black px-3 py-1 rounded-full shadow">
+              <span className="text-xs uppercase tracking-wider bg-amber-500 text-black px-3 py-1.5 rounded-full shadow font-bold">
                 ▶ TOQUE PARA ASSISTIR COM SOM
               </span>
             </button>
