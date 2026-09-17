@@ -532,7 +532,7 @@ export default function App() {
   ]);
 
   const pipeline = currentTorcida
-    ? getAnnualPipelineWithMatches(currentTorcida, clubStatus, season, challengedRivalTorcida)
+    ? getAnnualPipelineWithMatches(currentTorcida, clubStatus, season, challengedRivalTorcida, torcidaUnicaState.isTorcidaUnica)
     : [];
 
   const actionEvents = getActionStepEvents(clubStatus, season, currentTorcida);
@@ -917,6 +917,13 @@ export default function App() {
         ...st,
         moral: Math.min(100, st.moral + 15),
         respeito_nacional: Math.min(100, st.respeito_nacional + 8),
+      }));
+    } else if (tactic.id === 'TELAO_CHURRASCO_QUADRA_SEDE') {
+      setBankBalance((prev) => prev + 3500);
+      setStateTrackers((st) => ({
+        ...st,
+        moral: Math.min(100, st.moral + 8),
+        risco_mp: Math.max(0, st.risco_mp - 10),
       }));
     }
 

@@ -681,7 +681,8 @@ export function getDerbyForMatch(
   gameIndex: number, // 1, 2, 3, 4
   clubStatus: ClubStatus,
   season: number = 1,
-  challengedRivalTorcida?: string | null
+  challengedRivalTorcida?: string | null,
+  isTorcidaUnica?: boolean
 ): DerbyMatchInfo {
   const all = teamsData as OfficialTorcida[];
   const userClub = currentTorcida.clube.trim().toLowerCase();
@@ -1074,6 +1075,86 @@ export function getDerbyForMatch(
   };
 
   const homeStadiumInfo = getStadium(currentTorcida.clube);
+
+  if (isTorcidaUnica) {
+    if (gameIndex === 1) {
+      // JOGO 1: Clássico Estadual Mandante sob Decreto de Torcida Única
+      const rivalStadiumInfo = getStadium(mainRival.clube);
+      return {
+        matchTitle: `${currentTorcida.clube} x ${mainRival.clube}`,
+        homeClub: currentTorcida.clube,
+        awayClub: mainRival.clube,
+        rivalTorcida: mainRival.torcida,
+        rivalSigla: "",
+        stadium: homeStadiumInfo.stadium,
+        cityState: homeStadiumInfo.cityState,
+        derbyName: `🚫 Clássico Estadual sob Torcida Única (Mandante)`,
+        isHome: true,
+        isLongDistance: false,
+        isAllyGame: false,
+        competition: "🚫 Torcida Única (Estadual Mandante)",
+        importanceDescription: `O rival estadual (${mainRival.clube}) está proibido de entrar no seu estádio por decreto judicial. Foco no recebimento da equipe com Corredor de Fogo ou Barreira nos Portões.`,
+      };
+    } else if (gameIndex === 2) {
+      // JOGO 2: Clássico Estadual Visitante sob Decreto de Torcida Única
+      const rivalStadiumInfo = getStadium(mainRival.clube);
+      return {
+        matchTitle: `${mainRival.clube} x ${currentTorcida.clube}`,
+        homeClub: mainRival.clube,
+        awayClub: currentTorcida.clube,
+        rivalTorcida: mainRival.torcida,
+        rivalSigla: "",
+        stadium: rivalStadiumInfo.stadium,
+        cityState: rivalStadiumInfo.cityState,
+        derbyName: `🚫 Clássico Estadual sob Torcida Única (Visitante)`,
+        isHome: false,
+        isLongDistance: false,
+        isAllyGame: false,
+        competition: "🚫 Torcida Única (Estadual Visitante)",
+        importanceDescription: `Sua torcida está proibida de entrar no estádio do rival (${mainRival.clube}). Escolhas de rua: Cortejo no CT, Emboscada Rodoviária, Telão na Sede (Lucro de Caixa) ou Marcha na Barreira da PM.`,
+      };
+    } else if (gameIndex === 3) {
+      // JOGO 3: Rival Interestadual (Sem restrição de Torcida Única — Caravana Liberada)
+      const interstateRival = otherStateRivals[0] || secondRival;
+      const rivalStadiumInfo = getStadium(interstateRival.clube);
+      const isHighway = isHighwayTrip(currentTorcida.clube, interstateRival.clube);
+      return {
+        matchTitle: `${interstateRival.clube} x ${currentTorcida.clube}`,
+        homeClub: interstateRival.clube,
+        awayClub: currentTorcida.clube,
+        rivalTorcida: interstateRival.torcida,
+        rivalSigla: "",
+        stadium: rivalStadiumInfo.stadium,
+        cityState: rivalStadiumInfo.cityState,
+        derbyName: `🚌 Confronto Interestadual: ${currentTorcida.clube} x ${interstateRival.clube}`,
+        isHome: false,
+        isLongDistance: isHighway,
+        isAllyGame: false,
+        competition: "🚌 Clássico Interestadual (Liberação de Caravana)",
+        importanceDescription: `O decreto estadual aplica-se apenas ao estado de origem. Válvula de escape com caravana rodoviária completa, setor visitante liberado e festa total de pirotecnia contra o ${interstateRival.clube}.`,
+      };
+    } else {
+      // JOGO 4: Amistoso Festivo de Aliança / Confraternização
+      const ally = allyTorcida || allies[0];
+      if (ally) {
+        return {
+          matchTitle: `${currentTorcida.clube} x ${ally.clube}`,
+          homeClub: currentTorcida.clube,
+          awayClub: ally.clube,
+          rivalTorcida: ally.torcida,
+          rivalSigla: "",
+          stadium: homeStadiumInfo.stadium,
+          cityState: homeStadiumInfo.cityState,
+          derbyName: `🤝 Festa de Aliança & Confraternização (${currentTorcida.eixo_alianca})`,
+          isHome: true,
+          isLongDistance: false,
+          isAllyGame: true,
+          competition: "🤝 Amistoso Festivo de Aliança",
+          importanceDescription: `Amistoso festivo de eixos aliados no ${homeStadiumInfo.stadium} com churrasco farto de costela de chão na sede, chopp gelado, cortejo conjunto e festa de arquibancada com as duas baterias!`,
+        };
+      }
+    }
+  }
 
   if (gameIndex === 1) {
     // Game 1: Regional Classic (Paulistão / Campeonato Estadual)
@@ -1821,6 +1902,153 @@ export function getTacticalBattleChoices(
   derby: DerbyMatchInfo,
   selectedPoliceChoice?: PoliceMeetingChoice | null
 ): TacticalBattleChoice[] {
+  if ((derby.competition || "").includes("Torcida Única")) {
+    if (!derby.isHome) {
+      // 🚫 TORCIDA ÚNICA VISITANTE — 4 OPÇÕES REALISTAS DE RUA
+      return [
+        {
+          id: "CORTEJO_DESPEDIDA_CT",
+          title: "🚌 1. Cortejo de Despedida no CT / Aeroporto",
+          description: "A torcida se concentra na porta do CT do clube com sinalizadores e fumaça para empurrar o ônibus do time antes da viagem.",
+          pistaMod: 5,
+          moralMod: 10,
+          mpPenalty: 0,
+          costRisk: 800,
+          injuryRisk: 0,
+          tacticalLog: "Cortejo apoteótico no CT empurrou a comitiva do clube antes da viagem, contagiando os jogadores para buscar a vitória fora de casa.",
+          formattedDeltas: [
+            { label: "Empurrão no Time (Placar)", value: "+15% Placar", isPositive: true },
+            { label: "Moral da Torcida", value: "+10", isPositive: true },
+            { label: "Risco MP", value: "0% (Ação Legal)", isPositive: true },
+            { label: "Arsenal de Fumaça", value: "-R$ 800", isPositive: false },
+          ],
+        },
+        {
+          id: "EMBOSCADA_RODOVIARIA_PERIMETRO",
+          title: "🚨 2. Interceptação Rodoviária / Emboscada de Perímetro",
+          description: "A linha de frente tenta interceptar o comboio rival na rodovia/pedágio fora do raio de isolamento da PM.",
+          pistaMod: 12,
+          moralMod: 12,
+          mpPenalty: 12,
+          costRisk: 1500,
+          injuryRisk: 10,
+          tacticalLog: "Linha de frente executou interceptação surpresa na rodovia antes do cerco policial, travando a pista em confronto pesado.",
+          formattedDeltas: [
+            { label: "Respeito de Pista", value: "+12 Pista", isPositive: true },
+            { label: "Moral da Tropa", value: "+12", isPositive: true },
+            { label: "Risco MP", value: "+12%", isPositive: false },
+            { label: "Custos de Apoio", value: "-R$ 1.500", isPositive: false },
+          ],
+        },
+        {
+          id: "TELAO_CHURRASCO_QUADRA_SEDE",
+          title: "📺 3. Mega Concentração com Telão na Sede / Quadra (Arrecadação de Caixa)",
+          description: "Evento festivo seguro que arrecada caixa para a torcida com churrasco, chopp e transmissão ao vivo no telão da quadra.",
+          pistaMod: -5,
+          moralMod: 8,
+          mpPenalty: -10,
+          costRisk: 0,
+          injuryRisk: 0,
+          tacticalLog: "Festa monumental na quadra da torcida com transmissão no telão, churrasco farto e arrecadação direta para o caixa da entidade.",
+          formattedDeltas: [
+            { label: "Lucro no Caixa da Torcida", value: "+R$ 3.500", isPositive: true },
+            { label: "Moral da Massa", value: "+8", isPositive: true },
+            { label: "Integrantes Preservados", value: "100% Seguros (0 Feridos)", isPositive: true },
+            { label: "Risco MP", value: "-10% (Pacto Cumprido)", isPositive: true },
+          ],
+        },
+        {
+          id: "MARCHA_BARREIRA_POLICIAL",
+          title: "🚧 4. Marcha de Presença até a Barreira da PM",
+          description: "Marcha ruidosa com bateria e fumaça escoltando a comitiva até o limite do cerco policial (2km do estádio rival).",
+          pistaMod: 2,
+          moralMod: 8,
+          mpPenalty: 2,
+          costRisk: 600,
+          injuryRisk: 0,
+          tacticalLog: "Massa marchou com bateria e sinalizadores até o último bloqueio da PM, mostrando a presença da agremiação no perímetro.",
+          formattedDeltas: [
+            { label: "Respeito Nacional", value: "+12", isPositive: true },
+            { label: "Moral da Tropa", value: "+8", isPositive: true },
+            { label: "Postura de Rua", value: "Presença Confirmada", isPositive: true },
+            { label: "Logística de Marcha", value: "-R$ 600", isPositive: false },
+          ],
+        },
+      ];
+    } else {
+      // 🚫 TORCIDA ÚNICA MANDANTE — OPÇÕES DE CALDEIRÃO E RECEPÇÃO
+      return [
+        {
+          id: "CORREDOR_FOGO_CHEGADA_ONIBUS",
+          title: "🎆 1. Corredor de Fogo na Chegada do Ônibus no Caldeirão",
+          description: "Recepção apoteótica do ônibus do clube nos portões do estádio próprio com dezenas de fumaças e sinalizadores.",
+          pistaMod: 4,
+          moralMod: 10,
+          mpPenalty: 5,
+          costRisk: 2500,
+          injuryRisk: 0,
+          tacticalLog: "Recepção apoteótica na chegada do ônibus com corredor em brasa viva e show de fumaças nos portões do estádio.",
+          formattedDeltas: [
+            { label: "Pressão de Bancada", value: "+15", isPositive: true },
+            { label: "Moral da Torcida", value: "+10", isPositive: true },
+            { label: "Arsenal Pirotécnico", value: "-R$ 2.500", isPositive: false },
+          ],
+        },
+        {
+          id: "VIGILANCIA_PORTAO_ANTI_INFILTRACAO",
+          title: "🛡️ 2. Barreira Anti-Infiltração nos Portões",
+          description: "Integrantes checam suspeitos de torcer pelo rival tentando entrar de neutro no caldeirão próprio.",
+          pistaMod: 2,
+          moralMod: 5,
+          mpPenalty: -10,
+          costRisk: 500,
+          injuryRisk: 0,
+          tacticalLog: "Barreira de portão impediu a infiltração de rival nos setores locais, garantindo tranquilidade interna.",
+          formattedDeltas: [
+            { label: "Segurança de Setor", value: "100% Protegido", isPositive: true },
+            { label: "Risco MP", value: "-10%", isPositive: true },
+            { label: "Operação de Portão", value: "-R$ 500", isPositive: false },
+          ],
+        },
+        {
+          id: "FESTA_CALDEIRAO_CAMPINHO",
+          title: "🏟️ 3. Comando da Bancada & Pressão no Caldeirão (>85%)",
+          description: "Assuma o comando da arquibancada 100% local! Mantenha o caldeirão fervendo acima dos 85% para impulsionar o time.",
+          pistaMod: -2,
+          moralMod: 8,
+          mpPenalty: -10,
+          costRisk: 2000,
+          injuryRisk: 0,
+          isMosaicTactic: true,
+          tacticalLog: "Comandou o caldeirão de arquibancada sustentando a pressão no auge e impulsionando o time no campinho tático.",
+          formattedDeltas: [
+            { label: "Bônus no Placar (PEC)", value: "Até +25%", isPositive: true },
+            { label: "Moral da Torcida", value: "+8", isPositive: true },
+            { label: "Risco MP", value: "-10% (Paz)", isPositive: true },
+            { label: "Adereços", value: "-R$ 2.000", isPositive: false },
+          ],
+        },
+        {
+          id: "FESTA_BANDEIRAO_3D_CASA",
+          title: "🚩 4. Bandeirão 3D de Pavilhão no Setor Principal",
+          description: "Desfraldar bandeirão 3D gigante cobrindo todo o setor principal na entrada das equipes.",
+          pistaMod: -4,
+          moralMod: 7,
+          mpPenalty: 0,
+          costRisk: 3500,
+          injuryRisk: 0,
+          isMosaicTactic: true,
+          tacticalLog: "Subiu o bandeirão 3D de pavilhão cobrindo o setor principal em um espetáculo visual inesquecível.",
+          formattedDeltas: [
+            { label: "Pressão de Bancada", value: "+7", isPositive: true },
+            { label: "Moral da Torcida", value: "+7", isPositive: true },
+            { label: "Confecção & Materiais", value: "-R$ 3.500", isPositive: false },
+          ],
+        },
+      ];
+    }
+  }
+
   if (derby.isAllyGame) {
     return [
       {
@@ -2973,13 +3201,14 @@ export function getAnnualPipelineWithMatches(
   currentTorcida: OfficialTorcida,
   clubStatus: ClubStatus,
   season: number = 1,
-  challengedRivalTorcida?: string | null
+  challengedRivalTorcida?: string | null,
+  isTorcidaUnica?: boolean
 ) {
   const isInterior = isInteriorSP(currentTorcida);
-  const derby1 = getDerbyForMatch(currentTorcida, 1, clubStatus, season, challengedRivalTorcida);
-  const derby2 = getDerbyForMatch(currentTorcida, 2, clubStatus, season, challengedRivalTorcida);
-  const derby3 = getDerbyForMatch(currentTorcida, 3, clubStatus, season, challengedRivalTorcida);
-  const derby4 = getDerbyForMatch(currentTorcida, 4, clubStatus, season, challengedRivalTorcida);
+  const derby1 = getDerbyForMatch(currentTorcida, 1, clubStatus, season, challengedRivalTorcida, isTorcidaUnica);
+  const derby2 = getDerbyForMatch(currentTorcida, 2, clubStatus, season, challengedRivalTorcida, isTorcidaUnica);
+  const derby3 = getDerbyForMatch(currentTorcida, 3, clubStatus, season, challengedRivalTorcida, isTorcidaUnica);
+  const derby4 = getDerbyForMatch(currentTorcida, 4, clubStatus, season, challengedRivalTorcida, isTorcidaUnica);
 
   const act0 = getSeasonalActionEvent(1, season, 0, isInterior);
   const act1 = getSeasonalActionEvent(1, season, 1, isInterior);
