@@ -269,6 +269,44 @@ export default function App() {
   const [activeMatchResult, setActiveMatchResult] = useState<MatchExecutionResult | null>(null);
   const [isGeneratingChronicle, setIsGeneratingChronicle] = useState<boolean>(false);
 
+  // MÓDULO 1: Gatilho em 2 Estágios (1º Aviso MP/TAC -> 2º Decreto Definitivo de Torcida Única)
+  const triggerMPRiskFlow = (newMP: number, mpDelta: number) => {
+    if (
+      !hasServedTorcidaUnicaRef.current &&
+      !torcidaUnicaState.hasAlreadyServedTorcidaUnica &&
+      !torcidaUnicaState.isTorcidaUnica
+    ) {
+      // Estágio 1: Primeiro aviso quando Risco MP atinge >= 75% (Apenas abre a Coletiva do TAC/Aviso, sem decretação)
+      if (!torcidaUnicaState.hasBeenWarnedByMP && newMP >= 75) {
+        setTorcidaUnicaState((prev) => ({
+          ...prev,
+          hasBeenWarnedByMP: true,
+        }));
+        const conf = getPressConference("ENTREVISTA_CRISE_JUDICIAL_MP");
+        if (conf) {
+          setActivePressConference(conf);
+        }
+      } 
+      // Estágio 2: Se JÁ FOI AVISADO e o Risco MP voltou a AUMENTAR (mpDelta > 0)
+      else if (torcidaUnicaState.hasBeenWarnedByMP && mpDelta > 0) {
+        hasServedTorcidaUnicaRef.current = true;
+        setTorcidaUnicaState((prev) => ({
+          ...prev,
+          isTorcidaUnica: true,
+          torcidaUnicaCounter: 3,
+          permanentCostMult: 1.0,
+          hasPendingActivationNews: true,
+          hasAlreadyServedTorcidaUnica: true,
+        }));
+        setActiveTorcidaUnicaModalMode("ACTIVATION_NEWS");
+        const conf = getPressConference("ENTREVISTA_TORCIDA_UNICA");
+        if (conf) {
+          setActivePressConference(conf);
+        }
+      }
+    }
+  };
+
   // ACTION FEEDBACK STATE
   const [actionFeedback, setActionFeedback] = useState<{
     title: string;
@@ -1130,28 +1168,8 @@ export default function App() {
         });
       }
 
-      // MÓDULO 1: Gatilho de Ativação de Crise Judicial & Decreto de Torcida Única (Risco MP >= 75%, Apenas 1x na Carreira)
-      if (
-        !hasServedTorcidaUnicaRef.current &&
-        !torcidaUnicaState.hasAlreadyServedTorcidaUnica &&
-        !torcidaUnicaState.isTorcidaUnica &&
-        newMP >= 75
-      ) {
-        hasServedTorcidaUnicaRef.current = true;
-        setTorcidaUnicaState((prev) => ({
-          ...prev,
-          isTorcidaUnica: true,
-          torcidaUnicaCounter: 3,
-          permanentCostMult: 1.0,
-          hasPendingActivationNews: true,
-          hasAlreadyServedTorcidaUnica: true,
-        }));
-        setActiveTorcidaUnicaModalMode("ACTIVATION_NEWS");
-        const conf = getPressConference("ENTREVISTA_CRISE_JUDICIAL_MP") || getPressConference("ENTREVISTA_TORCIDA_UNICA");
-        if (conf) {
-          setActivePressConference(conf);
-        }
-      }
+      // MÓDULO 1: Sistema de Alerta em 2 Estágios (Aviso MP -> TAC -> Torcida Única no Próximo Aumento)
+      triggerMPRiskFlow(newMP, result.mpAdded);
 
       // MÓDULO 2: Gatilho da Coletiva de Imprensa Mosaico Gigante Viral (Bancada > 95)
       if (tactic.isMosaicTactic && stats.pressao_bancada > 95) {
@@ -4551,12 +4569,25 @@ export default function App() {
               }));
             }
             if (choice.stateEffects) {
-              setStateTrackers((prev) => ({
-                moral: Math.min(100, Math.max(0, prev.moral + (choice.stateEffects?.moral || 0))),
-                risco_mp: Math.min(100, Math.max(0, prev.risco_mp + (choice.stateEffects?.risco_mp || 0))),
-                relacao_clube: Math.min(100, Math.max(0, prev.relacao_clube + (choice.stateEffects?.relacao_clube || 0))),
-                respeito_nacional: Math.min(100, Math.max(0, prev.respeito_nacional + (choice.stateEffects?.respeito_nacional || 0))),
-              }));
+              setStateTrackers((prev) => {
+                const deltaMP = choice.stateEffects?.risco_mp || 0;
+                const newMP = Math.min(100, Math.max(0, prev.risco_mp + deltaMP));
+
+                if (activePressConference?.id === "ENTREVISTA_CRISE_JUDICIAL_MP") {
+                  if (choice.id === "RESP_CAMPANHA_PAZ_MP" || choice.id === "RESP_MUTIRAO_ARRECADAÇÃO_MP") {
+                    setTorcidaUnicaState((tu) => ({ ...tu, hasSignedTAC: true }));
+                  }
+                }
+
+                triggerMPRiskFlow(newMP, deltaMP);
+
+                return {
+                  moral: Math.min(100, Math.max(0, prev.moral + (choice.stateEffects?.moral || 0))),
+                  risco_mp: newMP,
+                  relacao_clube: Math.min(100, Math.max(0, prev.relacao_clube + (choice.stateEffects?.relacao_clube || 0))),
+                  respeito_nacional: Math.min(100, Math.max(0, prev.respeito_nacional + (choice.stateEffects?.respeito_nacional || 0))),
+                };
+              });
             }
             if (choice.cashDelta !== undefined && choice.cashDelta !== 0) {
               setBankBalance((prev) => Math.max(0, prev + choice.cashDelta!));
@@ -4599,12 +4630,17 @@ export default function App() {
               contingente: Math.min(100, Math.max(0, prev.contingente + result.accumulatedContingenteDelta)),
             }));
 
-            setStateTrackers((prev) => ({
-              ...prev,
-              moral: Math.min(100, Math.max(0, prev.moral + result.accumulatedMoralDelta)),
-              risco_mp: Math.min(100, Math.max(0, prev.risco_mp + result.accumulatedRiscoMPDelta)),
-              respeito_nacional: Math.min(100, Math.max(0, prev.respeito_nacional + result.accumulatedRespectDelta)),
-            }));
+            setStateTrackers((prev) => {
+              const deltaMP = result.accumulatedRiscoMPDelta;
+              const newMP = Math.min(100, Math.max(0, prev.risco_mp + deltaMP));
+              triggerMPRiskFlow(newMP, deltaMP);
+              return {
+                moral: Math.min(100, Math.max(0, prev.moral + result.accumulatedMoralDelta)),
+                risco_mp: newMP,
+                respeito_nacional: Math.min(100, Math.max(0, prev.respeito_nacional + result.accumulatedRespectDelta)),
+                relacao_clube: prev.relacao_clube,
+              };
+            });
 
             setHistoryLog((prev) => [
               `[Inquérito MP] ${result.verdict.title} - Custo Jurídico/Multa: R$ ${totalCost.toLocaleString("pt-BR")}`,

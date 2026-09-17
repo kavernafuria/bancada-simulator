@@ -4153,6 +4153,8 @@ export interface TorcidaUnicaState {
   hasPendingActivationNews?: boolean;
   hasPendingRevocationNews?: boolean;
   hasAlreadyServedTorcidaUnica?: boolean;
+  hasBeenWarnedByMP?: boolean;
+  hasSignedTAC?: boolean;
 }
 
 export const INITIAL_TORCIDA_UNICA_STATE: TorcidaUnicaState = {
@@ -4162,6 +4164,8 @@ export const INITIAL_TORCIDA_UNICA_STATE: TorcidaUnicaState = {
   hasPendingActivationNews: false,
   hasPendingRevocationNews: false,
   hasAlreadyServedTorcidaUnica: false,
+  hasBeenWarnedByMP: false,
+  hasSignedTAC: false,
 };
 
 export interface TorcidaUnicaActionResult {
