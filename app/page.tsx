@@ -3718,7 +3718,7 @@ export default function App() {
               activeMatchResult.isVictoryPista ? (
                 <div className="relative -mx-5 -mt-5 mb-2 h-44 overflow-hidden border-b border-amber-500/30">
                   <img
-                    src="/images/linha_de_frente.jpeg"
+                    src={activeMatchResult.scorePlayerClub % 2 === 0 ? "/images/linha_de_frente.jpeg" : "/images/vitoria02.jpeg"}
                     alt="Vitória e Domínio de Pista"
                     className="w-full h-full object-cover opacity-85"
                   />
