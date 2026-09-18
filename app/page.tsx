@@ -3769,7 +3769,7 @@ export default function App() {
                   </div>
                 </div>
               )
-            ) : activeMatchResult.isVictoryPista || activeMatchResult.isVictoryBancada ? (
+            ) : (activeMatchResult.scorePlayerClub >= activeMatchResult.scoreRivalClub) ? (
               <div className="relative -mx-5 -mt-5 mb-2 h-44 overflow-hidden border-b border-amber-500/30">
                 <img
                   src="/images/vitoriajogo.jpeg"
@@ -3779,7 +3779,7 @@ export default function App() {
                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/40 to-transparent" />
                 <div className="absolute bottom-2 left-4">
                   <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800">
-                    🔥 FESTA & VITÓRIA NO JOGO
+                    🔥 FESTA DA BANCADA & VITÓRIA NO JOGO
                   </span>
                 </div>
               </div>
@@ -3793,7 +3793,7 @@ export default function App() {
                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/40 to-transparent" />
                 <div className="absolute bottom-2 left-4">
                   <span className="text-[9px] font-black text-red-400 uppercase tracking-widest bg-red-950/90 px-2 py-0.5 rounded border border-red-800">
-                    ⚠️ DERROTA NO JOGO
+                    ⚠️ FESTA DA BANCADA & DERROTA EM CAMPO
                   </span>
                 </div>
               </div>
