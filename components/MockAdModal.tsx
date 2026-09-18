@@ -112,26 +112,15 @@ export const MockAdModal: React.FC<MockAdModalProps> = ({ onComplete, onCancel }
   const progressPct = totalSeconds > 0 ? Math.min(100, (currentTime / totalSeconds) * 100) : 0;
 
   return (
-    <div className="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 select-none animate-fade-in overflow-y-auto">
-      <div className="bg-zinc-950 border-2 border-amber-500/80 rounded-2xl sm:rounded-3xl w-full max-w-[360px] h-[92vh] max-h-[720px] p-3 shadow-2xl flex flex-col justify-between text-center relative overflow-hidden my-auto">
-        {/* Ad Header Banner */}
-        <div className="flex items-center justify-between bg-amber-950/90 border border-amber-500/50 rounded-xl px-3 py-2 text-left z-10 shrink-0">
-          <div className="flex items-center gap-1.5">
-            <Tv className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-            <span className="text-[10px] font-black text-amber-300 uppercase tracking-wider">
-              ANÚNCIO RECOMPENSADO (2x CONTINGENTE)
-            </span>
-          </div>
-          <span className="text-[10px] font-black text-amber-400 bg-zinc-900 px-2 py-0.5 rounded border border-amber-500/30">
-            {isFinished ? "CONCLUÍDO" : `${remainingSeconds}s`}
-          </span>
-        </div>
-
-        {/* Vertical Portrait Video Container (TikTok / Reels Style 9:16 Aspect Ratio) */}
+    <div className="fixed inset-0 z-[1000] bg-black select-none animate-fade-in flex items-center justify-center p-0 sm:p-4">
+      {/* TikTok Portrait Container: Fullscreen on mobile, centered Smartphone mockup on desktop */}
+      <div className="relative w-full h-full sm:h-[680px] sm:max-w-[380px] sm:rounded-3xl bg-black border-0 sm:border-2 sm:border-amber-500/80 shadow-2xl overflow-hidden flex flex-col justify-between">
+        
+        {/* TikTok Full Background Video Container */}
         <div
           onClick={handleAdClick}
-          className="group relative flex-1 w-full bg-black rounded-xl border border-zinc-800 overflow-hidden cursor-pointer shadow-2xl transition-all hover:border-amber-400/80 flex items-center justify-center my-2 min-h-0 aspect-[9/16]"
-          title="Clique em qualquer lugar do anúncio para abrir na Shopee"
+          className="absolute inset-0 w-full h-full bg-black cursor-pointer overflow-hidden flex items-center justify-center z-0"
+          title="Clique em qualquer lugar do anúncio para abrir o produto na Shopee"
         >
           <video
             ref={videoRef}
@@ -140,66 +129,67 @@ export const MockAdModal: React.FC<MockAdModalProps> = ({ onComplete, onCancel }
             playsInline
             muted={isMuted}
             preload="auto"
-            className="w-full h-full object-cover rounded-xl bg-black"
+            className="w-full h-full object-cover bg-black"
           >
             <source src="/videos/videoanuncio.mp4" type="video/mp4" />
           </video>
 
-          {/* Pause / Autoplay Play Trigger Button Overlay */}
+          {/* Autoplay Fallback Trigger Overlay */}
           {isPaused && (
             <button
               onClick={handleStartPlay}
-              className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-2 text-white font-black z-30 cursor-pointer p-4 text-center"
+              className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-3 text-white font-black z-40 cursor-pointer p-4 text-center"
             >
-              <div className="w-14 h-14 rounded-full bg-amber-500 text-black flex items-center justify-center shadow-lg transform transition group-hover:scale-110">
-                <Play className="w-7 h-7 ml-1 fill-black" />
+              <div className="w-16 h-16 rounded-full bg-amber-500 text-black flex items-center justify-center shadow-2xl animate-pulse">
+                <Play className="w-8 h-8 ml-1 fill-black" />
               </div>
-              <span className="text-xs uppercase tracking-wider bg-amber-500 text-black px-3 py-1.5 rounded-full shadow font-bold">
+              <span className="text-xs uppercase tracking-wider bg-amber-500 text-black px-4 py-2 rounded-full font-black shadow-lg">
                 ▶ TOQUE PARA ASSISTIR COM SOM
               </span>
             </button>
           )}
+        </div>
 
-          {/* Click Shopee Watermark Overlay */}
-          <div className="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none z-10">
-            <span className="bg-orange-600/95 text-white text-[9px] font-black uppercase px-2 py-1 rounded border border-orange-400 shadow flex items-center gap-1">
-              <ExternalLink className="w-2.5 h-2.5" /> Shopee • Clique para abrir produto
+        {/* Top TikTok Overlay Header */}
+        <div className="relative z-30 p-3 sm:p-4 flex items-center justify-between bg-gradient-to-b from-black/90 via-black/40 to-transparent pointer-events-none">
+          <div className="flex items-center gap-2 bg-amber-950/90 border border-amber-500/60 rounded-xl px-3 py-1.5 shadow-lg pointer-events-auto">
+            <Tv className="w-4 h-4 text-amber-400 animate-pulse" />
+            <span className="text-[10px] sm:text-[11px] font-black text-amber-300 uppercase tracking-wider">
+              ANÚNCIO RECOMPENSADO (2x CONTINGENTE)
             </span>
           </div>
+          <span className="text-[11px] font-black text-amber-400 bg-zinc-900/90 px-3 py-1 rounded-xl border border-amber-500/40 shadow-lg pointer-events-auto">
+            {isFinished ? "CONCLUÍDO" : `${remainingSeconds}s`}
+          </span>
+        </div>
 
-          {/* Audio Mute/Unmute Toggle */}
+        {/* Middle Right Audio Toggle Button */}
+        <div className="relative z-30 px-3 sm:px-4 flex justify-end pointer-events-none">
           <button
             type="button"
             onClick={toggleMute}
-            className="absolute bottom-3 right-3 bg-black/80 hover:bg-black text-white p-2 rounded-full border border-amber-500/50 z-20 transition shadow cursor-pointer"
+            className="pointer-events-auto bg-black/75 hover:bg-black text-white p-3 rounded-full border border-amber-500/60 shadow-2xl transition cursor-pointer active:scale-95"
             title={isMuted ? "Ativar som" : "Desativar som"}
           >
-            {isMuted ? <VolumeX className="w-4 h-4 text-red-400" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
+            {isMuted ? <VolumeX className="w-5 h-5 text-red-400" /> : <Volume2 className="w-5 h-5 text-emerald-400" />}
           </button>
-
-          {/* Progress Bar overlay at bottom of video */}
-          <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-zinc-900 pointer-events-none z-20">
-            <div
-              className="h-full bg-amber-500 transition-all duration-200"
-              style={{ width: `${progressPct}%` }}
-            />
-          </div>
         </div>
 
-        {/* Shopee Click Callout Banner */}
-        <div className="shrink-0 space-y-2">
+        {/* Bottom TikTok Overlay Footer */}
+        <div className="relative z-30 p-3 sm:p-4 space-y-2.5 bg-gradient-to-t from-black via-black/85 to-transparent">
+          {/* Shopee Callout Button */}
           <button
             onClick={handleAdClick}
-            className="w-full bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 hover:from-orange-500 hover:to-yellow-500 text-white p-2.5 rounded-xl font-black text-[11px] uppercase tracking-wider shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            className="w-full bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 hover:from-orange-500 hover:to-yellow-500 text-white p-3 rounded-2xl font-black text-xs uppercase tracking-wider shadow-2xl transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 border border-orange-400/50"
           >
-            <ExternalLink className="w-3.5 h-3.5" /> Abrir Produto na Shopee
+            <ExternalLink className="w-4 h-4" /> Abrir Produto na Shopee
           </button>
 
-          {/* Lock / Advance Status Explanation */}
-          <p className="text-[10px] text-zinc-300 leading-tight font-medium">
+          {/* Status message */}
+          <p className="text-[11px] text-zinc-200 leading-tight font-semibold text-center drop-shadow">
             {isFinished ? (
-              <span className="text-emerald-400 font-bold flex items-center justify-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Anúncio concluído! Recompensa liberada.
+              <span className="text-emerald-400 font-bold flex items-center justify-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Anúncio concluído! Recompensa liberada.
               </span>
             ) : (
               <span>
@@ -208,12 +198,20 @@ export const MockAdModal: React.FC<MockAdModalProps> = ({ onComplete, onCancel }
             )}
           </p>
 
+          {/* Progress Bar */}
+          <div className="w-full h-1.5 bg-zinc-800/80 rounded-full overflow-hidden border border-zinc-700/50">
+            <div
+              className="h-full bg-amber-500 transition-all duration-200"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+
           {/* Action Buttons */}
           <div>
             {isFinished ? (
               <button
                 onClick={onComplete}
-                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-400 hover:from-emerald-400 hover:to-green-300 text-black font-black text-xs uppercase tracking-wider transition-all shadow-xl active:scale-95 cursor-pointer flex items-center justify-center gap-2 animate-pulse"
+                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-400 hover:from-emerald-400 hover:to-green-300 text-black font-black text-xs uppercase tracking-wider transition-all shadow-2xl active:scale-95 cursor-pointer flex items-center justify-center gap-2 animate-pulse"
               >
                 <Sparkles className="w-4 h-4 text-black" /> RESGATAR 2x CONTINGENTE & REFAZER DUELO
               </button>
@@ -221,16 +219,16 @@ export const MockAdModal: React.FC<MockAdModalProps> = ({ onComplete, onCancel }
               <div className="space-y-1.5">
                 <button
                   disabled
-                  className="w-full py-2.5 px-3 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-500 font-black text-[11px] uppercase tracking-wider cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full py-3 px-3 rounded-2xl bg-zinc-900/90 border border-zinc-800 text-zinc-500 font-black text-[11px] uppercase tracking-wider cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  <Lock className="w-3.5 h-3.5 text-amber-500/60" /> AGUARDE O FIM DO VÍDEO ({remainingSeconds}s)
+                  <Lock className="w-4 h-4 text-amber-500/60" /> AGUARDE O FIM DO VÍDEO ({remainingSeconds}s)
                 </button>
 
                 <button
                   onClick={onCancel}
-                  className="w-full py-1.5 px-3 rounded-lg bg-zinc-950 hover:bg-zinc-900 text-zinc-500 hover:text-zinc-300 font-bold text-[10px] uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1"
+                  className="w-full py-1.5 px-3 rounded-xl bg-black/60 hover:bg-black/90 text-zinc-400 hover:text-zinc-200 font-bold text-[10px] uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1"
                 >
-                  <X className="w-3 h-3" /> Sair sem Recompensa
+                  <X className="w-3.5 h-3.5" /> Sair sem Recompensa
                 </button>
               </div>
             )}

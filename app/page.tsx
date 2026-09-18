@@ -287,8 +287,8 @@ export default function App() {
           setActivePressConference(conf);
         }
       } 
-      // Estágio 2: Se JÁ FOI AVISADO e o Risco MP voltou a AUMENTAR (mpDelta > 0)
-      else if (torcidaUnicaState.hasBeenWarnedByMP && mpDelta > 0) {
+      // Estágio 2: Se JÁ FOI AVISADO e o Risco MP VOLTAR a atingir Crise (>= 75%) com novo aumento (mpDelta > 0)
+      else if (torcidaUnicaState.hasBeenWarnedByMP && newMP >= 75 && mpDelta > 0) {
         hasServedTorcidaUnicaRef.current = true;
         setTorcidaUnicaState((prev) => ({
           ...prev,
