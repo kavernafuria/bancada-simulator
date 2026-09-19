@@ -1979,8 +1979,25 @@ export function getTacticalBattleChoices(
       // 🚫 TORCIDA ÚNICA MANDANTE — OPÇÕES DE CALDEIRÃO E RECEPÇÃO
       return [
         {
+          id: "EMBOSCADA_BAIRRO_LABIRINTO",
+          title: "🏟️ 1. Festa no Caldeirão",
+          description: "Comande a festa nas arquibancadas e garanta arrecadação recorde para o caixa da torcida! Atenção aos acessos do bairro.",
+          pistaMod: 5,
+          moralMod: 15,
+          mpPenalty: -10,
+          costRisk: 0,
+          injuryRisk: 0,
+          tacticalLog: "O bonde superou a tentativa de emboscada nas ruas do bairro e comandou a apoteose monumental no Caldeirão, arrecadando R$ 4.500 para o caixa.",
+          formattedDeltas: [
+            { label: "Lucro no Caixa da Torcida", value: "+R$ 4.500", isPositive: true },
+            { label: "Bônus no Placar (PEC)", value: "Até +25%", isPositive: true },
+            { label: "Moral da Torcida", value: "+15", isPositive: true },
+            { label: "Risco MP", value: "-10% (Paz)", isPositive: true },
+          ],
+        },
+        {
           id: "CORREDOR_FOGO_CHEGADA_ONIBUS",
-          title: "🎆 1. Corredor de Fogo na Chegada do Ônibus no Caldeirão",
+          title: "🎆 2. Corredor de Fogo na Chegada do Ônibus no Caldeirão",
           description: "Recepção apoteótica do ônibus do clube nos portões do estádio próprio com dezenas de fumaças e sinalizadores.",
           pistaMod: 4,
           moralMod: 10,

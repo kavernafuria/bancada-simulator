@@ -4,11 +4,12 @@ import { RojonShooterCanvas } from './minigames/RojonShooterCanvas';
 import { RuadaFlagWavingModal } from './flag_waving/RuadaFlagWavingModal';
 import { RhythmBateriaModal } from './rhythm_bateria/RhythmBateriaModal';
 import { ArquibancadaMinigame } from './minigames/caldeirao/ArquibancadaMinigame';
+import { MazeEscapeMinigame } from './minigames/MazeEscapeMinigame';
 
 // ==========================================
 // 1. TIPOS & INTERFACES
 // ==========================================
-export type GameType = 'whack' | 'rojon' | 'rhythm' | 'dodge' | 'punch' | 'memory' | 'runner_3d' | 'flag_waving' | 'rhythm_bateria' | 'caldeirao_pitch';
+export type GameType = 'whack' | 'rojon' | 'rhythm' | 'dodge' | 'punch' | 'memory' | 'runner_3d' | 'flag_waving' | 'rhythm_bateria' | 'caldeirao_pitch' | 'maze_escape';
 
 export interface MiniGameResult {
   gameType: GameType;
@@ -33,7 +34,8 @@ export interface MatchContext {
     | 'color_memory'
     | 'flag_waving'
     | 'rhythm_bateria'
-    | 'caldeirao_pitch';
+    | 'caldeirao_pitch'
+    | 'maze_escape';
   homeContingent: number;
   awayContingent: number;
   opponentTier: 'S' | 'A' | 'B';
@@ -980,6 +982,7 @@ export const MatchTacticalResolver: React.FC<{
     }
 
     // Seleção de mini-game conforme tática padrão
+    if (context.tacticalChoice === 'maze_escape') setActiveMiniGame('maze_escape');
     if (context.tacticalChoice === 'caldeirao_pitch') setActiveMiniGame('caldeirao_pitch');
     if (context.tacticalChoice === 'runner_3d') setActiveMiniGame('runner_3d');
     if (context.tacticalChoice === 'front_charge') setActiveMiniGame('whack');
@@ -1003,6 +1006,17 @@ export const MatchTacticalResolver: React.FC<{
         <div className="bg-zinc-900 border border-zinc-700 p-4 rounded-xl text-center text-sm text-zinc-300 max-w-sm mb-4">
           {statusMessage}
         </div>
+      )}
+
+      {activeMiniGame === 'maze_escape' && (
+        <MazeEscapeMinigame
+          playerTorcidaName={context.playerTorcidaName || "Torcida Organizada"}
+          playerClubName={context.playerClubName || "Nosso Clube"}
+          rivalTorcidaName={context.rivalTorcidaName || "Torcida Rival"}
+          contingente={context.contingente ?? 50}
+          poderPista={context.poderPista ?? 50}
+          onFinish={handleMiniGameFinish}
+        />
       )}
 
       {activeMiniGame === 'caldeirao_pitch' && (

@@ -869,6 +869,8 @@ export default function App() {
     // Prioridade Total para a Tática Selecionada no Passo 4:
     if (tid.includes("CALDEIRAO") || tid.includes("CAMPINHO") || tid === "FESTA_CALDEIRAO_CAMPINHO") {
       mappedChoice = 'caldeirao_pitch';
+    } else if (tid.includes("MAZE") || tid.includes("EMBOSCADA_BAIRRO") || tid.includes("FUGA_LABIRINTO") || tid.includes("VIGILANCIA_PORTAO") || tid.includes("CORREDOR_FOGO")) {
+      mappedChoice = 'maze_escape';
     } else if (tid.includes("RUNNER_3D") || tid === "ATAQUE_FRONTAL_RUNNER_3D") {
       mappedChoice = 'runner_3d';
     } else if (tid.includes("MAO_LIMPA") || tid.includes("SOCO") || tid.includes("DISPOSICAO")) {
@@ -955,6 +957,14 @@ export default function App() {
         ...st,
         moral: Math.min(100, st.moral + 15),
         respeito_nacional: Math.min(100, st.respeito_nacional + 8),
+      }));
+    } else if (activeMatchMiniGameContext?.tacticalChoice === 'maze_escape') {
+      setBankBalance((prev) => prev + 2500);
+      setStateTrackers((st) => ({
+        ...st,
+        moral: Math.min(100, st.moral + 15),
+        respeito_nacional: Math.min(100, st.respeito_nacional + 10),
+        risco_mp: Math.max(0, st.risco_mp - 5),
       }));
     } else if (tactic.id === 'TELAO_CHURRASCO_QUADRA_SEDE') {
       setBankBalance((prev) => prev + 3500);
@@ -3693,7 +3703,7 @@ export default function App() {
       {matchModalPhase === "MINIGAME" && activeMatchMiniGameContext && activeMatchDerby && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-[100] animate-fade-in overflow-y-auto">
           <div className={`bg-zinc-900 border border-amber-500/50 rounded-3xl w-full p-3 sm:p-5 shadow-2xl space-y-3 text-center max-h-[92vh] overflow-y-auto ${
-            ['runner_3d', 'caldeirao_pitch', 'whack'].includes(activeMatchMiniGameContext.tacticalChoice) ? 'max-w-5xl' : 'max-w-md'
+            ['runner_3d', 'caldeirao_pitch', 'maze_escape', 'whack'].includes(activeMatchMiniGameContext.tacticalChoice) ? 'max-w-5xl' : 'max-w-md'
           }`}>
             <div className="border-b border-zinc-800 pb-2 flex items-center justify-between">
               <div>
