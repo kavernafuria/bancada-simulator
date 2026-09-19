@@ -33,10 +33,11 @@ import { Runner3DGame } from "@/components/minigames/Runner3DGame";
 import { RuadaFlagWavingModal } from "@/components/flag_waving/RuadaFlagWavingModal";
 import { RhythmBateriaModal } from "@/components/rhythm_bateria/RhythmBateriaModal";
 import { ArquibancadaMinigame } from "@/components/minigames/caldeirao/ArquibancadaMinigame";
+import { MazeEscapeMinigame } from "@/components/minigames/MazeEscapeMinigame";
 
 export default function MiniGamesTestPage() {
   const [activeTab, setActiveTab] = useState<
-    "caldeirao" | "runner3d" | "whack" | "punch" | "rojon" | "rhythm" | "dodge" | "memory" | "gate" | "ruada"
+    "caldeirao" | "festa_caldeirao" | "runner3d" | "whack" | "punch" | "rojon" | "rhythm" | "dodge" | "memory" | "gate" | "ruada"
   >("caldeirao");
 
   // Viewport Switcher Mode (Desktop vs Mobile simulation)
@@ -155,6 +156,27 @@ export default function MiniGamesTestPage() {
             </span>
           </div>
           <span className={`text-[9px] block mt-0.5 ${activeTab === "caldeirao" ? "text-zinc-900 font-bold" : "text-zinc-500"}`}>Bancada & Campo</span>
+        </button>
+
+        {/* FESTA NO CALDEIRÃO (LABIRINTO 2D) */}
+        <button
+          onClick={() => {
+            setActiveTab("festa_caldeirao");
+            setLastResult(null);
+            setGameKey((k) => k + 1);
+          }}
+          className={`p-2 rounded-2xl border text-left transition-all cursor-pointer ${
+            activeTab === "festa_caldeirao"
+              ? "bg-red-950/80 border-red-500 text-white shadow-xl scale-[1.02]"
+              : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+          }`}
+        >
+          <div className="flex items-center justify-between font-black text-xs">
+            <span className={`flex items-center gap-1 text-[11px] ${activeTab === "festa_caldeirao" ? "text-white font-bold" : "text-red-400"}`}>
+              <Flame className="w-3.5 h-3.5" /> Emboscada Bairro
+            </span>
+          </div>
+          <span className={`text-[9px] block mt-0.5 ${activeTab === "festa_caldeirao" ? "text-red-200 font-bold" : "text-zinc-500"}`}>Festa Caldeirão 2D</span>
         </button>
 
         {/* RUNNER 3D */}
@@ -377,6 +399,18 @@ export default function MiniGamesTestPage() {
               primaryColor: "#dc2626",
               secondaryColor: "#18181b",
             }}
+            onFinish={handleFinishMiniGame}
+          />
+        )}
+
+        {activeTab === "festa_caldeirao" && (
+          <MazeEscapeMinigame
+            key={gameKey}
+            playerTorcidaName="Mancha Verde"
+            playerClubName="Palmeiras"
+            rivalTorcidaName="Gaviões da Fiel"
+            contingente={runnerContingente}
+            poderPista={runnerPoderPista}
             onFinish={handleFinishMiniGame}
           />
         )}
