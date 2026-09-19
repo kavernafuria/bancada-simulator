@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { MiniGameResult } from '../MatchTacticalResolver';
+import { AlertTriangle, Flame, Shield, Trophy, Volume2, VolumeX } from 'lucide-react';
 
 export interface MazeEscapeMinigameProps {
   playerTorcidaName?: string;
@@ -10,38 +11,18 @@ export interface MazeEscapeMinigameProps {
   onFinish: (result: MiniGameResult) => void;
 }
 
-// 15x15 Neighborhood Grid Map
-// 0 = Street / Alley (Walkable)
-// 1 = Building Block / Wall (Obstacle)
-// 2 = Small Rival Mob Spawn (Alley)
-// 3 = Stadium Gate Destination
-const MAZE_GRID: number[][] = [
-  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
-  [1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1],
-  [1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1],
-  [1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1],
-  [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-  [1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-  [1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1],
-  [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
-  [1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1],
-  [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1],
-  [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 3, 1],
-  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-];
-
-// Web Audio API helper for sound effects
-class MazeAudio {
+/* ==========================================================================
+   WEB AUDIO API SOUND SYNTHESIZER
+   ========================================================================== */
+class SoundEngine {
   private ctx: AudioContext | null = null;
+  public enabled: boolean = true;
 
-  private init() {
-    if (!this.ctx) {
-      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      if (AudioContextClass) {
-        this.ctx = new AudioContextClass();
+  init() {
+    if (!this.ctx && typeof window !== 'undefined') {
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (AudioCtx) {
+        this.ctx = new AudioCtx();
       }
     }
     if (this.ctx && this.ctx.state === 'suspended') {
@@ -49,489 +30,1397 @@ class MazeAudio {
     }
   }
 
-  playMove() {
-    this.init();
-    if (!this.ctx) return;
-    const t = this.ctx.currentTime;
+  playBumbo() {
+    if (!this.ctx || !this.enabled) return;
+    const now = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(220, t);
-    osc.frequency.exponentialRampToValueAtTime(110, t + 0.05);
-    gain.gain.setValueAtTime(0.08, t);
-    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+    osc.frequency.setValueAtTime(140, now);
+    osc.frequency.exponentialRampToValueAtTime(32, now + 0.28);
+    gain.gain.setValueAtTime(0.6, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
     osc.connect(gain);
     gain.connect(this.ctx.destination);
-    osc.start(t);
-    osc.stop(t + 0.05);
+    osc.start(now);
+    osc.stop(now + 0.3);
   }
 
-  playSiren() {
-    this.init();
-    if (!this.ctx) return;
-    const t = this.ctx.currentTime;
+  playPickup() {
+    if (!this.ctx || !this.enabled) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(523.25, now);
+    osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.12);
+    gain.gain.setValueAtTime(0.25, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.15);
+  }
+
+  playWhistle() {
+    if (!this.ctx || !this.enabled) return;
+    const now = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(600, t);
-    osc.frequency.linearRampToValueAtTime(900, t + 0.15);
-    osc.frequency.linearRampToValueAtTime(600, t + 0.3);
-    gain.gain.setValueAtTime(0.12, t);
-    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+    osc.frequency.setValueAtTime(2400, now);
+    osc.frequency.setValueAtTime(2200, now + 0.08);
+    osc.frequency.setValueAtTime(2600, now + 0.16);
+    gain.gain.setValueAtTime(0.18, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
     osc.connect(gain);
     gain.connect(this.ctx.destination);
-    osc.start(t);
-    osc.stop(t + 0.3);
+    osc.start(now);
+    osc.stop(now + 0.35);
   }
 
-  playRageAlert() {
-    this.init();
-    if (!this.ctx) return;
-    const t = this.ctx.currentTime;
+  playPoliceSiren() {
+    if (!this.ctx || !this.enabled) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(650, now);
+    osc.frequency.linearRampToValueAtTime(950, now + 0.15);
+    osc.frequency.linearRampToValueAtTime(650, now + 0.3);
+    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.35);
+  }
+
+  playBrawl() {
+    if (!this.ctx || !this.enabled) return;
+    const now = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     osc.type = 'square';
-    osc.frequency.setValueAtTime(350, t);
-    osc.frequency.exponentialRampToValueAtTime(700, t + 0.25);
-    gain.gain.setValueAtTime(0.2, t);
-    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.25);
+    osc.frequency.setValueAtTime(140, now);
+    osc.frequency.exponentialRampToValueAtTime(32, now + 0.25);
+    gain.gain.setValueAtTime(0.35, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
     osc.connect(gain);
     gain.connect(this.ctx.destination);
-    osc.start(t);
-    osc.stop(t + 0.25);
+    osc.start(now);
+    osc.stop(now + 0.25);
+    setTimeout(() => this.playCheer(), 120);
   }
 
-  playVictoryDrums() {
-    this.init();
-    if (!this.ctx) return;
-    const t = this.ctx.currentTime;
-    for (let i = 0; i < 4; i++) {
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(140 - i * 20, t + i * 0.12);
-      gain.gain.setValueAtTime(0.3, t + i * 0.12);
-      gain.gain.exponentialRampToValueAtTime(0.01, t + i * 0.12 + 0.1);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start(t + i * 0.12);
-      osc.stop(t + i * 0.12 + 0.1);
-    }
-  }
-
-  playClashFail() {
-    this.init();
-    if (!this.ctx) return;
-    const t = this.ctx.currentTime;
+  playRage() {
+    if (!this.ctx || !this.enabled) return;
+    const now = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(120, t);
-    osc.frequency.linearRampToValueAtTime(40, t + 0.4);
-    gain.gain.setValueAtTime(0.35, t);
-    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.4);
+    osc.frequency.setValueAtTime(160, now);
+    osc.frequency.linearRampToValueAtTime(450, now + 0.22);
+    osc.frequency.linearRampToValueAtTime(130, now + 0.42);
+    gain.gain.setValueAtTime(0.26, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
     osc.connect(gain);
     gain.connect(this.ctx.destination);
-    osc.start(t);
-    osc.stop(t + 0.4);
+    osc.start(now);
+    osc.stop(now + 0.45);
+  }
+
+  playCheer() {
+    if (!this.ctx || !this.enabled) return;
+    const now = this.ctx.currentTime;
+    [440, 554.37, 659.25, 880].forEach((freq, i) => {
+      if (!this.ctx) return;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now + i * 0.08);
+      gain.gain.setValueAtTime(0.18, now + i * 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now + i * 0.08);
+      osc.stop(now + 0.5);
+    });
   }
 }
 
-const audio = new MazeAudio();
+const audio = new SoundEngine();
+
+/* ==========================================================================
+   MAZE MAP DEFINITION (15x15)
+   ========================================================================== */
+const GRID_W = 15;
+const GRID_H = 15;
+
+// 0: path/street, 1: wall/concrete barrier, 3: exit (Portão do Caldeirão)
+const MAZE_MAP = [
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  [1,0,0,0,1,0,0,0,0,0,1,0,0,3,1],
+  [1,0,1,0,1,0,1,1,1,0,1,0,1,0,1],
+  [1,0,1,0,0,0,0,0,1,0,0,0,1,0,1],
+  [1,0,1,1,1,1,0,1,1,1,1,0,1,0,1],
+  [1,0,0,0,0,1,0,0,0,0,1,0,0,0,1],
+  [1,1,1,0,1,1,1,0,1,0,1,1,1,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // Avenida central aberta
+  [1,0,1,1,1,0,1,0,1,0,1,1,1,0,1],
+  [1,0,1,0,0,0,0,0,0,0,0,0,1,0,1], // Avenida para viatura 2
+  [1,0,1,0,1,1,1,0,1,1,1,0,1,0,1],
+  [1,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
+  [1,0,1,1,1,0,1,1,1,0,1,1,1,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // Avenida sul aberta para largada
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+];
+
+interface GameItem {
+  x: number;
+  y: number;
+  type: 'flare' | 'drum' | 'banner' | 'ticket';
+  label: string;
+  collected: boolean;
+}
+
+export interface BigRivalMob {
+  id: number;
+  name: string;
+  x: number;
+  y: number;
+  path: { x: number; y: number }[];
+  targetIdx: number;
+  speed: number;
+  isChasing: boolean;
+  alertTimer: number;
+}
+
+export interface PoliceCar {
+  id: number;
+  x: number;
+  y: number;
+  path: { x: number; y: number }[];
+  targetIdx: number;
+  speed: number;
+  heading: 'left' | 'right' | 'up' | 'down';
+  sirenPhase: number;
+}
+
+export interface SmallRivalMob {
+  x: number;
+  y: number;
+  defeated: boolean;
+}
+
+export interface TorcedorMember {
+  id: number;
+  role: 'leader' | 'drummer' | 'banner' | 'flare' | 'singing' | 'repique' | 'megaphone' | 'surdo';
+  name: string;
+  shirtColor: string;
+  skinColor: string;
+  hairColor: string;
+}
+
+export const CROWD_ROSTER: TorcedorMember[] = [
+  { id: 1, role: 'leader', name: 'Puxador', shirtColor: '#10b981', skinColor: '#e0ac69', hairColor: '#1f2937' },
+  { id: 2, role: 'drummer', name: 'Bumbo de Alça', shirtColor: '#059669', skinColor: '#f1c27d', hairColor: '#374151' },
+  { id: 3, role: 'banner', name: 'Bandeirão', shirtColor: '#047857', skinColor: '#8d5524', hairColor: '#111827' },
+  { id: 4, role: 'singing', name: 'Cantor da Geral', shirtColor: '#10b981', skinColor: '#c68642', hairColor: '#4b5563' },
+  { id: 5, role: 'flare', name: 'Sinalizador', shirtColor: '#059669', skinColor: '#ffdbac', hairColor: '#1f2937' },
+  { id: 6, role: 'repique', name: 'Caixa de Ritmo', shirtColor: '#047857', skinColor: '#e0ac69', hairColor: '#2b2b2b' },
+  { id: 7, role: 'megaphone', name: 'Voz da Torcida', shirtColor: '#10b981', skinColor: '#8d5524', hairColor: '#111827' },
+  { id: 8, role: 'surdo', name: 'Surdo de Marcação', shirtColor: '#047857', skinColor: '#f1c27d', hairColor: '#374151' },
+];
 
 export const MazeEscapeMinigame: React.FC<MazeEscapeMinigameProps> = ({
   playerTorcidaName = 'Torcida Organizada',
   playerClubName = 'Nosso Clube',
   rivalTorcidaName = 'Torcida Rival',
-  contingente = 50,
-  poderPista = 50,
   onFinish,
 }) => {
-  const [isTutorial, setIsTutorial] = useState<boolean>(true);
-  const [timeLeft, setTimeLeft] = useState<number>(30);
-  const [gameOver, setGameOver] = useState<boolean>(false);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [gameState, setGameState] = useState<'READY' | 'PLAYING' | 'WON' | 'LOST'>('READY');
+  const [soundEnabled, setSoundEnabled] = useState(true);
 
-  // Player position
-  const [playerPos, setPlayerPos] = useState<{ r: number; c: number }>({ r: 1, c: 1 });
+  const [timeLeft, setTimeLeft] = useState(45);
+  const [itemsCollected, setItemsCollected] = useState(0);
+  const [smallRivalDefeated, setSmallRivalDefeated] = useState(false);
+  const [rivalsEnraged, setRivalsEnraged] = useState(false);
+  const [lastScore, setLastScore] = useState(85);
 
-  // Small Rival Mob (3 members) position
-  const [smallMobPos, setSmallMobPos] = useState<{ r: number; c: number; alive: boolean }>({
-    r: 13,
-    c: 1,
-    alive: true,
+  const gameStateRef = useRef(gameState);
+  gameStateRef.current = gameState;
+  const smallRivalDefeatedRef = useRef(false);
+  const rivalsEnragedRef = useRef(false);
+  const brawlBannerRef = useRef<{ text: string; sub: string; life: number } | null>(null);
+
+  const playerRef = useRef({
+    x: 1.5,
+    y: 13.5,
+    vx: 0,
+    vy: 0,
+    speed: 3.0,
+    flareActive: false,
+    flareTime: 0,
   });
 
-  // Rage mode state
-  const [isRageMode, setIsRageMode] = useState<boolean>(false);
-  const [rageBannerTimer, setRageBannerTimer] = useState<boolean>(false);
+  const trailRef = useRef<{ x: number; y: number }[]>([]);
+  const chantsRef = useRef<{ text: string; x: number; y: number; life: number; maxLife: number }[]>([]);
+  const lastChantTimeRef = useRef<number>(0);
 
-  // Big Rival Mobs (6 members each)
-  const [bigMobs, setBigMobs] = useState<Array<{ id: number; r: number; c: number; dir: number }>>([
-    { id: 1, r: 5, c: 5, dir: 0 },
-    { id: 2, r: 9, c: 7, dir: 1 },
-    { id: 3, r: 3, c: 11, dir: 2 },
+  // 3 Big Rival Mobs (6 members each)
+  const bigRivalsRef = useRef<BigRivalMob[]>([
+    {
+      id: 1,
+      name: `Bonde Norte (${rivalTorcidaName})`,
+      x: 5.5,
+      y: 1.5,
+      path: [{ x: 5.5, y: 1.5 }, { x: 9.5, y: 1.5 }, { x: 12.5, y: 3.5 }, { x: 7.5, y: 3.5 }],
+      targetIdx: 0,
+      speed: 1.35,
+      isChasing: false,
+      alertTimer: 0,
+    },
+    {
+      id: 2,
+      name: `Bonde Leste (${rivalTorcidaName})`,
+      x: 13.5,
+      y: 5.5,
+      path: [{ x: 13.5, y: 5.5 }, { x: 13.5, y: 10.5 }, { x: 11.5, y: 7.5 }],
+      targetIdx: 0,
+      speed: 1.4,
+      isChasing: false,
+      alertTimer: 0,
+    },
+    {
+      id: 3,
+      name: `Bonde Oeste (${rivalTorcidaName})`,
+      x: 3.5,
+      y: 5.5,
+      path: [{ x: 3.5, y: 5.5 }, { x: 1.5, y: 5.5 }, { x: 1.5, y: 8.5 }, { x: 3.5, y: 8.5 }],
+      targetIdx: 0,
+      speed: 1.35,
+      isChasing: false,
+      alertTimer: 0,
+    },
   ]);
 
-  // Police Cars (PM/DRADE with sirens)
-  const [policeCars, setPoliceCars] = useState<Array<{ id: number; r: number; c: number; dir: number }>>([
-    { id: 1, r: 1, c: 7, dir: 0 },
-    { id: 2, r: 7, c: 13, dir: 1 },
+  // 2 Police Patrol Cars
+  const policeCarsRef = useRef<PoliceCar[]>([
+    {
+      id: 1,
+      x: 2.5,
+      y: 13.5,
+      path: [{ x: 2.5, y: 13.5 }, { x: 13.5, y: 13.5 }],
+      targetIdx: 0,
+      speed: 1.35,
+      heading: 'right',
+      sirenPhase: 0,
+    },
+    {
+      id: 2,
+      x: 3.5,
+      y: 9.5,
+      path: [{ x: 3.5, y: 9.5 }, { x: 11.5, y: 9.5 }],
+      targetIdx: 0,
+      speed: 1.35,
+      heading: 'right',
+      sirenPhase: 0,
+    },
   ]);
 
-  const [policeDelayCount, setPoliceDelayCount] = useState<number>(0);
+  // 1 Small Rival Mob (3 members)
+  const smallRivalMobRef = useRef<SmallRivalMob>({
+    x: 7.5,
+    y: 7.5,
+    defeated: false,
+  });
 
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const itemsRef = useRef<GameItem[]>([]);
+  const smokeParticlesRef = useRef<{ x: number; y: number; vx: number; vy: number; size: number; life: number; color: string }[]>([]);
+  const keysRef = useRef<{ [key: string]: boolean }>({});
 
-  // 1. Move Player logic
-  const movePlayer = (dr: number, dc: number) => {
-    if (gameOver || isTutorial) return;
-
-    setPlayerPos((prev) => {
-      const nr = prev.r + dr;
-      const nc = prev.c + dc;
-
-      // Check wall bounds
-      if (nr < 0 || nr >= 15 || nc < 0 || nc >= 15 || MAZE_GRID[nr][nc] === 1) {
-        return prev;
-      }
-
-      audio.playMove();
-
-      // Check small mob collision (defeat small mob & trigger RAGE mode!)
-      if (smallMobPos.alive && nr === smallMobPos.r && nc === smallMobPos.c) {
-        setSmallMobPos((sm) => ({ ...sm, alive: false }));
-        setIsRageMode(true);
-        setRageBannerTimer(true);
-        audio.playRageAlert();
-        setTimeout(() => setRageBannerTimer(false), 3000);
-      }
-
-      // Check Stadium Gate destination reach!
-      if (MAZE_GRID[nr][nc] === 3) {
-        setGameOver(true);
-        audio.playVictoryDrums();
-        setTimeout(() => {
-          if (!smallMobPos.alive) {
-            // Rank S: Defeated Small Mob + Safe Gate Escape!
-            onFinish({
-              gameType: 'maze_escape' as any,
-              modifier: 0.25,
-              rank: 'S',
-              penaltyMP: 0,
-              description: `✨ VICTÓRIA APOTEÓTICA NO BAIRRO E NA BANCADA! O bonde encurralou o pequeno grupo do ${rivalTorcidaName}, rompeu a emboscada e garantiu a Festa no Caldeirão com lucro recorde no caixa (+25% PEC, +15 Moral, +R$ 4.500)!`,
-            });
-          } else if (policeDelayCount === 0) {
-            // Rank A: Direct Escape to Stadium Gate
-            onFinish({
-              gameType: 'maze_escape' as any,
-              modifier: 0.15,
-              rank: 'A',
-              penaltyMP: 0,
-              description: `🛡️ NAVEGAÇÃO ESTRATÉGICA PELO BAIRRO! O bonde desviou das patrulhas rivais e acessou o Caldeirão a tempo de comandar o show nas arquibancadas (+15% PEC, +10 Moral)!`,
-            });
-          } else {
-            // Rank B: Delayed by Police but Reached Gate
-            onFinish({
-              gameType: 'maze_escape' as any,
-              modifier: 0.05,
-              rank: 'B',
-              penaltyMP: 5,
-              description: `⚠️ CHEGADA COM RETENÇÃO POLICIAL! O bonde enfrentou a blitz da PM nas ruas do bairro, mas entrou a tempo de apoiar o time nas arquibancadas (+5% PEC, +5% Risco MP).`,
-            });
-          }
-        }, 600);
-      }
-
-      return { r: nr, c: nc };
-    });
+  const toggleSound = () => {
+    const next = !soundEnabled;
+    setSoundEnabled(next);
+    audio.enabled = next;
+    if (next) audio.init();
   };
 
-  // 2. Keyboard Control Listener
+  // Keyboard listeners
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (gameOver || isTutorial) return;
-      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
-        movePlayer(-1, 0);
-      } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
-        movePlayer(1, 0);
-      } else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
-        movePlayer(0, -1);
-      } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
-        movePlayer(0, 1);
+      keysRef.current[e.key.toLowerCase()] = true;
+      if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(e.key.toLowerCase())) {
+        e.preventDefault();
       }
     };
+    const handleKeyUp = (e: KeyboardEvent) => {
+      keysRef.current[e.key.toLowerCase()] = false;
+    };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [gameOver, isTutorial, smallMobPos, policeDelayCount]);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
 
-  // 3. Game Timer
-  useEffect(() => {
-    if (isTutorial || gameOver) return;
-    const timer = setInterval(() => {
-      setTimeLeft((t) => {
-        if (t <= 1) {
-          clearInterval(timer);
-          setGameOver(true);
-          audio.playClashFail();
-          onFinish({
-            gameType: 'maze_escape' as any,
-            modifier: -0.20,
-            rank: 'F',
-            penaltyMP: 15,
-            description: `❌ TEMPO ESGOTADO NAS RUAS DO BAIRRO! O bonde ficou preso nos bloqueios antes de alcançar os portões do Caldeirão (-20% PEC, +15% Risco MP).`,
-          });
-          return 0;
-        }
-        return t - 1;
+  const initItems = () => {
+    itemsRef.current = [
+      { x: 1.5, y: 1.5, type: 'flare', label: '🔥', collected: false },
+      { x: 7.5, y: 1.5, type: 'drum', label: '🥁', collected: false },
+      { x: 7.5, y: 7.5, type: 'banner', label: '🚩', collected: false },
+      { x: 13.5, y: 11.5, type: 'ticket', label: '🎟️', collected: false },
+      { x: 3.5, y: 9.5, type: 'flare', label: '🔥', collected: false },
+    ];
+    setItemsCollected(0);
+  };
+
+  const isWall = (x: number, y: number) => {
+    const gx = Math.floor(x);
+    const gy = Math.floor(y);
+    if (gx < 0 || gx >= GRID_W || gy < 0 || gy >= GRID_H) return true;
+    const tile = MAZE_MAP[gy][gx];
+    return tile === 1;
+  };
+
+  const startMinigame = () => {
+    audio.init();
+    audio.playWhistle();
+
+    const startX = 1.5;
+    const startY = 13.5;
+
+    playerRef.current = {
+      x: startX,
+      y: startY,
+      vx: 0,
+      vy: 0,
+      speed: 3.0,
+      flareActive: false,
+      flareTime: 0,
+    };
+    trailRef.current = Array.from({ length: 140 }, () => ({ x: startX, y: startY }));
+    chantsRef.current = [
+      { text: `VAMOS ${playerTorcidaName.toUpperCase()}! ESCAPAR DA EMBOSCADA!`, x: startX, y: startY - 0.7, life: 2.5, maxLife: 2.5 }
+    ];
+    lastChantTimeRef.current = performance.now();
+    smokeParticlesRef.current = [];
+    brawlBannerRef.current = null;
+
+    setSmallRivalDefeated(false);
+    setRivalsEnraged(false);
+    smallRivalDefeatedRef.current = false;
+    rivalsEnragedRef.current = false;
+
+    bigRivalsRef.current = [
+      {
+        id: 1,
+        name: `Bonde Norte (${rivalTorcidaName})`,
+        x: 5.5,
+        y: 1.5,
+        path: [{ x: 5.5, y: 1.5 }, { x: 9.5, y: 1.5 }, { x: 12.5, y: 3.5 }, { x: 7.5, y: 3.5 }],
+        targetIdx: 0,
+        speed: 1.35,
+        isChasing: false,
+        alertTimer: 0,
+      },
+      {
+        id: 2,
+        name: `Bonde Leste (${rivalTorcidaName})`,
+        x: 13.5,
+        y: 5.5,
+        path: [{ x: 13.5, y: 5.5 }, { x: 13.5, y: 10.5 }, { x: 11.5, y: 7.5 }],
+        targetIdx: 0,
+        speed: 1.4,
+        isChasing: false,
+        alertTimer: 0,
+      },
+      {
+        id: 3,
+        name: `Bonde Oeste (${rivalTorcidaName})`,
+        x: 3.5,
+        y: 5.5,
+        path: [{ x: 3.5, y: 5.5 }, { x: 1.5, y: 5.5 }, { x: 1.5, y: 8.5 }, { x: 3.5, y: 8.5 }],
+        targetIdx: 0,
+        speed: 1.35,
+        isChasing: false,
+        alertTimer: 0,
+      },
+    ];
+
+    policeCarsRef.current = [
+      {
+        id: 1,
+        x: 2.5,
+        y: 13.5,
+        path: [{ x: 2.5, y: 13.5 }, { x: 13.5, y: 13.5 }],
+        targetIdx: 0,
+        speed: 1.35,
+        heading: 'right',
+        sirenPhase: 0,
+      },
+      {
+        id: 2,
+        x: 3.5,
+        y: 9.5,
+        path: [{ x: 3.5, y: 9.5 }, { x: 11.5, y: 9.5 }],
+        targetIdx: 0,
+        speed: 1.35,
+        heading: 'right',
+        sirenPhase: 0,
+      },
+    ];
+
+    smallRivalMobRef.current = {
+      x: 7.5,
+      y: 7.5,
+      defeated: false,
+    };
+
+    initItems();
+    setTimeLeft(45);
+    setGameState('PLAYING');
+  };
+
+  const finishGameAndReturn = (won: boolean, msg: string) => {
+    setGameState(won ? 'WON' : 'LOST');
+
+    if (won) {
+      audio.playCheer();
+      const didBeatSmall = smallRivalDefeatedRef.current;
+      const timePts = Math.min(25, Math.floor((timeLeft / 45) * 25));
+      const itemPts = Math.floor((itemsCollected / 5) * 15);
+      
+      let score = 60 + timePts + itemPts;
+      if (didBeatSmall) {
+        score = Math.min(100, score + 25);
+        setLastScore(score);
+        onFinish({
+          gameType: 'maze_escape' as any,
+          modifier: 0.25,
+          rank: 'S',
+          penaltyMP: 0,
+          description: `✨ VICTÓRIA TOTAL & APOTEÓTICA! O bonde botou o bonde menor do ${rivalTorcidaName} pra correr, rompeu a emboscada no bairro e comandou a Festa no Caldeirão com lucro recorde no caixa (+25% PEC, +15 Moral, +R$ 4.500)!`,
+        });
+      } else {
+        score = Math.min(80, Math.max(65, score));
+        setLastScore(score);
+        onFinish({
+          gameType: 'maze_escape' as any,
+          modifier: 0.15,
+          rank: 'A',
+          penaltyMP: 0,
+          description: `🛡️ FUGA TÁTICA DO BAIRRO! O bonde desviou de todas as patrulhas rivais e viaturas da PM, chegando a tempo de comandar a Festa no Caldeirão (+15% PEC, +10 Moral, +R$ 4.500)!`,
+        });
+      }
+    } else {
+      audio.playWhistle();
+      const itemPts = Math.floor((itemsCollected / 5) * 20);
+      const score = Math.min(45, Math.max(15, itemPts + 15));
+      setLastScore(score);
+      onFinish({
+        gameType: 'maze_escape' as any,
+        modifier: -0.20,
+        rank: 'F',
+        penaltyMP: 15,
+        description: `💥 EMBOSCADO NO BAIRRO! ${msg} (-20% PEC, +15% Risco MP).`,
       });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [isTutorial, gameOver, onFinish]);
+    }
+  };
 
-  // 4. Enemy & Police AI loop
+  // Timer loop
   useEffect(() => {
-    if (isTutorial || gameOver) return;
-
-    const moveIntervalTime = isRageMode ? 350 : 500;
-
-    const aiInterval = setInterval(() => {
-      // Move Big Mobs
-      setBigMobs((prevMobs) =>
-        prevMobs.map((mob) => {
-          const directions = [
-            { dr: -1, dc: 0 },
-            { dr: 1, dc: 0 },
-            { dr: 0, dc: -1 },
-            { dr: 0, dc: 1 },
-          ];
-
-          // Try moving in current direction or pick valid neighbor
-          let validMoves: Array<{ dr: number; dc: number; dirIdx: number }> = [];
-          directions.forEach((d, idx) => {
-            const nr = mob.r + d.dr;
-            const nc = mob.c + d.dc;
-            if (nr >= 0 && nr < 15 && nc >= 0 && nc < 15 && MAZE_GRID[nr][nc] !== 1) {
-              validMoves.push({ dr: d.dr, dc: d.dc, dirIdx: idx });
-            }
-          });
-
-          if (validMoves.length === 0) return mob;
-
-          // Prefer towards player if in Rage Mode!
-          let chosenMove = validMoves[Math.floor(Math.random() * validMoves.length)];
-          if (isRageMode) {
-            let minDistance = 999;
-            validMoves.forEach((m) => {
-              const testR = mob.r + m.dr;
-              const testC = mob.c + m.dc;
-              const dist = Math.abs(testR - playerPos.r) + Math.abs(testC - playerPos.c);
-              if (dist < minDistance) {
-                minDistance = dist;
-                chosenMove = m;
-              }
-            });
+    let timer: NodeJS.Timeout | null = null;
+    if (gameState === 'PLAYING') {
+      timer = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev % 4 === 0) audio.playBumbo();
+          if (prev <= 1) {
+            finishGameAndReturn(false, 'O tempo se esgotou antes de conseguir escapar da emboscada!');
+            return 0;
           }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [gameState, itemsCollected]);
 
-          const newR = mob.r + chosenMove.dr;
-          const newC = mob.c + chosenMove.dc;
-
-          // Check collision with player
-          if (newR === playerPos.r && newC === playerPos.c) {
-            setGameOver(true);
-            audio.playClashFail();
-            onFinish({
-              gameType: 'maze_escape' as any,
-              modifier: -0.20,
-              rank: 'F',
-              penaltyMP: 15,
-              description: `💥 BONDE EMBOSCADO NO BAIRRO! O grupo rival maior do ${rivalTorcidaName} cercou a travessia nas ruas antes do estádio (-20% PEC, +15% Risco MP).`,
-            });
-          }
-
-          return { ...mob, r: newR, c: newC, dir: chosenMove.dirIdx };
-        })
-      );
-
-      // Move Police Cars
-      setPoliceCars((prevCars) =>
-        prevCars.map((car) => {
-          const dirs = [
-            { dr: 0, dc: 1 },
-            { dr: 0, dc: -1 },
-            { dr: 1, dc: 0 },
-            { dr: -1, dc: 0 },
-          ];
-
-          let d = dirs[car.dir];
-          let nr = car.r + d.dr;
-          let nc = car.c + d.dc;
-
-          if (nr < 0 || nr >= 15 || nc < 0 || nc >= 15 || MAZE_GRID[nr][nc] === 1) {
-            const nextDir = (car.dir + 1) % 4;
-            d = dirs[nextDir];
-            nr = car.r + d.dr;
-            nc = car.c + d.dc;
-            return { ...car, r: car.r, c: car.c, dir: nextDir };
-          }
-
-          // Check police collision (blitz delay)
-          if (nr === playerPos.r && nc === playerPos.c) {
-            audio.playSiren();
-            setPoliceDelayCount((c) => c + 1);
-          }
-
-          return { ...car, r: nr, c: nc };
-        })
-      );
-    }, moveIntervalTime);
-
-    return () => clearInterval(aiInterval);
-  }, [isTutorial, gameOver, isRageMode, playerPos, rivalTorcidaName, onFinish]);
-
-  // 5. Canvas Render Engine
+  // Main Canvas Render & Animation Loop
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animFrame: number;
-    let tick = 0;
+    let animId: number;
+    let lastTime = performance.now();
 
-    const render = () => {
-      tick++;
-      const tileSize = canvas.width / 15;
+    const renderLoop = (currentTime: number) => {
+      const dt = Math.min((currentTime - lastTime) / 1000, 0.1);
+      lastTime = currentTime;
 
-      // Background Asphalt
-      ctx.fillStyle = '#18181b';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const currentGameState = gameStateRef.current;
+      const player = playerRef.current;
+      const tileSize = canvas.width / GRID_W;
 
-      // Draw Grid Tiles
-      for (let r = 0; r < 15; r++) {
-        for (let c = 0; c < 15; c++) {
-          const x = c * tileSize;
-          const y = r * tileSize;
-          const cell = MAZE_GRID[r][c];
+      // Update game physics if playing
+      if (currentGameState === 'PLAYING') {
+        const keys = keysRef.current;
+        let moveX = 0;
+        let moveY = 0;
+        if (keys['arrowup'] || keys['w']) moveY -= 1;
+        if (keys['arrowdown'] || keys['s']) moveY += 1;
+        if (keys['arrowleft'] || keys['a']) moveX -= 1;
+        if (keys['arrowright'] || keys['d']) moveX += 1;
 
-          if (cell === 1) {
-            // Wall / Neighborhood Block
-            ctx.fillStyle = '#09090b';
-            ctx.fillRect(x, y, tileSize, tileSize);
-            ctx.strokeStyle = '#27272a';
-            ctx.strokeRect(x + 1, y + 1, tileSize - 2, tileSize - 2);
+        if (moveX !== 0 || moveY !== 0) {
+          const len = Math.hypot(moveX, moveY);
+          player.vx = moveX / len;
+          player.vy = moveY / len;
+        }
 
-            // Roof detail lines
-            ctx.fillStyle = '#1c1917';
-            ctx.fillRect(x + 4, y + 4, tileSize - 8, tileSize - 8);
-          } else if (cell === 3) {
-            // Stadium Gate Area
-            const glow = Math.sin(tick * 0.1) * 0.3 + 0.7;
-            ctx.fillStyle = `rgba(245, 158, 11, ${glow})`;
-            ctx.fillRect(x, y, tileSize, tileSize);
-            ctx.strokeStyle = '#fef08a';
+        let speed = player.speed;
+        if (player.flareActive) {
+          speed *= 1.45;
+          player.flareTime -= dt;
+          if (player.flareTime <= 0) player.flareActive = false;
+
+          if (Math.random() < 0.6) {
+            smokeParticlesRef.current.push({
+              x: player.x * tileSize,
+              y: player.y * tileSize,
+              vx: (Math.random() - 0.5) * 30,
+              vy: -20 - Math.random() * 30,
+              size: 6 + Math.random() * 8,
+              life: 1.0,
+              color: Math.random() > 0.5 ? 'rgba(239, 68, 68,' : 'rgba(245, 158, 11,',
+            });
+          }
+        }
+
+        const nextX = player.x + player.vx * speed * dt;
+        const nextY = player.y + player.vy * speed * dt;
+
+        if (!isWall(nextX, player.y)) player.x = nextX;
+        if (!isWall(player.x, nextY)) player.y = nextY;
+
+        // Check Items
+        itemsRef.current.forEach((item) => {
+          if (!item.collected) {
+            const dist = Math.hypot(player.x - item.x, player.y - item.y);
+            if (dist < 0.6) {
+              item.collected = true;
+              audio.playPickup();
+              setItemsCollected((c) => c + 1);
+              if (item.type === 'flare') {
+                player.flareActive = true;
+                player.flareTime = 5;
+              }
+            }
+          }
+        });
+
+        // Update smoke
+        for (let i = smokeParticlesRef.current.length - 1; i >= 0; i--) {
+          const p = smokeParticlesRef.current[i];
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          p.life -= dt * 1.5;
+          p.size += dt * 6;
+          if (p.life <= 0) {
+            smokeParticlesRef.current.splice(i, 1);
+          }
+        }
+
+        // Update Brawl banner notification life
+        if (brawlBannerRef.current) {
+          brawlBannerRef.current.life -= dt;
+          if (brawlBannerRef.current.life <= 0) {
+            brawlBannerRef.current = null;
+          }
+        }
+
+        // 1. CONFRONTO COM O BONDE MENOR RIVAL (Objetivo 2)
+        const smallMob = smallRivalMobRef.current;
+        if (!smallMob.defeated) {
+          const smDist = Math.hypot(player.x - smallMob.x, player.y - smallMob.y);
+          if (smDist < 0.85) {
+            smallMob.defeated = true;
+            smallRivalDefeatedRef.current = true;
+            setSmallRivalDefeated(true);
+
+            audio.playBrawl();
+
+            for (let p = 0; p < 25; p++) {
+              smokeParticlesRef.current.push({
+                x: smallMob.x * tileSize,
+                y: smallMob.y * tileSize,
+                vx: (Math.random() - 0.5) * 90,
+                vy: (Math.random() - 0.5) * 90,
+                size: 6 + Math.random() * 8,
+                life: 1.4,
+                color: Math.random() > 0.5 ? 'rgba(239, 68, 68,' : 'rgba(245, 158, 11,',
+              });
+            }
+
+            brawlBannerRef.current = {
+              text: '💥 BONDE MENOR (3 PESSOAS) VENCIDO!',
+              sub: 'BOTOU PRA CORRER! OS 3 BONDES MAIORES (6 PESSOAS CADA) ENTRARAM EM FÚRIA!',
+              life: 3.8,
+            };
+
+            chantsRef.current.push({
+              text: 'O BONDE É NOSSO! CORRERAM!',
+              x: player.x,
+              y: player.y - 0.7,
+              life: 3.0,
+              maxLife: 3.0,
+            });
+
+            rivalsEnragedRef.current = true;
+            setRivalsEnraged(true);
+            setTimeout(() => audio.playRage(), 350);
+
+            bigRivalsRef.current.forEach((mob) => {
+              mob.speed = 2.25;
+              mob.isChasing = true;
+            });
+          }
+        }
+
+        // 2. ATUALIZAR 3 BONDES MAIORES DA TORCIDA RIVAL
+        bigRivalsRef.current.forEach((mob) => {
+          const pdist = Math.hypot(player.x - mob.x, player.y - mob.y);
+          const isEnraged = rivalsEnragedRef.current;
+          const aggroDist = isEnraged ? 7.5 : 3.8;
+
+          if (pdist < aggroDist) {
+            mob.isChasing = true;
+          }
+
+          const curSpeed = isEnraged ? 2.25 : 1.45;
+
+          if (mob.isChasing) {
+            const dx = player.x - mob.x;
+            const dy = player.y - mob.y;
+            const len = Math.hypot(dx, dy) || 1;
+            const stepX = (dx / len) * curSpeed * dt;
+            const stepY = (dy / len) * curSpeed * dt;
+
+            if (!isWall(mob.x + stepX, mob.y)) mob.x += stepX;
+            if (!isWall(mob.x, mob.y + stepY)) mob.y += stepY;
+
+            if (pdist < 0.68) {
+              finishGameAndReturn(false, `Seu bonde foi cercado por um dos bondes maiores do ${rivalTorcidaName}!`);
+            }
+          } else {
+            const target = mob.path[mob.targetIdx];
+            const gdx = target.x - mob.x;
+            const gdy = target.y - mob.y;
+            const gdist = Math.hypot(gdx, gdy);
+
+            if (gdist < 0.15) {
+              mob.targetIdx = (mob.targetIdx + 1) % mob.path.length;
+            } else {
+              mob.x += (gdx / gdist) * curSpeed * dt;
+              mob.y += (gdy / gdist) * curSpeed * dt;
+            }
+
+            if (pdist < 0.68) {
+              finishGameAndReturn(false, `Seu bonde foi cercado por um dos bondes maiores do ${rivalTorcidaName}!`);
+            }
+          }
+        });
+
+        // 3. ATUALIZAR 2 VIATURAS DA POLÍCIA
+        policeCarsRef.current.forEach((car) => {
+          const target = car.path[car.targetIdx];
+          const dx = target.x - car.x;
+          const dy = target.y - car.y;
+          const dist = Math.hypot(dx, dy);
+
+          if (dist < 0.15) {
+            car.targetIdx = (car.targetIdx + 1) % car.path.length;
+          } else {
+            const vx = dx / dist;
+            const vy = dy / dist;
+            car.x += vx * car.speed * dt;
+            car.y += vy * car.speed * dt;
+
+            if (Math.abs(vx) > Math.abs(vy)) {
+              car.heading = vx > 0 ? 'right' : 'left';
+            } else {
+              car.heading = vy > 0 ? 'down' : 'up';
+            }
+          }
+
+          car.sirenPhase = (car.sirenPhase + dt * 12) % (Math.PI * 2);
+
+          const pdist = Math.hypot(player.x - car.x, player.y - car.y);
+          let inHeadlight = false;
+          if (pdist < 1.85) {
+            if (car.heading === 'right' && player.x > car.x && Math.abs(player.y - car.y) < 0.65) inHeadlight = true;
+            if (car.heading === 'left' && player.x < car.x && Math.abs(player.y - car.y) < 0.65) inHeadlight = true;
+            if (car.heading === 'down' && player.y > car.y && Math.abs(player.x - car.x) < 0.65) inHeadlight = true;
+            if (car.heading === 'up' && player.y < car.y && Math.abs(player.x - car.x) < 0.65) inHeadlight = true;
+          }
+
+          if (pdist < 0.65 || inHeadlight) {
+            audio.playPoliceSiren();
+            finishGameAndReturn(false, 'A viatura da polícia interceptou o bonde! Todos foram detidos e enquadrados.');
+          }
+        });
+
+        // Breadcrumb trail
+        const lastPt = trailRef.current[0];
+        if (!lastPt || Math.hypot(player.x - lastPt.x, player.y - lastPt.y) > 0.032) {
+          trailRef.current.unshift({ x: player.x, y: player.y });
+          if (trailRef.current.length > 140) {
+            trailRef.current.pop();
+          }
+        }
+
+        // Chants
+        if (currentTime - lastChantTimeRef.current > 3400) {
+          lastChantTimeRef.current = currentTime;
+          const chantPhrases = [
+            'VAI PRA CIMA!',
+            `É A ${playerTorcidaName.toUpperCase()}!`,
+            'VAMOS MEU TIME!',
+            'DÁ-LHE, DÁ-LHE!',
+            'EXPLODE O CALDEIRÃO!',
+            'EU SOU TORCIDA!',
+            'BATERIA A MIL!',
+            'NINGUÉM PEGA O BONDE!'
+          ];
+          const chosenText = chantPhrases[Math.floor(Math.random() * chantPhrases.length)];
+          chantsRef.current.push({
+            text: chosenText,
+            x: player.x,
+            y: player.y - 0.7,
+            life: 2.2,
+            maxLife: 2.2,
+          });
+          if (Math.random() > 0.45) {
+            audio.playBumbo();
+          }
+        }
+
+        for (let i = chantsRef.current.length - 1; i >= 0; i--) {
+          const ch = chantsRef.current[i];
+          ch.life -= dt;
+          ch.y -= dt * 0.22;
+          if (ch.life <= 0) {
+            chantsRef.current.splice(i, 1);
+          }
+        }
+
+        // Check Win
+        const gx = Math.floor(player.x);
+        const gy = Math.floor(player.y);
+        if (MAZE_MAP[gy] && MAZE_MAP[gy][gx] === 3) {
+          finishGameAndReturn(true, 'Você superou o labirinto e inflou a festa da arquibancada com sucesso!');
+        }
+      }
+
+      // Drawing
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Maze tiles
+      for (let y = 0; y < GRID_H; y++) {
+        for (let x = 0; x < GRID_W; x++) {
+          const tile = MAZE_MAP[y][x];
+          const px = x * tileSize;
+          const py = y * tileSize;
+
+          if (tile === 1) {
+            ctx.fillStyle = '#16212e';
+            ctx.fillRect(px, py, tileSize, tileSize);
+            ctx.strokeStyle = '#27384e';
+            ctx.strokeRect(px + 1, py + 1, tileSize - 2, tileSize - 2);
+          } else if (tile === 3) {
+            ctx.fillStyle = '#064e3b';
+            ctx.fillRect(px, py, tileSize, tileSize);
+            ctx.strokeStyle = '#10b981';
             ctx.lineWidth = 2;
-            ctx.strokeRect(x, y, tileSize, tileSize);
-
-            // Gate icon text
-            ctx.font = 'bold 16px sans-serif';
+            ctx.strokeRect(px + 2, py + 2, tileSize - 4, tileSize - 4);
+            ctx.fillStyle = '#10b981';
+            ctx.font = '16px sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText('🏟️', x + tileSize / 2, y + tileSize / 2);
+            ctx.fillText('🏟️', px + tileSize / 2, py + tileSize / 2);
           } else {
-            // Street surface & sidewalk markings
-            ctx.fillStyle = '#27272a';
-            ctx.fillRect(x, y, tileSize, tileSize);
-            ctx.strokeStyle = '#3f3f46';
-            ctx.lineWidth = 0.5;
-            ctx.strokeRect(x, y, tileSize, tileSize);
+            ctx.fillStyle = '#0e1622';
+            ctx.fillRect(px, py, tileSize, tileSize);
           }
         }
       }
 
-      // Draw Small Rival Mob (if alive)
-      if (smallMobPos.alive) {
-        const smX = smallMobPos.c * tileSize;
-        const smY = smallMobPos.r * tileSize;
+      // Items
+      itemsRef.current.forEach((item) => {
+        if (!item.collected) {
+          const ix = item.x * tileSize;
+          const iy = item.y * tileSize;
 
-        ctx.fillStyle = 'rgba(239, 68, 68, 0.3)';
+          ctx.beginPath();
+          ctx.arc(ix, iy, 12, 0, Math.PI * 2);
+          ctx.fillStyle = item.type === 'flare' ? 'rgba(239, 68, 68, 0.25)' : 'rgba(245, 158, 11, 0.25)';
+          ctx.fill();
+
+          ctx.font = '18px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(item.label, ix, iy);
+        }
+      });
+
+      // Render Small Mob (3 members)
+      const sMob = smallRivalMobRef.current;
+      const sx = sMob.x * tileSize;
+      const sy = sMob.y * tileSize;
+
+      if (!sMob.defeated) {
+        const pulse = Math.sin(currentTime / 200) * 4;
         ctx.beginPath();
-        ctx.arc(smX + tileSize / 2, smY + tileSize / 2, tileSize * 0.45, 0, Math.PI * 2);
+        ctx.arc(sx, sy, 22 + pulse, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(245, 158, 11, 0.18)';
         ctx.fill();
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
 
+        const smallMobOffsets = [
+          { ox: 0, oy: -6 },
+          { ox: -7, oy: 4 },
+          { ox: 7, oy: 4 }
+        ];
+
+        smallMobOffsets.forEach(({ ox, oy }) => {
+          const bx = sx + ox;
+          const by = sy + oy;
+          ctx.fillStyle = '#1e3a8a';
+          ctx.beginPath();
+          ctx.arc(bx, by + 2, 5.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#ffdbac';
+          ctx.beginPath();
+          ctx.arc(bx, by - 5, 3.8, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#1f2937';
+          ctx.beginPath();
+          ctx.arc(bx, by - 6, 3.8, Math.PI, Math.PI * 2);
+          ctx.fill();
+        });
+
+        ctx.font = 'bold 9px sans-serif';
+        ctx.fillStyle = '#fbbf24';
+        ctx.textAlign = 'center';
+        ctx.fillText('🎯 BONDE MENOR (3 PESSOAS)', sx, sy - 16);
+        ctx.font = 'bold 8px sans-serif';
+        ctx.fillStyle = '#fde68a';
+        ctx.fillText('Vá pra cima e vença!', sx, sy + 16);
+      } else {
         ctx.font = '14px sans-serif';
         ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('👊', smX + tileSize / 2, smY + tileSize / 2);
+        ctx.fillText('💫🏳️', sx, sy);
+        ctx.font = 'bold 9px sans-serif';
+        ctx.fillStyle = '#10b981';
+        ctx.fillText('✓ VENCIDO', sx, sy + 12);
       }
 
-      // Draw Big Rival Mobs (6 figures)
-      bigMobs.forEach((mob) => {
-        const mx = mob.c * tileSize;
-        const my = mob.r * tileSize;
+      // Render Police Cars
+      policeCarsRef.current.forEach((car) => {
+        const cx = car.x * tileSize;
+        const cy = car.y * tileSize;
 
-        if (isRageMode) {
-          const pulse = (Math.sin(tick * 0.2) + 1) * 0.4 + 0.2;
-          ctx.fillStyle = `rgba(220, 38, 38, ${pulse})`;
+        ctx.save();
+        ctx.fillStyle = 'rgba(254, 240, 138, 0.18)';
+        ctx.beginPath();
+        if (car.heading === 'right') {
+          ctx.moveTo(cx + 12, cy - 6);
+          ctx.lineTo(cx + tileSize * 1.8, cy - 14);
+          ctx.lineTo(cx + tileSize * 1.8, cy + 14);
+          ctx.lineTo(cx + 12, cy + 6);
+        } else if (car.heading === 'left') {
+          ctx.moveTo(cx - 12, cy - 6);
+          ctx.lineTo(cx - tileSize * 1.8, cy - 14);
+          ctx.lineTo(cx - tileSize * 1.8, cy + 14);
+          ctx.lineTo(cx - 12, cy + 6);
+        } else if (car.heading === 'down') {
+          ctx.moveTo(cx - 6, cy + 12);
+          ctx.lineTo(cx - 14, cy + tileSize * 1.8);
+          ctx.lineTo(cx + 14, cy + tileSize * 1.8);
+          ctx.lineTo(cx + 6, cy + 12);
+        } else {
+          ctx.moveTo(cx - 6, cy - 12);
+          ctx.lineTo(cx - 14, cy - tileSize * 1.8);
+          ctx.lineTo(cx + 14, cy - tileSize * 1.8);
+          ctx.lineTo(cx + 6, cy - 12);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        const isHoriz = car.heading === 'left' || car.heading === 'right';
+        const carW = isHoriz ? 24 : 14;
+        const carH = isHoriz ? 14 : 24;
+
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(-carW / 2, -carH / 2, carW, carH);
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 1.2;
+        ctx.strokeRect(-carW / 2, -carH / 2, carW, carH);
+
+        ctx.fillStyle = '#f8fafc';
+        if (isHoriz) {
+          ctx.fillRect(-carW / 4, -carH / 2 + 1, carW / 2, carH - 2);
+        } else {
+          ctx.fillRect(-carW / 2 + 1, -carH / 4, carW - 2, carH / 2);
+        }
+
+        const strobe = Math.sin(car.sirenPhase) > 0;
+        ctx.fillStyle = strobe ? '#ef4444' : '#3b82f6';
+        ctx.beginPath();
+        ctx.arc(-2, 0, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = !strobe ? '#ef4444' : '#3b82f6';
+        ctx.beginPath();
+        ctx.arc(2, 0, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+
+        ctx.font = 'bold 8px sans-serif';
+        ctx.fillStyle = '#94a3b8';
+        ctx.textAlign = 'center';
+        ctx.fillText('🚓 POLÍCIA', cx, cy - 12);
+      });
+
+      // Render 3 Big Rival Mobs (6 members each)
+      bigRivalsRef.current.forEach((mob) => {
+        const mx = mob.x * tileSize;
+        const my = mob.y * tileSize;
+        const isEnraged = rivalsEnragedRef.current;
+
+        const auraRadius = (isEnraged ? 7.5 : 3.8) * tileSize;
+        ctx.beginPath();
+        ctx.arc(mx, my, auraRadius, 0, Math.PI * 2);
+        ctx.strokeStyle = mob.isChasing
+          ? 'rgba(239, 68, 68, 0.28)'
+          : 'rgba(239, 68, 68, 0.1)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        if (mob.isChasing) {
           ctx.beginPath();
-          ctx.arc(mx + tileSize / 2, my + tileSize / 2, tileSize * 0.6, 0, Math.PI * 2);
+          ctx.arc(mx, my, 26, 0, Math.PI * 2);
+          ctx.fillStyle = isEnraged ? 'rgba(239, 68, 68, 0.3)' : 'rgba(239, 68, 68, 0.18)';
           ctx.fill();
         }
 
-        ctx.font = '16px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('👺', mx + tileSize / 2, my + tileSize / 2);
-      });
+        const mobOffsets = [
+          { ox: 0, oy: -8, isLeader: true },
+          { ox: -8, oy: -1, isLeader: false },
+          { ox: 8, oy: -1, isLeader: false },
+          { ox: 0, oy: 3, isLeader: false },
+          { ox: -6, oy: 9, isLeader: false },
+          { ox: 6, oy: 9, isLeader: false },
+        ];
 
-      // Draw Police Patrol Cars
-      policeCars.forEach((car) => {
-        const cx = car.c * tileSize;
-        const cy = car.r * tileSize;
+        mobOffsets.forEach(({ ox, oy, isLeader }) => {
+          const bx = mx + ox;
+          const by = my + oy;
 
-        // Siren light flashing alternating red/blue
-        const isRed = (Math.floor(tick / 6) % 2) === 0;
-        ctx.fillStyle = isRed ? 'rgba(239, 68, 68, 0.4)' : 'rgba(59, 130, 246, 0.4)';
+          ctx.fillStyle = isLeader ? '#991b1b' : '#1e3a8a';
+          ctx.beginPath();
+          ctx.arc(bx, by + 2, 5.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = '#e0ac69';
+          ctx.beginPath();
+          ctx.arc(bx, by - 5, 3.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = '#111827';
+          ctx.beginPath();
+          ctx.arc(bx, by - 6, 3.5, Math.PI, Math.PI * 2);
+          ctx.fill();
+        });
+
+        const poleX = mx + 9;
+        const poleY = my - 18;
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 1.2;
         ctx.beginPath();
-        ctx.arc(cx + tileSize / 2, cy + tileSize / 2, tileSize * 0.55, 0, Math.PI * 2);
+        ctx.moveTo(poleX, my);
+        ctx.lineTo(poleX, poleY);
+        ctx.stroke();
+
+        ctx.fillStyle = '#991b1b';
+        ctx.beginPath();
+        ctx.moveTo(poleX, poleY);
+        ctx.lineTo(poleX + 11, poleY + 4);
+        ctx.lineTo(poleX, poleY + 8);
+        ctx.closePath();
         ctx.fill();
 
-        ctx.font = '16px sans-serif';
+        ctx.font = 'bold 9px sans-serif';
         ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('🚔', cx + tileSize / 2, cy + tileSize / 2);
+        if (isEnraged) {
+          ctx.fillStyle = '#ef4444';
+          ctx.fillText('⚡ FÚRIA! (6 PESSOAS)', mx, my - 22);
+        } else if (mob.isChasing) {
+          ctx.fillStyle = '#f87171';
+          ctx.fillText('🔥 VEM PRA CIMA! (6)', mx, my - 22);
+        } else {
+          ctx.fillStyle = '#fca5a5';
+          ctx.fillText('⚠️ Bonde Maior (6)', mx, my - 22);
+        }
       });
 
-      // Draw Player Convoy (Pelotão da Torcida)
-      const px = playerPos.c * tileSize;
-      const py = playerPos.r * tileSize;
+      // Render Player Squad (Crowd of Characters Walking Together)
+      const currentCrowdCount = Math.min(CROWD_ROSTER.length, 4 + itemsCollected);
+      const isMoving = Math.hypot(player.vx, player.vy) > 0.05;
+      const animSec = currentTime / 1000;
 
-      // Flare trail particles around player
-      const flareAlpha = Math.sin(tick * 0.15) * 0.3 + 0.5;
-      ctx.fillStyle = `rgba(34, 197, 94, ${flareAlpha})`;
-      ctx.beginPath();
-      ctx.arc(px + tileSize / 2, py + tileSize / 2, tileSize * 0.5, 0, Math.PI * 2);
-      ctx.fill();
+      interface RenderableMember {
+        member: TorcedorMember;
+        x: number;
+        y: number;
+        isLeader: boolean;
+        index: number;
+      }
 
-      // Convoy Sprite Icon
-      ctx.font = '18px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('🥁', px + tileSize / 2, py + tileSize / 2);
+      const crowdToRender: RenderableMember[] = [];
 
-      animFrame = requestAnimationFrame(render);
+      for (let k = 0; k < currentCrowdCount; k++) {
+        const member = CROWD_ROSTER[k];
+        if (k === 0) {
+          crowdToRender.push({
+            member,
+            x: player.x,
+            y: player.y,
+            isLeader: true,
+            index: 0,
+          });
+        } else {
+          const sampleIdx = Math.min(trailRef.current.length - 1, Math.floor(k * 3.4));
+          const basePos = trailRef.current[sampleIdx] || { x: player.x, y: player.y };
+
+          const prevPos = trailRef.current[Math.max(0, sampleIdx - 2)] || basePos;
+          const dtx = prevPos.x - basePos.x;
+          const dty = prevPos.y - basePos.y;
+          const tlen = Math.hypot(dtx, dty) || 1;
+          const perpX = -dty / tlen;
+          const perpY = dtx / tlen;
+
+          const lateralFactor = (k % 2 === 1 ? -1 : 1) * (0.13 + (k % 3) * 0.035);
+          let candX = basePos.x + perpX * lateralFactor;
+          let candY = basePos.y + perpY * lateralFactor;
+
+          if (isWall(candX, candY)) {
+            candX = basePos.x;
+            candY = basePos.y;
+          }
+
+          crowdToRender.push({
+            member,
+            x: candX,
+            y: candY,
+            isLeader: false,
+            index: k,
+          });
+        }
+      }
+
+      crowdToRender.sort((a, b) => a.y - b.y);
+
+      crowdToRender.forEach(({ member, x, y, isLeader, index }) => {
+        const cx = x * tileSize;
+        const cy = y * tileSize;
+
+        const stepFreq = isMoving ? 13 : 4;
+        const bob = isMoving
+          ? Math.abs(Math.sin(animSec * stepFreq + index * 1.4)) * 3
+          : Math.sin(animSec * 3 + index * 1.1) * 1.2;
+        const sway = isMoving ? Math.sin(animSec * 6 + index) * 1.2 : 0;
+
+        if (isLeader && player.flareActive) {
+          const glowGrad = ctx.createRadialGradient(cx, cy, 3, cx, cy, 22);
+          glowGrad.addColorStop(0, 'rgba(245, 158, 11, 0.45)');
+          glowGrad.addColorStop(0.5, 'rgba(239, 68, 68, 0.22)');
+          glowGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+          ctx.fillStyle = glowGrad;
+          ctx.beginPath();
+          ctx.arc(cx, cy, 22, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.32)';
+        ctx.beginPath();
+        ctx.ellipse(cx, cy + 7, 7, 3.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        const legOffset = isMoving ? Math.sin(animSec * stepFreq + index * 1.4) * 2.5 : 0;
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(cx - 3.5 + sway, cy + 3 - bob + legOffset, 2.5, 4);
+        ctx.fillRect(cx + 1 + sway, cy + 3 - bob - legOffset, 2.5, 4);
+
+        const torsoY = cy - 4 - bob;
+        ctx.fillStyle = member.shirtColor;
+        ctx.beginPath();
+        if (typeof ctx.roundRect === 'function') {
+          ctx.roundRect(cx - 5 + sway, torsoY, 10, 9, 2);
+        } else {
+          ctx.rect(cx - 5 + sway, torsoY, 10, 9);
+        }
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(cx - 1 + sway, torsoY, 2, 9);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(cx + sway, torsoY, 2.5, 0, Math.PI);
+        ctx.fill();
+
+        const headY = torsoY - 5;
+        ctx.fillStyle = member.skinColor;
+        ctx.beginPath();
+        ctx.arc(cx + sway, headY, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = member.hairColor;
+        ctx.beginPath();
+        ctx.arc(cx + sway, headY - 1, 4.3, Math.PI * 0.9, Math.PI * 2.1);
+        ctx.fill();
+
+        ctx.fillStyle = '#111827';
+        ctx.fillRect(cx - 1.8 + sway, headY - 0.5, 1.2, 1.5);
+        ctx.fillRect(cx + 0.8 + sway, headY - 0.5, 1.2, 1.5);
+
+        if (isLeader) {
+          if (player.flareActive) {
+            const fx = cx + 8 + sway;
+            const fy = torsoY - 8;
+            ctx.strokeStyle = '#9ca3af';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(cx + 4 + sway, torsoY + 2);
+            ctx.lineTo(fx, fy + 4);
+            ctx.stroke();
+
+            ctx.fillStyle = '#dc2626';
+            ctx.fillRect(fx - 1.5, fy + 2, 3, 5);
+
+            ctx.fillStyle = '#fbbf24';
+            ctx.beginPath();
+            ctx.arc(fx, fy, 4 + Math.sin(animSec * 20) * 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(fx, fy, 2, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            ctx.strokeStyle = member.skinColor;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(cx + 4 + sway, torsoY + 2);
+            ctx.lineTo(cx + 8 + sway, headY - 3 + Math.sin(animSec * 8) * 2);
+            ctx.stroke();
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(cx + 6 + sway, headY - 4 + Math.sin(animSec * 8) * 2, 3, 2);
+          }
+        } else if (member.role === 'drummer' || member.role === 'repique' || member.role === 'surdo') {
+          const drumY = torsoY + 2;
+          ctx.fillStyle = '#f59e0b';
+          ctx.beginPath();
+          ctx.ellipse(cx + sway, drumY, 6, 3.2, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = '#f8fafc';
+          ctx.beginPath();
+          ctx.ellipse(cx + sway, drumY, 4.5, 2.2, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          const drumBeat = Math.sin(animSec * 16 + index);
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1.4;
+          ctx.beginPath();
+          ctx.moveTo(cx - 5 + sway, drumY - 4 - drumBeat * 2.5);
+          ctx.lineTo(cx - 1 + sway, drumY);
+          ctx.moveTo(cx + 5 + sway, drumY - 4 + drumBeat * 2.5);
+          ctx.lineTo(cx + 1 + sway, drumY);
+          ctx.stroke();
+        } else if (member.role === 'banner') {
+          const poleX = cx - 5 + sway;
+          const poleTopY = torsoY - 17;
+          ctx.strokeStyle = '#e2e8f0';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(poleX, torsoY + 5);
+          ctx.lineTo(poleX, poleTopY);
+          ctx.stroke();
+
+          const wave1 = Math.sin(animSec * 8 + index) * 3;
+          const wave2 = Math.cos(animSec * 8 + index + 1) * 2.5;
+          ctx.fillStyle = '#10b981';
+          ctx.beginPath();
+          ctx.moveTo(poleX, poleTopY);
+          ctx.quadraticCurveTo(poleX + 7, poleTopY + wave1, poleX + 14, poleTopY + wave2);
+          ctx.lineTo(poleX + 14, poleTopY + 10 + wave2);
+          ctx.quadraticCurveTo(poleX + 7, poleTopY + 10 + wave1, poleX, poleTopY + 8);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(poleX, poleTopY + 4);
+          ctx.lineTo(poleX + 14, poleTopY + 5 + wave2);
+          ctx.stroke();
+        } else if (member.role === 'singing') {
+          ctx.strokeStyle = member.skinColor;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(cx - 4 + sway, torsoY + 3);
+          ctx.lineTo(cx - 7 + sway, headY - 4);
+          ctx.moveTo(cx + 4 + sway, torsoY + 3);
+          ctx.lineTo(cx + 7 + sway, headY - 4);
+          ctx.stroke();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(cx - 8 + sway, headY - 5, 2.5, 2);
+          ctx.fillRect(cx + 6 + sway, headY - 5, 2.5, 2);
+        } else if (member.role === 'flare') {
+          const fx = cx + 6 + sway;
+          const fy = torsoY - 3;
+          ctx.fillStyle = '#ef4444';
+          ctx.beginPath();
+          ctx.arc(fx, fy, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (member.role === 'megaphone') {
+          ctx.fillStyle = '#f59e0b';
+          ctx.beginPath();
+          ctx.moveTo(cx + 3 + sway, torsoY + 1);
+          ctx.lineTo(cx + 8 + sway, torsoY - 3);
+          ctx.lineTo(cx + 8 + sway, torsoY + 4);
+          ctx.closePath();
+          ctx.fill();
+        }
+      });
+
+      // Render Floating Chants (Speech Bubbles)
+      chantsRef.current.forEach((ch) => {
+        const bx = ch.x * tileSize;
+        const by = ch.y * tileSize;
+        const alpha = Math.min(1, ch.life / 0.4);
+
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.font = 'bold 11px sans-serif';
+        const textMetrics = ctx.measureText(ch.text);
+        const paddingX = 8;
+        const boxW = textMetrics.width + paddingX * 2;
+        const boxH = 20;
+
+        const startX = bx - boxW / 2;
+        const startY = by - boxH;
+
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 1.5;
+
+        ctx.beginPath();
+        if (typeof ctx.roundRect === 'function') {
+          ctx.roundRect(startX, startY, boxW, boxH, 6);
+        } else {
+          ctx.rect(startX, startY, boxW, boxH);
+        }
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(bx - 3, startY + boxH);
+        ctx.lineTo(bx, startY + boxH + 4);
+        ctx.lineTo(bx + 3, startY + boxH);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.strokeStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.moveTo(bx - 3, startY + boxH);
+        ctx.lineTo(bx, startY + boxH + 4);
+        ctx.lineTo(bx + 3, startY + boxH);
+        ctx.stroke();
+
+        ctx.fillStyle = '#0f172a';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(ch.text, bx, startY + boxH / 2);
+        ctx.restore();
+      });
+
+      // Render Top Announcement Banner (Brawl Alert / Rage Warning)
+      if (brawlBannerRef.current && brawlBannerRef.current.life > 0) {
+        const banner = brawlBannerRef.current;
+        const bannerH = 46;
+        const bAlpha = Math.min(1, banner.life / 0.5);
+
+        ctx.save();
+        ctx.globalAlpha = bAlpha;
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
+        ctx.fillRect(8, 8, canvas.width - 16, bannerH);
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(8, 8, canvas.width - 16, bannerH);
+
+        ctx.font = 'bold 12px sans-serif';
+        ctx.fillStyle = '#fbbf24';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText(banner.text, canvas.width / 2, 13);
+
+        ctx.font = 'bold 9px sans-serif';
+        ctx.fillStyle = '#fca5a5';
+        ctx.fillText(banner.sub, canvas.width / 2, 30);
+        ctx.restore();
+      }
+
+      animId = requestAnimationFrame(renderLoop);
     };
 
-    render();
-    return () => cancelAnimationFrame(animFrame);
-  }, [playerPos, bigMobs, policeCars, smallMobPos, isRageMode]);
+    animId = requestAnimationFrame(renderLoop);
+    return () => cancelAnimationFrame(animId);
+  }, []);
 
-  // Render Tutorial Card / Emergency Warning Notice
-  if (isTutorial) {
+  const handleTouchDir = (dx: number, dy: number) => {
+    audio.init();
+    playerRef.current.vx = dx;
+    playerRef.current.vy = dy;
+  };
+
+  const handleTouchStop = () => {
+    playerRef.current.vx = 0;
+    playerRef.current.vy = 0;
+  };
+
+  // 1. EMERGENCY WARNING NOTICE SCREEN (When READY)
+  if (gameState === 'READY') {
     return (
       <div className="flex flex-col items-center bg-zinc-950 p-6 rounded-2xl border border-red-500/80 text-white max-w-md w-full select-none shadow-2xl space-y-4 text-center">
         <div className="border-b border-red-900/60 pb-3 w-full">
-          <span className="text-[10px] font-black text-red-400 uppercase tracking-widest block animate-pulse">
-            🚨 TORCIDA ÚNICA • ALERTA DE EMBOSCADA NO BAIRRO
+          <span className="text-[10px] font-black text-red-400 uppercase tracking-widest block animate-pulse flex items-center justify-center gap-1">
+            <AlertTriangle className="w-3.5 h-3.5" /> TORCIDA ÚNICA • ALERTA DE EMBOSCADA NO BAIRRO
           </span>
           <h3 className="text-base font-black text-white uppercase mt-0.5 tracking-wide">
             Festa no Caldeirão
@@ -541,24 +1430,26 @@ export const MazeEscapeMinigame: React.FC<MazeEscapeMinigameProps> = ({
         <div className="bg-red-950/40 border border-red-600/50 p-4 rounded-xl text-left space-y-2 shadow-inner">
           <p className="text-xs font-bold text-red-200 leading-relaxed flex items-start space-x-1.5">
             <span className="text-lg">⚠️</span>
-            <span>Um dos seus bondes de Bairro está sofrendo uma tentativa de emboscada por grupos da torcida rival nas ruas próximas ao estádio!</span>
+            <span>Um dos seus bondes de Bairro está sofrendo uma tentativa de emboscada por grupos da torcida rival ({rivalTorcidaName}) nas ruas próximas ao estádio!</span>
           </p>
-          <p className="text-[11px] text-zinc-300 leading-relaxed border-t border-red-900/40 pt-2">
-            Guie o <strong className="text-emerald-400">Pelotão (🥁)</strong> pelas ruas do bairro, desvie dos grupos rivais maiores e alcance o <strong className="text-amber-400">Portão do Caldeirão (🏟️)</strong> para salvar o bonde e iniciar a festa monumental!
-          </p>
+          <div className="text-[11px] text-zinc-300 leading-relaxed border-t border-red-900/40 pt-2 space-y-1">
+            <div>• <strong>Objetivo 1 (Fuga):</strong> Guie o <span className="text-emerald-400 font-bold">Pelotão (🥁)</span> até o <span className="text-amber-400 font-bold">Portão do Caldeirão (🏁)</span>.</div>
+            <div>• <strong>Objetivo 2 (Confronto):</strong> Localize o <span className="text-yellow-400 font-bold">Bonde Menor Rival (3 pessoas 🎯)</span> para ir pra cima e botar pra correr!</div>
+            <div className="text-red-300 font-semibold">• <strong>Atenção:</strong> Cuidado com os <span className="text-red-400 font-bold">3 Bondes Maiores (6 pessoas cada 👺)</span> e com as <span className="text-blue-400 font-bold">2 Viaturas da Polícia (🚔)</span>.</div>
+          </div>
         </div>
 
-        <div className="bg-zinc-900 border border-zinc-800 p-2.5 rounded-xl text-[11px] font-mono text-emerald-400 w-full text-center font-bold">
-          💰 Recompensa no Caixa: +R$ 4.500 • Meta: Salvar o Bonde & Festa (+25% PEC)
+        <div className="bg-zinc-900 border border-zinc-800 p-2.5 rounded-xl text-[11px] font-mono text-emerald-400 w-full text-center font-bold flex items-center justify-center gap-1.5">
+          <Trophy className="w-3.5 h-3.5" /> Recompensa no Caixa: +R$ 4.500 • Meta: Fuga & Festa (+25% PEC)
         </div>
 
         <button
-          onClick={() => setIsTutorial(false)}
+          onClick={startMinigame}
           onTouchEnd={(e) => {
             e.preventDefault();
-            setIsTutorial(false);
+            startMinigame();
           }}
-          className="w-full py-3.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer touch-manipulation animate-pulse"
+          className="w-full py-3.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer touch-manipulation animate-pulse flex items-center justify-center gap-2"
         >
           🚨 SOCORRER BONDE & INICIAR FUGA
         </button>
@@ -566,92 +1457,113 @@ export const MazeEscapeMinigame: React.FC<MazeEscapeMinigameProps> = ({
     );
   }
 
+  // 2. MAIN GAME SCREEN
   return (
-    <div className="flex flex-col items-center bg-zinc-950 p-4 sm:p-6 rounded-2xl border border-amber-500/80 text-white max-w-md w-full select-none shadow-2xl space-y-3">
-      {/* Dynamic Header */}
-      <div className="flex justify-between items-center w-full border-b border-zinc-800 pb-2 text-xs font-black uppercase">
-        <div className="flex items-center space-x-2">
-          <span className="text-amber-400 font-bold">🚨 Emboscada no Bairro</span>
-          {isRageMode && (
-            <span className="bg-red-600/80 text-white px-2 py-0.5 rounded text-[9px] font-mono tracking-widest animate-pulse">
-              🔥 RAGE MODE
-            </span>
-          )}
+    <div className="flex flex-col items-center bg-zinc-950 p-3 sm:p-5 rounded-2xl border border-amber-500/80 text-white max-w-md w-full select-none shadow-2xl space-y-3">
+      {/* Header HUD Bar */}
+      <div className="grid grid-cols-4 gap-2 w-full text-center">
+        <div className="bg-zinc-900 border border-zinc-800 p-2 rounded-xl">
+          <span className="text-[9px] font-bold text-zinc-400 block uppercase">Tempo</span>
+          <span className="text-sm font-black text-amber-400 font-mono">{timeLeft}s</span>
         </div>
-        <div className="font-mono text-sm text-yellow-400 font-bold">
-          ⏱️ {timeLeft}s
+        <div className="bg-zinc-900 border border-zinc-800 p-2 rounded-xl">
+          <span className="text-[9px] font-bold text-zinc-400 block uppercase">Itens</span>
+          <span className="text-sm font-black text-white font-mono">{itemsCollected}/5</span>
+        </div>
+        <div className="bg-zinc-900 border border-zinc-800 p-2 rounded-xl">
+          <span className="text-[9px] font-bold text-zinc-400 block uppercase">Pelotão</span>
+          <span className="text-xs font-black text-emerald-400">{Math.min(CROWD_ROSTER.length, 4 + itemsCollected)} Fãs</span>
+        </div>
+        <div className="bg-zinc-900 border border-zinc-800 p-2 rounded-xl">
+          <span className="text-[9px] font-bold text-zinc-400 block uppercase">Bonde 3</span>
+          <span className={`text-xs font-black ${smallRivalDefeated ? 'text-emerald-400 font-bold' : 'text-amber-400'}`}>
+            {smallRivalDefeated ? '✓ Vencido' : '🎯 Localizar'}
+          </span>
         </div>
       </div>
 
-      {/* RAGE Banner Alert */}
-      {rageBannerTimer && (
-        <div className="w-full bg-red-600/90 text-white text-[10px] font-black uppercase text-center py-1 rounded-lg animate-bounce border border-red-400">
-          💥 BONDE RIVAL PEQUENO DERROTADO! MODO RAGE ACTIVATED NOS RIVAIS!
+      {/* Threat Radar Box */}
+      <div className="grid grid-cols-2 gap-2 w-full text-[10px] bg-zinc-900/90 border border-zinc-800 p-2 rounded-xl">
+        <div className="flex flex-col justify-between">
+          <span className="font-black text-zinc-400 uppercase tracking-wide">🎯 Objetivos</span>
+          <span className="text-zinc-300">1. Escapar até o Portão 🏁</span>
+          <span className={smallRivalDefeated ? 'text-emerald-400 font-bold' : 'text-amber-400'}>
+            2. Vencer Bonde Menor (3p) {smallRivalDefeated ? '✓' : '👊'}
+          </span>
         </div>
-      )}
+        <div className="flex flex-col justify-between border-l border-zinc-800 pl-2">
+          <span className="font-black text-zinc-400 uppercase tracking-wide">⚠️ Radar Ameaças</span>
+          <span className={rivalsEnraged ? 'text-red-400 font-bold animate-pulse' : 'text-zinc-300'}>
+            3 Bondes Maiores: {rivalsEnraged ? '⚡ FÚRIA!' : 'Patrulha'}
+          </span>
+          <span className="text-blue-400">2 Viaturas Policiais 🚓</span>
+        </div>
+      </div>
 
       {/* Canvas Viewport */}
       <div className="relative w-full aspect-square bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 shadow-inner flex items-center justify-center">
         <canvas
           ref={canvasRef}
-          width={360}
-          height={360}
+          width={450}
+          height={450}
           className="w-full h-full object-contain"
         />
       </div>
 
-      {/* Mobile D-Pad Touch Controls */}
-      <div className="flex flex-col items-center justify-center pt-2 space-y-1.5 w-full">
+      {/* Controls: Keyboard or Touch D-Pad */}
+      <div className="flex flex-col items-center justify-center pt-1 space-y-1 w-full">
         <button
-          onClick={() => movePlayer(-1, 0)}
-          onTouchEnd={(e) => {
-            e.preventDefault();
-            movePlayer(-1, 0);
-          }}
-          className="w-14 h-12 bg-zinc-800 hover:bg-zinc-700 active:bg-amber-500 active:text-black text-amber-400 rounded-xl font-black text-lg border border-zinc-700 flex items-center justify-center shadow cursor-pointer touch-manipulation"
+          onMouseDown={() => handleTouchDir(0, -1)}
+          onMouseUp={handleTouchStop}
+          onTouchStart={(e) => { e.preventDefault(); handleTouchDir(0, -1); }}
+          onTouchEnd={(e) => { e.preventDefault(); handleTouchStop(); }}
+          className="w-14 h-11 bg-zinc-800 hover:bg-zinc-700 active:bg-amber-500 active:text-black text-amber-400 rounded-xl font-black text-base border border-zinc-700 flex items-center justify-center shadow cursor-pointer touch-manipulation"
         >
           ▲
         </button>
 
-        <div className="flex space-x-4">
+        <div className="flex space-x-3">
           <button
-            onClick={() => movePlayer(0, -1)}
-            onTouchEnd={(e) => {
-              e.preventDefault();
-              movePlayer(0, -1);
-            }}
-            className="w-14 h-12 bg-zinc-800 hover:bg-zinc-700 active:bg-amber-500 active:text-black text-amber-400 rounded-xl font-black text-lg border border-zinc-700 flex items-center justify-center shadow cursor-pointer touch-manipulation"
+            onMouseDown={() => handleTouchDir(-1, 0)}
+            onMouseUp={handleTouchStop}
+            onTouchStart={(e) => { e.preventDefault(); handleTouchDir(-1, 0); }}
+            onTouchEnd={(e) => { e.preventDefault(); handleTouchStop(); }}
+            className="w-14 h-11 bg-zinc-800 hover:bg-zinc-700 active:bg-amber-500 active:text-black text-amber-400 rounded-xl font-black text-base border border-zinc-700 flex items-center justify-center shadow cursor-pointer touch-manipulation"
           >
             ◀
           </button>
           <button
-            onClick={() => movePlayer(1, 0)}
-            onTouchEnd={(e) => {
-              e.preventDefault();
-              movePlayer(1, 0);
-            }}
-            className="w-14 h-12 bg-zinc-800 hover:bg-zinc-700 active:bg-amber-500 active:text-black text-amber-400 rounded-xl font-black text-lg border border-zinc-700 flex items-center justify-center shadow cursor-pointer touch-manipulation"
+            onMouseDown={() => handleTouchDir(0, 1)}
+            onMouseUp={handleTouchStop}
+            onTouchStart={(e) => { e.preventDefault(); handleTouchDir(0, 1); }}
+            onTouchEnd={(e) => { e.preventDefault(); handleTouchStop(); }}
+            className="w-14 h-11 bg-zinc-800 hover:bg-zinc-700 active:bg-amber-500 active:text-black text-amber-400 rounded-xl font-black text-base border border-zinc-700 flex items-center justify-center shadow cursor-pointer touch-manipulation"
           >
             ▼
           </button>
           <button
-            onClick={() => movePlayer(0, 1)}
-            onTouchEnd={(e) => {
-              e.preventDefault();
-              movePlayer(0, 1);
-            }}
-            className="w-14 h-12 bg-zinc-800 hover:bg-zinc-700 active:bg-amber-500 active:text-black text-amber-400 rounded-xl font-black text-lg border border-zinc-700 flex items-center justify-center shadow cursor-pointer touch-manipulation"
+            onMouseDown={() => handleTouchDir(1, 0)}
+            onMouseUp={handleTouchStop}
+            onTouchStart={(e) => { e.preventDefault(); handleTouchDir(1, 0); }}
+            onTouchEnd={(e) => { e.preventDefault(); handleTouchStop(); }}
+            className="w-14 h-11 bg-zinc-800 hover:bg-zinc-700 active:bg-amber-500 active:text-black text-amber-400 rounded-xl font-black text-base border border-zinc-700 flex items-center justify-center shadow cursor-pointer touch-manipulation"
           >
             ▶
           </button>
         </div>
       </div>
 
-      {/* Footer Info */}
-      <div className="flex justify-between items-center w-full text-[10px] text-zinc-400 font-mono border-t border-zinc-800 pt-2">
-        <span>Bonde Pequeno: <strong className={smallMobPos.alive ? 'text-red-400' : 'text-emerald-400 font-bold'}>{smallMobPos.alive ? ' Localizar 👊' : ' Defeated ✨'}</strong></span>
-        <span>Retenções PM: <strong className="text-blue-400 font-bold">{policeDelayCount}</strong></span>
+      <div className="flex justify-between items-center w-full text-[10px] text-zinc-400 border-t border-zinc-800 pt-2 font-mono">
+        <span>Controles: Setas / WASD ou D-Pad</span>
+        <button
+          onClick={toggleSound}
+          className="text-zinc-400 hover:text-white flex items-center gap-1 cursor-pointer"
+        >
+          {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-emerald-400" /> : <VolumeX className="w-3.5 h-3.5 text-red-400" />}
+          <span>{soundEnabled ? 'Som LIGADO' : 'Mudo'}</span>
+        </button>
       </div>
     </div>
   );
 };
+
