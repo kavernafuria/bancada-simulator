@@ -1401,7 +1401,7 @@ export const MazeEscapeMinigame: React.FC<MazeEscapeMinigameProps> = ({
 
     animId = requestAnimationFrame(renderLoop);
     return () => cancelAnimationFrame(animId);
-  }, []);
+  }, [gameState]);
 
   const handleTouchDir = (dx: number, dy: number) => {
     audio.init();
