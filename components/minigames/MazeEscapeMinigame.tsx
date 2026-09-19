@@ -1417,30 +1417,30 @@ export const MazeEscapeMinigame: React.FC<MazeEscapeMinigameProps> = ({
   // 1. EMERGENCY WARNING NOTICE SCREEN (When READY)
   if (gameState === 'READY') {
     return (
-      <div className="flex flex-col items-center bg-zinc-950 p-6 rounded-2xl border border-red-500/80 text-white max-w-md w-full select-none shadow-2xl space-y-4 text-center">
-        <div className="border-b border-red-900/60 pb-3 w-full">
-          <span className="text-[10px] font-black text-red-400 uppercase tracking-widest block animate-pulse flex items-center justify-center gap-1">
-            <AlertTriangle className="w-3.5 h-3.5" /> TORCIDA ÚNICA • ALERTA DE EMBOSCADA NO BAIRRO
+      <div className="flex flex-col items-center bg-zinc-950 p-6 sm:p-8 rounded-3xl border-2 border-red-600/80 text-white max-w-xl w-full select-none shadow-2xl space-y-5 text-center my-auto">
+        <div className="border-b border-red-900/60 pb-4 w-full">
+          <span className="text-[11px] font-black text-red-400 uppercase tracking-widest block animate-pulse flex items-center justify-center gap-1.5">
+            <AlertTriangle className="w-4 h-4 text-red-500" /> TORCIDA ÚNICA • ALERTA DE EMBOSCADA NO BAIRRO
           </span>
-          <h3 className="text-base font-black text-white uppercase mt-0.5 tracking-wide">
+          <h3 className="text-xl font-black text-white uppercase mt-1 tracking-wide">
             Festa no Caldeirão
           </h3>
         </div>
 
-        <div className="bg-red-950/40 border border-red-600/50 p-4 rounded-xl text-left space-y-2 shadow-inner">
-          <p className="text-xs font-bold text-red-200 leading-relaxed flex items-start space-x-1.5">
-            <span className="text-lg">⚠️</span>
+        <div className="bg-red-950/40 border border-red-600/50 p-5 rounded-2xl text-left space-y-3 shadow-inner">
+          <p className="text-sm font-bold text-red-200 leading-relaxed flex items-start gap-2">
+            <span className="text-xl">⚠️</span>
             <span>Um dos seus bondes de Bairro está sofrendo uma tentativa de emboscada por grupos da torcida rival ({rivalTorcidaName}) nas ruas próximas ao estádio!</span>
           </p>
-          <div className="text-[11px] text-zinc-300 leading-relaxed border-t border-red-900/40 pt-2 space-y-1">
+          <div className="text-xs text-zinc-300 leading-relaxed border-t border-red-900/50 pt-3 space-y-1.5">
             <div>• <strong>Objetivo 1 (Fuga):</strong> Guie o <span className="text-emerald-400 font-bold">Pelotão (🥁)</span> até o <span className="text-amber-400 font-bold">Portão do Caldeirão (🏁)</span>.</div>
             <div>• <strong>Objetivo 2 (Confronto):</strong> Localize o <span className="text-yellow-400 font-bold">Bonde Menor Rival (3 pessoas 🎯)</span> para ir pra cima e botar pra correr!</div>
             <div className="text-red-300 font-semibold">• <strong>Atenção:</strong> Cuidado com os <span className="text-red-400 font-bold">3 Bondes Maiores (6 pessoas cada 👺)</span> e com as <span className="text-blue-400 font-bold">2 Viaturas da Polícia (🚔)</span>.</div>
           </div>
         </div>
 
-        <div className="bg-zinc-900 border border-zinc-800 p-2.5 rounded-xl text-[11px] font-mono text-emerald-400 w-full text-center font-bold flex items-center justify-center gap-1.5">
-          <Trophy className="w-3.5 h-3.5" /> Recompensa no Caixa: +R$ 4.500 • Meta: Fuga & Festa (+25% PEC)
+        <div className="bg-zinc-900 border border-zinc-800 p-3 rounded-xl text-xs font-mono text-emerald-400 w-full text-center font-bold flex items-center justify-center gap-2">
+          <Trophy className="w-4 h-4 text-emerald-400" /> Recompensa no Caixa: +R$ 4.500 • Meta: Fuga & Festa (+25% PEC)
         </div>
 
         <button
@@ -1449,7 +1449,7 @@ export const MazeEscapeMinigame: React.FC<MazeEscapeMinigameProps> = ({
             e.preventDefault();
             startMinigame();
           }}
-          className="w-full py-3.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer touch-manipulation animate-pulse flex items-center justify-center gap-2"
+          className="w-full py-4 rounded-2xl bg-red-600 hover:bg-red-500 text-white font-black text-xs sm:text-sm uppercase tracking-wider transition-all shadow-xl active:scale-95 cursor-pointer touch-manipulation animate-pulse flex items-center justify-center gap-2"
         >
           🚨 SOCORRER BONDE & INICIAR FUGA
         </button>
@@ -1459,23 +1459,23 @@ export const MazeEscapeMinigame: React.FC<MazeEscapeMinigameProps> = ({
 
   // 2. MAIN GAME SCREEN
   return (
-    <div className="flex flex-col items-center bg-zinc-950 p-3 sm:p-5 rounded-2xl border border-amber-500/80 text-white max-w-md w-full select-none shadow-2xl space-y-3">
+    <div className="flex flex-col items-center bg-zinc-950 p-4 sm:p-6 rounded-3xl border border-zinc-800 text-white max-w-2xl w-full select-none shadow-2xl space-y-4 my-auto">
       {/* Header HUD Bar */}
-      <div className="grid grid-cols-4 gap-2 w-full text-center">
-        <div className="bg-zinc-900 border border-zinc-800 p-2 rounded-xl">
-          <span className="text-[9px] font-bold text-zinc-400 block uppercase">Tempo</span>
-          <span className="text-sm font-black text-amber-400 font-mono">{timeLeft}s</span>
+      <div className="grid grid-cols-4 gap-2.5 w-full text-center">
+        <div className="bg-zinc-900/90 border border-zinc-800 p-2.5 rounded-2xl shadow-md">
+          <span className="text-[10px] font-bold text-zinc-400 block uppercase tracking-wider">Tempo</span>
+          <span className="text-base font-black text-amber-400 font-mono">{timeLeft}s</span>
         </div>
-        <div className="bg-zinc-900 border border-zinc-800 p-2 rounded-xl">
-          <span className="text-[9px] font-bold text-zinc-400 block uppercase">Itens</span>
-          <span className="text-sm font-black text-white font-mono">{itemsCollected}/5</span>
+        <div className="bg-zinc-900/90 border border-zinc-800 p-2.5 rounded-2xl shadow-md">
+          <span className="text-[10px] font-bold text-zinc-400 block uppercase tracking-wider">Itens</span>
+          <span className="text-base font-black text-white font-mono">{itemsCollected}/5</span>
         </div>
-        <div className="bg-zinc-900 border border-zinc-800 p-2 rounded-xl">
-          <span className="text-[9px] font-bold text-zinc-400 block uppercase">Pelotão</span>
-          <span className="text-xs font-black text-emerald-400">{Math.min(CROWD_ROSTER.length, 4 + itemsCollected)} Fãs</span>
+        <div className="bg-zinc-900/90 border border-zinc-800 p-2.5 rounded-2xl shadow-md">
+          <span className="text-[10px] font-bold text-zinc-400 block uppercase tracking-wider">Pelotão</span>
+          <span className="text-sm font-black text-emerald-400">{Math.min(CROWD_ROSTER.length, 4 + itemsCollected)} Fãs</span>
         </div>
-        <div className="bg-zinc-900 border border-zinc-800 p-2 rounded-xl">
-          <span className="text-[9px] font-bold text-zinc-400 block uppercase">Bonde 3</span>
+        <div className="bg-zinc-900/90 border border-zinc-800 p-2.5 rounded-2xl shadow-md">
+          <span className="text-[10px] font-bold text-zinc-400 block uppercase tracking-wider">Bonde 3</span>
           <span className={`text-xs font-black ${smallRivalDefeated ? 'text-emerald-400 font-bold' : 'text-amber-400'}`}>
             {smallRivalDefeated ? '✓ Vencido' : '🎯 Localizar'}
           </span>
@@ -1483,52 +1483,56 @@ export const MazeEscapeMinigame: React.FC<MazeEscapeMinigameProps> = ({
       </div>
 
       {/* Threat Radar Box */}
-      <div className="grid grid-cols-2 gap-2 w-full text-[10px] bg-zinc-900/90 border border-zinc-800 p-2 rounded-xl">
-        <div className="flex flex-col justify-between">
-          <span className="font-black text-zinc-400 uppercase tracking-wide">🎯 Objetivos</span>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full text-xs bg-zinc-900/80 border border-zinc-800 p-3 rounded-2xl shadow-sm">
+        <div className="flex flex-col justify-between space-y-1">
+          <span className="font-black text-zinc-400 uppercase tracking-wider text-[10px] flex items-center gap-1">
+            <Trophy className="w-3.5 h-3.5 text-amber-400" /> Objetivos do Bonde
+          </span>
           <span className="text-zinc-300">1. Escapar até o Portão 🏁</span>
           <span className={smallRivalDefeated ? 'text-emerald-400 font-bold' : 'text-amber-400'}>
-            2. Vencer Bonde Menor (3p) {smallRivalDefeated ? '✓' : '👊'}
+            2. Vencer Bonde Menor (3p) {smallRivalDefeated ? '✓ VENCIDO!' : '👊'}
           </span>
         </div>
-        <div className="flex flex-col justify-between border-l border-zinc-800 pl-2">
-          <span className="font-black text-zinc-400 uppercase tracking-wide">⚠️ Radar Ameaças</span>
+        <div className="flex flex-col justify-between space-y-1 sm:border-l sm:border-zinc-800 sm:pl-3">
+          <span className="font-black text-zinc-400 uppercase tracking-wider text-[10px] flex items-center gap-1">
+            <AlertTriangle className="w-3.5 h-3.5 text-red-400" /> Radar de Ameaças
+          </span>
           <span className={rivalsEnraged ? 'text-red-400 font-bold animate-pulse' : 'text-zinc-300'}>
-            3 Bondes Maiores: {rivalsEnraged ? '⚡ FÚRIA!' : 'Patrulha'}
+            3 Bondes Maiores (6p): {rivalsEnraged ? '⚡ FÚRIA!' : 'Patrulhando'}
           </span>
           <span className="text-blue-400">2 Viaturas Policiais 🚓</span>
         </div>
       </div>
 
-      {/* Canvas Viewport */}
-      <div className="relative w-full aspect-square bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 shadow-inner flex items-center justify-center">
+      {/* Canvas Viewport Container */}
+      <div className="relative w-full max-w-[500px] aspect-square bg-zinc-900 rounded-2xl overflow-hidden border-2 border-zinc-800 shadow-2xl flex items-center justify-center">
         <canvas
           ref={canvasRef}
-          width={450}
-          height={450}
+          width={560}
+          height={560}
           className="w-full h-full object-contain"
         />
       </div>
 
       {/* Controls: Keyboard or Touch D-Pad */}
-      <div className="flex flex-col items-center justify-center pt-1 space-y-1 w-full">
+      <div className="flex flex-col items-center justify-center pt-1 space-y-1.5 w-full">
         <button
           onMouseDown={() => handleTouchDir(0, -1)}
           onMouseUp={handleTouchStop}
           onTouchStart={(e) => { e.preventDefault(); handleTouchDir(0, -1); }}
           onTouchEnd={(e) => { e.preventDefault(); handleTouchStop(); }}
-          className="w-14 h-11 bg-zinc-800 hover:bg-zinc-700 active:bg-amber-500 active:text-black text-amber-400 rounded-xl font-black text-base border border-zinc-700 flex items-center justify-center shadow cursor-pointer touch-manipulation"
+          className="w-16 h-12 bg-zinc-900 hover:bg-zinc-800 active:bg-amber-500 active:text-black text-amber-400 rounded-2xl font-black text-lg border border-zinc-700 flex items-center justify-center shadow-md cursor-pointer touch-manipulation transition-all"
         >
           ▲
         </button>
 
-        <div className="flex space-x-3">
+        <div className="flex space-x-4">
           <button
             onMouseDown={() => handleTouchDir(-1, 0)}
             onMouseUp={handleTouchStop}
             onTouchStart={(e) => { e.preventDefault(); handleTouchDir(-1, 0); }}
             onTouchEnd={(e) => { e.preventDefault(); handleTouchStop(); }}
-            className="w-14 h-11 bg-zinc-800 hover:bg-zinc-700 active:bg-amber-500 active:text-black text-amber-400 rounded-xl font-black text-base border border-zinc-700 flex items-center justify-center shadow cursor-pointer touch-manipulation"
+            className="w-16 h-12 bg-zinc-900 hover:bg-zinc-800 active:bg-amber-500 active:text-black text-amber-400 rounded-2xl font-black text-lg border border-zinc-700 flex items-center justify-center shadow-md cursor-pointer touch-manipulation transition-all"
           >
             ◀
           </button>
@@ -1537,7 +1541,7 @@ export const MazeEscapeMinigame: React.FC<MazeEscapeMinigameProps> = ({
             onMouseUp={handleTouchStop}
             onTouchStart={(e) => { e.preventDefault(); handleTouchDir(0, 1); }}
             onTouchEnd={(e) => { e.preventDefault(); handleTouchStop(); }}
-            className="w-14 h-11 bg-zinc-800 hover:bg-zinc-700 active:bg-amber-500 active:text-black text-amber-400 rounded-xl font-black text-base border border-zinc-700 flex items-center justify-center shadow cursor-pointer touch-manipulation"
+            className="w-16 h-12 bg-zinc-900 hover:bg-zinc-800 active:bg-amber-500 active:text-black text-amber-400 rounded-2xl font-black text-lg border border-zinc-700 flex items-center justify-center shadow-md cursor-pointer touch-manipulation transition-all"
           >
             ▼
           </button>
@@ -1546,20 +1550,20 @@ export const MazeEscapeMinigame: React.FC<MazeEscapeMinigameProps> = ({
             onMouseUp={handleTouchStop}
             onTouchStart={(e) => { e.preventDefault(); handleTouchDir(1, 0); }}
             onTouchEnd={(e) => { e.preventDefault(); handleTouchStop(); }}
-            className="w-14 h-11 bg-zinc-800 hover:bg-zinc-700 active:bg-amber-500 active:text-black text-amber-400 rounded-xl font-black text-base border border-zinc-700 flex items-center justify-center shadow cursor-pointer touch-manipulation"
+            className="w-16 h-12 bg-zinc-900 hover:bg-zinc-800 active:bg-amber-500 active:text-black text-amber-400 rounded-2xl font-black text-lg border border-zinc-700 flex items-center justify-center shadow-md cursor-pointer touch-manipulation transition-all"
           >
             ▶
           </button>
         </div>
       </div>
 
-      <div className="flex justify-between items-center w-full text-[10px] text-zinc-400 border-t border-zinc-800 pt-2 font-mono">
+      <div className="flex justify-between items-center w-full text-[11px] text-zinc-400 border-t border-zinc-800 pt-3 font-mono">
         <span>Controles: Setas / WASD ou D-Pad</span>
         <button
           onClick={toggleSound}
-          className="text-zinc-400 hover:text-white flex items-center gap-1 cursor-pointer"
+          className="text-zinc-400 hover:text-white flex items-center gap-1.5 cursor-pointer bg-zinc-900 px-2.5 py-1 rounded-lg border border-zinc-800"
         >
-          {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-emerald-400" /> : <VolumeX className="w-3.5 h-3.5 text-red-400" />}
+          {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
           <span>{soundEnabled ? 'Som LIGADO' : 'Mudo'}</span>
         </button>
       </div>
