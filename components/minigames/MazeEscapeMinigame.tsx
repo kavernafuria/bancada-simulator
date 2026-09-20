@@ -485,7 +485,7 @@ export const MazeEscapeMinigame: React.FC<MazeEscapeMinigameProps> = ({
     setGameState('PLAYING');
   };
 
-  const finishGameAndReturn = (won: boolean, msg: string) => {
+  const finishGameAndReturn = (won: boolean, cause: 'WIN' | 'RIVAL' | 'POLICE' | 'TIMEOUT', msg: string) => {
     setGameState(won ? 'WON' : 'LOST');
 
     if (won) {
@@ -503,7 +503,7 @@ export const MazeEscapeMinigame: React.FC<MazeEscapeMinigameProps> = ({
           modifier: 0.25,
           rank: 'S',
           penaltyMP: 0,
-          description: `✨ VICTÓRIA TOTAL & APOTEÓTICA! O bonde botou o bonde menor do ${rivalTorcidaName} pra correr, rompeu a emboscada no bairro e comandou a Festa no Caldeirão com lucro recorde no caixa (+25% PEC, +15 Moral, +R$ 4.500)!`,
+          description: `✨ APOTEOSE TOTAL & TRIUNFO DE PISTA! O bonde botou o grupo rival da ${rivalTorcidaName} (3 pessoas) pra correr na mão limpa, rompeu a emboscada no bairro e incendiou o estádio com moral máxima e caixa forte (+25% PEC, +18 Moral, +R$ 6.000)!`,
         });
       } else {
         score = Math.min(80, Math.max(65, score));
@@ -513,21 +513,40 @@ export const MazeEscapeMinigame: React.FC<MazeEscapeMinigameProps> = ({
           modifier: 0.15,
           rank: 'A',
           penaltyMP: 0,
-          description: `🛡️ FUGA TÁTICA DO BAIRRO! O bonde desviou de todas as patrulhas rivais e viaturas da PM, chegando a tempo de comandar a Festa no Caldeirão (+15% PEC, +10 Moral, +R$ 4.500)!`,
+          description: `🛡️ FUGA TÁTICA DO BAIRRO! O bonde esquivou das patrulhas da ${rivalTorcidaName} e das viaturas da PM nas ruas do bairro, rompeu a emboscada sem sofrer baixas e chegou a tempo de comandar a Festa no Caldeirão (+15% PEC, +10 Moral, +R$ 4.500)!`,
         });
       }
     } else {
       audio.playWhistle();
-      const itemPts = Math.floor((itemsCollected / 5) * 20);
-      const score = Math.min(45, Math.max(15, itemPts + 15));
-      setLastScore(score);
-      onFinish({
-        gameType: 'maze_escape' as any,
-        modifier: -0.20,
-        rank: 'F',
-        penaltyMP: 15,
-        description: `💥 EMBOSCADO NO BAIRRO! ${msg} (-20% PEC, +15% Risco MP).`,
-      });
+      if (cause === 'RIVAL') {
+        setLastScore(30);
+        onFinish({
+          gameType: 'maze_escape' as any,
+          modifier: -0.20,
+          rank: 'F',
+          penaltyMP: 10,
+          description: `👹 CERCO & EMBOSCADA RIVAL! O bonde foi cercado por uma das linhas pesadas da ${rivalTorcidaName} nas vielas do bairro. Houve confronto desvantajoso e dispersão sob pancadaria (-20% PEC, -12 Moral, +10% Risco MP).`,
+        });
+      } else if (cause === 'POLICE') {
+        setLastScore(15);
+        onFinish({
+          gameType: 'maze_escape' as any,
+          modifier: -0.25,
+          rank: 'F',
+          penaltyMP: 25,
+          description: `🚓 INTERCEPTAÇÃO & DETENÇÃO PELA POLÍCIA! A viatura da PM encurralou o bonde com farol de busca no percurso. Vários integrantes foram detidos e conduzidos à delegacia por tumulto (+25% Risco MP, -25% PEC, -15 Moral).`,
+        });
+      } else {
+        // TIMEOUT
+        setLastScore(35);
+        onFinish({
+          gameType: 'maze_escape' as any,
+          modifier: -0.15,
+          rank: 'F',
+          penaltyMP: 5,
+          description: `⏱️ TEMPO ESGOTADO NO LABIRINTO! O bonde ficou retido nos bloqueios de bairro e perdeu a entrada oficial no estádio antes do apito inicial (-15% PEC, -8 Moral, +5% Risco MP).`,
+        });
+      }
     }
   };
 
@@ -539,7 +558,7 @@ export const MazeEscapeMinigame: React.FC<MazeEscapeMinigameProps> = ({
         setTimeLeft((prev) => {
           if (prev % 4 === 0) audio.playBumbo();
           if (prev <= 1) {
-            finishGameAndReturn(false, 'O tempo se esgotou antes de conseguir escapar da emboscada!');
+            finishGameAndReturn(false, 'TIMEOUT', 'O tempo se esgotou antes de conseguir escapar da emboscada!');
             return 0;
           }
           return prev - 1;
@@ -717,7 +736,7 @@ export const MazeEscapeMinigame: React.FC<MazeEscapeMinigameProps> = ({
             if (!isWall(mob.x, mob.y + stepY)) mob.y += stepY;
 
             if (pdist < 0.68) {
-              finishGameAndReturn(false, `Seu bonde foi cercado por um dos bondes maiores do ${rivalTorcidaName}!`);
+              finishGameAndReturn(false, 'RIVAL', `Seu bonde foi cercado por um dos bondes maiores do ${rivalTorcidaName}!`);
             }
           } else {
             const target = mob.path[mob.targetIdx];
@@ -733,7 +752,7 @@ export const MazeEscapeMinigame: React.FC<MazeEscapeMinigameProps> = ({
             }
 
             if (pdist < 0.68) {
-              finishGameAndReturn(false, `Seu bonde foi cercado por um dos bondes maiores do ${rivalTorcidaName}!`);
+              finishGameAndReturn(false, 'RIVAL', `Seu bonde foi cercado por um dos bondes maiores do ${rivalTorcidaName}!`);
             }
           }
         });
@@ -773,7 +792,7 @@ export const MazeEscapeMinigame: React.FC<MazeEscapeMinigameProps> = ({
 
           if (pdist < 0.65 || inHeadlight) {
             audio.playPoliceSiren();
-            finishGameAndReturn(false, 'A viatura da polícia interceptou o bonde! Todos foram detidos e enquadrados.');
+            finishGameAndReturn(false, 'POLICE', 'A viatura da polícia interceptou o bonde! Todos foram detidos e enquadrados.');
           }
         });
 
@@ -825,7 +844,7 @@ export const MazeEscapeMinigame: React.FC<MazeEscapeMinigameProps> = ({
         const gx = Math.floor(player.x);
         const gy = Math.floor(player.y);
         if (MAZE_MAP[gy] && MAZE_MAP[gy][gx] === 3) {
-          finishGameAndReturn(true, 'Você superou o labirinto e inflou a festa da arquibancada com sucesso!');
+          finishGameAndReturn(true, 'WIN', 'Você superou o labirinto e inflou a festa da arquibancada com sucesso!');
         }
       }
 
