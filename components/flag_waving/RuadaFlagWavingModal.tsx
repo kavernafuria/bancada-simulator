@@ -17,6 +17,8 @@ export interface RuadaFlagWavingModalProps {
   }) => void;
   torcidaName?: string;
   clubName?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
 }
 
 export const RuadaFlagWavingModal: React.FC<RuadaFlagWavingModalProps> = ({
@@ -24,6 +26,8 @@ export const RuadaFlagWavingModal: React.FC<RuadaFlagWavingModalProps> = ({
   onFinish,
   torcidaName = 'Torcida Organizada',
   clubName = 'Nosso Clube',
+  primaryColor,
+  secondaryColor,
 }) => {
   const [currentRoundIndex, setCurrentRoundIndex] = useState<number>(0);
   const [roundResults, setRoundResults] = useState<RoundResult[]>([]);
@@ -184,6 +188,8 @@ export const RuadaFlagWavingModal: React.FC<RuadaFlagWavingModalProps> = ({
               currentRound={currentRoundIndex + 1}
               totalRounds={totalRounds}
               settings={settings}
+              primaryColor={primaryColor}
+              secondaryColor={secondaryColor}
               onRoundComplete={handleRoundComplete}
             />
           ) : (

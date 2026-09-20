@@ -10,6 +10,8 @@ export interface RhythmBateriaModalProps {
   onFinish: (result: RhythmResult) => void;
   torcidaName?: string;
   clubName?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
 }
 
 export const RhythmBateriaModal: React.FC<RhythmBateriaModalProps> = ({
@@ -17,6 +19,8 @@ export const RhythmBateriaModal: React.FC<RhythmBateriaModalProps> = ({
   onFinish,
   torcidaName = 'BATERIA DA TORCIDA',
   clubName = 'NOSSO CLUBE',
+  primaryColor,
+  secondaryColor,
 }) => {
   const [combo, setCombo] = useState<number>(0);
   const [maxCombo, setMaxCombo] = useState<number>(0);
@@ -384,6 +388,8 @@ export const RhythmBateriaModal: React.FC<RhythmBateriaModalProps> = ({
                 bpm={currentBpm}
                 isPlaying={isPlaying}
                 torcidaName={torcidaName}
+                primaryColor={primaryColor}
+                secondaryColor={secondaryColor}
               />
 
               {/* RHYTHM BAR CANVAS */}

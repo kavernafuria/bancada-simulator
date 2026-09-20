@@ -6,6 +6,10 @@ export interface MazeEscapeMinigameProps {
   playerTorcidaName?: string;
   playerClubName?: string;
   rivalTorcidaName?: string;
+  playerPrimaryColor?: string;
+  playerSecondaryColor?: string;
+  rivalPrimaryColor?: string;
+  rivalSecondaryColor?: string;
   contingente?: number;
   poderPista?: number;
   onFinish: (result: MiniGameResult) => void;
@@ -237,8 +241,22 @@ export const MazeEscapeMinigame: React.FC<MazeEscapeMinigameProps> = ({
   playerTorcidaName = 'Torcida Organizada',
   playerClubName = 'Nosso Clube',
   rivalTorcidaName = 'Torcida Rival',
+  playerPrimaryColor = '#10b981',
+  playerSecondaryColor = '#ffffff',
+  rivalPrimaryColor = '#dc2626',
+  rivalSecondaryColor = '#09090b',
   onFinish,
 }) => {
+  const crowdRoster: TorcedorMember[] = [
+    { id: 1, role: 'leader', name: 'Puxador', shirtColor: playerPrimaryColor, skinColor: '#e0ac69', hairColor: '#1f2937' },
+    { id: 2, role: 'drummer', name: 'Bumbo de Alça', shirtColor: playerSecondaryColor, skinColor: '#f1c27d', hairColor: '#374151' },
+    { id: 3, role: 'banner', name: 'Bandeirão', shirtColor: playerPrimaryColor, skinColor: '#8d5524', hairColor: '#111827' },
+    { id: 4, role: 'singing', name: 'Cantor da Geral', shirtColor: playerSecondaryColor, skinColor: '#c68642', hairColor: '#4b5563' },
+    { id: 5, role: 'flare', name: 'Sinalizador', shirtColor: playerPrimaryColor, skinColor: '#ffdbac', hairColor: '#1f2937' },
+    { id: 6, role: 'repique', name: 'Caixa de Ritmo', shirtColor: playerSecondaryColor, skinColor: '#e0ac69', hairColor: '#2b2b2b' },
+    { id: 7, role: 'megaphone', name: 'Voz da Torcida', shirtColor: playerPrimaryColor, skinColor: '#8d5524', hairColor: '#111827' },
+    { id: 8, role: 'surdo', name: 'Surdo de Marcação', shirtColor: playerSecondaryColor, skinColor: '#f1c27d', hairColor: '#374151' },
+  ];
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [gameState, setGameState] = useState<'READY' | 'PLAYING' | 'WON' | 'LOST'>('READY');
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -1060,7 +1078,7 @@ export const MazeEscapeMinigame: React.FC<MazeEscapeMinigameProps> = ({
           const bx = mx + ox;
           const by = my + oy;
 
-          ctx.fillStyle = isLeader ? '#991b1b' : '#1e3a8a';
+          ctx.fillStyle = isLeader ? rivalPrimaryColor : (rivalSecondaryColor !== '#09090b' && rivalSecondaryColor !== '#000000' ? rivalSecondaryColor : rivalPrimaryColor);
           ctx.beginPath();
           ctx.arc(bx, by + 2, 5.5, 0, Math.PI * 2);
           ctx.fill();
@@ -1085,7 +1103,7 @@ export const MazeEscapeMinigame: React.FC<MazeEscapeMinigameProps> = ({
         ctx.lineTo(poleX, poleY);
         ctx.stroke();
 
-        ctx.fillStyle = '#991b1b';
+        ctx.fillStyle = rivalPrimaryColor;
         ctx.beginPath();
         ctx.moveTo(poleX, poleY);
         ctx.lineTo(poleX + 11, poleY + 4);
@@ -1108,7 +1126,7 @@ export const MazeEscapeMinigame: React.FC<MazeEscapeMinigameProps> = ({
       });
 
       // Render Player Squad (Crowd of Characters Walking Together)
-      const currentCrowdCount = Math.min(CROWD_ROSTER.length, 4 + itemsCollected);
+      const currentCrowdCount = Math.min(crowdRoster.length, 4 + itemsCollected);
       const isMoving = Math.hypot(player.vx, player.vy) > 0.05;
       const animSec = currentTime / 1000;
 
@@ -1123,7 +1141,7 @@ export const MazeEscapeMinigame: React.FC<MazeEscapeMinigameProps> = ({
       const crowdToRender: RenderableMember[] = [];
 
       for (let k = 0; k < currentCrowdCount; k++) {
-        const member = CROWD_ROSTER[k];
+        const member = crowdRoster[k];
         if (k === 0) {
           crowdToRender.push({
             member,

@@ -16,6 +16,8 @@ interface PathTraceCanvasProps {
   currentRound: number;
   totalRounds: number;
   settings: GameSettings;
+  primaryColor?: string;
+  secondaryColor?: string;
   onRoundComplete: (result: RoundResult) => void;
 }
 
@@ -24,6 +26,8 @@ export const PathTraceCanvas: React.FC<PathTraceCanvasProps> = ({
   currentRound,
   totalRounds,
   settings,
+  primaryColor,
+  secondaryColor,
   onRoundComplete,
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -348,6 +352,8 @@ export const PathTraceCanvas: React.FC<PathTraceCanvasProps> = ({
         isMiss={isMiss}
         theme={settings.flagTheme}
         crowdHype={crowdHype}
+        primaryColor={primaryColor}
+        secondaryColor={secondaryColor}
       />
 
       <div

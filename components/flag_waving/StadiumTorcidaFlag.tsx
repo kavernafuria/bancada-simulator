@@ -8,6 +8,8 @@ interface StadiumTorcidaFlagProps {
   isMiss: boolean;
   theme?: 'rubronegro' | 'tricolor' | 'alvinegro' | 'verdao';
   crowdHype: number;
+  primaryColor?: string;
+  secondaryColor?: string;
 }
 
 interface SmokeParticle {
@@ -41,6 +43,8 @@ export const StadiumTorcidaFlag: React.FC<StadiumTorcidaFlagProps> = ({
   isMiss,
   theme = 'rubronegro',
   crowdHype,
+  primaryColor,
+  secondaryColor,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -81,6 +85,16 @@ export const StadiumTorcidaFlag: React.FC<StadiumTorcidaFlagProps> = ({
     window.addEventListener('resize', resize);
 
     const getThemeColors = () => {
+      if (primaryColor) {
+        const sec = secondaryColor || '#ffffff';
+        return {
+          stripe1: primaryColor,
+          stripe2: sec,
+          accent: '#f59e0b',
+          smoke: [`${primaryColor}aa`, `${sec}aa`, 'rgba(245, 158, 11, 0.35)'],
+          text: '#ffffff',
+        };
+      }
       switch (theme) {
         case 'rubronegro':
           return {

@@ -909,6 +909,13 @@ export default function App() {
       ? Math.max(15, Math.round(stats.contingente * 0.55))
       : stats.contingente;
 
+    const rivalClub = activeMatchDerby.isHome ? activeMatchDerby.awayClub : activeMatchDerby.homeClub;
+    const rivalColors = getDefaultTorcidaColors(rivalClub);
+    const playerColors = {
+      primary: currentTorcida.primaryColor || getDefaultTorcidaColors(currentTorcida.clube).primary,
+      secondary: currentTorcida.secondaryColor || getDefaultTorcidaColors(currentTorcida.clube).secondary,
+    };
+
     setActiveSelectedTactic(tactic);
     setActiveMatchMiniGameContext({
       isHome: activeMatchDerby.isHome,
@@ -920,7 +927,11 @@ export default function App() {
       playerTorcidaName: currentTorcida.torcida,
       playerClubName: currentTorcida.clube,
       rivalTorcidaName: activeMatchDerby.rivalTorcida || "Torcida Rival",
-      rivalClubName: activeMatchDerby.isHome ? activeMatchDerby.awayClub : activeMatchDerby.homeClub,
+      rivalClubName: rivalClub,
+      playerPrimaryColor: playerColors.primary,
+      playerSecondaryColor: playerColors.secondary,
+      rivalPrimaryColor: rivalColors.primary,
+      rivalSecondaryColor: rivalColors.secondary,
       contingente: effectiveContingente,
       poderPista: isPerimeterBreach ? Math.max(15, Math.round(stats.poder_pista * 0.75)) : stats.poder_pista,
     });
@@ -4599,6 +4610,13 @@ export default function App() {
                 formattedDeltas: []
               });
 
+              const tuRivalClub = activeMatchDerby?.isHome ? activeMatchDerby?.awayClub : activeMatchDerby?.homeClub;
+              const tuRivalColors = getDefaultTorcidaColors(tuRivalClub || "");
+              const tuPlayerColors = {
+                primary: currentTorcida?.primaryColor || getDefaultTorcidaColors(currentTorcida?.clube || "").primary,
+                secondary: currentTorcida?.secondaryColor || getDefaultTorcidaColors(currentTorcida?.clube || "").secondary,
+              };
+
               setActiveMatchMiniGameContext({
                 isHome: activeMatchDerby?.isHome ?? true,
                 isAllyGame: activeMatchDerby?.isAllyGame ?? false,
@@ -4609,7 +4627,11 @@ export default function App() {
                 playerTorcidaName: currentTorcida?.torcida,
                 playerClubName: currentTorcida?.clube,
                 rivalTorcidaName: activeMatchDerby?.rivalTorcida || "Torcida Rival",
-                rivalClubName: activeMatchDerby?.isHome ? activeMatchDerby?.awayClub : activeMatchDerby?.homeClub,
+                rivalClubName: tuRivalClub || "Rival FC",
+                playerPrimaryColor: tuPlayerColors.primary,
+                playerSecondaryColor: tuPlayerColors.secondary,
+                rivalPrimaryColor: tuRivalColors.primary,
+                rivalSecondaryColor: tuRivalColors.secondary,
                 contingente: stats.contingente,
                 poderPista: stats.poder_pista,
               });

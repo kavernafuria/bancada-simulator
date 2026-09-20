@@ -11,6 +11,8 @@ interface CrowdViewCanvasProps {
   bpm: number;
   isPlaying: boolean;
   torcidaName?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
 }
 
 interface FanPersonProps {
@@ -18,15 +20,19 @@ interface FanPersonProps {
   isUp: boolean;
   isMissed: boolean;
   row: 'back' | 'mid' | 'front';
+  primaryColor?: string;
+  secondaryColor?: string;
 }
 
-const FanPersonFigure: React.FC<FanPersonProps> = ({ seed, isUp, isMissed, row }) => {
+const FanPersonFigure: React.FC<FanPersonProps> = ({ seed, isUp, isMissed, row, primaryColor, secondaryColor }) => {
   const skinTones = ['#5c3a21', '#8d5524', '#c68642', '#e0ac69', '#f1c27d'];
   const skinColor = skinTones[seed % skinTones.length];
 
-  const jerseyColors = ['#f59e0b', '#18181b', '#ffffff', '#dc2626', '#16a34a'];
+  const pColor = primaryColor || '#f59e0b';
+  const sColor = secondaryColor || '#18181b';
+  const jerseyColors = [pColor, sColor, pColor, sColor, '#ffffff'];
   const jerseyColor = jerseyColors[seed % jerseyColors.length];
-  const accentColor = seed % 2 === 0 ? '#fbbf24' : '#ffffff';
+  const accentColor = seed % 2 === 0 ? pColor : '#ffffff';
 
   const hasCap = seed % 3 === 0;
   const capColor = seed % 2 === 0 ? '#18181b' : '#f59e0b';
@@ -115,6 +121,8 @@ export const CrowdViewCanvas: React.FC<CrowdViewCanvasProps> = ({
   bpm,
   isPlaying,
   torcidaName = 'BANCA DAS ARQUIBANCADAS',
+  primaryColor,
+  secondaryColor,
 }) => {
   const isJumping = feedback === 'perfect' || feedback === 'good';
   const isMissed = feedback === 'miss';
@@ -216,6 +224,8 @@ export const CrowdViewCanvas: React.FC<CrowdViewCanvasProps> = ({
                 isUp={isUp}
                 isMissed={isMissed}
                 row="back"
+                primaryColor={primaryColor}
+                secondaryColor={secondaryColor}
               />
             );
           })}
@@ -232,6 +242,8 @@ export const CrowdViewCanvas: React.FC<CrowdViewCanvasProps> = ({
                 isUp={isUp}
                 isMissed={isMissed}
                 row="mid"
+                primaryColor={primaryColor}
+                secondaryColor={secondaryColor}
               />
             );
           })}
@@ -248,6 +260,8 @@ export const CrowdViewCanvas: React.FC<CrowdViewCanvasProps> = ({
                 isUp={isUp}
                 isMissed={isMissed}
                 row="front"
+                primaryColor={primaryColor}
+                secondaryColor={secondaryColor}
               />
             );
           })}

@@ -43,6 +43,10 @@ export interface MatchContext {
   playerClubName?: string;
   rivalTorcidaName?: string;
   rivalClubName?: string;
+  playerPrimaryColor?: string;
+  playerSecondaryColor?: string;
+  rivalPrimaryColor?: string;
+  rivalSecondaryColor?: string;
   contingente?: number;
   poderPista?: number;
 }
@@ -54,9 +58,21 @@ interface TorcedorAvatarProps {
   isAlly?: boolean;
   type?: 'ATTACK' | 'GUARD_OPEN' | 'ALLY';
   seed?: number;
+  playerPrimaryColor?: string;
+  playerSecondaryColor?: string;
+  rivalPrimaryColor?: string;
+  rivalSecondaryColor?: string;
 }
 
-export const TorcedorFrontAvatar: React.FC<TorcedorAvatarProps> = ({ isAlly = false, type = 'ATTACK', seed = 0 }) => {
+export const TorcedorFrontAvatar: React.FC<TorcedorAvatarProps> = ({
+  isAlly = false,
+  type = 'ATTACK',
+  seed = 0,
+  playerPrimaryColor = '#2563eb',
+  playerSecondaryColor = '#60a5fa',
+  rivalPrimaryColor = '#dc2626',
+  rivalSecondaryColor = '#f87171',
+}) => {
   const skinTones = ['#3c2415', '#5c3a21', '#8d5524', '#c68642', '#e0ac69', '#f1c27d'];
   const skinColor = skinTones[seed % skinTones.length];
 
@@ -66,8 +82,8 @@ export const TorcedorFrontAvatar: React.FC<TorcedorAvatarProps> = ({ isAlly = fa
   const hairStyles = ['DEGRADÊ', 'BLACK_POWER', 'BONÉ_TRÁS', 'DREADS', 'CARECA'];
   const hairStyle = hairStyles[seed % hairStyles.length];
 
-  const jerseyColor = isAlly ? '#2563eb' : '#dc2626';
-  const accentColor = isAlly ? '#60a5fa' : '#f87171';
+  const jerseyColor = isAlly ? playerPrimaryColor : rivalPrimaryColor;
+  const accentColor = isAlly ? playerSecondaryColor : rivalSecondaryColor;
 
   return (
     <div className="relative w-16 h-20 flex flex-col items-center justify-center select-none pointer-events-none">
@@ -161,10 +177,21 @@ export const TorcedorFrontAvatar: React.FC<TorcedorAvatarProps> = ({ isAlly = fa
 // ==========================================
 interface WhackCombatProps {
   opponentTier: 'S' | 'A' | 'B';
+  playerPrimaryColor?: string;
+  playerSecondaryColor?: string;
+  rivalPrimaryColor?: string;
+  rivalSecondaryColor?: string;
   onFinish: (result: MiniGameResult) => void;
 }
 
-export const WhackCombat: React.FC<WhackCombatProps> = ({ opponentTier, onFinish }) => {
+export const WhackCombat: React.FC<WhackCombatProps> = ({
+  opponentTier,
+  playerPrimaryColor,
+  playerSecondaryColor,
+  rivalPrimaryColor,
+  rivalSecondaryColor,
+  onFinish,
+}) => {
   const [isTutorial, setIsTutorial] = useState(true);
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(10);
@@ -292,7 +319,15 @@ export const WhackCombat: React.FC<WhackCombatProps> = ({ opponentTier, onFinish
           >
             {activeSlot === slot && (
               <div className="flex flex-col items-center">
-                <TorcedorFrontAvatar isAlly={isAlly} type={isAlly ? 'ALLY' : 'ATTACK'} seed={slot * 7 + (isAlly ? 3 : 1)} />
+                <TorcedorFrontAvatar
+                  isAlly={isAlly}
+                  type={isAlly ? 'ALLY' : 'ATTACK'}
+                  seed={slot * 7 + (isAlly ? 3 : 1)}
+                  playerPrimaryColor={playerPrimaryColor}
+                  playerSecondaryColor={playerSecondaryColor}
+                  rivalPrimaryColor={rivalPrimaryColor}
+                  rivalSecondaryColor={rivalSecondaryColor}
+                />
                 <span className="text-[9px] font-black uppercase mt-1 tracking-wider">
                   {isAlly ? '🛡️ Nossos!' : '👊 Rival!'}
                 </span>
@@ -315,10 +350,21 @@ export const WhackCombat: React.FC<WhackCombatProps> = ({ opponentTier, onFinish
 // ==========================================
 interface PunchFrontCombatProps {
   opponentTier: 'S' | 'A' | 'B';
+  playerPrimaryColor?: string;
+  playerSecondaryColor?: string;
+  rivalPrimaryColor?: string;
+  rivalSecondaryColor?: string;
   onFinish: (result: MiniGameResult) => void;
 }
 
-export const PunchFrontCombat: React.FC<PunchFrontCombatProps> = ({ opponentTier, onFinish }) => {
+export const PunchFrontCombat: React.FC<PunchFrontCombatProps> = ({
+  opponentTier,
+  playerPrimaryColor,
+  playerSecondaryColor,
+  rivalPrimaryColor,
+  rivalSecondaryColor,
+  onFinish,
+}) => {
   const [isTutorial, setIsTutorial] = useState(true);
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(10);
@@ -443,14 +489,30 @@ export const PunchFrontCombat: React.FC<PunchFrontCombatProps> = ({ opponentTier
           >
             {rivalState.type === 'ATTACK' ? (
               <div className="flex flex-col items-center animate-bounce">
-                <TorcedorFrontAvatar isAlly={false} type="ATTACK" seed={rivalState.lane * 3 + 1} />
+                <TorcedorFrontAvatar
+                  isAlly={false}
+                  type="ATTACK"
+                  seed={rivalState.lane * 3 + 1}
+                  playerPrimaryColor={playerPrimaryColor}
+                  playerSecondaryColor={playerSecondaryColor}
+                  rivalPrimaryColor={rivalPrimaryColor}
+                  rivalSecondaryColor={rivalSecondaryColor}
+                />
                 <span className="text-[9px] font-black bg-red-600 px-2 py-0.5 rounded text-white mt-1 shadow uppercase tracking-wider">
                   ⚠️ ATAQUE!
                 </span>
               </div>
             ) : (
               <div className="flex flex-col items-center animate-pulse">
-                <TorcedorFrontAvatar isAlly={false} type="GUARD_OPEN" seed={rivalState.lane * 5 + 2} />
+                <TorcedorFrontAvatar
+                  isAlly={false}
+                  type="GUARD_OPEN"
+                  seed={rivalState.lane * 5 + 2}
+                  playerPrimaryColor={playerPrimaryColor}
+                  playerSecondaryColor={playerSecondaryColor}
+                  rivalPrimaryColor={rivalPrimaryColor}
+                  rivalSecondaryColor={rivalSecondaryColor}
+                />
                 <span className="text-[9px] font-black bg-yellow-500 px-2 py-0.5 rounded text-black mt-1 shadow uppercase tracking-wider">
                   🎯 GUARDA ABERTA!
                 </span>
@@ -491,19 +553,29 @@ export const PunchFrontCombat: React.FC<PunchFrontCombatProps> = ({ opponentTier
 // 4. MINI-GAME 3: MOSAICO 3D (PARES DE MEMÓRIA - 10 PLACAS, 5 PARES)
 // ==========================================
 interface MemoryMosaicProps {
+  playerPrimaryColor?: string;
+  playerSecondaryColor?: string;
+  rivalPrimaryColor?: string;
+  rivalSecondaryColor?: string;
   onFinish: (result: MiniGameResult) => void;
 }
 
-export const MemoryMosaic: React.FC<MemoryMosaicProps> = ({ onFinish }) => {
+export const MemoryMosaic: React.FC<MemoryMosaicProps> = ({
+  playerPrimaryColor = '#16a34a',
+  playerSecondaryColor = '#ffffff',
+  rivalPrimaryColor = '#dc2626',
+  rivalSecondaryColor = '#000000',
+  onFinish,
+}) => {
   const [isTutorial, setIsTutorial] = useState(true);
 
-  // 5 Color Pairs Definition
+  // 5 Color Pairs Definition (baseadas nas torcidas do confronto)
   const COLOR_PAIRS = [
-    { id: 'RED', name: 'Vermelho', hex: '#ef4444', icon: '🔴' },
-    { id: 'BLUE', name: 'Azul', hex: '#3b82f6', icon: '🔵' },
-    { id: 'YELLOW', name: 'Amarelo', hex: '#eab308', icon: '🟡' },
-    { id: 'GREEN', name: 'Verde', hex: '#22c55e', icon: '🟢' },
-    { id: 'PURPLE', name: 'Roxo', hex: '#a855f7', icon: '🟣' },
+    { id: 'PLAYER_PRI', name: 'Mosaico Principal', hex: playerPrimaryColor, icon: '🔴' },
+    { id: 'PLAYER_SEC', name: 'Mosaico Secundário', hex: playerSecondaryColor !== '#ffffff' && playerSecondaryColor !== '#f4f4f5' ? playerSecondaryColor : '#3b82f6', icon: '🔵' },
+    { id: 'RIVAL_PRI', name: 'Mosaico Rival', hex: rivalPrimaryColor, icon: '🟢' },
+    { id: 'RIVAL_SEC', name: 'Mosaico Visitante', hex: rivalSecondaryColor !== '#000000' && rivalSecondaryColor !== '#09090b' ? rivalSecondaryColor : '#a855f7', icon: '🟣' },
+    { id: 'TACTICAL_GOLD', name: 'Ouro Tático', hex: '#eab308', icon: '🟡' },
   ];
 
   interface CardTile {
@@ -713,42 +785,61 @@ export const MemoryMosaic: React.FC<MemoryMosaicProps> = ({ onFinish }) => {
 // ==========================================
 interface RojonTargetProps {
   opponentTier?: 'S' | 'A' | 'B';
+  playerTorcidaName?: string;
+  playerClubName?: string;
+  rivalTorcidaName?: string;
+  rivalClubName?: string;
+  playerPrimaryColor?: string;
+  playerSecondaryColor?: string;
+  rivalPrimaryColor?: string;
+  rivalSecondaryColor?: string;
   onFinish: (result: MiniGameResult) => void;
 }
 
-export const RojonTarget: React.FC<RojonTargetProps> = ({ opponentTier = 'A', onFinish }) => {
-  const defaultPlayerTeam = {
-    id: 'mancha',
-    name: 'Mancha Verde',
-    shortName: 'MAN',
-    club: 'Palmeiras',
-    primaryColor: '#16a34a',
-    secondaryColor: '#ffffff',
-    accentColor: '#15803d',
-    mascot: 'Mancha',
-    slogan: 'Cante e vibre!',
+export const RojonTarget: React.FC<RojonTargetProps> = ({
+  opponentTier = 'A',
+  playerTorcidaName = 'Torcida Organizada',
+  playerClubName = 'Nosso Clube',
+  rivalTorcidaName = 'Torcida Rival',
+  rivalClubName = 'Rival FC',
+  playerPrimaryColor = '#16a34a',
+  playerSecondaryColor = '#ffffff',
+  rivalPrimaryColor = '#dc2626',
+  rivalSecondaryColor = '#000000',
+  onFinish,
+}) => {
+  const playerTeam = {
+    id: 'player_team',
+    name: playerTorcidaName,
+    shortName: playerTorcidaName.split(' ')[0] || playerTorcidaName,
+    club: playerClubName,
+    primaryColor: playerPrimaryColor,
+    secondaryColor: playerSecondaryColor,
+    accentColor: playerPrimaryColor,
+    mascot: 'Torcida',
+    slogan: 'Linha de Bateria & Rojões',
     contingent: 75,
     pistaOverall: 88,
   };
 
-  const defaultRivalTeam = {
-    id: 'gavioes',
-    name: 'Gaviões da Fiel',
-    shortName: 'GAV',
-    club: 'Corinthians',
-    primaryColor: '#dc2626',
-    secondaryColor: '#000000',
-    accentColor: '#b91c1c',
-    mascot: 'Gavião',
-    slogan: 'Lealdade e Humildade',
+  const rivalTeam = {
+    id: 'rival_team',
+    name: rivalTorcidaName,
+    shortName: rivalTorcidaName.split(' ')[0] || rivalTorcidaName,
+    club: rivalClubName,
+    primaryColor: rivalPrimaryColor,
+    secondaryColor: rivalSecondaryColor,
+    accentColor: rivalPrimaryColor,
+    mascot: 'Rival',
+    slogan: 'Bonde Rival',
     contingent: 75,
     pistaOverall: 88,
   };
 
   return (
     <RojonShooterCanvas
-      playerTeam={defaultPlayerTeam}
-      rivalTeam={defaultRivalTeam}
+      playerTeam={playerTeam}
+      rivalTeam={rivalTeam}
       opponentTier={opponentTier}
       onFinish={onFinish}
     />
@@ -1013,6 +1104,10 @@ export const MatchTacticalResolver: React.FC<{
           playerTorcidaName={context.playerTorcidaName || "Torcida Organizada"}
           playerClubName={context.playerClubName || "Nosso Clube"}
           rivalTorcidaName={context.rivalTorcidaName || "Torcida Rival"}
+          playerPrimaryColor={context.playerPrimaryColor}
+          playerSecondaryColor={context.playerSecondaryColor}
+          rivalPrimaryColor={context.rivalPrimaryColor}
+          rivalSecondaryColor={context.rivalSecondaryColor}
           contingente={context.contingente ?? 50}
           poderPista={context.poderPista ?? 50}
           onFinish={handleMiniGameFinish}
@@ -1023,13 +1118,13 @@ export const MatchTacticalResolver: React.FC<{
         <ArquibancadaMinigame
           homeTeam={{
             name: context.playerTorcidaName || "Torcida Organizada",
-            primaryColor: "#000000",
-            secondaryColor: "#f59e0b",
+            primaryColor: context.playerPrimaryColor || "#000000",
+            secondaryColor: context.playerSecondaryColor || "#f59e0b",
           }}
           awayTeam={{
             name: context.rivalTorcidaName || "Torcida Rival",
-            primaryColor: "#dc2626",
-            secondaryColor: "#18181b",
+            primaryColor: context.rivalPrimaryColor || "#dc2626",
+            secondaryColor: context.rivalSecondaryColor || "#18181b",
           }}
           onFinish={handleMiniGameFinish}
         />
@@ -1041,6 +1136,9 @@ export const MatchTacticalResolver: React.FC<{
           playerClubName={context.playerClubName || "Nosso Clube"}
           rivalTorcidaName={context.rivalTorcidaName || "Torcida Rival"}
           rivalClubName={context.rivalClubName || "Rival FC"}
+          playerPrimaryColor={context.playerPrimaryColor}
+          playerSecondaryColor={context.playerSecondaryColor}
+          rivalPrimaryColor={context.rivalPrimaryColor}
           contingente={context.contingente ?? 50}
           poderPista={context.poderPista ?? 50}
           opponentTier={context.opponentTier}
@@ -1053,6 +1151,9 @@ export const MatchTacticalResolver: React.FC<{
           playerClubName={context.playerClubName || "Nosso Clube"}
           rivalTorcidaName={context.rivalTorcidaName || "Torcida Rival"}
           rivalClubName={context.rivalClubName || "Rival FC"}
+          playerPrimaryColor={context.playerPrimaryColor}
+          playerSecondaryColor={context.playerSecondaryColor}
+          rivalPrimaryColor={context.rivalPrimaryColor}
           contingente={context.contingente ?? 50}
           poderPista={context.poderPista ?? 50}
           opponentTier={context.opponentTier}
@@ -1061,12 +1162,49 @@ export const MatchTacticalResolver: React.FC<{
         />
       )}
       {activeMiniGame === 'punch' && (
-        <PunchFrontCombat opponentTier={context.opponentTier} onFinish={handleMiniGameFinish} />
+        <PunchFrontCombat
+          opponentTier={context.opponentTier}
+          playerPrimaryColor={context.playerPrimaryColor}
+          playerSecondaryColor={context.playerSecondaryColor}
+          rivalPrimaryColor={context.rivalPrimaryColor}
+          rivalSecondaryColor={context.rivalSecondaryColor}
+          onFinish={handleMiniGameFinish}
+        />
       )}
-      {activeMiniGame === 'rojon' && <RojonTarget onFinish={handleMiniGameFinish} />}
-      {activeMiniGame === 'rhythm' && <MemoryMosaic onFinish={handleMiniGameFinish} />}
+      {activeMiniGame === 'rojon' && (
+        <RojonTarget
+          opponentTier={context.opponentTier}
+          playerTorcidaName={context.playerTorcidaName}
+          playerClubName={context.playerClubName}
+          rivalTorcidaName={context.rivalTorcidaName}
+          rivalClubName={context.rivalClubName}
+          playerPrimaryColor={context.playerPrimaryColor}
+          playerSecondaryColor={context.playerSecondaryColor}
+          rivalPrimaryColor={context.rivalPrimaryColor}
+          rivalSecondaryColor={context.rivalSecondaryColor}
+          onFinish={handleMiniGameFinish}
+        />
+      )}
+      {activeMiniGame === 'rhythm' && (
+        <MemoryMosaic
+          playerPrimaryColor={context.playerPrimaryColor}
+          playerSecondaryColor={context.playerSecondaryColor}
+          rivalPrimaryColor={context.rivalPrimaryColor}
+          rivalSecondaryColor={context.rivalSecondaryColor}
+          onFinish={handleMiniGameFinish}
+        />
+      )}
       {activeMiniGame === 'dodge' && <CaravanDodge onFinish={handleMiniGameFinish} />}
-      {activeMiniGame === 'memory' && <ColorMemoryGame opponentTier={context.opponentTier} onFinish={handleMiniGameFinish} />}
+      {activeMiniGame === 'memory' && (
+        <ColorMemoryGame
+          opponentTier={context.opponentTier}
+          playerPrimaryColor={context.playerPrimaryColor}
+          playerSecondaryColor={context.playerSecondaryColor}
+          rivalPrimaryColor={context.rivalPrimaryColor}
+          rivalSecondaryColor={context.rivalSecondaryColor}
+          onFinish={handleMiniGameFinish}
+        />
+      )}
       {activeMiniGame === 'flag_waving' && (
         <RuadaFlagWavingModal
           onClose={() => handleMiniGameFinish({ gameType: 'flag_waving', modifier: 0, rank: 'F', description: 'Cortejo cancelado pelo jogador.' })}
@@ -1078,6 +1216,8 @@ export const MatchTacticalResolver: React.FC<{
           })}
           torcidaName={context.playerTorcidaName}
           clubName={context.playerClubName}
+          primaryColor={context.playerPrimaryColor}
+          secondaryColor={context.playerSecondaryColor}
         />
       )}
       {activeMiniGame === 'rhythm_bateria' && (
@@ -1091,6 +1231,8 @@ export const MatchTacticalResolver: React.FC<{
           })}
           torcidaName={context.playerTorcidaName}
           clubName={context.playerClubName}
+          primaryColor={context.playerPrimaryColor}
+          secondaryColor={context.playerSecondaryColor}
         />
       )}
     </div>
@@ -1103,10 +1245,21 @@ export const MatchTacticalResolver: React.FC<{
 // ==========================================
 interface ColorMemoryGameProps {
   opponentTier: 'S' | 'A' | 'B';
+  playerPrimaryColor?: string;
+  playerSecondaryColor?: string;
+  rivalPrimaryColor?: string;
+  rivalSecondaryColor?: string;
   onFinish: (result: MiniGameResult) => void;
 }
 
-export const ColorMemoryGame: React.FC<ColorMemoryGameProps> = ({ opponentTier, onFinish }) => {
+export const ColorMemoryGame: React.FC<ColorMemoryGameProps> = ({
+  opponentTier,
+  playerPrimaryColor = '#16a34a',
+  playerSecondaryColor = '#ffffff',
+  rivalPrimaryColor = '#dc2626',
+  rivalSecondaryColor = '#000000',
+  onFinish,
+}) => {
   const [isTutorial, setIsTutorial] = useState(true);
   const [sequence, setSequence] = useState<number[]>([]);
   const [playerInput, setPlayerInput] = useState<number[]>([]);
@@ -1116,11 +1269,11 @@ export const ColorMemoryGame: React.FC<ColorMemoryGameProps> = ({ opponentTier, 
   const [gameStatus, setGameStatus] = useState<'IDLE' | 'SHOWING' | 'USER_TURN' | 'FAIL' | 'SUCCESS'>('IDLE');
 
   const COLORS = [
-    { id: 0, name: 'VERMELHO', bg: 'bg-red-600', activeBg: 'bg-red-400 border-white scale-105 shadow-red-500/80 shadow-lg' },
-    { id: 1, name: 'PRETO', bg: 'bg-zinc-900 border-zinc-700', activeBg: 'bg-zinc-700 border-white scale-105 shadow-zinc-400/80 shadow-lg' },
-    { id: 2, name: 'BRANCO', bg: 'bg-zinc-100 text-black', activeBg: 'bg-white text-black border-yellow-400 scale-105 shadow-white/80 shadow-lg' },
-    { id: 3, name: 'AMARELO', bg: 'bg-amber-500', activeBg: 'bg-amber-300 border-white scale-105 shadow-amber-400/80 shadow-lg' },
-    { id: 4, name: 'AZUL', bg: 'bg-blue-600', activeBg: 'bg-blue-400 border-white scale-105 shadow-blue-500/80 shadow-lg' },
+    { id: 0, name: 'NOSSA COR', hex: playerPrimaryColor },
+    { id: 1, name: 'PAVILHÃO', hex: playerSecondaryColor !== '#ffffff' && playerSecondaryColor !== '#f4f4f5' ? playerSecondaryColor : '#2563eb' },
+    { id: 2, name: 'RIVAL', hex: rivalPrimaryColor },
+    { id: 3, name: 'VISITANTE', hex: rivalSecondaryColor !== '#000000' && rivalSecondaryColor !== '#09090b' ? rivalSecondaryColor : '#7e22ce' },
+    { id: 4, name: 'OURO', hex: '#eab308' },
   ];
 
   const generateSequenceForPhase = (targetLength: number): number[] => {
@@ -1247,11 +1400,12 @@ export const ColorMemoryGame: React.FC<ColorMemoryGameProps> = ({ opponentTier, 
             key={c.id}
             onClick={() => handleColorClick(c.id)}
             disabled={gameStatus !== 'USER_TURN'}
+            style={{ backgroundColor: c.hex }}
             className={`h-20 rounded-2xl flex flex-col items-center justify-center font-black text-xs transition-all border-2 cursor-pointer ${
-              activeButton === c.id ? c.activeBg : `${c.bg} border-zinc-800 hover:border-amber-400 opacity-90 hover:opacity-100`
+              activeButton === c.id ? 'border-white scale-105 shadow-xl ring-2 ring-white' : 'border-zinc-800 hover:border-amber-400 opacity-85 hover:opacity-100'
             }`}
           >
-            <span className="text-[10px] uppercase font-black tracking-wider">{c.name}</span>
+            <span className="text-[10px] uppercase font-black tracking-wider bg-black/50 px-1.5 py-0.5 rounded text-white">{c.name}</span>
           </button>
         ))}
       </div>
