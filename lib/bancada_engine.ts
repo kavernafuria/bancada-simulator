@@ -2800,22 +2800,6 @@ export function executeCompleteMatch(
   let scorePlayerClub = scorePower > 50 ? Math.floor(Math.random() * 2 + 1) : Math.floor(Math.random() * 2);
   let scoreRivalClub = isVictoryPista ? Math.max(0, scorePlayerClub - Math.floor(Math.random() * 2 + 1)) : scorePlayerClub + 1;
 
-  const isVictoryBancada = isVictoryPista || (tactic.isMosaicTactic ?? false);
-  const membersLost = isVictoryPista
-    ? Math.floor(Math.random() * 4 + 1)
-    : Math.floor(Math.random() * 22 + 8);
-
-  const medicalCost = isVictoryPista
-    ? tactic.costRisk
-    : tactic.costRisk + Math.floor(Math.random() * 1200 + 600);
-
-  const policeCost = police ? police.cost : 0;
-  const extraExpenses = transport.fixedCost + medicalCost + policeCost;
-  const mpAdded = Math.max(0, transport.mpRisk + tactic.mpPenalty + (police ? police.mpRiskMod : 0));
-  let moralChange = isVictoryPista
-    ? Math.min(15, Math.max(3, 7 + tactic.moralMod + (police ? police.moralMod : 0)))
-    : Math.min(-2, -8 + tactic.moralMod + (police ? police.moralMod : 0));
-
   const isPistaFight = !derby.isAllyGame &&
     !isFestaTactic &&
     !isEvasionTactic &&
@@ -2841,6 +2825,22 @@ export function executeCompleteMatch(
       tid.includes("TROCA_SOCOS") ||
       tid.includes("PISTA")
     );
+
+  const isVictoryBancada = isVictoryPista || (tactic.isMosaicTactic ?? false);
+  const membersLost = isPistaFight
+    ? (isVictoryPista ? Math.floor(Math.random() * 4 + 1) : Math.floor(Math.random() * 22 + 8))
+    : 0;
+
+  const medicalCost = isPistaFight
+    ? (isVictoryPista ? tactic.costRisk : tactic.costRisk + Math.floor(Math.random() * 1200 + 600))
+    : 0;
+
+  const policeCost = police ? police.cost : 0;
+  const extraExpenses = transport.fixedCost + medicalCost + policeCost;
+  const mpAdded = Math.max(0, transport.mpRisk + tactic.mpPenalty + (police ? police.mpRiskMod : 0));
+  let moralChange = isVictoryPista
+    ? Math.min(15, Math.max(3, 7 + tactic.moralMod + (police ? police.moralMod : 0)))
+    : Math.min(-2, -8 + tactic.moralMod + (police ? police.moralMod : 0));
 
   // ------------------------------------------------------------------------
   // 2. REGRAS RESTRITIVAS PARA CAPTURA E PERDA DE FAIXAS (APENAS EM JOGOS DE PISTA)
@@ -2891,8 +2891,15 @@ export function executeCompleteMatch(
     { label: "Placar do Jogo", value: `${scorePlayerClub} x ${scoreRivalClub}`, isPositive: scorePlayerClub >= scoreRivalClub },
     { label: "Moral da Tropa", value: moralChange >= 0 ? `+${moralChange}` : `${moralChange}`, isPositive: moralChange >= 0 },
     { label: "Custos do Jogo", value: `R$ ${extraExpenses.toLocaleString()}`, isPositive: extraExpenses === 0 },
-    { label: "Baixas Médicas", value: membersLost === 0 ? "0 feridos" : `-${membersLost} feridos`, isPositive: membersLost <= 4 },
   ];
+
+  if (isPistaFight) {
+    deltas.push({
+      label: "Baixas Médicas",
+      value: membersLost === 0 ? "0 feridos" : `-${membersLost} feridos`,
+      isPositive: membersLost <= 4,
+    });
+  }
 
   if (bannerCaptured) {
     deltas.unshift({

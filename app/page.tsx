@@ -930,7 +930,42 @@ export default function App() {
   // 6. Complete Mini-Game & Resolve Complete Match Mechanics
   const handleMatchMiniGameComplete = (resultText: string, finalPECModifier: number, penaltyMP?: number) => {
     const tactic = activeSelectedTactic;
-    if (!tactic || !selectedTransport || !activeScoutIntel || !activeMatchDerby || !currentTorcida) return;
+    if (!tactic || !activeMatchDerby || !currentTorcida) return;
+
+    const transport: TransportChoice = selectedTransport || {
+      id: "TORCIDA_UNICA_LOGISTICA",
+      name: "Logística de Torcida Única",
+      description: "Deslocamento e segurança unificados sob diretrizes de Torcida Única do MP.",
+      costPerMember: 0,
+      fixedCost: 0,
+      capacityMultiplier: 1.0,
+      pistaBonus: 0,
+      mpRisk: 0,
+      speed: "MEDIO"
+    };
+
+    const intel: MatchScoutReport = activeScoutIntel || {
+      playerMembersPresent: Math.max(500, stats.contingente * 40),
+      rivalMembersWaiting: 2000,
+      policePresence: "MODERADA",
+      scoutIntelLog: "Vigência de Torcida Única do MP.",
+      twistTitle: "Vigência de Torcida Única (MP)",
+      twistDescription: "Sem presença de torcida visitante no perímetro do estádio."
+    };
+
+    const police: PoliceMeetingChoice = selectedPoliceChoice || {
+      id: "TAC_POLICIA_PADRAO",
+      title: "Alinhamento Padrão da PM",
+      stance: "DIPLOMATICA",
+      description: "Escolta padrão do policiamento de área.",
+      cost: 0,
+      mpRiskMod: 0,
+      bancadaBonus: 0,
+      pistaMod: 0,
+      moralMod: 0,
+      formattedDeltas: [],
+      meetingLog: "Alinhamento padrão da PM."
+    };
 
     if (penaltyMP && penaltyMP > 0) {
       setStateTrackers((st) => ({
@@ -939,7 +974,7 @@ export default function App() {
       }));
     }
 
-    if (selectedTransport?.id === 'CORTEJO_ONIBUS_TIME' || activeMatchMiniGameContext?.tacticalChoice === 'flag_waving') {
+    if (transport.id === 'CORTEJO_ONIBUS_TIME' || activeMatchMiniGameContext?.tacticalChoice === 'flag_waving') {
       setBankBalance((prev) => prev + 1500);
       setStateTrackers((st) => ({
         ...st,
@@ -999,9 +1034,9 @@ export default function App() {
       const result = executeCompleteMatch(
         stats,
         stateTrackers,
-        selectedPoliceChoice,
-        selectedTransport,
-        activeScoutIntel,
+        police,
+        transport,
+        intel,
         modifiedTactic,
         activeMatchDerby,
         currentTorcida,
@@ -1094,15 +1129,15 @@ export default function App() {
         isPistaFight: result.isPistaFight ?? false,
         isPeacefulMatch: !result.isPistaFight,
         score: `${result.scorePlayerClub} x ${result.scoreRivalClub}`,
-        playerAttendance: activeScoutIntel.playerMembersPresent,
-        rivalAttendance: activeScoutIntel.rivalMembersWaiting,
+        playerAttendance: intel.playerMembersPresent,
+        rivalAttendance: intel.rivalMembersWaiting,
         tacticTitle: tactic.title,
         tacticLog: `${tactic.tacticalLog} (${resultText})`,
-        policeStance: selectedPoliceChoice?.stance || "PADRÃO",
-        policeTitle: selectedPoliceChoice?.title || "Reunião de Segurança",
-        transportName: selectedTransport?.name || "Transporte",
-        twistTitle: activeScoutIntel.twistTitle,
-        twistDescription: activeScoutIntel.twistDescription,
+        policeStance: police.stance || "PADRÃO",
+        policeTitle: police.title || "Reunião de Segurança",
+        transportName: transport.name || "Transporte",
+        twistTitle: intel.twistTitle,
+        twistDescription: intel.twistDescription,
         extraCost: result.extraExpenses,
         medical: result.medicalCost,
         desertion: result.membersLost,
@@ -4548,15 +4583,45 @@ export default function App() {
             }
             setHistoryLog((prev) => [`[Torcida Única] ${res.log}`, ...prev]);
             setTorcidaUnicaActionAppliedForStep(pipelineIndex);
-            setMatchModalPhase("CLOSED");
             setActiveTorcidaUnicaModalMode(null);
 
-            if (res.id === "CACADA_CLANDESTINA") {
+            if (res.id === "MAIOR_FESTA_ANO" || res.id === "FESTA_CALDEIRAO_CAMPINHO") {
+              setActiveSelectedTactic({
+                id: "FESTA_CALDEIRAO_CAMPINHO",
+                title: "Festa no Caldeirão",
+                description: "Festa no Caldeirão com Fuga do Labirinto de Bairro.",
+                pistaMod: 0,
+                moralMod: 15,
+                mpPenalty: 0,
+                costRisk: 0,
+                injuryRisk: 0,
+                tacticalLog: "Realizou a Festa no Caldeirão e resgatou o bonde de bairro na emboscada.",
+                formattedDeltas: []
+              });
+
+              setActiveMatchMiniGameContext({
+                isHome: activeMatchDerby?.isHome ?? true,
+                isAllyGame: activeMatchDerby?.isAllyGame ?? false,
+                tacticalChoice: 'maze_escape',
+                homeContingent: activeMatchDerby?.isHome ? (stats.contingente * 40) : 2000,
+                awayContingent: activeMatchDerby?.isHome ? 2000 : (stats.contingente * 40),
+                opponentTier: 'A',
+                playerTorcidaName: currentTorcida?.torcida,
+                playerClubName: currentTorcida?.clube,
+                rivalTorcidaName: activeMatchDerby?.rivalTorcida || "Torcida Rival",
+                rivalClubName: activeMatchDerby?.isHome ? activeMatchDerby?.awayClub : activeMatchDerby?.homeClub,
+                contingente: stats.contingente,
+                poderPista: stats.poder_pista,
+              });
+              setMatchModalPhase("MINIGAME");
+            } else if (res.id === "CACADA_CLANDESTINA") {
+              setMatchModalPhase("CLOSED");
               setActiveInquiryTrigger({
                 triggerReason: res.narrative || "Confronto clandestino de rua em dia de Torcida Única",
                 initialConvictionBase: res.rngOutcome === "FAIL_CRITICAL" ? 35 : 20,
               });
             } else {
+              setMatchModalPhase("CLOSED");
               advancePipeline();
             }
           }}
