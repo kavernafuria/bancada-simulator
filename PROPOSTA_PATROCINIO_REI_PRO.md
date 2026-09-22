@@ -1,7 +1,7 @@
 # 🏆 Proposta Comercial de Patrocínio & Integração In-Game
 ## Bancada Simulator x Rei PRO Uniformes Esportivos
 
-![Logo Rei PRO](https://i.imgur.com/vH9Z9lA.png)
+![Logo Rei PRO](C:/Users/renan.carlos/.gemini/antigravity/brain/ef7d6bfc-d326-4af7-9772-2722d46be4c4/.user_uploaded/media_1790081429121.jpg)
 
 ---
 
@@ -54,6 +54,8 @@ graph TD
 - **Item Especial In-Game**: *"Lote de Uniformes & Agasalhos Oficiais Rei PRO"*.
 - **Impacto no Jogo**: Comprar artigos confeccionados pela Rei PRO aumenta a **Autonomia Financeira (+15%)** e a **Moral dos Associados (+10%)**.
 
+![Interface da Loja Social da Torcida com Marca e Cupom Rei PRO](C:/Users/renan.carlos/.gemini/antigravity/brain/ef7d6bfc-d326-4af7-9772-2722d46be4c4/reipro_store_interface_1790085666310.jpg)
+
 ---
 
 ### 🚩 B. Minigame de Bandeirões & Festas de Arquibancada (`Flag Waving & Mosaico`)
@@ -62,11 +64,15 @@ graph TD
   - Faixas verticais e de mastro trazendo o selo da **Rei PRO**.
 - **Impacto Visual**: Exposição da marca no momento de maior emoção visual do jogo.
 
+![Arquibancada com Bandeirões 3D e Placas de Estádio Rei PRO](C:/Users/renan.carlos/.gemini/antigravity/brain/ef7d6bfc-d326-4af7-9772-2722d46be4c4/reipro_bancada_stadium_1790085581813.jpg)
+
 ---
 
 ### 🥁 C. Minigame de Rhythm Bateria (`Ritmo & Vestuário`)
 - **Visual**: Os ritmistas da bateria usam uniformes e regatas confeccionados com o logo da **Rei PRO** visível no peito e nas peles dos bumbos.
 - **Patrocínio do Ritmo**: *"Bateria Uniformizada por Rei PRO"*.
+
+![Minigame de Bateria com Ritmistas Uniformizados pela Rei PRO](C:/Users/renan.carlos/.gemini/antigravity/brain/ef7d6bfc-d326-4af7-9772-2722d46be4c4/reipro_bateria_minigame_1790085612776.jpg)
 
 ---
 
@@ -91,7 +97,7 @@ Para o lançamento do jogo, estruturamos **2 Planos Acessíveis de Entrada**, fo
 ### 🥉 Plano 1: **Cota Parceiro de Lançamento (R$ 300,00 / mês + Comissão + Sorteios)**
 > *O plano de entrada perfeito: valor acessível, comissão sobre vendas e engajamento com sorteios reais de produtos para os jogadores.*
 
-- **Investimento**: **R$ 300,00 / mês** (Contrato Anual de 12 Meses) + **5% a 10% de Comissão** em vendas geradas via cupom do jogo.
+- **Investimento**: **R$ 300,00 / mês** (Contrato Anual) + **5% a 10% de Comissão** em vendas geradas via cupom do jogo.
 - **O que a Rei PRO ganha no jogo**:
   - **Exposição Visual**: Logo nas placas digitais do estádio e banner fixo na quadra social da torcida.
   - **Selo de Fabricação nos Bandeirões**: Os bandeirões 3D e faixas de mastro nos clássicos trazem o selo *"Confecção por Rei PRO"*.
@@ -104,7 +110,7 @@ Para o lançamento do jogo, estruturamos **2 Planos Acessíveis de Entrada**, fo
 ### 🥇 Plano 2: **Cota Máster & Fornecedora Oficial (R$ 500,00 / mês + Exclusividade Total)**
 > *O plano completo e exclusivo: a Rei PRO assume o papel de única fabricante de uniformes da economia do jogo e domina a marca no ecossistema.*
 
-- **Investimento**: **R$ 500,00 / mês** (Contrato Anual de 12 Meses) + **10% de Comissão** em vendas geradas via cupom do jogo.
+- **Investimento**: **R$ 500,00 / mês** (Contrato Anual) + **10% de Comissão** em vendas geradas via cupom do jogo.
 - **Tudo do Plano 1, MAIS**:
   - **Fornecedora Exclusiva na Loja In-Game**: Na aba de compras do jogo, a **Rei PRO** é a fornecedora oficial obrigatória para o jogador confeccionar lotes de uniformes e agasalhos para a torcida.
   - **Minigame de Bateria**: Ritmistas da bateria vestem uniformes com a marca Rei PRO e o logo é estampado na pele do bumbo principal.
@@ -140,11 +146,11 @@ A parceria não se limita ao ambiente digital! Criamos uma ponte direta entre os
 
 ## 7. Próximos Passos & Implementação
 
-1. **Escolha da Cota**: Seleção do Plano 1 (R$ 300) ou Plano 2 (R$ 500).
-2. **Recebimento do Logotipo**: Envio da marca Rei PRO em vetor ou PNG em alta resolução.
-3. **Inserção In-Game**: Desenvolvimento dos banners, etiquetas de bandeiras, regatas de bateria e itens de loja.
-4. **Alinhamento do Primeiro Sorteio**: Definição dos produtos físicos da Rei PRO para o lançamento oficial.
+1. **Aprovação do Formato**: Escolha do Plano 1 (R$ 300) ou Plano 2 (R$ 500).
+2. **Recebimento de Vetores**: Envio da marca Rei PRO em alta resolução (Vetor/PNG transparente).
+3. **Desenvolvimento In-Game**: Inserção das sprites, banners e itens da marca no jogo.
+4. **Homologação & Lançamento**: Teste conjunto das telas e divulgação nos canais oficiais do jogo e da Rei PRO.
 
 ---
 
-*Documentação comercial elaborada pela equipe de desenvolvimento do Bancada Simulator.*
+*Documentação elaborada pela equipe de desenvolvimento do Bancada Simulator.*
