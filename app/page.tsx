@@ -50,9 +50,53 @@ import {
   Crown,
   Download,
   ShieldAlert,
+  Shirt,
+  ShoppingBag,
+  TrendingUp,
+  Clock,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { MatchTacticalResolver, MatchContext } from "@/components/MatchTacticalResolver";
+
+export interface MerchandiseOrder {
+  id: string;
+  itemType: "CAMISAS" | "BERMUDAS" | "AGASALHOS";
+  title: string;
+  cost: number;
+  returnAmount: number;
+  purchaseSeason: number;
+  maturitySeason: number;
+}
+
+const MERCHANDISE_CATALOG = [
+  {
+    type: "CAMISAS" as const,
+    title: "🎽 Lote de Camisas Oficiais de Torcida",
+    subtitle: "Confecção & Pré-Venda de Camisas",
+    description: "Financiamento de lote de tecido, bordado e estamparia para camisas oficiais do pavilhão.",
+    cost: 5000,
+    returnAmount: 10000,
+    statBonus: { moral: 5, contingente: 5 },
+  },
+  {
+    type: "BERMUDAS" as const,
+    title: "🩳 Lote de Bermudas & Calções de Bonde",
+    subtitle: "Produção de Bermudas & Calções Táticos",
+    description: "Confecção de lote de bermudas oficiais de bonde para subsedes e associados da agremiação.",
+    cost: 10000,
+    returnAmount: 20000,
+    statBonus: { poder_pista: 8, moral: 5 },
+  },
+  {
+    type: "AGASALHOS" as const,
+    title: "🧥 Lote de Agasalhos Corta-Vento & Blusões",
+    subtitle: "Encomenda de Agasalhos de Comitiva",
+    description: "Produção de blusões corta-vento reforçados para comboios e caravanas de inverno.",
+    cost: 25000,
+    returnAmount: 50000,
+    statBonus: { caravana: 12, autonomia_financeira: 10, moral: 0 },
+  },
+];
 import { TorcidaUnicaModal } from "@/components/TorcidaUnicaModal";
 import { PressConferenceModal } from "@/components/PressConferenceModal";
 import { ElectionCrisisModal } from "@/components/ElectionCrisisModal";
@@ -240,6 +284,7 @@ export default function App() {
   const [isAgeVerified, setIsAgeVerified] = useState<boolean>(false);
   const [showMockAdModal, setShowMockAdModal] = useState<boolean>(false);
   const [purchasedInvestments, setPurchasedInvestments] = useState<string[]>([]);
+  const [merchandiseOrders, setMerchandiseOrders] = useState<MerchandiseOrder[]>([]);
   const [unforeseenExpenseModal, setUnforeseenExpenseModal] = useState<UnforeseenExpense | null>(null);
 
   // MÓDULO 1 & 2 STATE
@@ -476,6 +521,7 @@ export default function App() {
           if (parsed.hasOwnHeadquarters !== undefined) setHasOwnHeadquarters(parsed.hasOwnHeadquarters);
           if (parsed.bateriaDurability !== undefined) setBateriaDurability(parsed.bateriaDurability);
           if (parsed.pyroStockCount !== undefined) setPyroStockCount(parsed.pyroStockCount);
+          if (parsed.merchandiseOrders) setMerchandiseOrders(parsed.merchandiseOrders);
           if (parsed.rivalryRecords) {
             setRivalryRecords(parsed.rivalryRecords);
           }
@@ -544,6 +590,7 @@ export default function App() {
           bateriaDurability,
           pyroStockCount,
           torcidaUnicaState,
+          merchandiseOrders,
         })
       );
     }
@@ -567,6 +614,7 @@ export default function App() {
     bateriaDurability,
     pyroStockCount,
     torcidaUnicaState,
+    merchandiseOrders,
   ]);
 
   const pipeline = currentTorcida
@@ -612,6 +660,48 @@ export default function App() {
 
     setHistoryLog((prev) => [
       `[Ano ${season} - Investimento de Elite] A diretoria concluiu a aquisição: ${inv.title} (-R$ ${inv.cost.toLocaleString()}).`,
+      ...prev,
+    ]);
+  };
+
+  const handleFundMerchandiseOrder = (item: typeof MERCHANDISE_CATALOG[number]) => {
+    if (bankBalance < item.cost) {
+      alert(`Saldo insuficiente no caixa. Você precisa de R$ ${item.cost.toLocaleString()} para financiar este lote.`);
+      return;
+    }
+
+    setBankBalance((prev) => prev - item.cost);
+
+    const newOrder: MerchandiseOrder = {
+      id: `merch_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      itemType: item.type,
+      title: item.title,
+      cost: item.cost,
+      returnAmount: item.returnAmount,
+      purchaseSeason: season,
+      maturitySeason: season + 1,
+    };
+
+    setMerchandiseOrders((prev) => [...prev, newOrder]);
+
+    if (item.statBonus) {
+      setStats((st) => ({
+        ...st,
+        contingente: Math.min(100, st.contingente + (item.statBonus.contingente || 0)),
+        poder_pista: Math.min(100, st.poder_pista + (item.statBonus.poder_pista || 0)),
+        caravana: Math.min(100, st.caravana + (item.statBonus.caravana || 0)),
+        autonomia_financeira: Math.min(100, st.autonomia_financeira + (item.statBonus.autonomia_financeira || 0)),
+      }));
+      if (item.statBonus && item.statBonus.moral) {
+        const moralBonus = item.statBonus.moral;
+        setStateTrackers((st) => ({ ...st, moral: Math.min(100, st.moral + moralBonus) }));
+      }
+    }
+
+    if (soundEnabled) playStadiumSound("cash");
+
+    setHistoryLog((prev) => [
+      `[Ano ${season} - Confecção de Vestuário] A agremiação financiou ${item.title} (-R$ ${item.cost.toLocaleString()}). Retorno de R$ ${item.returnAmount.toLocaleString()} (Lucro Dobrado 2x) agendado para o Ano ${season + 1}!`,
       ...prev,
     ]);
   };
@@ -1345,6 +1435,23 @@ export default function App() {
         setPipelineIndex(0);
         setTorcidaUnicaActionAppliedForStep(null);
         setChallengedRivalTorcida(null);
+
+        // MÓDULO 3: Payout Matured Merchandise Orders (Lucro Dobrado 2x após 1 Ano/Temporada)
+        const maturedMerch = merchandiseOrders.filter((ord) => ord.maturitySeason <= nextSeason);
+        if (maturedMerch.length > 0) {
+          const totalReturn = maturedMerch.reduce((sum, ord) => sum + ord.returnAmount, 0);
+          setBankBalance((prev) => prev + totalReturn);
+          setMerchandiseOrders((prev) => prev.filter((ord) => ord.maturitySeason > nextSeason));
+
+          maturedMerch.forEach((ord) => {
+            setHistoryLog((prev) => [
+              `[Ano ${nextSeason} - Retorno de Vestuário] 💰 Vendas do ${ord.title} finalizadas! +R$ ${ord.returnAmount.toLocaleString()} (LUCRO DOBRADO 2X) creditado no caixa!`,
+              ...prev,
+            ]);
+          });
+
+          if (soundEnabled) playStadiumSound("cash");
+        }
 
         // MÓDULO 1: Torcida Única Season Decrement & Revocation Check (3 temporadas de vigência, travado para nunca mais repetir)
         if (torcidaUnicaState.isTorcidaUnica) {
@@ -3134,25 +3241,100 @@ export default function App() {
             </div>
           </div>
 
-          <div className="bg-zinc-950 p-3.5 rounded-2xl border border-amber-500/30 flex items-center justify-between">
-            <div>
-              <span className="font-bold text-white block text-xs flex items-center gap-1.5 text-amber-400">
-                <Download className="w-3.5 h-3.5" /> Baixar Código para o Localhost
+          {/* CONFECÇÃO & VENDA DE ARTIGOS DA TORCIDA (LUCRO DOBRADO 2X EM 1 ANO) */}
+          <div className="bg-zinc-900 border border-amber-500/40 rounded-3xl p-4 shadow-xl space-y-3 relative z-10">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-zinc-800 pb-3">
+              <div>
+                <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest block flex items-center gap-1">
+                  <Shirt className="w-3.5 h-3.5" /> LOJA SOCIAL & CONFECÇÃO DE UNIFORMES
+                </span>
+                <h3 className="text-sm font-black text-white uppercase flex items-center gap-1.5">
+                  Financiamento de Estoque & Artigos da Torcida
+                </h3>
+              </div>
+              <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-xl flex items-center gap-1 shadow-sm">
+                <TrendingUp className="w-3.5 h-3.5" /> Lucro Dobrado (2x) em 1 Ano
               </span>
-              <span className="text-[10px] text-zinc-400">Download do projeto completo atualizado em arquivo .ZIP</span>
             </div>
-            <button
-              onClick={handleDownloadProjectZip}
-              disabled={isDownloadingZip}
-              className="py-1.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs transition-all flex items-center gap-1.5 shadow cursor-pointer disabled:opacity-50"
-            >
-              {isDownloadingZip ? (
-                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Download className="w-3.5 h-3.5" />
-              )}
-              {isDownloadingZip ? "Baixando..." : "Baixar ZIP"}
-            </button>
+
+            <p className="text-[11px] text-zinc-300 leading-relaxed">
+              Financie a fabricação do lote oficial de vestuário da torcida (camisas, bermudas de bonde e agasalhos de comitiva).
+              As vendas são finalizadas ao longo de 1 temporada (1 ano) e retornam o <strong className="text-emerald-400">dobro do valor investido (2x)</strong> diretamente para o caixa!
+            </p>
+
+            {/* CATALOG CARDS */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+              {MERCHANDISE_CATALOG.map((item) => {
+                const canAfford = bankBalance >= item.cost;
+                return (
+                  <div
+                    key={item.type}
+                    className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 flex flex-col justify-between space-y-2 hover:border-amber-500/50 transition-all text-left"
+                  >
+                    <div>
+                      <span className="font-black text-xs text-white block mb-0.5">
+                        {item.title}
+                      </span>
+                      <span className="text-[9.5px] text-amber-400 font-extrabold block">{item.subtitle}</span>
+                      <p className="text-[10px] text-zinc-400 leading-snug mt-1.5">{item.description}</p>
+                    </div>
+
+                    <div className="space-y-1.5 pt-2 border-t border-zinc-800/80">
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className="text-zinc-400 font-semibold">Custo do Lote:</span>
+                        <span className="font-extrabold text-amber-300">R$ {item.cost.toLocaleString()}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className="text-zinc-400 font-semibold">Retorno em 1 Ano:</span>
+                        <span className="font-black text-emerald-400">R$ {item.returnAmount.toLocaleString()}</span>
+                      </div>
+
+                      <button
+                        onClick={() => handleFundMerchandiseOrder(item)}
+                        disabled={!canAfford}
+                        className={`w-full py-2 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all cursor-pointer shadow mt-1 ${
+                          canAfford
+                            ? "bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black active:scale-95"
+                            : "bg-zinc-800 text-zinc-500 opacity-60 cursor-not-allowed"
+                        }`}
+                      >
+                        {canAfford ? "FINANCIAR ESTOQUE (2X)" : `SALDO INSUFICIENTE (R$ ${item.cost.toLocaleString()})`}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* ACTIVE MERCHANDISE ORDERS */}
+            {merchandiseOrders.length > 0 && (
+              <div className="bg-zinc-950 p-3 rounded-2xl border border-amber-500/30 space-y-2 mt-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5" /> LOTES EM CONFECÇÃO & VENDAS DA TEMPORADA ({merchandiseOrders.length})
+                  </span>
+                  <span className="text-[9px] text-zinc-400 font-semibold">Retorno automático no Ano +1</span>
+                </div>
+                <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                  {merchandiseOrders.map((ord) => (
+                    <div key={ord.id} className="bg-zinc-900 p-2.5 rounded-xl border border-zinc-800 flex items-center justify-between text-[11px]">
+                      <div>
+                        <span className="font-bold text-white block">{ord.title}</span>
+                        <span className="text-[9.5px] text-zinc-400">
+                          Financiado no Ano {ord.purchaseSeason} • Retorno agendado no caixa para o Ano {ord.maturitySeason}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-black text-emerald-400 block">+R$ {ord.returnAmount.toLocaleString()}</span>
+                        <span className="text-[9px] text-amber-300 font-extrabold flex items-center gap-0.5 justify-end">
+                          <Sparkles className="w-3 h-3 text-amber-400" /> Lucro Dobrado
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800/80 flex items-center justify-between">
