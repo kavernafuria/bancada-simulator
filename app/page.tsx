@@ -49,6 +49,7 @@ import {
   Award,
   Crown,
   Download,
+  Upload,
   ShieldAlert,
   Shirt,
   ShoppingBag,
@@ -377,8 +378,49 @@ export default function App() {
   }[]>([]);
 
   const [historyLog, setHistoryLog] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<"pipeline" | "objectives" | "ranking" | "standings" | "profile" | "alliances" | "history">("pipeline");
+  const [activeTab, setActiveTab] = useState<"pipeline" | "objectives" | "ranking" | "standings" | "profile" | "alliances" | "loja">("pipeline");
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
+
+  const handleExportSave = () => {
+    const saved = localStorage.getItem("bancada_ultra_v2_save");
+    if (!saved) {
+      alert("Nenhum jogo salvo encontrado para exportar.");
+      return;
+    }
+    const blob = new Blob([saved], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `bancada_save_temporada_${season}_${currentTorcida?.sigla || "save"}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportSave = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const parsed = JSON.parse(content);
+
+        if (!parsed.currentTorcida || !parsed.isStarted) {
+          alert("Arquivo JSON de Save inválido!");
+          return;
+        }
+
+        localStorage.setItem("bancada_ultra_v2_save", content);
+        window.location.reload();
+      } catch (err) {
+        alert("Erro ao ler o arquivo JSON de save. Verifique a formatação do arquivo.");
+      }
+    };
+    reader.readAsText(file);
+  };
   const [copied, setCopied] = useState<boolean>(false);
   const [showResetConfirm, setShowResetConfirm] = useState<boolean>(false);
   const [isDownloadingZip, setIsDownloadingZip] = useState<boolean>(false);
@@ -522,6 +564,8 @@ export default function App() {
           if (parsed.bateriaDurability !== undefined) setBateriaDurability(parsed.bateriaDurability);
           if (parsed.pyroStockCount !== undefined) setPyroStockCount(parsed.pyroStockCount);
           if (parsed.merchandiseOrders) setMerchandiseOrders(parsed.merchandiseOrders);
+          if (parsed.purchasedInvestments) setPurchasedInvestments(parsed.purchasedInvestments);
+          if (parsed.seasonHistory) setSeasonHistory(parsed.seasonHistory);
           if (parsed.rivalryRecords) {
             setRivalryRecords(parsed.rivalryRecords);
           }
@@ -591,6 +635,8 @@ export default function App() {
           pyroStockCount,
           torcidaUnicaState,
           merchandiseOrders,
+          purchasedInvestments,
+          seasonHistory,
         })
       );
     }
@@ -615,6 +661,8 @@ export default function App() {
     pyroStockCount,
     torcidaUnicaState,
     merchandiseOrders,
+    purchasedInvestments,
+    seasonHistory,
   ]);
 
   const pipeline = currentTorcida
@@ -2327,6 +2375,14 @@ export default function App() {
                 <span>Fundar Torcida e Iniciar Carreira</span>
                 <ChevronRight className="w-5 h-5 fill-black" />
               </button>
+
+              {/* Import Save JSON on Start Screen */}
+              <div className="pt-2 border-t border-zinc-800">
+                <label className="w-full py-2.5 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-amber-400 border border-zinc-800 text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow">
+                  <Download className="w-4 h-4 text-amber-400" /> Restaurar Jogo Salvo (Importar Save JSON)
+                  <input type="file" accept=".json" onChange={handleImportSave} className="hidden" />
+                </label>
+              </div>
             </div>
           )}
         </div>
@@ -2545,6 +2601,14 @@ export default function App() {
               🎮 <span className="hidden sm:inline">Mini-Games</span>
             </Link>
             <button
+              onClick={handleExportSave}
+              className="p-1.5 px-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 transition-colors flex items-center gap-1 text-[10px] font-bold cursor-pointer"
+              title="Exportar Save JSON para backup"
+            >
+              <Download className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="hidden sm:inline">Save JSON</span>
+            </button>
+            <button
               onClick={() => setShowResetConfirm(true)}
               className="p-1.5 px-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-amber-400 transition-colors flex items-center gap-1 text-[10px] font-bold cursor-pointer"
               title="Voltar ao início / Reiniciar carreira (Ano 1)"
@@ -2681,14 +2745,14 @@ export default function App() {
         </button>
 
         <button
-          onClick={() => setActiveTab("history")}
+          onClick={() => setActiveTab("loja")}
           className={`py-1.5 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer ${
-            activeTab === "history"
+            activeTab === "loja"
               ? "bg-amber-500 text-black shadow-md font-black"
               : "bg-zinc-900 text-zinc-400 border border-zinc-800"
           }`}
         >
-          <FileText className="w-3 h-3" /> Crônicas
+          <ShoppingBag className="w-3 h-3" /> Loja
         </button>
       </div>
 
@@ -3121,7 +3185,7 @@ export default function App() {
         </div>
       )}
 
-      {/* TAB 3: PROFILE */}
+      {/* TAB 3: PROFILE & CHRONICLES INTEGRATED */}
       {activeTab === "profile" && currentTorcida && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 shadow-xl space-y-3 relative z-10">
           <div>
@@ -3173,8 +3237,225 @@ export default function App() {
             </ul>
           </div>
 
+          {/* BACKUP & GERENCIAMENTO DE SAVE JSON */}
+          <div className="bg-zinc-950 p-3.5 rounded-2xl border border-zinc-800 space-y-2.5">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
+              <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block flex items-center gap-1">
+                <Download className="w-3.5 h-3.5 text-amber-400" /> GERENCIAMENTO & BACKUP DO SAVE JSON
+              </span>
+              <span className="text-[9px] text-zinc-400 font-semibold">Proteja seu progresso</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <button
+                onClick={handleExportSave}
+                className="py-2.5 px-3 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow"
+              >
+                <Download className="w-4 h-4" /> Exportar Save
+              </button>
+              <label className="py-2.5 px-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow">
+                <Upload className="w-4 h-4" /> Importar Save
+                <input type="file" accept=".json" onChange={handleImportSave} className="hidden" />
+              </label>
+            </div>
+          </div>
+
+          {/* HISTÓRICO DE EVOLUÇÃO (ANO A ANO) */}
+          {seasonHistory.length > 0 && (
+            <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] font-black text-amber-400 uppercase">
+                  📈 EVOLUÇÃO DA TORCIDA (ANO A ANO)
+                </span>
+                <span className="text-[9px] font-bold text-zinc-400">
+                  {seasonHistory.length} Anos Registrados
+                </span>
+              </div>
+
+              <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
+                {seasonHistory.map((rec) => (
+                  <div
+                    key={rec.season}
+                    className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-between text-xs"
+                  >
+                    <div>
+                      <div className="font-black text-amber-400 flex items-center gap-1.5">
+                        <span>Ano {rec.season}</span>
+                        <span className="text-[9px] text-zinc-400 font-normal">
+                          (R$ {rec.bankBalance.toLocaleString()})
+                        </span>
+                      </div>
+                      <span className="text-[9px] text-zinc-400 block mt-0.5">
+                        Massa: {rec.contingente} • Bancada: {rec.pressaoBancada} • Pista: {rec.poderPista} • Moral: {rec.moral}%
+                      </span>
+                    </div>
+
+                    <div className="text-right">
+                      <span className="text-xs font-black text-emerald-400 block">{rec.powerScore} pts</span>
+                      <span className="text-[9px] font-bold text-amber-300 block">
+                        #{rec.rankPosition}º Lugar Nacional
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* CRÔNICAS & REGISTRO DE EVENTOS */}
+          <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 space-y-2">
+            <div className="flex items-center justify-between border-b border-zinc-800/80 pb-1.5">
+              <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest block flex items-center gap-1">
+                <FileText className="w-3.5 h-3.5" /> CRÔNICAS DA ARQUIBANCADA & HISTÓRICO DE EVENTOS
+              </span>
+              <span className="text-[9px] text-zinc-400 font-semibold">{historyLog.length} eventos</span>
+            </div>
+
+            <div className="max-h-64 overflow-y-auto space-y-2 text-xs font-semibold text-left pr-1">
+              {historyLog.length > 0 ? (
+                historyLog.map((log, idx) => (
+                  <div
+                    key={idx}
+                    className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800/90 text-zinc-300 leading-relaxed text-[11px]"
+                  >
+                    {log}
+                  </div>
+                ))
+              ) : (
+                <div className="text-zinc-500 text-center py-6 text-xs">
+                  Nenhum registro histórico registrado ainda.
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800/80 flex items-center justify-between">
+            <div>
+              <span className="font-bold text-white block text-xs">Reiniciar Carreira</span>
+              <span className="text-[10px] text-zinc-400">Voltar para o Ano 1 e escolher uma nova torcida</span>
+            </div>
+            <button
+              onClick={() => setShowResetConfirm(true)}
+              className="py-1.5 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5" /> Voltar ao Início
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 5: LOJA & INVESTIMENTOS DE INFRAESTRUTURA */}
+      {activeTab === "loja" && currentTorcida && (
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 shadow-xl space-y-4 relative z-10">
+          <div>
+            <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest block flex items-center gap-1">
+              <ShoppingBag className="w-3.5 h-3.5" /> LOJA SOCIAL, UNIFORMES & INFRAESTRUTURA
+            </span>
+            <h3 className="text-base font-black text-white uppercase">
+              Patrimônio, Finanças & Loja da Torcida
+            </h3>
+            <span className="text-xs text-zinc-400 font-semibold">
+              Gerencie a fabricação de agasalhos/camisas e financie obras de infraestrutura de elite.
+            </span>
+          </div>
+
+          {/* CONFECÇÃO & VENDA DE ARTIGOS DA TORCIDA (LUCRO DOBRADO 2X EM 1 ANO) */}
+          <div className="bg-zinc-950 p-4 rounded-2xl border border-amber-500/40 space-y-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-zinc-800 pb-3">
+              <div>
+                <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest block flex items-center gap-1">
+                  <Shirt className="w-3.5 h-3.5" /> CONFECÇÃO & VENDA DE VESTUÁRIO
+                </span>
+                <h4 className="text-xs font-black text-white uppercase flex items-center gap-1.5">
+                  Financiamento de Lotes (Camisas, Bermudas e Agasalhos)
+                </h4>
+              </div>
+              <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-xl flex items-center gap-1 shadow-sm">
+                <TrendingUp className="w-3.5 h-3.5" /> Lucro Dobrado (2x) em 1 Ano
+              </span>
+            </div>
+
+            <p className="text-[11px] text-zinc-300 leading-relaxed">
+              Financie a fabricação do lote oficial de vestuário da torcida (camisas oficiais, bermudas de bonde e agasalhos de comitiva).
+              As vendas são finalizadas ao longo de 1 temporada (1 ano) e retornam o <strong className="text-emerald-400">dobro do valor investido (2x)</strong> diretamente para o caixa!
+            </p>
+
+            {/* CATALOG CARDS */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+              {MERCHANDISE_CATALOG.map((item) => {
+                const canAfford = bankBalance >= item.cost;
+                return (
+                  <div
+                    key={item.type}
+                    className="bg-zinc-900 p-3 rounded-2xl border border-zinc-800 flex flex-col justify-between space-y-2 hover:border-amber-500/50 transition-all text-left"
+                  >
+                    <div>
+                      <span className="font-black text-xs text-white block mb-0.5">
+                        {item.title}
+                      </span>
+                      <span className="text-[9.5px] text-amber-400 font-extrabold block">{item.subtitle}</span>
+                      <p className="text-[10px] text-zinc-400 leading-snug mt-1.5">{item.description}</p>
+                    </div>
+
+                    <div className="space-y-1.5 pt-2 border-t border-zinc-800/80">
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className="text-zinc-400 font-semibold">Custo do Lote:</span>
+                        <span className="font-extrabold text-amber-300">R$ {item.cost.toLocaleString()}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className="text-zinc-400 font-semibold">Retorno em 1 Ano:</span>
+                        <span className="font-black text-emerald-400">R$ {item.returnAmount.toLocaleString()}</span>
+                      </div>
+
+                      <button
+                        onClick={() => handleFundMerchandiseOrder(item)}
+                        disabled={!canAfford}
+                        className={`w-full py-2 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all cursor-pointer shadow mt-1 ${
+                          canAfford
+                            ? "bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black active:scale-95"
+                            : "bg-zinc-800 text-zinc-500 opacity-60 cursor-not-allowed"
+                        }`}
+                      >
+                        {canAfford ? "FINANCIAR ESTOQUE (2X)" : `SALDO INSUFICIENTE (R$ ${item.cost.toLocaleString()})`}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* ACTIVE MERCHANDISE ORDERS */}
+            {merchandiseOrders.length > 0 && (
+              <div className="bg-zinc-900 p-3 rounded-2xl border border-amber-500/30 space-y-2 mt-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5" /> LOTES EM CONFECÇÃO & VENDAS DA TEMPORADA ({merchandiseOrders.length})
+                  </span>
+                  <span className="text-[9px] text-zinc-400 font-semibold">Retorno automático no Ano +1</span>
+                </div>
+                <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                  {merchandiseOrders.map((ord) => (
+                    <div key={ord.id} className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800 flex items-center justify-between text-[11px]">
+                      <div>
+                        <span className="font-bold text-white block">{ord.title}</span>
+                        <span className="text-[9.5px] text-zinc-400">
+                          Financiado no Ano {ord.purchaseSeason} • Retorno agendado no caixa para o Ano {ord.maturitySeason}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-black text-emerald-400 block">+R$ {ord.returnAmount.toLocaleString()}</span>
+                        <span className="text-[9px] text-amber-300 font-extrabold flex items-center gap-0.5 justify-end">
+                          <Sparkles className="w-3 h-3 text-amber-400" /> Lucro Dobrado
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* INVESTIMENTOS DE ELITE & INFRAESTRUTURA (END-GAME MONEY SINKS) */}
-          <div className="bg-zinc-950 p-3.5 rounded-2xl border border-amber-500/50 space-y-3">
+          <div className="bg-zinc-950 p-4 rounded-2xl border border-amber-500/50 space-y-3">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
               <div>
                 <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest block">
@@ -3189,7 +3470,7 @@ export default function App() {
               </span>
             </div>
 
-            <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+            <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
               {ENDGAME_INVESTMENTS.map((inv) => {
                 const isPurchased = purchasedInvestments.includes(inv.id);
                 const canAfford = bankBalance >= inv.cost;
@@ -3239,291 +3520,6 @@ export default function App() {
                 );
               })}
             </div>
-          </div>
-
-          {/* CONFECÇÃO & VENDA DE ARTIGOS DA TORCIDA (LUCRO DOBRADO 2X EM 1 ANO) */}
-          <div className="bg-zinc-900 border border-amber-500/40 rounded-3xl p-4 shadow-xl space-y-3 relative z-10">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-zinc-800 pb-3">
-              <div>
-                <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest block flex items-center gap-1">
-                  <Shirt className="w-3.5 h-3.5" /> LOJA SOCIAL & CONFECÇÃO DE UNIFORMES
-                </span>
-                <h3 className="text-sm font-black text-white uppercase flex items-center gap-1.5">
-                  Financiamento de Estoque & Artigos da Torcida
-                </h3>
-              </div>
-              <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-xl flex items-center gap-1 shadow-sm">
-                <TrendingUp className="w-3.5 h-3.5" /> Lucro Dobrado (2x) em 1 Ano
-              </span>
-            </div>
-
-            <p className="text-[11px] text-zinc-300 leading-relaxed">
-              Financie a fabricação do lote oficial de vestuário da torcida (camisas, bermudas de bonde e agasalhos de comitiva).
-              As vendas são finalizadas ao longo de 1 temporada (1 ano) e retornam o <strong className="text-emerald-400">dobro do valor investido (2x)</strong> diretamente para o caixa!
-            </p>
-
-            {/* CATALOG CARDS */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
-              {MERCHANDISE_CATALOG.map((item) => {
-                const canAfford = bankBalance >= item.cost;
-                return (
-                  <div
-                    key={item.type}
-                    className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 flex flex-col justify-between space-y-2 hover:border-amber-500/50 transition-all text-left"
-                  >
-                    <div>
-                      <span className="font-black text-xs text-white block mb-0.5">
-                        {item.title}
-                      </span>
-                      <span className="text-[9.5px] text-amber-400 font-extrabold block">{item.subtitle}</span>
-                      <p className="text-[10px] text-zinc-400 leading-snug mt-1.5">{item.description}</p>
-                    </div>
-
-                    <div className="space-y-1.5 pt-2 border-t border-zinc-800/80">
-                      <div className="flex items-center justify-between text-[10px]">
-                        <span className="text-zinc-400 font-semibold">Custo do Lote:</span>
-                        <span className="font-extrabold text-amber-300">R$ {item.cost.toLocaleString()}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-[10px]">
-                        <span className="text-zinc-400 font-semibold">Retorno em 1 Ano:</span>
-                        <span className="font-black text-emerald-400">R$ {item.returnAmount.toLocaleString()}</span>
-                      </div>
-
-                      <button
-                        onClick={() => handleFundMerchandiseOrder(item)}
-                        disabled={!canAfford}
-                        className={`w-full py-2 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all cursor-pointer shadow mt-1 ${
-                          canAfford
-                            ? "bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black active:scale-95"
-                            : "bg-zinc-800 text-zinc-500 opacity-60 cursor-not-allowed"
-                        }`}
-                      >
-                        {canAfford ? "FINANCIAR ESTOQUE (2X)" : `SALDO INSUFICIENTE (R$ ${item.cost.toLocaleString()})`}
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* ACTIVE MERCHANDISE ORDERS */}
-            {merchandiseOrders.length > 0 && (
-              <div className="bg-zinc-950 p-3 rounded-2xl border border-amber-500/30 space-y-2 mt-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5" /> LOTES EM CONFECÇÃO & VENDAS DA TEMPORADA ({merchandiseOrders.length})
-                  </span>
-                  <span className="text-[9px] text-zinc-400 font-semibold">Retorno automático no Ano +1</span>
-                </div>
-                <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
-                  {merchandiseOrders.map((ord) => (
-                    <div key={ord.id} className="bg-zinc-900 p-2.5 rounded-xl border border-zinc-800 flex items-center justify-between text-[11px]">
-                      <div>
-                        <span className="font-bold text-white block">{ord.title}</span>
-                        <span className="text-[9.5px] text-zinc-400">
-                          Financiado no Ano {ord.purchaseSeason} • Retorno agendado no caixa para o Ano {ord.maturitySeason}
-                        </span>
-                      </div>
-                      <div className="text-right">
-                        <span className="font-black text-emerald-400 block">+R$ {ord.returnAmount.toLocaleString()}</span>
-                        <span className="text-[9px] text-amber-300 font-extrabold flex items-center gap-0.5 justify-end">
-                          <Sparkles className="w-3 h-3 text-amber-400" /> Lucro Dobrado
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800/80 flex items-center justify-between">
-            <div>
-              <span className="font-bold text-white block text-xs">Reiniciar Carreira</span>
-              <span className="text-[10px] text-zinc-400">Voltar para o Ano 1 e escolher uma nova torcida</span>
-            </div>
-            <button
-              onClick={() => setShowResetConfirm(true)}
-              className="py-1.5 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-            >
-              <RotateCcw className="w-3.5 h-3.5" /> Voltar ao Início
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 4: ALLIANCES & RIVALRY TROPHIES */}
-      {activeTab === "alliances" && (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 shadow-xl space-y-3 relative z-10">
-          <div>
-            <span className="text-[9px] font-black text-amber-400 uppercase block">GEOPOLÍTICA DE ARQUIBANCADA</span>
-            <h3 className="text-sm font-black text-white uppercase">Eixos Nacionais e Alianças de Pista</h3>
-          </div>
-
-          <div className="space-y-2 text-xs max-h-48 overflow-y-auto pr-1">
-            {Object.entries((alliances as any).eixos_nacionais).map(([key, axis]: [string, any]) => (
-              <div key={key} className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 space-y-1">
-                <div className="flex items-center justify-between font-black text-amber-400">
-                  <span>{axis.symbol} {axis.name}</span>
-                  <span className="text-[9px] text-zinc-500 uppercase">{key}</span>
-                </div>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {axis.members.map((m: string, idx: number) => {
-                    const matchingTorcida = officialList.find(
-                      (t) => t.torcida.toLowerCase() === m.toLowerCase() || t.clube.toLowerCase() === m.toLowerCase()
-                    );
-                    return (
-                      <button
-                        key={idx}
-                        onClick={() => {
-                          if (matchingTorcida && matchingTorcida.clube !== currentTorcida?.clube) {
-                            setSelectedTorcidaForDiplomacy(matchingTorcida);
-                            setDiplomacyFeedback(null);
-                          }
-                        }}
-                        className="bg-zinc-900 hover:border-amber-500/50 border border-zinc-800 px-2 py-0.5 rounded-lg text-[9px] text-zinc-300 font-semibold cursor-pointer"
-                      >
-                        {m}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* TROFÉUS DE PISTA & HISTÓRICO DE RIVALIDADES */}
-          <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 space-y-3 pt-3 border-t border-zinc-800">
-            <div className="flex items-center justify-between">
-              <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest block">
-                🏆 ARMÁRIO DE TROFÉUS & HISTÓRICO DE RIVALIDADES
-              </span>
-              <span className="text-[9px] text-zinc-500 font-bold">
-                {Object.keys(rivalryRecords).length} Rivais Enfrentados
-              </span>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2 text-center text-xs">
-              <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
-                <span className="text-[8px] font-black text-emerald-400 block uppercase">Faixas Tomadas</span>
-                <span className="text-base font-black text-emerald-400">
-                  🏴‍☠️ {Object.values(rivalryRecords).reduce((acc, r) => acc + r.faixasTomadas, 0)}
-                </span>
-                <span className="text-[8px] text-emerald-400/80 block font-bold">+2 Moral Permanente</span>
-              </div>
-
-              <div className="p-2 rounded-xl bg-red-500/10 border border-red-500/30">
-                <span className="text-[8px] font-black text-red-400 block uppercase">Faixas Perdidas</span>
-                <span className="text-base font-black text-red-400">
-                  ⚠️ {Object.values(rivalryRecords).reduce((acc, r) => acc + r.faixasPerdidas, 0)}
-                </span>
-                <span className="text-[8px] text-red-400/80 block font-bold">-2 Moral Permanente</span>
-              </div>
-
-              <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/30">
-                <span className="text-[8px] font-black text-blue-400 block uppercase">Jogos da Paz</span>
-                <span className="text-base font-black text-blue-400">
-                  🕊️ {Object.values(rivalryRecords).reduce((acc, r) => acc + r.jogosDaPaz, 0)}
-                </span>
-                <span className="text-[8px] text-blue-400/80 block font-bold">Sem Incidentes</span>
-              </div>
-            </div>
-
-            {Object.keys(rivalryRecords).length > 0 && (
-              <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1 pt-1">
-                {Object.values(rivalryRecords).map((rec, idx) => (
-                  <div key={idx} className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-between text-xs">
-                    <div>
-                      <span className="font-bold text-white block">{rec.rivalTorcida}</span>
-                      <span className="text-[9px] text-zinc-400">
-                        {rec.totalConfrontos} jogos • {rec.vitoriasPista} vitórias • {rec.derrotasPista} derrotas • {rec.jogosDaPaz} paz
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[10px] font-black">
-                      {rec.faixasTomadas > 0 && (
-                        <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-1.5 py-0.5 rounded">
-                          +{rec.faixasTomadas} Faixas
-                        </span>
-                      )}
-                      {rec.faixasPerdidas > 0 && (
-                        <span className="bg-red-500/20 text-red-400 border border-red-500/40 px-1.5 py-0.5 rounded">
-                          -{rec.faixasPerdidas} Perdid.
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* TAB 5: CHRONICLES & SCORE HISTORY */}
-      {activeTab === "history" && (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 shadow-xl flex-1 flex flex-col space-y-3 relative z-10">
-          <div className="text-xs text-zinc-400 font-black uppercase tracking-wider flex items-center justify-between">
-            <span>Histórico de Evolução & Crônicas</span>
-            <span className="text-[10px] text-amber-400">{historyLog.length} eventos</span>
-          </div>
-
-          {/* SEASON EVOLUTION SCORE HISTORY TABLE */}
-          {seasonHistory.length > 0 && (
-            <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[9px] font-black text-amber-400 uppercase">
-                  📈 EVOLUÇÃO DA TORCIDA (ANO A ANO)
-                </span>
-                <span className="text-[9px] font-bold text-zinc-400">
-                  {seasonHistory.length} Anos Registrados
-                </span>
-              </div>
-
-              <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
-                {seasonHistory.map((rec) => (
-                  <div
-                    key={rec.season}
-                    className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-between text-xs"
-                  >
-                    <div>
-                      <div className="font-black text-amber-400 flex items-center gap-1.5">
-                        <span>Ano {rec.season}</span>
-                        <span className="text-[9px] text-zinc-400 font-normal">
-                          (R$ {rec.bankBalance.toLocaleString()})
-                        </span>
-                      </div>
-                      <span className="text-[9px] text-zinc-400 block mt-0.5">
-                        Massa: {rec.contingente} • Bancada: {rec.pressaoBancada} • Pista: {rec.poderPista} • Moral: {rec.moral}%
-                      </span>
-                    </div>
-
-                    <div className="text-right">
-                      <span className="text-xs font-black text-emerald-400 block">{rec.powerScore} pts</span>
-                      <span className="text-[9px] font-bold text-amber-300 block">
-                        #{rec.rankPosition}º Lugar Nacional
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="max-h-80 overflow-y-auto space-y-2 text-xs font-semibold text-left pr-1">
-            {historyLog.length > 0 ? (
-              historyLog.map((log, idx) => (
-                <div
-                  key={idx}
-                  className="p-2.5 rounded-xl bg-zinc-950 border border-zinc-800/90 text-zinc-300 leading-relaxed text-[11px]"
-                >
-                  {log}
-                </div>
-              ))
-            ) : (
-              <div className="text-zinc-500 text-center py-8">
-                Nenhum registro histórico registrado ainda.
-              </div>
-            )}
           </div>
         </div>
       )}
