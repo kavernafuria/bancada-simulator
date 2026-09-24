@@ -164,6 +164,18 @@ import {
 } from "@/lib/bancada_engine";
 import { isInteriorSP } from "@/lib/season_events";
 
+export interface SeasonStartSnapshot {
+  contingente: number;
+  pressao_bancada: number;
+  poder_pista: number;
+  caravana: number;
+  bankBalance: number;
+  moral: number;
+  risco_mp: number;
+  respeito_nacional: number;
+  rank: number;
+}
+
 function playStadiumSound(type: "drum" | "whistle" | "victory" | "alert" | "cash") {
   try {
     const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -254,14 +266,19 @@ export default function App() {
   const [bankBalance, setBankBalance] = useState<number>(15000);
   const [clubStatus, setClubStatus] = useState<ClubStatus>("LUTANDO_ACESSO");
 
-  // Season Objectives
+  // Season Objectives & Snapshots
   const [seasonObjectives, setSeasonObjectives] = useState<SeasonObjective[]>([]);
+  const [seasonStartSnapshot, setSeasonStartSnapshot] = useState<SeasonStartSnapshot | null>(null);
   const [seasonEndReport, setSeasonEndReport] = useState<{
     completedCount: number;
     totalCashBonus: number;
     totalMoralBonus: number;
     totalRespeitoBonus: number;
     logs: string[];
+    startSnapshot?: SeasonStartSnapshot;
+    endSnapshot?: SeasonStartSnapshot;
+    playerRankEntry?: RankingEntry;
+    totalTorcidasCount?: number;
   } | null>(null);
 
   const [stats, setStats] = useState<TorcidaStats>({
@@ -817,7 +834,28 @@ export default function App() {
       setIsGameOver(false);
       setRetryUsedCurrentMatch(false);
       setIsRetryWithAdAttempt(false);
+
+      // Snapshot & Tutorial Auto-Open
+      const initialSnapshotHist: SeasonStartSnapshot = {
+        contingente: torcidaWithColors.contingente,
+        pressao_bancada: torcidaWithColors.pressao_bancada,
+        poder_pista: torcidaWithColors.poder_pista,
+        caravana: torcidaWithColors.caravana,
+        bankBalance: torcidaWithColors.autonomia_financeira * 200,
+        moral: 80,
+        risco_mp: 10,
+        respeito_nacional: 80,
+        rank: simulateNationalRanking(torcidaWithColors, {
+          contingente: torcidaWithColors.contingente,
+          pressao_bancada: torcidaWithColors.pressao_bancada,
+          poder_pista: torcidaWithColors.poder_pista,
+          caravana: torcidaWithColors.caravana,
+          autonomia_financeira: torcidaWithColors.autonomia_financeira,
+        }, { moral: 80, risco_mp: 10, relacao_clube: 50, respeito_nacional: 80 }, 1).find((r) => r.isPlayer)?.rank || 1,
+      };
+      setSeasonStartSnapshot(initialSnapshotHist);
       setIsStarted(true);
+      setShowGameTutorialModal(true);
       return;
     }
 
@@ -876,7 +914,28 @@ export default function App() {
     setIsGameOver(false);
     setRetryUsedCurrentMatch(false);
     setIsRetryWithAdAttempt(false);
+
+    // Snapshot & Tutorial Auto-Open
+    const initialSnapshotCustom: SeasonStartSnapshot = {
+      contingente: torcidaWithCrisis.contingente,
+      pressao_bancada: torcidaWithCrisis.pressao_bancada,
+      poder_pista: torcidaWithCrisis.poder_pista,
+      caravana: torcidaWithCrisis.caravana,
+      bankBalance: torcidaWithCrisis.autonomia_financeira * 150,
+      moral: state.moral,
+      risco_mp: state.risco_mp,
+      respeito_nacional: state.respeito_nacional,
+      rank: simulateNationalRanking(torcidaWithCrisis, {
+        contingente: torcidaWithCrisis.contingente,
+        pressao_bancada: torcidaWithCrisis.pressao_bancada,
+        poder_pista: torcidaWithCrisis.poder_pista,
+        caravana: torcidaWithCrisis.caravana,
+        autonomia_financeira: torcidaWithCrisis.autonomia_financeira,
+      }, state, 1).find((r) => r.isPlayer)?.rank || 1,
+    };
+    setSeasonStartSnapshot(initialSnapshotCustom);
     setIsStarted(true);
+    setShowGameTutorialModal(true);
   };
 
   // ACTION CHOICE RESOLUTION
@@ -1461,12 +1520,56 @@ export default function App() {
         setStateTrackers((st) => ({ ...st, risco_mp: 35 }));
       }
 
+      const finalBalance = bankBalance + totalRevenue;
+      const finalMoral = Math.min(100, Math.max(0, stateTrackers.moral + evaluation.totalMoralBonus));
+      const finalRespeito = Math.min(100, Math.max(0, stateTrackers.respeito_nacional + evaluation.totalRespeitoBonus));
+
+      let endRankEntry: RankingEntry | undefined;
+      let totalTorcidasCount = 35;
+      let endRank = 1;
+
+      if (currentTorcida) {
+        const tempTrackers = { ...stateTrackers, moral: finalMoral, respeito_nacional: finalRespeito };
+        const ranking = simulateNationalRanking(currentTorcida, stats, tempTrackers, season);
+        endRankEntry = ranking.find((r) => r.isPlayer);
+        totalTorcidasCount = ranking.length;
+        endRank = endRankEntry?.rank || 1;
+      }
+
+      const endSnapshot: SeasonStartSnapshot = {
+        contingente: stats.contingente,
+        pressao_bancada: stats.pressao_bancada,
+        poder_pista: stats.poder_pista,
+        caravana: stats.caravana,
+        bankBalance: finalBalance,
+        moral: finalMoral,
+        risco_mp: isBannedByMP ? 35 : stateTrackers.risco_mp,
+        respeito_nacional: finalRespeito,
+        rank: endRank,
+      };
+
+      const fallbackStart: SeasonStartSnapshot = seasonStartSnapshot || {
+        contingente: stats.contingente,
+        pressao_bancada: stats.pressao_bancada,
+        poder_pista: stats.poder_pista,
+        caravana: stats.caravana,
+        bankBalance: bankBalance,
+        moral: stateTrackers.moral,
+        risco_mp: stateTrackers.risco_mp,
+        respeito_nacional: stateTrackers.respeito_nacional,
+        rank: endRank,
+      };
+
       setSeasonEndReport({
         completedCount: evaluation.completedCount,
         totalCashBonus: evaluation.totalCashBonus,
         totalMoralBonus: evaluation.totalMoralBonus,
         totalRespeitoBonus: evaluation.totalRespeitoBonus,
         logs: evaluation.summaryLogs,
+        startSnapshot: fallbackStart,
+        endSnapshot: endSnapshot,
+        playerRankEntry: endRankEntry,
+        totalTorcidasCount: totalTorcidasCount,
       });
 
       if (evaluation.completedCount > 0 && soundEnabled) {
@@ -4147,41 +4250,166 @@ export default function App() {
 
       {/* 7. SEASON END OBJECTIVES CELEBRATION MODAL */}
       {seasonEndReport && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fade-in">
-          <div className="bg-zinc-900 border border-emerald-500/50 rounded-3xl max-w-md w-full p-5 text-center shadow-2xl space-y-3.5 relative max-h-[85vh] overflow-y-auto pb-12">
-            <div className="mx-auto w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 z-[100] animate-fade-in">
+          <div className="bg-zinc-900 border border-emerald-500/50 rounded-3xl max-w-lg w-full p-4 sm:p-5 text-center shadow-2xl space-y-3.5 relative max-h-[90vh] overflow-y-auto pb-10">
+            <div className="mx-auto w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30 shadow-lg">
               <Award className="w-7 h-7" />
             </div>
 
             <div>
-              <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest block">
+              <span className="text-[9.5px] font-black text-emerald-400 uppercase tracking-widest block bg-emerald-950/60 px-2.5 py-0.5 rounded border border-emerald-800/50 w-fit mx-auto mb-1">
                 FECHAMENTO DA TEMPORADA {season - 1}
               </span>
-              <h3 className="text-base font-black text-white uppercase">
-                Balanço de Metas e Recompensas
+              <h3 className="text-base font-black text-white uppercase tracking-tight">
+                Balanço de Desempenho & Metas
               </h3>
             </div>
 
+            {/* 🏆 RANKING NACIONAL DE TORCIDAS BOX */}
+            {seasonEndReport.endSnapshot && (
+              <div className="bg-gradient-to-r from-amber-950/70 via-zinc-950 to-purple-950/70 p-3.5 rounded-2xl border border-amber-500/40 text-left space-y-2 relative overflow-hidden shadow-xl">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider flex items-center gap-1">
+                    <Crown className="w-3.5 h-3.5" /> Posição no Ranking Nacional
+                  </span>
+                  {seasonEndReport.startSnapshot?.rank !== undefined && (
+                    <span
+                      className={`text-[9.5px] font-black px-2 py-0.5 rounded border ${
+                        seasonEndReport.startSnapshot.rank > seasonEndReport.endSnapshot.rank
+                          ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
+                          : seasonEndReport.startSnapshot.rank < seasonEndReport.endSnapshot.rank
+                          ? "bg-red-500/20 text-red-400 border-red-500/40"
+                          : "bg-zinc-800 text-zinc-300 border-zinc-700"
+                      }`}
+                    >
+                      {seasonEndReport.startSnapshot.rank > seasonEndReport.endSnapshot.rank
+                        ? `▲ Subiu ${seasonEndReport.startSnapshot.rank - seasonEndReport.endSnapshot.rank} posições`
+                        : seasonEndReport.startSnapshot.rank < seasonEndReport.endSnapshot.rank
+                        ? `▼ Caiu ${seasonEndReport.endSnapshot.rank - seasonEndReport.startSnapshot.rank} posições`
+                        : "= Mantida a Posição"}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-baseline justify-between pt-0.5">
+                  <div>
+                    <span className="text-2xl font-black text-white tracking-tight">
+                      {seasonEndReport.endSnapshot.rank}º LUGAR
+                    </span>
+                    <span className="text-xs text-zinc-400 font-bold ml-1.5">
+                      entre {seasonEndReport.totalTorcidasCount || 35} Torcidas do Brasil
+                    </span>
+                  </div>
+                  {seasonEndReport.playerRankEntry && (
+                    <div className="text-right">
+                      <span className="text-xs font-black text-amber-400 block">
+                        {seasonEndReport.playerRankEntry.powerScore} pts
+                      </span>
+                      <span className="text-[9px] text-zinc-500 block uppercase">Score Ultras</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* 📊 COMPARATIVO DE EVOLUÇÃO DO ANO (INÍCIO vs FINAL) */}
+            {seasonEndReport.startSnapshot && seasonEndReport.endSnapshot && (
+              <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 text-left space-y-2">
+                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-wider block border-b border-zinc-800 pb-1.5">
+                  📊 Comparativo de Evolução do Ano (Início vs Final)
+                </span>
+
+                <div className="grid grid-cols-2 gap-2 text-xs font-bold pt-0.5">
+                  {/* Contingente / Massa */}
+                  <div className="bg-zinc-900/80 p-2 rounded-xl border border-zinc-800">
+                    <span className="text-[10px] text-zinc-400 block mb-0.5">👥 Massa (Associados)</span>
+                    <div className="flex items-center justify-between text-white">
+                      <span>{seasonEndReport.startSnapshot.contingente} ➔ {seasonEndReport.endSnapshot.contingente}</span>
+                      <span className={seasonEndReport.endSnapshot.contingente >= seasonEndReport.startSnapshot.contingente ? "text-emerald-400 text-[11px]" : "text-red-400 text-[11px]"}>
+                        {seasonEndReport.endSnapshot.contingente >= seasonEndReport.startSnapshot.contingente ? "+" : ""}
+                        {seasonEndReport.endSnapshot.contingente - seasonEndReport.startSnapshot.contingente}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Pressão de Bancada */}
+                  <div className="bg-zinc-900/80 p-2 rounded-xl border border-zinc-800">
+                    <span className="text-[10px] text-zinc-400 block mb-0.5">🥁 Pressão Bancada</span>
+                    <div className="flex items-center justify-between text-white">
+                      <span>{seasonEndReport.startSnapshot.pressao_bancada} ➔ {seasonEndReport.endSnapshot.pressao_bancada}</span>
+                      <span className={seasonEndReport.endSnapshot.pressao_bancada >= seasonEndReport.startSnapshot.pressao_bancada ? "text-emerald-400 text-[11px]" : "text-red-400 text-[11px]"}>
+                        {seasonEndReport.endSnapshot.pressao_bancada >= seasonEndReport.startSnapshot.pressao_bancada ? "+" : ""}
+                        {seasonEndReport.endSnapshot.pressao_bancada - seasonEndReport.startSnapshot.pressao_bancada}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Poder de Pista */}
+                  <div className="bg-zinc-900/80 p-2 rounded-xl border border-zinc-800">
+                    <span className="text-[10px] text-zinc-400 block mb-0.5">🥊 Poder de Pista</span>
+                    <div className="flex items-center justify-between text-white">
+                      <span>{seasonEndReport.startSnapshot.poder_pista} ➔ {seasonEndReport.endSnapshot.poder_pista}</span>
+                      <span className={seasonEndReport.endSnapshot.poder_pista >= seasonEndReport.startSnapshot.poder_pista ? "text-emerald-400 text-[11px]" : "text-red-400 text-[11px]"}>
+                        {seasonEndReport.endSnapshot.poder_pista >= seasonEndReport.startSnapshot.poder_pista ? "+" : ""}
+                        {seasonEndReport.endSnapshot.poder_pista - seasonEndReport.startSnapshot.poder_pista}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Caixa Acumulado */}
+                  <div className="bg-zinc-900/80 p-2 rounded-xl border border-zinc-800">
+                    <span className="text-[10px] text-zinc-400 block mb-0.5">💰 Caixa da Agremiação</span>
+                    <div className="flex items-center justify-between text-white">
+                      <span className="text-[10.5px]">R$ {seasonEndReport.startSnapshot.bankBalance.toLocaleString()} ➔ R$ {seasonEndReport.endSnapshot.bankBalance.toLocaleString()}</span>
+                    </div>
+                  </div>
+
+                  {/* Moral */}
+                  <div className="bg-zinc-900/80 p-2 rounded-xl border border-zinc-800">
+                    <span className="text-[10px] text-zinc-400 block mb-0.5">🔥 Moral da Torcida</span>
+                    <div className="flex items-center justify-between text-white">
+                      <span>{seasonEndReport.startSnapshot.moral} ➔ {seasonEndReport.endSnapshot.moral}</span>
+                      <span className={seasonEndReport.endSnapshot.moral >= seasonEndReport.startSnapshot.moral ? "text-emerald-400 text-[11px]" : "text-red-400 text-[11px]"}>
+                        {seasonEndReport.endSnapshot.moral >= seasonEndReport.startSnapshot.moral ? "+" : ""}
+                        {seasonEndReport.endSnapshot.moral - seasonEndReport.startSnapshot.moral}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Respeito Nacional */}
+                  <div className="bg-zinc-900/80 p-2 rounded-xl border border-zinc-800">
+                    <span className="text-[10px] text-zinc-400 block mb-0.5">⭐ Respeito Nacional</span>
+                    <div className="flex items-center justify-between text-white">
+                      <span>{seasonEndReport.startSnapshot.respeito_nacional} ➔ {seasonEndReport.endSnapshot.respeito_nacional}</span>
+                      <span className={seasonEndReport.endSnapshot.respeito_nacional >= seasonEndReport.startSnapshot.respeito_nacional ? "text-emerald-400 text-[11px]" : "text-red-400 text-[11px]"}>
+                        {seasonEndReport.endSnapshot.respeito_nacional >= seasonEndReport.startSnapshot.respeito_nacional ? "+" : ""}
+                        {seasonEndReport.endSnapshot.respeito_nacional - seasonEndReport.startSnapshot.respeito_nacional}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 🎯 BALANÇO DE METAS & RECOMPENSAS */}
             <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 text-left space-y-2">
-              <div className="flex items-center justify-between text-xs font-black">
-                <span className="text-zinc-400">Metas Cumpridas:</span>
-                <span className="text-emerald-400">{seasonEndReport.completedCount} concluídas</span>
-              </div>
-              <div className="flex items-center justify-between text-xs font-black">
-                <span className="text-zinc-400">Bônus Financeiro:</span>
-                <span className="text-emerald-400">+R$ {seasonEndReport.totalCashBonus.toLocaleString()}</span>
-              </div>
-              <div className="flex items-center justify-between text-xs font-black">
-                <span className="text-zinc-400">Moral da Bancada:</span>
-                <span className="text-amber-400">+{seasonEndReport.totalMoralBonus} pts</span>
-              </div>
-              <div className="flex items-center justify-between text-xs font-black">
-                <span className="text-zinc-400">Respeito Nacional:</span>
-                <span className="text-purple-400">+{seasonEndReport.totalRespeitoBonus} pts</span>
+              <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider block border-b border-zinc-800 pb-1">
+                🎯 Balanço de Metas Cumpridas
+              </span>
+              <div className="grid grid-cols-2 gap-2 text-xs font-black pt-1">
+                <div className="flex items-center justify-between text-zinc-400 bg-zinc-900/60 p-2 rounded-xl">
+                  <span>Metas Cumpridas:</span>
+                  <span className="text-emerald-400">{seasonEndReport.completedCount} concluídas</span>
+                </div>
+                <div className="flex items-center justify-between text-zinc-400 bg-zinc-900/60 p-2 rounded-xl">
+                  <span>Bônus Financeiro:</span>
+                  <span className="text-emerald-400">+R$ {seasonEndReport.totalCashBonus.toLocaleString()}</span>
+                </div>
               </div>
             </div>
 
-            <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 text-left text-[11px] space-y-1.5 max-h-36 overflow-y-auto">
+            {/* Log list */}
+            <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 text-left text-[11px] space-y-1.5 max-h-32 overflow-y-auto">
               {seasonEndReport.logs.map((log, idx) => (
                 <div key={idx} className="text-zinc-300 font-medium">
                   {log}
@@ -4192,12 +4420,28 @@ export default function App() {
             {/* Kavers Games Social Sharing Block */}
             {renderSocialShareSection(
               `TEMPORADA ${season - 1}`,
-              `🏆 [BANCADA SIMULATOR • KAVERS GAMES]\nFechamento da Temporada ${season - 1} com a ${currentTorcida?.torcida} (${currentTorcida?.clube})!\n\nMetas Cumpridas: ${seasonEndReport.completedCount}\nMassa: ${stats.contingente}/100 | Bancada: ${stats.pressao_bancada}/100 | Pista: ${stats.poder_pista}/100\nCaixa Acumulado: R$ ${bankBalance.toLocaleString()}\n\n🎮 Monte sua torcida no Simulador Oficial Kavers Games:\n👉 https://kaversgames.com.br\n#BancadaSimulator #KaversGames #Futebol`
+              `🏆 [BANCADA SIMULATOR • KAVERS GAMES]\nFechamento da Temporada ${season - 1} com a ${currentTorcida?.torcida} (${currentTorcida?.clube})!\n\n👑 Posição no Ranking: ${seasonEndReport.endSnapshot?.rank || 1}º LUGAR NACIONAL\nMetas Cumpridas: ${seasonEndReport.completedCount}\nMassa: ${stats.contingente}/100 | Bancada: ${stats.pressao_bancada}/100 | Pista: ${stats.poder_pista}/100\nCaixa Acumulado: R$ ${bankBalance.toLocaleString()}\n\n🎮 Monte sua torcida no Simulador Oficial Kavers Games:\n👉 https://kaversgames.com.br\n#BancadaSimulator #KaversGames #Futebol`
             )}
 
             <button
-              onClick={() => setSeasonEndReport(null)}
-              className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider shadow-lg active:scale-95 transition-all cursor-pointer"
+              onClick={() => {
+                if (currentTorcida) {
+                  const nextSeasonRank = simulateNationalRanking(currentTorcida, stats, stateTrackers, season).find((r) => r.isPlayer)?.rank || 1;
+                  setSeasonStartSnapshot({
+                    contingente: stats.contingente,
+                    pressao_bancada: stats.pressao_bancada,
+                    poder_pista: stats.poder_pista,
+                    caravana: stats.caravana,
+                    bankBalance: bankBalance,
+                    moral: stateTrackers.moral,
+                    risco_mp: stateTrackers.risco_mp,
+                    respeito_nacional: stateTrackers.respeito_nacional,
+                    rank: nextSeasonRank,
+                  });
+                }
+                setSeasonEndReport(null);
+              }}
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-black text-xs uppercase tracking-wider shadow-lg active:scale-95 transition-all cursor-pointer"
             >
               Iniciar Temporada {season}
             </button>

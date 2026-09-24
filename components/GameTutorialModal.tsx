@@ -21,6 +21,7 @@ import {
   Compass,
   Scale,
   RotateCcw,
+  Target,
 } from "lucide-react";
 
 interface GameTutorialModalProps {
@@ -106,6 +107,43 @@ const TUTORIAL_STEPS = [
   },
   {
     step: 3,
+    title: "Metas da Diretoria & Objetivos Sazonais",
+    subtitle: "Como Cumprir Metas para Elevar a Reputação e o Caixa",
+    icon: <Target className="w-5 h-5 text-amber-400" />,
+    badge: "METAS & OBJETIVOS",
+    content: (
+      <div className="space-y-3 text-xs leading-relaxed text-zinc-300">
+        <p>
+          No início de cada temporada, a diretoria estabelece <strong className="text-amber-400">4 Metas Estratégicas</strong> prioritárias para a agremiação.
+        </p>
+
+        <div className="space-y-2 pt-1">
+          <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">
+            <span className="font-bold text-amber-400 block text-[11px] mb-0.5">🎯 Tipos de Metas da Temporada:</span>
+            <p className="text-[10.5px] text-zinc-400">
+              Metas de <strong className="text-white">Massa</strong> (crescimento de membros), <strong className="text-red-400">Pista</strong> (vitórias em derbies), <strong className="text-emerald-400">Finanças</strong> (investimentos de vestuário na Loja) e <strong className="text-purple-400">Respeito</strong> (controle de Risco MP).
+            </p>
+          </div>
+
+          <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">
+            <span className="font-bold text-emerald-400 block text-[11px] mb-0.5">📊 Fechamento do Ano & Auditagem:</span>
+            <p className="text-[10.5px] text-zinc-400">
+              Ao final de cada temporada, o balanço de metas é auditado no relatório anual. Cumprir metas garante <strong className="text-emerald-400">bônus financeiro em dinheiro</strong>, eleva a <strong className="text-amber-400">Moral</strong> e faz sua torcida subir no <strong className="text-purple-400">Ranking Nacional</strong>!
+            </p>
+          </div>
+
+          <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">
+            <span className="font-bold text-indigo-400 block text-[11px] mb-0.5">🏛️ Eleições a cada 3 Anos:</span>
+            <p className="text-[10.5px] text-zinc-400">
+              O cumprimento constante das metas consolida seu prestígio na quadra social, garantindo reeleições tranquilas e bônus da diretoria.
+            </p>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    step: 4,
     title: "Loja Social, Uniformes & Investimentos de Elite",
     subtitle: "Como Multiplicar o Caixa e Expandir Patrimônio",
     icon: <Shirt className="w-5 h-5 text-emerald-400" />,
@@ -143,7 +181,7 @@ const TUTORIAL_STEPS = [
     ),
   },
   {
-    step: 4,
+    step: 5,
     title: "Geopolítica, Alianças & Troféus de Pista",
     subtitle: "Eixos Nacionais, Diplomacia e Faixas Tomadas",
     icon: <Compass className="w-5 h-5 text-indigo-400" />,
@@ -173,7 +211,7 @@ const TUTORIAL_STEPS = [
     ),
   },
   {
-    step: 5,
+    step: 6,
     title: "Gestão de Crises, MP & Autoridades",
     subtitle: "Inquéritos Judiciais, TACs e Coletivas de Imprensa",
     icon: <ShieldAlert className="w-5 h-5 text-red-400" />,
@@ -208,7 +246,7 @@ const TUTORIAL_STEPS = [
     ),
   },
   {
-    step: 6,
+    step: 7,
     title: "Backup & Proteção da sua Carreira",
     subtitle: "Como Exportar e Importar Save JSON",
     icon: <Download className="w-5 h-5 text-emerald-400" />,
