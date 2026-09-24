@@ -55,6 +55,7 @@ import {
   ShoppingBag,
   TrendingUp,
   Clock,
+  HelpCircle,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { MatchTacticalResolver, MatchContext } from "@/components/MatchTacticalResolver";
@@ -74,7 +75,7 @@ const MERCHANDISE_CATALOG = [
     type: "CAMISAS" as const,
     title: "🎽 Lote de Camisas Oficiais de Torcida",
     subtitle: "Confecção & Pré-Venda de Camisas",
-    description: "Financiamento de lote de tecido, bordado e estamparia para camisas oficiais do pavilhão.",
+    description: "Financiamento de lote de tecido, bordado e estamparia para camisas oficiais da agremiação.",
     cost: 5000,
     returnAmount: 10000,
     statBonus: { moral: 5, contingente: 5 },
@@ -102,6 +103,7 @@ import { TorcidaUnicaModal } from "@/components/TorcidaUnicaModal";
 import { PressConferenceModal } from "@/components/PressConferenceModal";
 import { ElectionCrisisModal } from "@/components/ElectionCrisisModal";
 import { InquiryModal, InquiryResultPayload } from "@/components/InquiryModal";
+import { GameTutorialModal } from "@/components/GameTutorialModal";
 import {
   GAME_BALANCE,
   getOfficialTorcidas,
@@ -287,6 +289,7 @@ export default function App() {
   const [purchasedInvestments, setPurchasedInvestments] = useState<string[]>([]);
   const [merchandiseOrders, setMerchandiseOrders] = useState<MerchandiseOrder[]>([]);
   const [unforeseenExpenseModal, setUnforeseenExpenseModal] = useState<UnforeseenExpense | null>(null);
+  const [showGameTutorialModal, setShowGameTutorialModal] = useState<boolean>(false);
 
   // MÓDULO 1 & 2 STATE
   const [torcidaUnicaState, setTorcidaUnicaState] = useState<TorcidaUnicaState>(INITIAL_TORCIDA_UNICA_STATE);
@@ -852,7 +855,7 @@ export default function App() {
     setSeasonObjectives(objectives);
 
     const customHistoryEvents = [
-      `[Ano 1 - Fundação] Fundada a nova torcida ${torcida.torcida} com pavilhão nas cores ${primaryColor} e ${secondaryColor} no perfil "${ARCHETYPES[selectedArchetype].name}" apoiando o ${torcida.clube}.`,
+      `[Ano 1 - Fundação] Fundada a nova torcida ${torcida.torcida} com a agremiação nas cores ${primaryColor} e ${secondaryColor} no perfil "${ARCHETYPES[selectedArchetype].name}" apoiando o ${torcida.clube}.`,
     ];
 
     if (torcidaWithCrisis.electionCrisis?.hasCrisis) {
@@ -2030,7 +2033,7 @@ export default function App() {
               SIMULADOR DE ARQUIBANCADA • 15 TEMPORADAS
             </span>
             <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
-              Defina as cores do seu pavilhão, cumpra objetivos sazonais (mosaicos, pistas e caravanas) e comande 15 temporadas de história de torcida.
+              Defina as cores da sua agremiação, cumpra objetivos sazonais (mosaicos, pistas e caravanas) e comande 15 temporadas de história de torcida.
             </p>
           </div>
 
@@ -2064,7 +2067,7 @@ export default function App() {
           <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800/80 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-black text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
-                <Palette className="w-3.5 h-3.5 text-amber-400" /> Cores Oficiais do Pavilhão
+                <Palette className="w-3.5 h-3.5 text-amber-400" /> Cores Oficiais da Agremiação
               </span>
               <div className="flex items-center gap-1.5">
                 <div
@@ -2375,17 +2378,31 @@ export default function App() {
                 <span>Fundar Torcida e Iniciar Carreira</span>
                 <ChevronRight className="w-5 h-5 fill-black" />
               </button>
-
-              {/* Import Save JSON on Start Screen */}
-              <div className="pt-2 border-t border-zinc-800">
-                <label className="w-full py-2.5 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-amber-400 border border-zinc-800 text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow">
-                  <Download className="w-4 h-4 text-amber-400" /> Restaurar Jogo Salvo (Importar Save JSON)
-                  <input type="file" accept=".json" onChange={handleImportSave} className="hidden" />
-                </label>
-              </div>
             </div>
           )}
+
+          {/* Tutorial & Import Save JSON on Start Screen */}
+          <div className="pt-3 border-t border-zinc-800 grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+            <button
+              type="button"
+              onClick={() => setShowGameTutorialModal(true)}
+              className="py-2.5 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-amber-300 border border-zinc-800 text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow"
+            >
+              <HelpCircle className="w-4 h-4 text-amber-400" /> Guia & Tutorial
+            </button>
+
+            <label className="py-2.5 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-amber-400 border border-zinc-800 text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow">
+              <Download className="w-4 h-4 text-amber-400" /> Importar Save JSON
+              <input type="file" accept=".json" onChange={handleImportSave} className="hidden" />
+            </label>
+          </div>
         </div>
+
+        {/* GAME TUTORIAL MODAL */}
+        <GameTutorialModal
+          isOpen={showGameTutorialModal}
+          onClose={() => setShowGameTutorialModal(false)}
+        />
       </div>
     );
   }
@@ -2592,6 +2609,14 @@ export default function App() {
               title="Alternar Som"
             >
               {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-amber-400" /> : <VolumeX className="w-3.5 h-3.5" />}
+            </button>
+            <button
+              onClick={() => setShowGameTutorialModal(true)}
+              className="p-1.5 px-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-amber-300 transition-colors flex items-center gap-1 text-[10px] font-bold cursor-pointer"
+              title="Abrir Guia & Tutorial Interativo"
+            >
+              <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
+              <span className="hidden sm:inline">Guia</span>
             </button>
             <Link
               href="/bancada/minigames"
@@ -3200,7 +3225,7 @@ export default function App() {
 
           {/* Color Badges */}
           <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 flex items-center justify-between text-xs">
-            <span className="font-bold text-zinc-300">Cores do Pavilhão:</span>
+            <span className="font-bold text-zinc-300">Cores da Agremiação:</span>
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1.5">
                 <div className="w-3.5 h-3.5 rounded-full border border-white/20" style={{ backgroundColor: themePrimary }} />
@@ -4927,6 +4952,12 @@ export default function App() {
           }}
         />
       )}
+
+      {/* GAME TUTORIAL MODAL */}
+      <GameTutorialModal
+        isOpen={showGameTutorialModal}
+        onClose={() => setShowGameTutorialModal(false)}
+      />
     </div>
   );
 }

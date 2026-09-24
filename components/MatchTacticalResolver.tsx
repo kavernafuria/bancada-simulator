@@ -1270,7 +1270,7 @@ export const ColorMemoryGame: React.FC<ColorMemoryGameProps> = ({
 
   const COLORS = [
     { id: 0, name: 'NOSSA COR', hex: playerPrimaryColor },
-    { id: 1, name: 'PAVILHÃO', hex: playerSecondaryColor !== '#ffffff' && playerSecondaryColor !== '#f4f4f5' ? playerSecondaryColor : '#2563eb' },
+    { id: 1, name: 'AGREMIAÇÃO', hex: playerSecondaryColor !== '#ffffff' && playerSecondaryColor !== '#f4f4f5' ? playerSecondaryColor : '#2563eb' },
     { id: 2, name: 'RIVAL', hex: rivalPrimaryColor },
     { id: 3, name: 'VISITANTE', hex: rivalSecondaryColor !== '#000000' && rivalSecondaryColor !== '#09090b' ? rivalSecondaryColor : '#7e22ce' },
     { id: 4, name: 'OURO', hex: '#eab308' },

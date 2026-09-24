@@ -1319,7 +1319,7 @@ function generateProceduralEventPool(): EventTemplate[] {
     "Sistema de Som e Amplificação da Sede", "Churrasqueira Industrial para Ensaios", "Reforma do Bar da Sede Social",
     "Reforma da Fachada com Mosaico Grafitado", "Troca dos Ônibus para Caravana Festiva", "Manutenção da Frota de Micro-ônibus",
     "Confecção de Mosaico 3D com Mastro", "Bandeiras de Bambu para Setor Local", "Camisas de Edição Limitada do Centenário",
-    "Acervo Histórico e Memória do Pavilhão", "Reforma do Camarim e Palco de Samba", "Cadastro Biométrico de Associados"
+    "Acervo Histórico e Memória da Agremiação", "Reforma do Camarim e Palco de Samba", "Cadastro Biométrico de Associados"
   ];
 
   for (let i = 1; i <= 200; i++) {

@@ -235,7 +235,7 @@ export const ArquibancadaMinigame: React.FC<ArquibancadaMinigameProps> = ({
 
       setLiveActionFeed({
         icon: "🚩",
-        message: "Pavilhão gigante desfraldado cobrindo o setor principal! (+22% de pressão)",
+        message: "Bandeirão gigante da agremiação desfraldado cobrindo o setor principal! (+22% de pressão)",
       });
       setCooldowns((cd) => ({ ...cd, bandeirao: 6 }));
     } else if (actionId === "faixas") {

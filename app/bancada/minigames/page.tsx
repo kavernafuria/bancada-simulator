@@ -323,7 +323,7 @@ export default function MiniGamesTestPage() {
               <Zap className="w-3.5 h-3.5" /> Sequência Cores
             </span>
           </div>
-          <span className="text-[9px] text-zinc-500 block mt-0.5">Pavilhão de Cores</span>
+          <span className="text-[9px] text-zinc-500 block mt-0.5">Agremiação de Cores</span>
         </button>
 
         {/* RUADA BANDEIRÃO */}

@@ -2047,7 +2047,7 @@ export function getTacticalBattleChoices(
         },
         {
           id: "FESTA_BANDEIRAO_3D_CASA",
-          title: "🚩 4. Bandeirão 3D de Pavilhão no Setor Principal",
+          title: "🚩 4. Bandeirão 3D da Agremiação no Setor Principal",
           description: "Desfraldar bandeirão 3D gigante cobrindo todo o setor principal na entrada das equipes.",
           pistaMod: -4,
           moralMod: 7,
@@ -2055,7 +2055,7 @@ export function getTacticalBattleChoices(
           costRisk: 3500,
           injuryRisk: 0,
           isMosaicTactic: true,
-          tacticalLog: "Subiu o bandeirão 3D de pavilhão cobrindo o setor principal em um espetáculo visual inesquecível.",
+          tacticalLog: "Subiu o bandeirão 3D da agremiação cobrindo o setor principal em um espetáculo visual inesquecível.",
           formattedDeltas: [
             { label: "Pressão de Bancada", value: "+7", isPositive: true },
             { label: "Moral da Torcida", value: "+7", isPositive: true },
@@ -2297,7 +2297,7 @@ export function getTacticalBattleChoices(
       },
       {
         id: isHome ? "FESTA_BANDEIRAO_3D_CASA" : "FESTA_FAIXAS_TIRANTES_FORA",
-        title: isHome ? "🚩 [OPÇÃO FESTA] Bandeirão 3D de Pavilhão no Setor Principal" : "🚩 [OPÇÃO FESTA] Faixas de Mão & Tirantes de Setor Visitante",
+        title: isHome ? "🚩 [OPÇÃO FESTA] Bandeirão 3D da Agremiação no Setor Principal" : "🚩 [OPÇÃO FESTA] Faixas de Mão & Tirantes de Setor Visitante",
         description: isHome
           ? "Desfraldar bandeirão 3D gigante cobrindo todo o setor e subir tirantes verticais na entrada do time."
           : "Estender faixas de comitivas e tirantes verticais no setor visitante, contagiando os membros que viajaram.",
@@ -2308,7 +2308,7 @@ export function getTacticalBattleChoices(
         injuryRisk: 0,
         isMosaicTactic: true,
         tacticalLog: isHome
-          ? "Subiu o bandeirão 3D de pavilhão cobrindo o setor principal em um espetáculo visual inesquecível de arquibancada."
+          ? "Subiu o bandeirão 3D da agremiação cobrindo o setor principal em um espetáculo visual inesquecível de arquibancada."
           : "Apoio ininterrupto no setor visitante com faixas de mão e tirantes representando a agremiação fora de casa.",
         formattedDeltas: [
           { label: "Pressão de Bancada", value: "+7", isPositive: true },
@@ -2918,7 +2918,7 @@ export function executeCompleteMatch(
   const chronicleText = bannerCaptured
     ? `Jornada gloriosa registrada no patrimônio da torcida. Além da vitória na pista, a nossa linha de frente arrancou a faixa oficial do ${derby.rivalTorcida}, trazendo um troféu inestimável para o salão da sede (+10 Moral)!`
     : bannerLost
-    ? `Um dia fatídico gravado com dor na memória da torcida. A perda do bandeirão oficial na emboscada abalou a alma do pavilhão (-20 Moral), gerando cobrança pesada e reunião de emergência com a velha guarda na sede social.`
+    ? `Um dia fatídico gravado com dor na memória da torcida. A perda do bandeirão oficial na emboscada abalou a alma da agremiação (-20 Moral), gerando cobrança pesada e reunião de emergência com a velha guarda na sede social.`
     : `O comboio ocupou as vias do ${derby.stadium} com aproximadamente ${intel.playerMembersPresent.toLocaleString()} integrantes. A postura de segurança (${police?.title || "alinhamento padrão"}) e a tática de ${tactic.title.toLowerCase()} definiram os acontecimentos. Nas arquibancadas, os cantos ecoaram sem parar até o apito final.`;
 
   return {
@@ -3318,7 +3318,7 @@ export async function generateGeminiChronicle(payload: any): Promise<string> {
   if (payload.isAllyGame) {
     const allyStories = [
       `A recepção no ${payload.stadium || "estádio"} e na sede foi uma verdadeira aula de confraternização e respeito mútuo. O churrasco farto de costela no fogo de chão e o chopp trincando selaram a união histórica entre a ${payload.torcida || "nossa torcida"} e os irmãos da ${payload.rivalTorcida || "aliada"}.\n\nNo cortejo conjunto, as duas massas caminharam lado a lado pelas avenidas com fumaça e sinalizadores. Dentro do estádio, as baterias unificadas ditaram um ritmo arrepiante que levantou todo o setor, mostrando para o Brasil a força da amizade e a lealdade inabalável do nosso eixo.`,
-      `O dia foi marcado pela celebração pacífica e vibrante da nossa irmandade com a ${payload.rivalTorcida || "aliada"}. Desde as primeiras horas da manhã, as churrasqueiras da sede social trabalharam sem parar, reunindo os veteranos e a nova geração em um banquete de respeito.\n\nNa subida para as arquibancadas, os mosaicos e trapos das duas agremiações se entrelaçaram no alambrado. Ao som dos surdos de marcação e repiques em perfeita sintonia, as duas torcidas cantaram os 90 minutos em clima de festa pura, reafirmando que o respeito no nosso pavilhão é eterno.`,
+      `O dia foi marcado pela celebração pacífica e vibrante da nossa irmandade com a ${payload.rivalTorcida || "aliada"}. Desde as primeiras horas da manhã, as churrasqueiras da sede social trabalharam sem parar, reunindo os veteranos e a nova geração em um banquete de respeito.\n\nNa subida para as arquibancadas, os mosaicos e trapos das duas agremiações se entrelaçaram no alambrado. Ao som dos surdos de marcação e repiques em perfeita sintonia, as duas torcidas cantaram os 90 minutos em clima de festa pura, reafirmando que o respeito na nossa agremiação é eterno.`,
       `Um espetáculo de união que ficará gravado na memória da bancada. A diretoria e os antenas organizaram a escolta de gala para recepcionar a caravana da ${payload.rivalTorcida || "aliada"} no trevo da rodovia com festa de fumaça.\n\nO encontro na praça foi embalado por uma roda de samba monumental, muita cerveja gelada e abraços fraternos entre as lideranças. Dentro do ${payload.stadium || "estádio"}, as duas torcidas fizeram um show à parte, cantando em uníssono e demonstrando a grandeza das nossas cores.`,
     ];
     return allyStories[Math.floor(Math.random() * allyStories.length)];
@@ -3349,11 +3349,11 @@ export async function generateGeminiChronicle(payload: any): Promise<string> {
     } else if (tacticStr.includes("surpresa") || tacticStr.includes("emboscada") || tacticStr.includes("flanqueamento")) {
       return `A inteligência do relatório dos antenas foi cirúrgica no deslocamento para o ${payload.stadium || "estádio"}. Enquanto a contenção rival esperava o comboio pela via expressa principal, nossas vans e motos cortaram pelas travessas e alças de acesso, executando um ataque surpresa perfeito pela retaguarda adversária.\n\nA manobra pegou o grupo rival de surpresa, quebrando as linhas deles sem dar chance de reação. O bonde da ${payload.torcida || "nossa torcida"} entrou no estádio de peito estufado, desfraldando os trapos e comandando a festa na bancada do primeiro ao último minuto.`;
     } else if (tacticStr.includes("mão limpa") || tacticStr.includes("disposição")) {
-      return `Na pura raça e no brio de arquibancada, o confronto no ${payload.stadium || "estádio"} consagrou a disposição da ${payload.torcida || "nossa torcida"}. Sem recorrer a covardias, o bonde de pista encarou a linha adversária homem a homem, na mão limpa e na honra do pavilhão.\n\nA superioridade física e o coração da nossa linha de frente prevaleceram na trocação franca, garantindo o controle total das vias de acesso. Dentro do estádio, a bateria ditou o ritmo de um triunfo inesquecível que reforça o respeito nacional ao nosso pavilhão.`;
+      return `Na pura raça e no brio de arquibancada, o confronto no ${payload.stadium || "estádio"} consagrou a disposição da ${payload.torcida || "nossa torcida"}. Sem recorrer a covardias, o bonde de pista encarou a linha adversária homem a homem, na mão limpa e na honra da agremiação.\n\nA superioridade física e o coração da nossa linha de frente prevaleceram na trocação franca, garantindo o controle total das vias de acesso. Dentro do estádio, a bateria ditou o ritmo de um triunfo inesquecível que reforça o respeito nacional à nossa agremiação.`;
     } else if (tacticStr.includes("mosaico") || tacticStr.includes("festa")) {
       return `Um dia memorável para a história visual da nossa agremiação no ${payload.stadium || "estádio"}. Na subida dos jogadores, o setor visitante explodiu com um mosaico 3D de precisão cirúrgica, acompanhado por uma cortina de fumaça viva que pintou as arquibancadas com as cores do ${payload.clube || "clube"}.\n\nA festa calou o estádio rival e empurrou o time do início ao fim com cantos ininterruptos. A dedicação de cada associado e o empenho da diretoria foram coroados com um espetáculo inigualável de bancada e arquibancada raiz.`;
     } else {
-      return `Com marcha firme e batedores abrindo caminho, o bonde da ${payload.torcida || "nossa torcida"} desembarcou no ${payload.stadium || "estádio"} com mais de ${(payload.playerAttendance || 1000).toLocaleString()} integrantes dispostos a defender o pavilhão até o fim.\n\nO avanço compacto da nossa linha de frente rompeu a contenção adversária e estabeleceu o domínio territorial na rampa de acesso. Durante o jogo, a cadência dos surdos e caixas fez o estádio tremer, carimbando mais uma jornada de glória e respeito absoluto na história da nossa torcida.`;
+      return `Com marcha firme e batedores abrindo caminho, o bonde da ${payload.torcida || "nossa torcida"} desembarcou no ${payload.stadium || "estádio"} com mais de ${(payload.playerAttendance || 1000).toLocaleString()} integrantes dispostos a defender a agremiação até o fim.\n\nO avanço compacto da nossa linha de frente rompeu a contenção adversária e estabeleceu o domínio territorial na rampa de acesso. Durante o jogo, a cadência dos surdos e caixas fez o estádio tremer, carimbando mais uma jornada de glória e respeito absoluto na história da nossa torcida.`;
     }
   } else {
     // Adverse match fallback
@@ -4479,7 +4479,7 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         type: "RADICAL",
         label: "🚌 Respeito nas Estradas e Pista",
         badgeText: "PRESENÇA EM COMBOIO & CORTEJO",
-        answerText: "Nosso objetivo é garantir que nenhuma caravana nossa seja intimidada e que o pavilhão imponha respeito em qualquer estádio do país.",
+        answerText: "Nosso objetivo é garantir que nenhuma caravana nossa seja intimidada e que a agremiação imponha respeito em qualquer estádio do país.",
         statEffects: { poder_pista: 3, caravana: 2 },
         log: "Foco em presença de caravana e escolta de pista (+3 Pista, +2 Caravana).",
         formattedDeltas: [

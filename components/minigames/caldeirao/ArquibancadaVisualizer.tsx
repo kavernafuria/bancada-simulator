@@ -75,7 +75,7 @@ export const ArquibancadaVisualizer: React.FC<ArquibancadaVisualizerProps> = ({
         </div>
       )}
 
-      {/* SUBIDA DO BANDEIRÃO GIGANTE DE PAVILHÃO */}
+      {/* SUBIDA DO BANDEIRÃO GIGANTE DA AGREMIAÇÃO */}
       <div
         className={`absolute inset-x-1 sm:inset-x-2 top-6 sm:top-10 bottom-0 z-40 rounded-t-lg sm:rounded-t-2xl shadow-2xl border-t-2 sm:border-t-4 border-amber-400 overflow-hidden flex flex-col items-center justify-center transition-all duration-700 ease-out transform ${
           isBannerUp ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
@@ -92,7 +92,7 @@ export const ArquibancadaVisualizer: React.FC<ArquibancadaVisualizerProps> = ({
           </span>
           <div className="h-0.5 sm:h-1 w-16 sm:w-36 bg-amber-400 my-0.5 sm:my-2.5 rounded-full shadow-lg z-10" />
           <span className="text-[7px] sm:text-xs font-black text-amber-300 uppercase tracking-widest z-10 drop-shadow">
-            PAVILHÃO
+            AGREMIAÇÃO
           </span>
         </div>
       </div>

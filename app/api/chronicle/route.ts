@@ -157,7 +157,7 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
         const standClosings = [
           `${statusTitle || "Espetáculo de arquibancada"}. Moral da bancada em alta (+${moralChange}) e festa generalizada dos associados.`,
           `Mais uma jornada vitoriosa celebrando a tradição, a organização e a paixão das nossas cores nas arquibancadas.`,
-          `Ao apito final, a comemoração estendeu-se pela sede social celebrando mais um capítulo inesquecível no nosso pavilhão.`,
+          `Ao apito final, a comemoração estendeu-se pela sede social celebrando mais um capítulo inesquecível na nossa agremiação.`,
         ];
         const op = standOpenings[Math.floor(Math.random() * standOpenings.length)];
         const mi = standMiddles[Math.floor(Math.random() * standMiddles.length)];
@@ -213,7 +213,7 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
         `O resultado consolida a ${torcida} entre as forças mais respeitadas no cenário nacional de arquibancadas.`,
         `Saldo amplamente positivo com moral nas alturas (+${moralChange}) e regresso em festa da tropa para a sede.`,
         `Um triunfo de respeito, organização e imposição territorial que será lembrado por longas temporadas.`,
-        `Comemoração efusiva nos ônibus e na praça central da cidade marcando a supremacia total do nosso pavilhão.`,
+        `Comemoração efusiva nos ônibus e na praça central da cidade marcando a supremacia total da nossa agremiação.`,
         `A diretoria agradeceu o empenho de cada associado que colocou a alma na bancada nessa batalha inesquecível.`,
       ];
 
@@ -252,7 +252,7 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
         `O momento pede cabeça fria, reorganização dos bondes e foco total na recuperação da autonomia financeira e moral.`,
         `Saldo de provação que servirá de aprendizado tático para a reconstrução da nossa postura nos próximos clássicos.`,
         `Lideranças atuam na assistência aos associados feridos (${desertion} membros) e na defesa jurídica perante os órgãos de fiscalização.`,
-        `A bancada sentiu a baque (${moralChange} moral), mas o compromisso com o pavilhão permanece inabalável diante de qualquer revés.`,
+        `A bancada sentiu a baque (${moralChange} moral), mas o compromisso com a agremiação permanece inabalável diante de qualquer revés.`,
         `Apoio incondicional aos feridos e convocação geral da massa para fechar fileiras e retomar a força da torcida.`,
       ];
 
