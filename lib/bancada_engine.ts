@@ -3350,9 +3350,13 @@ export async function generateGeminiChronicle(payload: any): Promise<string> {
 
   // 3. COMBAT / DERBY NARRATIVE BASED ON TACTIC & VICTORY
   const tacticStr = (payload.tacticTitle || payload.tactic || "").toLowerCase();
-  
+  const logStr = (payload.tacticLog || "").toLowerCase() + " " + tacticStr;
+  const isBeatSmallGroup = logStr.includes("grupo rival") || logStr.includes("3 pessoas") || logStr.includes("apoteose") || logStr.includes("vencendo o bonde") || logStr.includes("pra correr");
+
   if (payload.isVictory || payload.isVictoryPista) {
-    if (tacticStr.includes("rojões") || tacticStr.includes("morteiro")) {
+    if (isBeatSmallGroup) {
+      return `O grande ápice do confronto deu-se nas vielas do bairro no entorno do ${payload.stadium || "estádio"}. A nossa linha de frente encarou de peito aberto o grupo rival da ${payload.rivalTorcida || "oposição"}, peitou a contenção na mão limpa e botou os adversários para correr em debandada geral, rompendo a emboscada com autoridade máxima!\n\nCom o triunfo apoteótico de pista assegurado, a comitiva da ${payload.torcida || "nossa torcida"} tomou a rampa de acesso com os braços erguidos e comandou a festa na bancada do primeiro ao último minuto!`;
+    } else if (tacticStr.includes("rojões") || tacticStr.includes("morteiro")) {
       return `A operação de pista no entorno do ${payload.stadium || "estádio"} foi um verdadeiro espetáculo de poder bélico. Quando o comboio rival tentou esboçar aproximação, a nossa linha de frente acionou a bateria pesada de morteiros de vara e guerra de rojões, iluminando o céu e criando uma barreira de fumaça intransponível.\n\nCom o adversário desorientado e recuando em desordem, o bonde da ${payload.torcida || "nossa torcida"} avançou com autoridade e tomou a pista principal. Nas arquibancadas, os mais de ${(payload.playerAttendance || 1200).toLocaleString()} guerreiros cantaram os 90 minutos, comemorando a vitória das nossas cores com orgulho e moral nas alturas.`;
     } else if (tacticStr.includes("surpresa") || tacticStr.includes("emboscada") || tacticStr.includes("flanqueamento")) {
       return `A inteligência do relatório dos antenas foi cirúrgica no deslocamento para o ${payload.stadium || "estádio"}. Enquanto a contenção rival esperava o comboio pela via expressa principal, nossas vans e motos cortaram pelas travessas e alças de acesso, executando um ataque surpresa perfeito pela retaguarda adversária.\n\nA manobra pegou o grupo rival de surpresa, quebrando as linhas deles sem dar chance de reação. O bonde da ${payload.torcida || "nossa torcida"} entrou no estádio de peito estufado, desfraldando os trapos e comandando a festa na bancada do primeiro ao último minuto.`;

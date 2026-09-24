@@ -1206,15 +1206,19 @@ export default function App() {
       }));
     } else if (activeMatchMiniGameContext?.tacticalChoice === 'maze_escape') {
       if (finalPECModifier >= 0) {
-        setBankBalance((prev) => prev + 2500);
+        const isEpicWin = resultText.includes("APOTEOSE") || resultText.includes("grupo rival") || finalPECModifier >= 0.20;
+        const cashReward = isEpicWin ? 6000 : 3500;
+        setBankBalance((prev) => prev + cashReward);
         setStateTrackers((st) => ({
           ...st,
-          moral: Math.min(100, st.moral + 15),
-          respeito_nacional: Math.min(100, st.respeito_nacional + 10),
+          moral: Math.min(100, st.moral + (isEpicWin ? 18 : 12)),
+          respeito_nacional: Math.min(100, st.respeito_nacional + (isEpicWin ? 12 : 8)),
           risco_mp: Math.max(0, st.risco_mp - 5),
         }));
       } else {
-        // EMBOSCADA / CERCO NO BAIRRO: Derrota no Labirinto
+        // DERROTA NO LABIRINTO (EMBOSCADA / CERCO NO BAIRRO)
+        // Receita garantida da bancada/sede (+R$ 1.500), porem com PERDA DE PISTA (-15 Moral, -8 Respeito)
+        setBankBalance((prev) => prev + 1500);
         setStateTrackers((st) => ({
           ...st,
           moral: Math.max(0, st.moral - 15),
