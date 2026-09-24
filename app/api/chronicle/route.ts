@@ -42,8 +42,8 @@ export async function POST(req: Request) {
         const resultTypeDesc = statusTitle
           ? statusTitle
           : isPistaFight
-          ? (isVictoryPista ? "Vitória e Domínio de Rua" : "Pressão e Revés Tático")
-          : (isVictoryPista || isVictoryBancada ? "Vitória e Show de Bancada" : "Desempenho Irregular de Bancada");
+          ? (isVictoryPista ? "Vitória e Domínio de Rua" : "Derrota em Emboscada de Rua / Cerco Adversário")
+          : (isVictoryPista && isVictoryBancada ? "Vitória e Show de Bancada" : "Desempenho Irregular de Bancada");
 
         const prompt = `Você é um líder histórico e cronista de rua de uma torcida organizada do futebol brasileiro. 
 Escreva uma crônica empolgante, crua e visceral de 1 parágrafo vibrante (4 a 6 frases) sobre o jogo ocorrido.
@@ -143,7 +143,7 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
 
     // Non-Pista / Peaceful Arquibancada Matches (No Street Fight)
     if (!isPistaFight) {
-      if (isVictoryPista || isVictoryBancada) {
+      if (isVictoryPista && isVictoryBancada) {
         const standOpenings = [
           `[Ano ${season} - ${competition || "Campeonato"}] Dia de festa inesquecível para a ${torcida} ${homeStr} contra o ${rivalClub} (${rivalTorcida}).`,
           `[Ano ${season} - ${competition || "Campeonato"}] A atmosfera do ${stadium} ficou contagiante com o show da ${torcida} ${homeStr} diante do ${rivalClub} (${rivalTorcida}).`,

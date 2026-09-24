@@ -1205,13 +1205,23 @@ export default function App() {
         respeito_nacional: Math.min(100, st.respeito_nacional + 8),
       }));
     } else if (activeMatchMiniGameContext?.tacticalChoice === 'maze_escape') {
-      setBankBalance((prev) => prev + 2500);
-      setStateTrackers((st) => ({
-        ...st,
-        moral: Math.min(100, st.moral + 15),
-        respeito_nacional: Math.min(100, st.respeito_nacional + 10),
-        risco_mp: Math.max(0, st.risco_mp - 5),
-      }));
+      if (finalPECModifier >= 0) {
+        setBankBalance((prev) => prev + 2500);
+        setStateTrackers((st) => ({
+          ...st,
+          moral: Math.min(100, st.moral + 15),
+          respeito_nacional: Math.min(100, st.respeito_nacional + 10),
+          risco_mp: Math.max(0, st.risco_mp - 5),
+        }));
+      } else {
+        // EMBOSCADA / CERCO NO BAIRRO: Derrota no Labirinto
+        setStateTrackers((st) => ({
+          ...st,
+          moral: Math.max(0, st.moral - 15),
+          respeito_nacional: Math.max(0, st.respeito_nacional - 8),
+          risco_mp: Math.min(100, st.risco_mp + (penaltyMP || 15)),
+        }));
+      }
     } else if (tactic.id === 'TELAO_CHURRASCO_QUADRA_SEDE') {
       setBankBalance((prev) => prev + 3500);
       setStateTrackers((st) => ({

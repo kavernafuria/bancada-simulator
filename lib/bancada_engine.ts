@@ -2788,6 +2788,11 @@ export function executeCompleteMatch(
     isVictoryPista = false;
   }
 
+  // ⚠️ TRAVA DEFINITIVA DE MINIGAME: Se o minigame foi perdido (tactic.pistaMod < 0), a vitória de pista é NULA (Derrota Garantida)
+  if (tactic.pistaMod < 0) {
+    isVictoryPista = false;
+  }
+
   // Football match result calculation based on Ultras Pressão de Bancada + Moral + Police alignment + Tactic
   const scorePower =
     stats.pressao_bancada * 0.45 +
@@ -2800,11 +2805,10 @@ export function executeCompleteMatch(
   let scorePlayerClub = scorePower > 50 ? Math.floor(Math.random() * 2 + 1) : Math.floor(Math.random() * 2);
   let scoreRivalClub = isVictoryPista ? Math.max(0, scorePlayerClub - Math.floor(Math.random() * 2 + 1)) : scorePlayerClub + 1;
 
-  const isPistaFight = !derby.isAllyGame &&
+  const isPistaFight = (!derby.isAllyGame &&
     !isFestaTactic &&
     !isEvasionTactic &&
     !tactic.isMosaicTactic &&
-    !tid.includes("CALDEIRAO") &&
     !tid.includes("FLAG_WAVING") &&
     !tid.includes("BATERIA") &&
     !tid.includes("SAMBA") &&
@@ -2823,10 +2827,12 @@ export function executeCompleteMatch(
       tid.includes("FRONTAL") ||
       tid.includes("RUNNER_3D") ||
       tid.includes("TROCA_SOCOS") ||
-      tid.includes("PISTA")
-    );
+      tid.includes("PISTA") ||
+      tid.includes("MAZE") ||
+      tid.includes("CACADA")
+    )) || (tactic.pistaMod < 0 && !derby.isAllyGame);
 
-  const isVictoryBancada = isVictoryPista || (tactic.isMosaicTactic ?? false);
+  const isVictoryBancada = isVictoryPista && tactic.pistaMod >= 0;
   const membersLost = isPistaFight
     ? (isVictoryPista ? Math.floor(Math.random() * 4 + 1) : Math.floor(Math.random() * 22 + 8))
     : 0;
@@ -2840,7 +2846,7 @@ export function executeCompleteMatch(
   const mpAdded = Math.max(0, transport.mpRisk + tactic.mpPenalty + (police ? police.mpRiskMod : 0));
   let moralChange = isVictoryPista
     ? Math.min(15, Math.max(3, 7 + tactic.moralMod + (police ? police.moralMod : 0)))
-    : Math.min(-2, -8 + tactic.moralMod + (police ? police.moralMod : 0));
+    : Math.min(-4, -10 + tactic.moralMod + (police ? police.moralMod : 0));
 
   // ------------------------------------------------------------------------
   // 2. REGRAS RESTRITIVAS PARA CAPTURA E PERDA DE FAIXAS (APENAS EM JOGOS DE PISTA)
@@ -2862,7 +2868,7 @@ export function executeCompleteMatch(
   let statusTitle = isPistaFight
     ? (isVictoryPista
       ? `VITÓRIA & CONTROLE EM ${derby.stadium.toUpperCase()}`
-      : `CONFRONTO ADVERSO & CONTENÇÃO EM ${derby.stadium.toUpperCase()}`)
+      : `EMBOSCADA ADVERSA & REVES DE PISTA EM ${derby.stadium.toUpperCase()}`)
     : (isVictoryPista
       ? `VITÓRIA & FESTA NA ARQUIBANCADA EM ${derby.stadium.toUpperCase()}`
       : `DESEMPENHO IRREGULAR NA ARQUIBANCADA EM ${derby.stadium.toUpperCase()}`);
@@ -2879,7 +2885,7 @@ export function executeCompleteMatch(
       label: isPistaFight ? "Resultado de Pista" : "Resultado de Arquibancada",
       value: isVictoryPista
         ? (bannerCaptured ? "Vitória & Faixa Capturada" : (isPistaFight ? "Vitória e Domínio" : "Vitória e Show de Bancada"))
-        : (isPistaFight ? "Contenção / Recuo" : "Contenção de Bancada"),
+        : (isPistaFight ? "Emboscada / Recuo de Pista" : "Contenção de Bancada"),
       isPositive: isVictoryPista,
     },
     { label: "Efetivo na Rua", value: `${playerMembers.toLocaleString()} vs ${rivalMembers.toLocaleString()} (${ratio >= 1 ? `+${Math.round((ratio - 1) * 100)}%` : `-${Math.round((1 - ratio) * 100)}%`})`, isPositive: ratio >= 1 },
@@ -2919,6 +2925,8 @@ export function executeCompleteMatch(
     ? `Jornada gloriosa registrada no patrimônio da torcida. Além da vitória na pista, a nossa linha de frente arrancou a faixa oficial do ${derby.rivalTorcida}, trazendo um troféu inestimável para o salão da sede (+10 Moral)!`
     : bannerLost
     ? `Um dia fatídico gravado com dor na memória da torcida. A perda do bandeirão oficial na emboscada abalou a alma da agremiação (-20 Moral), gerando cobrança pesada e reunião de emergência com a velha guarda na sede social.`
+    : !isVictoryPista
+    ? `O deslocamento para o estádio ${derby.stadium} foi marcado por cerco hostil e emboscada nas alças de acesso. O bonde da nossa torcida foi surpreendido e precisou recuar sob forte pressão rival (${tactic.title}), resultando em abalo moral na tropa (${moralChange} Moral) e baixas médicas registradas.`
     : `O comboio ocupou as vias do ${derby.stadium} com aproximadamente ${intel.playerMembersPresent.toLocaleString()} integrantes. A postura de segurança (${police?.title || "alinhamento padrão"}) e a tática de ${tactic.title.toLowerCase()} definiram os acontecimentos. Nas arquibancadas, os cantos ecoaram sem parar até o apito final.`;
 
   return {
