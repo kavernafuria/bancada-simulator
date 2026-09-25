@@ -104,6 +104,7 @@ import { PressConferenceModal } from "@/components/PressConferenceModal";
 import { ElectionCrisisModal } from "@/components/ElectionCrisisModal";
 import { InquiryModal, InquiryResultPayload } from "@/components/InquiryModal";
 import { GameTutorialModal } from "@/components/GameTutorialModal";
+import { StoryCardModal, StoryCardData } from "@/components/StoryCardModal";
 import {
   GAME_BALANCE,
   getOfficialTorcidas,
@@ -307,6 +308,51 @@ export default function App() {
   const [merchandiseOrders, setMerchandiseOrders] = useState<MerchandiseOrder[]>([]);
   const [unforeseenExpenseModal, setUnforeseenExpenseModal] = useState<UnforeseenExpense | null>(null);
   const [showGameTutorialModal, setShowGameTutorialModal] = useState<boolean>(false);
+  const [showStoryCardModal, setShowStoryCardModal] = useState<boolean>(false);
+  const [activeStoryCardData, setActiveStoryCardData] = useState<StoryCardData | null>(null);
+
+  const handleOpenStoryCard = (cardType: "MATCH_VICTORY" | "SEASON_CLOSING" | "TORCIDA_PROFILE" = "TORCIDA_PROFILE") => {
+    if (!currentTorcida) return;
+
+    const ranking = simulateNationalRanking(currentTorcida, stats, stateTrackers, season);
+    const playerRankEntry = ranking.find((r) => r.isPlayer);
+
+    let chronicle = "";
+    let matchTitle = "";
+    let score = "";
+
+    if (cardType === "MATCH_VICTORY" && activeMatchResult) {
+      chronicle = activeMatchResult.chronicleText;
+      matchTitle = activeMatchDerby?.matchTitle || "Derby Clássico";
+      score = `${activeMatchResult.scorePlayerClub} x ${activeMatchResult.scoreRivalClub}`;
+    } else if (cardType === "SEASON_CLOSING") {
+      chronicle = `Fechamento glorioso da Temporada ${season - 1}! A ${currentTorcida.torcida} alcançou o ${playerRankEntry?.rank || 1}º Lugar no Ranking Nacional com ${playerRankEntry?.powerScore || 500} pts de autoridade!`;
+    } else {
+      chronicle = `Agremiação ${currentTorcida.torcida} do ${currentTorcida.clube}. Respeito e lealdade nas arquibancadas e nas ruas de todo o Brasil!`;
+    }
+
+    setActiveStoryCardData({
+      torcidaName: currentTorcida.torcida,
+      sigla: currentTorcida.sigla,
+      clube: currentTorcida.clube,
+      primaryColor: primaryColor,
+      secondaryColor: secondaryColor,
+      rank: playerRankEntry?.rank || 1,
+      powerScore: playerRankEntry?.powerScore || 500,
+      season: season,
+      cardType,
+      matchTitle,
+      score,
+      rivalTorcida: activeMatchDerby?.rivalTorcida,
+      chronicle,
+      contingente: stats.contingente,
+      pressaoBancada: stats.pressao_bancada,
+      poderPista: stats.poder_pista,
+      bankBalance: bankBalance,
+    });
+
+    setShowStoryCardModal(true);
+  };
 
   // MÓDULO 1 & 2 STATE
   const [torcidaUnicaState, setTorcidaUnicaState] = useState<TorcidaUnicaState>(INITIAL_TORCIDA_UNICA_STATE);
@@ -452,7 +498,11 @@ export default function App() {
     setTimeout(() => setShareToast(null), 3500);
   };
 
-  const renderSocialShareSection = (title: string, text: string) => {
+  const renderSocialShareSection = (
+    title: string,
+    text: string,
+    cardType: "MATCH_VICTORY" | "SEASON_CLOSING" | "TORCIDA_PROFILE" = "TORCIDA_PROFILE"
+  ) => {
     const encodedText = encodeURIComponent(text);
     const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodedText}`;
@@ -465,6 +515,15 @@ export default function App() {
             KAVERS GAMES
           </span>
         </div>
+
+        {/* Action Button for 9:16 Visual Card PNG */}
+        <button
+          type="button"
+          onClick={() => handleOpenStoryCard(cardType)}
+          className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 text-black font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all cursor-pointer my-1"
+        >
+          <Sparkles className="w-4 h-4 text-black" /> 📸 GERAR CARD VISUAL DE STORY (9:16 PNG)
+        </button>
 
         <div className="grid grid-cols-3 gap-1.5 pt-1">
           {/* WhatsApp */}
@@ -3362,6 +3421,15 @@ export default function App() {
             </span>
           </div>
 
+          {/* GERADOR DE CARD VISUAL DE STORY */}
+          <button
+            type="button"
+            onClick={() => handleOpenStoryCard("TORCIDA_PROFILE")}
+            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 text-black font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all cursor-pointer"
+          >
+            <Sparkles className="w-4 h-4 text-black" /> 📸 GERAR CARD VISUAL DE STORY (9:16 PNG)
+          </button>
+
           {/* Color Badges */}
           <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 flex items-center justify-between text-xs">
             <span className="font-bold text-zinc-300">Cores da Agremiação:</span>
@@ -4271,7 +4339,8 @@ export default function App() {
             {/* Kavers Games Social Sharing Block */}
             {renderSocialShareSection(
               "RESULTADO DO JOGO",
-              `🥁 [BANCADA SIMULATOR • KAVERS GAMES]\n${activeMatchResult.statusTitle} - ${currentTorcida?.torcida} vs ${activeMatchDerby?.rivalTorcida || "Rival"}!\nEstádio: ${activeMatchDerby?.stadium || "Estádio"}\n\n"Crônica de Arquibancada: ${activeMatchResult.chronicleText.slice(0, 160)}..."\n\n🎮 Jogue grátis o Simulador de Torcidas da Kavers Games:\n👉 https://kaversgames.com.br\n#BancadaSimulator #KaversGames #TorcidasOrganizadas`
+              `🥁 [BANCADA SIMULATOR • KAVERS GAMES]\n${activeMatchResult.statusTitle} - ${currentTorcida?.torcida} vs ${activeMatchDerby?.rivalTorcida || "Rival"}!\nEstádio: ${activeMatchDerby?.stadium || "Estádio"}\n\n"Crônica de Arquibancada: ${activeMatchResult.chronicleText.slice(0, 160)}..."\n\n🎮 Jogue grátis o Simulador de Torcidas da Kavers Games:\n👉 https://kaversgames.com.br\n#BancadaSimulator #KaversGames #TorcidasOrganizadas`,
+              "MATCH_VICTORY"
             )}
 
             <button
@@ -4456,7 +4525,8 @@ export default function App() {
             {/* Kavers Games Social Sharing Block */}
             {renderSocialShareSection(
               `TEMPORADA ${season - 1}`,
-              `🏆 [BANCADA SIMULATOR • KAVERS GAMES]\nFechamento da Temporada ${season - 1} com a ${currentTorcida?.torcida} (${currentTorcida?.clube})!\n\n👑 Posição no Ranking: ${seasonEndReport.endSnapshot?.rank || 1}º LUGAR NACIONAL\nMetas Cumpridas: ${seasonEndReport.completedCount}\nMassa: ${stats.contingente}/100 | Bancada: ${stats.pressao_bancada}/100 | Pista: ${stats.poder_pista}/100\nCaixa Acumulado: R$ ${bankBalance.toLocaleString()}\n\n🎮 Monte sua torcida no Simulador Oficial Kavers Games:\n👉 https://kaversgames.com.br\n#BancadaSimulator #KaversGames #Futebol`
+              `🏆 [BANCADA SIMULATOR • KAVERS GAMES]\nFechamento da Temporada ${season - 1} com a ${currentTorcida?.torcida} (${currentTorcida?.clube})!\n\n👑 Posição no Ranking: ${seasonEndReport.endSnapshot?.rank || 1}º LUGAR NACIONAL\nMetas Cumpridas: ${seasonEndReport.completedCount}\nMassa: ${stats.contingente}/100 | Bancada: ${stats.pressao_bancada}/100 | Pista: ${stats.poder_pista}/100\nCaixa Acumulado: R$ ${bankBalance.toLocaleString()}\n\n🎮 Monte sua torcida no Simulador Oficial Kavers Games:\n👉 https://kaversgames.com.br\n#BancadaSimulator #KaversGames #Futebol`,
+              "SEASON_CLOSING"
             )}
 
             <button
@@ -5237,6 +5307,13 @@ export default function App() {
       <GameTutorialModal
         isOpen={showGameTutorialModal}
         onClose={() => setShowGameTutorialModal(false)}
+      />
+
+      {/* VISUAL STORY CARD MODAL (9:16 PNG GENERATOR FOR INSTAGRAM & WHATSAPP) */}
+      <StoryCardModal
+        isOpen={showStoryCardModal}
+        onClose={() => setShowStoryCardModal(false)}
+        data={activeStoryCardData}
       />
     </div>
   );
