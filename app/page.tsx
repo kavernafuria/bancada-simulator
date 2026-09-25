@@ -1216,15 +1216,37 @@ export default function App() {
           risco_mp: Math.max(0, st.risco_mp - 5),
         }));
       } else {
-        // DERROTA NO LABIRINTO (EMBOSCADA / CERCO NO BAIRRO)
-        // Receita garantida da bancada/sede (+R$ 1.500), porem com PERDA DE PISTA (-15 Moral, -8 Respeito)
-        setBankBalance((prev) => prev + 1500);
-        setStateTrackers((st) => ({
-          ...st,
-          moral: Math.max(0, st.moral - 15),
-          respeito_nacional: Math.max(0, st.respeito_nacional - 8),
-          risco_mp: Math.min(100, st.risco_mp + (penaltyMP || 15)),
-        }));
+        // DERROTA / INTERCEPTAÇÃO NO LABIRINTO DE BAIRRO
+        const isPoliceDetention = (penaltyMP && penaltyMP >= 20) || resultText.includes("POLÍCIA") || resultText.includes("DETENÇÃO");
+
+        if (isPoliceDetention) {
+          // INTERCEPTAÇÃO PELA PM: Receita de Bancada (+R$ 1.500) - Custas Fiança/Advogados (-R$ 3.000) = Saldo -R$ 1.500
+          setBankBalance((prev) => Math.max(0, prev - 1500));
+          setStateTrackers((st) => ({
+            ...st,
+            moral: Math.max(0, st.moral - 15),
+            respeito_nacional: Math.max(0, st.respeito_nacional - 10),
+            risco_mp: Math.min(100, st.risco_mp + (penaltyMP || 25)),
+          }));
+          setHistoryLog((prev) => [
+            `[Detenção Policial] 🚓 Vários membros detidos pela PM. A diretoria desembolsou R$ 3.000 em fianças e advogados de emergência na delegacia para liberar o bonde (+R$ 1.500 Bancada / -R$ 3.000 Fiança).`,
+            ...prev,
+          ]);
+          // Dispara Coletiva de Urgência do MP para o presidente se posicionar
+          const crisisConf = getPressConference("ENTREVISTA_CRISE_JUDICIAL_MP");
+          if (crisisConf) {
+            setActivePressConference(crisisConf);
+          }
+        } else {
+          // EMBOSCADA RIVAL: Receita garantida de bancada (+R$ 1.500), porém com perda de pista (-15 Moral)
+          setBankBalance((prev) => prev + 1500);
+          setStateTrackers((st) => ({
+            ...st,
+            moral: Math.max(0, st.moral - 15),
+            respeito_nacional: Math.max(0, st.respeito_nacional - 8),
+            risco_mp: Math.min(100, st.risco_mp + (penaltyMP || 10)),
+          }));
+        }
       }
     } else if (tactic.id === 'TELAO_CHURRASCO_QUADRA_SEDE') {
       setBankBalance((prev) => prev + 3500);

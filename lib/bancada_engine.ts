@@ -3350,8 +3350,9 @@ export async function generateGeminiChronicle(payload: any): Promise<string> {
 
   // 3. COMBAT / DERBY NARRATIVE BASED ON TACTIC & VICTORY
   const tacticStr = (payload.tacticTitle || payload.tactic || "").toLowerCase();
-  const logStr = (payload.tacticLog || "").toLowerCase() + " " + tacticStr;
+  const logStr = (payload.tacticLog || "").toLowerCase() + " " + tacticStr + " " + (payload.statusTitle || "").toLowerCase();
   const isBeatSmallGroup = logStr.includes("grupo rival") || logStr.includes("3 pessoas") || logStr.includes("apoteose") || logStr.includes("vencendo o bonde") || logStr.includes("pra correr");
+  const isPoliceDetention = logStr.includes("polícia") || logStr.includes("policia") || logStr.includes("detenção") || logStr.includes("detencao") || logStr.includes("fiança") || logStr.includes("fianca") || logStr.includes("delegacia");
 
   if (payload.isVictory || payload.isVictoryPista) {
     if (isBeatSmallGroup) {
@@ -3369,6 +3370,9 @@ export async function generateGeminiChronicle(payload: any): Promise<string> {
     }
   } else {
     // Adverse match fallback
+    if (isPoliceDetention) {
+      return `O deslocamento para o ${payload.stadium || "estádio"} foi interrompido por um ostensivo cerco da PM e das forças de segurança. Diversos integrantes do bonde foram detidos e conduzidos à 2ª Delegacia para averiguação de tumulto no bairro.\n\nA diretoria da ${payload.torcida || "nossa torcida"} precisou agir rápido nas negociações e desembolsar R$ 3.000 em fianças e advogados de emergência para liberar os associados. Apesar de a bancada manter a arrecadação das mensalidades (+R$ 1.500), a perda de pista e a fiscalização do Ministério Público exigiram a convocação de uma coletiva de imprensa de urgência para defender o direito de torcer da nossa agremiação.`;
+    }
     return `O deslocamento para o ${payload.stadium || "estádio"} exigiu sangue frio e superação da nossa diretoria e da linha de frente. Com forte cerco do Choque e pressão hostil no entorno, o bonde precisou fechar formação defensiva cerrada para salvaguardar a frota de ônibus e os materiais históricos da torcida.\n\nMesmo sob atrito intenso e com custos médicos de R$ ${(payload.medical || 1500).toLocaleString()}, a lealdade dos nossos associados falou mais alto: os trapos foram defendidos com bravura e a voz da arquibancada não se calou até o apito final.`;
   }
 }

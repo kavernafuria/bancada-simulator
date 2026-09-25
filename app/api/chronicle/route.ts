@@ -223,6 +223,27 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
 
       return NextResponse.json({ chronicle: `${op} ${mi} ${cl}` });
     } else {
+      const isPoliceDetention = (statusTitle || "").toLowerCase().includes("polícia") || (statusTitle || "").toLowerCase().includes("detenção") || (statusTitle || "").toLowerCase().includes("fiança") || (statusTitle || "").toLowerCase().includes("crise judicial");
+
+      if (isPoliceDetention) {
+        const policeOpenings = [
+          `[Ano ${season} - ${competition || "Campeonato"}] Operação de cerco policial ostensivo interceptou o deslocamento da ${torcida} ${homeStr} rumo ao estádio ${stadium}.`,
+          `[Ano ${season} - ${competition || "Campeonato"}] Tarde de forte tensão com as forças de segurança em ${cityState}: parte do bonde da ${torcida} foi detida na aproximação ao ${stadium}.`,
+        ];
+        const policeMiddles = [
+          `Com dezenas de associados conduzidos à 2ª Delegacia de Polícia, a diretoria precisou desembolsar R$ 3.000 em fianças e advogados de emergência para liberar os torcedores.`,
+          `A intervenção ostensiva da PM reteve os materiais de bancada e forçou o departamento jurídico da agremiação a intervir diretamente no plantão policial.`,
+        ];
+        const policeClosings = [
+          `Apesar de a bancada manter a arrecadação de R$ 1.500, a perda de pista e a fiscalização do Ministério Público desencadearam a convocação de coletiva de imprensa de urgência.`,
+          `O desgaste jurídico e o aumento do Risco MP exigirão pulso firme das nossas lideranças para reorganizar a torcida e proteger a agremiação.`,
+        ];
+        const op = policeOpenings[Math.floor(Math.random() * policeOpenings.length)];
+        const mi = policeMiddles[Math.floor(Math.random() * policeMiddles.length)];
+        const cl = policeClosings[Math.floor(Math.random() * policeClosings.length)];
+        return NextResponse.json({ chronicle: `${op} ${mi} ${cl}` });
+      }
+
       const defOpenings = [
         `[Ano ${season} - ${competition || "Campeonato"}] Jornada de altíssima exigência e clima pesado para a ${torcida} ${homeStr} diante do ${rivalClub} (${rivalTorcida}).`,
         `[Ano ${season} - ${competition || "Campeonato"}] O teste de fogo no estádio ${stadium} impôs severas provações para a ${torcida} no confronto contra o ${rivalClub} (${rivalTorcida}).`,
