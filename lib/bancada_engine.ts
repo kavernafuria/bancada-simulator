@@ -273,29 +273,32 @@ export const TORCIDA_COLOR_PALETTE: TorcidaColorPreset[] = [
 
 export function getDefaultTorcidaColors(clube: string): { primary: string; secondary: string } {
   const c = (clube || "").trim().toLowerCase();
-  if (c.includes("palmeiras") || c.includes("guarani") || c.includes("coritiba") || c.includes("goiás") || c.includes("chapecoense")) {
+  if (c.includes("palmeiras") || c.includes("guarani") || c.includes("coritiba") || c.includes("goiás") || c.includes("chapecoense") || c.includes("itapirense") || c.includes("kueio loco")) {
     return { primary: "#15803d", secondary: "#f4f4f5" };
   }
-  if (c.includes("flamengo") || c.includes("internacional") || c.includes("sport") || c.includes("vitória") || c.includes("athletico")) {
+  if (c.includes("flamengo") || c.includes("internacional") || c.includes("sport") || c.includes("vitória") || c.includes("athletico") || c.includes("ituano") || c.includes("galoucura itu")) {
     return { primary: "#dc2626", secondary: "#09090b" };
   }
-  if (c.includes("são paulo") || c.includes("botafogo-sp") || c.includes("noroeste") || c.includes("náutico") || c.includes("santa cruz")) {
+  if (c.includes("são paulo") || c.includes("botafogo-sp") || c.includes("noroeste") || c.includes("náutico") || c.includes("santa cruz") || c.includes("mogi mirim") || c.includes("mancha vermelha")) {
     return { primary: "#dc2626", secondary: "#f4f4f5" };
   }
-  if (c.includes("ec são bernardo") || c.includes("esquadrão alvinegro") || c.includes("esquadrao alvinegro") || c.includes("comercial") || c.includes("corinthians") || c.includes("santos") || c.includes("vasco") || c.includes("botafogo") || c.includes("ceará") || c.includes("operário")) {
+  if (c.includes("inter de limeira") || c.includes("interror") || c.includes("bragantino") || c.includes("guerreiros do leão") || c.includes("ec são bernardo") || c.includes("esquadrão alvinegro") || c.includes("esquadrao alvinegro") || c.includes("comercial") || c.includes("corinthians") || c.includes("santos") || c.includes("vasco") || c.includes("botafogo") || c.includes("ceará") || c.includes("operário")) {
     return { primary: "#09090b", secondary: "#f4f4f5" };
   }
   if (c.includes("são caetano")) {
     return { primary: "#0284c7", secondary: "#f4f4f5" };
   }
-  if ((c.includes("são bernardo") && !c.includes("ec são bernardo")) || c.includes("criciúma") || c.includes("novorizontino")) {
+  if (c.includes("mirassol") || c.includes("fúria do leão")) {
+    return { primary: "#eab308", secondary: "#15803d" };
+  }
+  if ((c.includes("são bernardo") && !c.includes("ec são bernardo")) || c.includes("criciúma") || c.includes("novorizontino") || c.includes("garra do tigre")) {
     return { primary: "#eab308", secondary: "#09090b" };
   }
-  if (c.includes("cruzeiro") || c.includes("grêmio") || c.includes("bahia") || c.includes("csa") || c.includes("avaí") || c.includes("são bento") || c.includes("marília") || c.includes("santo andré") || c.includes("são josé")) {
+  if (c.includes("cruzeiro") || c.includes("grêmio") || c.includes("bahia") || c.includes("csa") || c.includes("avaí") || c.includes("são bento") || c.includes("marília") || c.includes("santo andré") || c.includes("são josé") || c.includes("água santa") || c.includes("agua santa") || c.includes("aquáticos")) {
     return { primary: "#2563eb", secondary: "#f4f4f5" };
   }
-  if (c.includes("fluminense") || c.includes("ferroviária") || c.includes("juventus")) {
-    return { primary: "#881337", secondary: "#15803d" };
+  if (c.includes("fluminense") || c.includes("ferroviária") || c.includes("juventus") || c.includes("sertãozinho") || c.includes("sertaozinho") || c.includes("raça grená")) {
+    return { primary: "#881337", secondary: "#f4f4f5" };
   }
   return { primary: "#09090b", secondary: "#f4f4f5" };
 }
@@ -906,6 +909,45 @@ export function getDerbyForMatch(
       secondRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "guarani") || rivalsOnly.find((t) => t.clube.toLowerCase() === "corinthians");
       allyTorcida = rivalsOnly.find((t) => t.clube.toLowerCase() === "união barbarense") || rivalsOnly.find((t) => t.clube.toLowerCase() === "xv de piracicaba");
       break;
+    case "red bull bragantino":
+    case "bragantino":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "ponte preta") || rivalsOnly.find((t) => t.clube.toLowerCase() === "santo andré");
+      secondRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "guarani") || rivalsOnly.find((t) => t.clube.toLowerCase() === "são paulo");
+      break;
+    case "ituano":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "são bento") || rivalsOnly.find((t) => t.clube.toLowerCase() === "guarani");
+      secondRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "ponte preta");
+      break;
+    case "novorizontino":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "mirassol") || rivalsOnly.find((t) => t.clube.toLowerCase() === "noroeste");
+      secondRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "botafogo-sp");
+      break;
+    case "mirassol":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "novorizontino") || rivalsOnly.find((t) => t.clube.toLowerCase() === "noroeste");
+      secondRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "botafogo-sp");
+      allyTorcida = rivalsOnly.find((t) => t.clube.toLowerCase() === "santo andré");
+      break;
+    case "água santa":
+    case "agua santa":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("são bernardo fc")) || rivalsOnly.find((t) => t.clube.toLowerCase().includes("são bernardo")) || rivalsOnly.find((t) => t.clube.toLowerCase() === "são caetano");
+      secondRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "santo andré");
+      allyTorcida = rivalsOnly.find((t) => t.clube.toLowerCase() === "santo andré");
+      break;
+    case "sertãozinho":
+    case "sertaozinho":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "comercial-rp") || rivalsOnly.find((t) => t.clube.toLowerCase() === "botafogo-sp");
+      secondRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "ferroviária");
+      break;
+    case "mogi mirim":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "itapirense") || rivalsOnly.find((t) => t.clube.toLowerCase() === "ponte preta");
+      secondRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "guarani");
+      allyTorcida = rivalsOnly.find((t) => t.clube.toLowerCase() === "santo andré");
+      break;
+    case "itapirense":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "mogi mirim") || rivalsOnly.find((t) => t.clube.toLowerCase() === "ponte preta");
+      secondRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "guarani");
+      allyTorcida = rivalsOnly.find((t) => t.clube.toLowerCase() === "santo andré");
+      break;
     case "caxias":
       mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("juventude"));
       secondRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("grêmio"));
@@ -1070,6 +1112,17 @@ export function getDerbyForMatch(
       case "noroeste": return { stadium: "Alfredo de Castilho", cityState: "Bauru - SP" };
       case "marília": return { stadium: "Bento de Abreu (Abreuzão)", cityState: "Marília - SP" };
       case "inter de limeira": return { stadium: "Major Levy Sobrinho (Limeirão)", cityState: "Limeira - SP" };
+      case "red bull bragantino":
+      case "bragantino": return { stadium: "Nabi Abi Chedid (Nabizão)", cityState: "Bragança Paulista - SP" };
+      case "ituano": return { stadium: "Novelli Júnior", cityState: "Itu - SP" };
+      case "novorizontino": return { stadium: "Jorge Ismael de Biasi (Jorjão)", cityState: "Novo Horizonte - SP" };
+      case "mirassol": return { stadium: "José Maria de Campos Maia (Maião)", cityState: "Mirassol - SP" };
+      case "água santa":
+      case "agua santa": return { stadium: "Distrital do Inamar", cityState: "Diadema - SP" };
+      case "sertãozinho":
+      case "sertaozinho": return { stadium: "Frederico Dalmaso (Fredericão)", cityState: "Sertãozinho - SP" };
+      case "mogi mirim": return { stadium: "Vail Chaves", cityState: "Mogi Mirim - SP" };
+      case "itapirense": return { stadium: "Chico Vieira", cityState: "Itapira - SP" };
       default: return { stadium: `Estádio Municipal de ${club}`, cityState: "Interior de SP" };
     }
   };
@@ -4043,8 +4096,12 @@ export function isPrincipalRival(clubA: string, clubB: string): boolean {
   if (matches("noroeste", "marilia") || matches("sangue rubro", "marilia")) return true;
   if (matches("paulista", "ponte preta") || matches("paulista", "guarani") || matches("paulista", "sao jose")) return true;
   if (matches("ferroviaria", "botafogo-sp") || matches("ferroviaria", "comercial")) return true;
-  if (matches("xv de piracicaba", "inter de limeira") || matches("xv de piracicaba", "uniao barbarense")) return true;
-  if (matches("sao bento", "paulista") || matches("sao bento", "xv de piracicaba")) return true;
+  if (matches("xv de piracicaba", "inter de limeira") || matches("xv de piracicaba", "uniao barbarense") || matches("interror", "malucos do tigre")) return true;
+  if (matches("sao bento", "paulista") || matches("sao bento", "xv de piracicaba") || matches("ituano", "sao bento") || matches("galoucura itu", "sangue azul")) return true;
+  if (matches("novorizontino", "mirassol") || matches("garra do tigre", "furia do leao")) return true;
+  if (matches("agua santa", "sao bernardo fc") || matches("aquaticos", "guerreiros do tigre")) return true;
+  if (matches("sertaozinho", "comercial") || matches("raca grena", "mancha alvinegra")) return true;
+  if (matches("mogi mirim", "itapirense") || matches("mancha vermelha", "kueio loco")) return true;
 
   // Rio de Janeiro - Clássicos Cariocas & Sub-Cariocas
   if (matches("flamengo", "vasco") || matches("jovem fla", "forca jovem")) return true;
