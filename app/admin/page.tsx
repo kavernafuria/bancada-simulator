@@ -23,7 +23,7 @@ import {
   Lock,
   RefreshCw,
 } from "lucide-react";
-import { resolveTorcidaRivalries } from "@/lib/bancada_engine";
+import { resolveTorcidaRivalries, getDefaultTorcidaColors } from "@/lib/bancada_engine";
 
 export interface TeamAdminItem {
   estado: string;
@@ -333,6 +333,15 @@ export default function AdminPage() {
         </div>
       </div>
 
+      {/* Global Datalist for Autocomplete of Torcidas */}
+      <datalist id="registered-torcidas-list">
+        {teams.map((t, index) => (
+          <option key={`${t.clube}-${t.torcida}-${index}`} value={`${t.clube} (${t.torcida})`}>
+            {t.clube} - {t.torcida} ({t.estado})
+          </option>
+        ))}
+      </datalist>
+
       {/* Loading State */}
       {isLoading ? (
         <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-12 text-center text-amber-400 animate-pulse font-bold text-sm">
@@ -343,7 +352,7 @@ export default function AdminPage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between text-xs text-zinc-400 font-bold px-1">
             <span>Exibindo {filteredTeams.length} de {teams.length} Torcidas</span>
-            <span>Edição direta em tempo real</span>
+            <span>Edição direta em tempo real com Autocomplete</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -353,8 +362,9 @@ export default function AdminPage() {
               );
               const idx = realIndex !== -1 ? realIndex : teams.indexOf(team);
 
-              const primaryHex = team.primaryColor || "#09090b";
-              const secondaryHex = team.secondaryColor || "#f4f4f5";
+              const defaultColors = getDefaultTorcidaColors(team.clube);
+              const primaryHex = team.primaryColor || defaultColors.primary;
+              const secondaryHex = team.secondaryColor || defaultColors.secondary;
 
               return (
                 <div
@@ -603,6 +613,7 @@ export default function AdminPage() {
                             </span>
                             <input
                               type="text"
+                              list="registered-torcidas-list"
                               value={team.rival_principal || ""}
                               onChange={(e) => handleUpdateTeam(idx, "rival_principal", e.target.value)}
                               placeholder={mainPh}
@@ -616,6 +627,7 @@ export default function AdminPage() {
                             </span>
                             <input
                               type="text"
+                              list="registered-torcidas-list"
                               value={team.rival_secundario || ""}
                               onChange={(e) => handleUpdateTeam(idx, "rival_secundario", e.target.value)}
                               placeholder={secondPh}
@@ -629,6 +641,7 @@ export default function AdminPage() {
                             </span>
                             <input
                               type="text"
+                              list="registered-torcidas-list"
                               value={team.torcida_aliada || ""}
                               onChange={(e) => handleUpdateTeam(idx, "torcida_aliada", e.target.value)}
                               placeholder={allyPh}

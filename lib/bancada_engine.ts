@@ -276,33 +276,170 @@ export const TORCIDA_COLOR_PALETTE: TorcidaColorPreset[] = [
 
 export function getDefaultTorcidaColors(clube: string): { primary: string; secondary: string } {
   const c = (clube || "").trim().toLowerCase();
-  if (c.includes("palmeiras") || c.includes("guarani") || c.includes("coritiba") || c.includes("goiás") || c.includes("chapecoense") || c.includes("itapirense") || c.includes("kueio loco")) {
+
+  // Verdes (Alviverde)
+  if (
+    c.includes("palmeiras") ||
+    c.includes("guarani") ||
+    c.includes("coritiba") ||
+    c.includes("goiás") ||
+    c.includes("goias") ||
+    c.includes("chapecoense") ||
+    c.includes("juventude") ||
+    c.includes("gama") ||
+    c.includes("união barbarense") ||
+    c.includes("uniao barbarense") ||
+    c.includes("itapirense") ||
+    c.includes("maringá") ||
+    c.includes("maringa") ||
+    c.includes("kueio loco")
+  ) {
     return { primary: "#15803d", secondary: "#f4f4f5" };
   }
-  if (c.includes("flamengo") || c.includes("internacional") || c.includes("sport") || c.includes("vitória") || c.includes("athletico") || c.includes("ituano") || c.includes("galoucura itu")) {
+
+  // Vermelho e Preto (Rubro-Negro)
+  if (
+    c.includes("flamengo") ||
+    c.includes("internacional") ||
+    c.includes("sport") ||
+    c.includes("vitória") ||
+    c.includes("vitoria") ||
+    c.includes("athletico") ||
+    c.includes("ituano") ||
+    c.includes("galoucura itu") ||
+    c.includes("atlético-go") ||
+    c.includes("atletico-go") ||
+    c.includes("atletico go") ||
+    c.includes("brasil de pelotas") ||
+    c.includes("campinense") ||
+    c.includes("moto club")
+  ) {
     return { primary: "#dc2626", secondary: "#09090b" };
   }
-  if (c.includes("são paulo") || c.includes("botafogo-sp") || c.includes("noroeste") || c.includes("náutico") || c.includes("santa cruz") || c.includes("mogi mirim") || c.includes("mancha vermelha")) {
+
+  // Vermelho e Branco (Tricolor/Alvirrubro)
+  if (
+    c.includes("são paulo") ||
+    c.includes("sao paulo") ||
+    c.includes("botafogo-sp") ||
+    c.includes("noroeste") ||
+    c.includes("náutico") ||
+    c.includes("nautico") ||
+    c.includes("santa cruz") ||
+    c.includes("mogi mirim") ||
+    c.includes("vila nova") ||
+    c.includes("comercial") ||
+    c.includes("sergipe") ||
+    c.includes("américa rn") ||
+    c.includes("america rn") ||
+    c.includes("mancha vermelha")
+  ) {
     return { primary: "#dc2626", secondary: "#f4f4f5" };
   }
-  if (c.includes("inter de limeira") || c.includes("interror") || c.includes("bragantino") || c.includes("guerreiros do leão") || c.includes("ec são bernardo") || c.includes("esquadrão alvinegro") || c.includes("esquadrao alvinegro") || c.includes("comercial") || c.includes("corinthians") || c.includes("santos") || c.includes("vasco") || c.includes("botafogo") || c.includes("ceará") || c.includes("operário")) {
-    return { primary: "#09090b", secondary: "#f4f4f5" };
+
+  // Vermelho e Azul (Tricolor / Grená & Azul)
+  if (c.includes("paraná") || c.includes("parana") || c.includes("fortaleza") || c.includes("bahia") || c.includes("caxias")) {
+    return { primary: "#dc2626", secondary: "#2563eb" };
   }
-  if (c.includes("são caetano")) {
-    return { primary: "#0284c7", secondary: "#f4f4f5" };
-  }
-  if (c.includes("mirassol") || c.includes("fúria do leão")) {
-    return { primary: "#eab308", secondary: "#15803d" };
-  }
-  if ((c.includes("são bernardo") && !c.includes("ec são bernardo")) || c.includes("criciúma") || c.includes("novorizontino") || c.includes("garra do tigre")) {
-    return { primary: "#eab308", secondary: "#09090b" };
-  }
-  if (c.includes("cruzeiro") || c.includes("grêmio") || c.includes("bahia") || c.includes("csa") || c.includes("avaí") || c.includes("são bento") || c.includes("marília") || c.includes("santo andré") || c.includes("são josé") || c.includes("água santa") || c.includes("agua santa") || c.includes("aquáticos")) {
-    return { primary: "#2563eb", secondary: "#f4f4f5" };
-  }
-  if (c.includes("fluminense") || c.includes("marcílio dias") || c.includes("marcilio dias") || c.includes("fúria marcilista") || c.includes("furia marcilista") || c.includes("ferroviária") || c.includes("juventus") || c.includes("sertãozinho") || c.includes("sertaozinho") || c.includes("raça grená")) {
+
+  // Grená / Vinho
+  if (
+    c.includes("fluminense") ||
+    c.includes("marcílio dias") ||
+    c.includes("marcilio dias") ||
+    c.includes("fúria marcilista") ||
+    c.includes("furia marcilista") ||
+    c.includes("ferroviária") ||
+    c.includes("ferroviaria") ||
+    c.includes("juventus") ||
+    c.includes("sertãozinho") ||
+    c.includes("sertaozinho") ||
+    c.includes("raça grená") ||
+    c.includes("raca grena")
+  ) {
     return { primary: "#881337", secondary: "#09090b" };
   }
+
+  // Azul e Branco (Alvi-Azul)
+  if (
+    c.includes("cruzeiro") ||
+    c.includes("grêmio") ||
+    c.includes("gremio") ||
+    c.includes("csa") ||
+    c.includes("avaí") ||
+    c.includes("avai") ||
+    c.includes("são bento") ||
+    c.includes("sao bento") ||
+    c.includes("marília") ||
+    c.includes("marilia") ||
+    c.includes("santo andré") ||
+    c.includes("santo andre") ||
+    c.includes("são josé") ||
+    c.includes("sao jose") ||
+    c.includes("água santa") ||
+    c.includes("agua santa") ||
+    c.includes("aquáticos") ||
+    c.includes("aquaticos") ||
+    c.includes("taubaté") ||
+    c.includes("taubate") ||
+    c.includes("paysandu") ||
+    c.includes("confiança") ||
+    c.includes("confianca") ||
+    c.includes("nacional-am") ||
+    c.includes("remo")
+  ) {
+    return { primary: "#2563eb", secondary: "#f4f4f5" };
+  }
+
+  // Azul Celeste / Azul Claro
+  if (c.includes("são caetano") || c.includes("sao caetano") || c.includes("londrina")) {
+    return { primary: "#0284c7", secondary: "#f4f4f5" };
+  }
+
+  // Amarelo e Verde
+  if (c.includes("mirassol") || c.includes("fúria do leão") || c.includes("furia do leao") || c.includes("cuiabá") || c.includes("cuiaba") || c.includes("brasiliense")) {
+    return { primary: "#eab308", secondary: "#15803d" };
+  }
+
+  // Amarelo e Preto (Canarinho / Tigre)
+  if (
+    (c.includes("são bernardo") && !c.includes("ec são bernardo") && !c.includes("ec sao bernardo")) ||
+    c.includes("criciúma") ||
+    c.includes("criciuma") ||
+    c.includes("novorizontino") ||
+    c.includes("garra do tigre") ||
+    c.includes("amazonas")
+  ) {
+    return { primary: "#eab308", secondary: "#09090b" };
+  }
+
+  // Preto e Branco (Alvinegro)
+  if (
+    c.includes("corinthians") ||
+    c.includes("santos") ||
+    c.includes("vasco") ||
+    c.includes("botafogo") ||
+    c.includes("ceará") ||
+    c.includes("ceara") ||
+    c.includes("ponte preta") ||
+    c.includes("bragantino") ||
+    c.includes("guerreiros do leão") ||
+    c.includes("inter de limeira") ||
+    c.includes("interror") ||
+    c.includes("figueirense") ||
+    c.includes("operário") ||
+    c.includes("operario") ||
+    c.includes("abc") ||
+    c.includes("treze") ||
+    c.includes("ec são bernardo") ||
+    c.includes("ec sao bernardo") ||
+    c.includes("esquadrão alvinegro") ||
+    c.includes("esquadrao alvinegro") ||
+    c.includes("mixto")
+  ) {
+    return { primary: "#09090b", secondary: "#f4f4f5" };
+  }
+
   return { primary: "#09090b", secondary: "#f4f4f5" };
 }
 

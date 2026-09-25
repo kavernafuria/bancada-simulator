@@ -13,7 +13,9 @@
     "eixo_alianca": "ALIANCA_ALVINEGRA",
     "rival_principal": "Palmeiras",
     "rival_secundario": "São Paulo",
-    "torcida_aliada": "Fúria Jovem do Botafogo"
+    "torcida_aliada": "Fúria Jovem do Botafogo",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -29,7 +31,9 @@
     "eixo_alianca": "DPA",
     "rival_principal": "Corinthians",
     "rival_secundario": "São Paulo",
-    "torcida_aliada": "Força Jovem do Vasco"
+    "torcida_aliada": "Força Jovem do Vasco",
+    "primaryColor": "#15803d",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -45,7 +49,9 @@
     "eixo_alianca": "PUNHO_CRUZADO",
     "rival_principal": "Corinthians",
     "rival_secundario": "Palmeiras",
-    "torcida_aliada": "Torcida Jovem do Fla"
+    "torcida_aliada": "Torcida Jovem do Fla",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -61,7 +67,9 @@
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Corinthians",
     "rival_secundario": "Palmeiras",
-    "torcida_aliada": "Força Jovem do Vasco"
+    "torcida_aliada": "Força Jovem do Vasco",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -77,7 +85,9 @@
     "eixo_alianca": "IRMANDADE",
     "rival_principal": "Guarani",
     "rival_secundario": "Corinthians",
-    "torcida_aliada": "Mancha Alvinegra"
+    "torcida_aliada": "Mancha Alvinegra",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -92,7 +102,9 @@
     "perfil_predominante": "Presença Constante em Viagens",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Palmeiras (Mancha Alvi-Verde)",
-    "rival_secundario": "São Paulo (Torcida Tricolor Indep.)"
+    "rival_secundario": "São Paulo (Torcida Tricolor Indep.)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -108,7 +120,9 @@
     "eixo_alianca": "PUNHO_CRUZADO",
     "rival_principal": "Corinthians (Gaviões da Fiel)",
     "rival_secundario": "Palmeiras (Mancha Alvi-Verde)",
-    "torcida_aliada": "Cruzeiro (Máfia Azul)"
+    "torcida_aliada": "Cruzeiro (Máfia Azul)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -124,7 +138,9 @@
     "eixo_alianca": "PUNHO_COLADO",
     "rival_principal": "Ponte Preta",
     "rival_secundario": "São Paulo",
-    "torcida_aliada": "Young Flu"
+    "torcida_aliada": "Young Flu",
+    "primaryColor": "#15803d",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -140,7 +156,9 @@
     "eixo_alianca": "DPA",
     "rival_principal": "Corinthians (Gaviões da Fiel)",
     "rival_secundario": "São Paulo (Torcida Tricolor Indep.)",
-    "torcida_aliada": "Vasco da Gama (Força Jovem do Vasco)"
+    "torcida_aliada": "Vasco da Gama (Força Jovem do Vasco)",
+    "primaryColor": "#15803d",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -155,7 +173,9 @@
     "perfil_predominante": "Presença Fiel em Caravanas",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Palmeiras (Mancha Alvi-Verde)",
-    "rival_secundario": "São Paulo (Torcida Tricolor Indep.)"
+    "rival_secundario": "São Paulo (Torcida Tricolor Indep.)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -171,7 +191,9 @@
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Comercial-RP (Mancha Alvinegra)",
     "rival_secundario": "Santos (Torcida Jovem do Santos)",
-    "torcida_aliada": "Ponte Preta (Torcida Jovem Ponte)"
+    "torcida_aliada": "Ponte Preta (Torcida Jovem Ponte)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -187,7 +209,9 @@
     "eixo_alianca": "FAMILIA_INTERIOR",
     "rival_principal": "Corinthians (Gaviões da Fiel)",
     "rival_secundario": "Palmeiras (Mancha Alvi-Verde)",
-    "torcida_aliada": "Santo André (Fúria Andreense)"
+    "torcida_aliada": "Santo André (Fúria Andreense)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -203,7 +227,9 @@
     "eixo_alianca": "IRMANDADE",
     "rival_principal": "Taubaté (Dragões Alvi Azul)",
     "rival_secundario": "Santo André (Fúria Andreense)",
-    "torcida_aliada": "Botafogo-SP (Fiel Força Tricolor)"
+    "torcida_aliada": "Botafogo-SP (Fiel Força Tricolor)",
+    "primaryColor": "#2563eb",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -219,7 +245,9 @@
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Corinthians (Gaviões da Fiel)",
     "rival_secundario": "Palmeiras (Mancha Alvi-Verde)",
-    "torcida_aliada": "Vasco da Gama (Força Jovem do Vasco)"
+    "torcida_aliada": "Vasco da Gama (Força Jovem do Vasco)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -233,7 +261,7 @@
     "autonomia_financeira": 55,
     "perfil_predominante": "Bate-Volta no Interior",
     "eixo_alianca": "IRMANDADE",
-    "primaryColor": "#09090b",
+    "primaryColor": "#dc2626",
     "secondaryColor": "#f4f4f5",
     "rival_principal": "Botafogo-SP (Fiel Força Tricolor)",
     "rival_secundario": "Noroeste (Sangue Rubro)",
@@ -253,7 +281,9 @@
     "eixo_alianca": "FAMILIA_INTERIOR",
     "rival_principal": "São Caetano (Comando Azul)",
     "rival_secundario": "São José EC (Torcida Mancha Azul)",
-    "torcida_aliada": "Portuguesa (Leões da Fabulosa)"
+    "torcida_aliada": "Portuguesa (Leões da Fabulosa)",
+    "primaryColor": "#2563eb",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -269,7 +299,9 @@
     "eixo_alianca": "FAMILIA_INTERIOR",
     "rival_principal": "União Barbarense (Sangue Barbarense)",
     "rival_secundario": "Inter de Limeira (Torcida Interror)",
-    "torcida_aliada": "Santo André (Fúria Andreense)"
+    "torcida_aliada": "Santo André (Fúria Andreense)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -285,7 +317,9 @@
     "eixo_alianca": "PUNHO_SEGURO",
     "rival_principal": "Rio Branco (Malucos do Tigre)",
     "rival_secundario": "Inter de Limeira (Torcida Interror)",
-    "torcida_aliada": "Inter de Limeira (Torcida Interror)"
+    "torcida_aliada": "Inter de Limeira (Torcida Interror)",
+    "primaryColor": "#15803d",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -301,7 +335,9 @@
     "eixo_alianca": "PUNHO_COLADO",
     "rival_principal": "Ponte Preta (Torcida Jovem Ponte)",
     "rival_secundario": "São Paulo (Torcida Tricolor Indep.)",
-    "torcida_aliada": "Guarani (Fúria Independente)"
+    "torcida_aliada": "Guarani (Fúria Independente)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -316,7 +352,9 @@
     "perfil_predominante": "Presença Visual em Jogos Fora",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Palmeiras (Mancha Alvi-Verde)",
-    "rival_secundario": "São Paulo (Torcida Tricolor Indep.)"
+    "rival_secundario": "São Paulo (Torcida Tricolor Indep.)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -332,7 +370,9 @@
     "eixo_alianca": "FAMILIA_INTERIOR",
     "rival_principal": "São José EC (Torcida Mancha Azul)",
     "rival_secundario": "Santo André (Fúria Andreense)",
-    "torcida_aliada": "Portuguesa (Leões da Fabulosa)"
+    "torcida_aliada": "Portuguesa (Leões da Fabulosa)",
+    "primaryColor": "#2563eb",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -347,7 +387,9 @@
     "perfil_predominante": "Presença Fiel no Interior",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "São José EC (Torcida Mancha Azul)",
-    "rival_secundario": "Santo André (Fúria Andreense)"
+    "rival_secundario": "Santo André (Fúria Andreense)",
+    "primaryColor": "#2563eb",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -363,7 +405,9 @@
     "eixo_alianca": "DPA",
     "rival_principal": "Corinthians (Gaviões da Fiel)",
     "rival_secundario": "São Paulo (Torcida Tricolor Indep.)",
-    "torcida_aliada": "Vasco da Gama (Força Jovem do Vasco)"
+    "torcida_aliada": "Vasco da Gama (Força Jovem do Vasco)",
+    "primaryColor": "#15803d",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -379,7 +423,9 @@
     "eixo_alianca": "FAMILIA_INTERIOR",
     "rival_principal": "Corinthians (Gaviões da Fiel)",
     "rival_secundario": "Palmeiras (Mancha Alvi-Verde)",
-    "torcida_aliada": "Botafogo-SP (Fiel Força Tricolor)"
+    "torcida_aliada": "Botafogo-SP (Fiel Força Tricolor)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -395,7 +441,9 @@
     "eixo_alianca": "PUNHO_SEGURO",
     "rival_principal": "EC São Bernardo (Esquadrão Alvinegro)",
     "rival_secundario": "São Caetano (Comando Azul)",
-    "torcida_aliada": "União Barbarense (Sangue Barbarense)"
+    "torcida_aliada": "União Barbarense (Sangue Barbarense)",
+    "primaryColor": "#eab308",
+    "secondaryColor": "#09090b"
   },
   {
     "estado": "SP",
@@ -410,7 +458,9 @@
     "perfil_predominante": "Convivência em Viagens",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Palmeiras (Mancha Alvi-Verde)",
-    "rival_secundario": "São Paulo (Torcida Tricolor Indep.)"
+    "rival_secundario": "São Paulo (Torcida Tricolor Indep.)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -426,7 +476,9 @@
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "EC São Bernardo (Esquadrão Alvinegro)",
     "rival_secundario": "São Caetano (Comando Azul)",
-    "torcida_aliada": "União Barbarense (Sangue Barbarense)"
+    "torcida_aliada": "União Barbarense (Sangue Barbarense)",
+    "primaryColor": "#eab308",
+    "secondaryColor": "#09090b"
   },
   {
     "estado": "SP",
@@ -441,7 +493,9 @@
     "perfil_predominante": "Viagens Locais no ABC & Litoral",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "São Bernardo FC (Guerreiros do Tigre)",
-    "rival_secundario": "São Caetano (Comando Azul)"
+    "rival_secundario": "São Caetano (Comando Azul)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -457,7 +511,9 @@
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Santo André (Fúria Andreense)",
     "rival_secundario": "São José EC (Torcida Mancha Azul)",
-    "torcida_aliada": "Comercial-RP (Mancha Alvinegra)"
+    "torcida_aliada": "Comercial-RP (Mancha Alvinegra)",
+    "primaryColor": "#0284c7",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -473,7 +529,9 @@
     "eixo_alianca": "PUNHO_SEGURO",
     "rival_principal": "Santo André (Fúria Andreense)",
     "rival_secundario": "São José EC (Torcida Mancha Azul)",
-    "torcida_aliada": "Comercial-RP (Mancha Alvinegra)"
+    "torcida_aliada": "Comercial-RP (Mancha Alvinegra)",
+    "primaryColor": "#0284c7",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -489,7 +547,9 @@
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "São Caetano (Comando Azul)",
     "rival_secundario": "São José EC (Torcida Mancha Azul)",
-    "torcida_aliada": "Portuguesa (Leões da Fabulosa)"
+    "torcida_aliada": "Portuguesa (Leões da Fabulosa)",
+    "primaryColor": "#2563eb",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -505,7 +565,9 @@
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Rio Branco (Malucos do Tigre)",
     "rival_secundario": "Guarani (Fúria Independente)",
-    "torcida_aliada": "União Barbarense (Sangue Barbarense)"
+    "torcida_aliada": "União Barbarense (Sangue Barbarense)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -520,7 +582,9 @@
     "perfil_predominante": "Força Bragantina de Pista & Arquibancada",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Ponte Preta (Torcida Jovem Ponte)",
-    "rival_secundario": "Guarani (Fúria Independente)"
+    "rival_secundario": "Guarani (Fúria Independente)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -535,7 +599,9 @@
     "perfil_predominante": "Rubro-Negro de Itu & Presença no Interior",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Guarani (Fúria Independente)",
-    "rival_secundario": "Ponte Preta (Torcida Jovem Ponte)"
+    "rival_secundario": "Ponte Preta (Torcida Jovem Ponte)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#09090b"
   },
   {
     "estado": "SP",
@@ -550,7 +616,9 @@
     "perfil_predominante": "Força de Novo Horizonte & Clássico do Interior",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Mirassol (Fúria do Leão)",
-    "rival_secundario": "Botafogo-SP (Fiel Força Tricolor)"
+    "rival_secundario": "Botafogo-SP (Fiel Força Tricolor)",
+    "primaryColor": "#eab308",
+    "secondaryColor": "#09090b"
   },
   {
     "estado": "SP",
@@ -566,7 +634,9 @@
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Novorizontino (Garra do Tigre)",
     "rival_secundario": "Botafogo-SP (Fiel Força Tricolor)",
-    "torcida_aliada": "Santo André (Fúria Andreense)"
+    "torcida_aliada": "Santo André (Fúria Andreense)",
+    "primaryColor": "#eab308",
+    "secondaryColor": "#15803d"
   },
   {
     "estado": "SP",
@@ -582,7 +652,9 @@
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "São Bernardo FC (Guerreiros do Tigre)",
     "rival_secundario": "Santo André (Fúria Andreense)",
-    "torcida_aliada": "Santo André (Fúria Andreense)"
+    "torcida_aliada": "Santo André (Fúria Andreense)",
+    "primaryColor": "#2563eb",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -597,7 +669,9 @@
     "perfil_predominante": "Força Grená da Região de Ribeirão Preto",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Comercial-RP (Mancha Alvinegra)",
-    "rival_secundario": "Corinthians (Gaviões da Fiel)"
+    "rival_secundario": "Corinthians (Gaviões da Fiel)",
+    "primaryColor": "#881337",
+    "secondaryColor": "#09090b"
   },
   {
     "estado": "SP",
@@ -613,7 +687,9 @@
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Itapirense (Kueio Loco)",
     "rival_secundario": "Guarani (Fúria Independente)",
-    "torcida_aliada": "Santo André (Fúria Andreense)"
+    "torcida_aliada": "Santo André (Fúria Andreense)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SP",
@@ -629,7 +705,9 @@
     "eixo_alianca": "UPS",
     "rival_principal": "Mogi Mirim (Mancha Vermelha do Mogi)",
     "rival_secundario": "Guarani (Fúria Independente)",
-    "torcida_aliada": "Santo André (Fúria Andreense)"
+    "torcida_aliada": "Santo André (Fúria Andreense)",
+    "primaryColor": "#15803d",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "RJ",
@@ -645,7 +723,9 @@
     "eixo_alianca": "PUNHO_CRUZADO",
     "rival_principal": "Vasco da Gama (Força Jovem do Vasco)",
     "rival_secundario": "Fluminense (Young Flu)",
-    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)"
+    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#09090b"
   },
   {
     "estado": "RJ",
@@ -661,7 +741,9 @@
     "eixo_alianca": "DPA",
     "rival_principal": "Flamengo (Torcida Jovem do Fla)",
     "rival_secundario": "Fluminense (Young Flu)",
-    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)"
+    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)",
+    "primaryColor": "#15803d",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "RJ",
@@ -677,7 +759,9 @@
     "eixo_alianca": "PUNHO_CRUZADO",
     "rival_principal": "Vasco da Gama (Força Jovem do Vasco)",
     "rival_secundario": "Fluminense (Young Flu)",
-    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)"
+    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#09090b"
   },
   {
     "estado": "RJ",
@@ -693,7 +777,9 @@
     "eixo_alianca": "PUNHO_COLADO",
     "rival_principal": "Flamengo (Torcida Jovem do Fla)",
     "rival_secundario": "Botafogo (Fúria Jovem do Botafogo)",
-    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)"
+    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)",
+    "primaryColor": "#881337",
+    "secondaryColor": "#09090b"
   },
   {
     "estado": "RJ",
@@ -709,7 +795,9 @@
     "eixo_alianca": "ALIANCA_ALVINEGRA",
     "rival_principal": "Flamengo (Torcida Jovem do Fla)",
     "rival_secundario": "Fluminense (Young Flu)",
-    "torcida_aliada": "Ceará (Cearamor)"
+    "torcida_aliada": "Ceará (Cearamor)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "RJ",
@@ -725,7 +813,9 @@
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Vasco da Gama (Força Jovem do Vasco)",
     "rival_secundario": "Fluminense (Young Flu)",
-    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)"
+    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#09090b"
   },
   {
     "estado": "RJ",
@@ -741,7 +831,9 @@
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Flamengo (Torcida Jovem do Fla)",
     "rival_secundario": "Fluminense (Young Flu)",
-    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)"
+    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)",
+    "primaryColor": "#15803d",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "RJ",
@@ -757,7 +849,9 @@
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Flamengo (Torcida Jovem do Fla)",
     "rival_secundario": "Botafogo (Fúria Jovem do Botafogo)",
-    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)"
+    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)",
+    "primaryColor": "#881337",
+    "secondaryColor": "#09090b"
   },
   {
     "estado": "RJ",
@@ -772,7 +866,9 @@
     "perfil_predominante": "Apoio Forte em Casa",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "America RJ (Torcida Sangue Rubro)",
-    "rival_secundario": "Flamengo (Torcida Jovem do Fla)"
+    "rival_secundario": "Flamengo (Torcida Jovem do Fla)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "RJ",
@@ -787,7 +883,9 @@
     "perfil_predominante": "Viagens Locais na Carioca",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "America RJ (Torcida Sangue Rubro)",
-    "rival_secundario": "Flamengo (Torcida Jovem do Fla)"
+    "rival_secundario": "Flamengo (Torcida Jovem do Fla)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "RJ",
@@ -802,7 +900,9 @@
     "perfil_predominante": "Deslocamentos Pequenos",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Olaria (Jovem Olaria)",
-    "rival_secundario": "Flamengo (Torcida Jovem do Fla)"
+    "rival_secundario": "Flamengo (Torcida Jovem do Fla)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "MG",
@@ -818,7 +918,9 @@
     "eixo_alianca": "DPA",
     "rival_principal": "Cruzeiro (Máfia Azul)",
     "rival_secundario": "America MG (Barra do Coelho)",
-    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)"
+    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "MG",
@@ -834,7 +936,9 @@
     "eixo_alianca": "PUNHO_CRUZADO",
     "rival_principal": "Atlético MG (Galoucura)",
     "rival_secundario": "Flamengo (Torcida Jovem do Fla)",
-    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)"
+    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)",
+    "primaryColor": "#2563eb",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "MG",
@@ -850,7 +954,9 @@
     "eixo_alianca": "PUNHO_CRUZADO",
     "rival_principal": "Atlético MG (Galoucura)",
     "rival_secundario": "Flamengo (Torcida Jovem do Fla)",
-    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)"
+    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)",
+    "primaryColor": "#2563eb",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "MG",
@@ -865,7 +971,9 @@
     "perfil_predominante": "Apoio em Viagens Longas",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Cruzeiro (Máfia Azul)",
-    "rival_secundario": "America MG (Barra do Coelho)"
+    "rival_secundario": "America MG (Barra do Coelho)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "MG",
@@ -881,7 +989,9 @@
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Atlético MG (Galoucura)",
     "rival_secundario": "Flamengo (Torcida Jovem do Fla)",
-    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)"
+    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)",
+    "primaryColor": "#2563eb",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "MG",
@@ -896,7 +1006,9 @@
     "perfil_predominante": "Viagens Regionais no Mineiro",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Atlético MG (Galoucura)",
-    "rival_secundario": "Cruzeiro (Máfia Azul)"
+    "rival_secundario": "Cruzeiro (Máfia Azul)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "MG",
@@ -911,7 +1023,9 @@
     "perfil_predominante": "Viagens no Triângulo/Alto Paranaíba",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Mamoré (Patos) (Pavilhão Sapo)",
-    "rival_secundario": "Atlético MG (Galoucura)"
+    "rival_secundario": "Atlético MG (Galoucura)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "MG",
@@ -926,7 +1040,9 @@
     "perfil_predominante": "Viagens na Zona da Mata",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Atlético MG (Galoucura)",
-    "rival_secundario": "Cruzeiro (Máfia Azul)"
+    "rival_secundario": "Cruzeiro (Máfia Azul)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "MG",
@@ -941,7 +1057,9 @@
     "perfil_predominante": "Deslocamentos no Interior",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "URT (Patos) (Trovão Azul)",
-    "rival_secundario": "Atlético MG (Galoucura)"
+    "rival_secundario": "Atlético MG (Galoucura)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "MG",
@@ -956,7 +1074,9 @@
     "perfil_predominante": "Viagens no Sul de Minas",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Atlético MG (Galoucura)",
-    "rival_secundario": "Cruzeiro (Máfia Azul)"
+    "rival_secundario": "Cruzeiro (Máfia Azul)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "RS",
@@ -972,7 +1092,9 @@
     "eixo_alianca": "DPA",
     "rival_principal": "Internacional (Guarda Popular)",
     "rival_secundario": "Palmeiras (Mancha Alvi-Verde)",
-    "torcida_aliada": "Vasco da Gama (Força Jovem do Vasco)"
+    "torcida_aliada": "Vasco da Gama (Força Jovem do Vasco)",
+    "primaryColor": "#2563eb",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "RS",
@@ -988,7 +1110,9 @@
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Grêmio (Geral do Grêmio)",
     "rival_secundario": "Corinthians (Gaviões da Fiel)",
-    "torcida_aliada": "Cruzeiro (Máfia Azul)"
+    "torcida_aliada": "Cruzeiro (Máfia Azul)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#09090b"
   },
   {
     "estado": "RS",
@@ -1004,7 +1128,9 @@
     "eixo_alianca": "PUNHO_CRUZADO",
     "rival_principal": "Grêmio (Geral do Grêmio)",
     "rival_secundario": "Corinthians (Gaviões da Fiel)",
-    "torcida_aliada": "Cruzeiro (Máfia Azul)"
+    "torcida_aliada": "Cruzeiro (Máfia Azul)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#09090b"
   },
   {
     "estado": "RS",
@@ -1020,7 +1146,9 @@
     "eixo_alianca": "DPA",
     "rival_principal": "Internacional (Guarda Popular)",
     "rival_secundario": "Palmeiras (Mancha Alvi-Verde)",
-    "torcida_aliada": "Vasco da Gama (Força Jovem do Vasco)"
+    "torcida_aliada": "Vasco da Gama (Força Jovem do Vasco)",
+    "primaryColor": "#2563eb",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "RS",
@@ -1035,7 +1163,9 @@
     "perfil_predominante": "Viagens de Serra Gaúcha",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Caxias (Força Grená)",
-    "rival_secundario": "Internacional (Guarda Popular)"
+    "rival_secundario": "Internacional (Guarda Popular)",
+    "primaryColor": "#15803d",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "RS",
@@ -1050,7 +1180,9 @@
     "perfil_predominante": "Invasões Xavantes / Raça Pura",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Pelotas (Força Jovem Lobos)",
-    "rival_secundario": "Grêmio (Geral do Grêmio)"
+    "rival_secundario": "Grêmio (Geral do Grêmio)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#09090b"
   },
   {
     "estado": "RS",
@@ -1065,7 +1197,9 @@
     "perfil_predominante": "Rivalidade do Sul / Caxias",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Juventude (Mancha Verde Juventude)",
-    "rival_secundario": "Grêmio (Geral do Grêmio)"
+    "rival_secundario": "Grêmio (Geral do Grêmio)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#2563eb"
   },
   {
     "estado": "RS",
@@ -1080,7 +1214,9 @@
     "perfil_predominante": "Deslocamentos no Sul Gaúcho",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Brasil de Pelotas (Máfia Xavante)",
-    "rival_secundario": "Internacional (Guarda Popular)"
+    "rival_secundario": "Internacional (Guarda Popular)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "PR",
@@ -1096,7 +1232,9 @@
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Coritiba (Império Alviverde)",
     "rival_secundario": "São Paulo (Torcida Tricolor Indep.)",
-    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)"
+    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#09090b"
   },
   {
     "estado": "PR",
@@ -1112,7 +1250,9 @@
     "eixo_alianca": "DPA",
     "rival_principal": "Athletico-PR (Os Fanáticos)",
     "rival_secundario": "Grêmio (Geral do Grêmio)",
-    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)"
+    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)",
+    "primaryColor": "#15803d",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "PR",
@@ -1128,7 +1268,9 @@
     "eixo_alianca": "PUNHO_COLADO",
     "rival_principal": "Coritiba (Império Alviverde)",
     "rival_secundario": "Athletico-PR (Os Fanáticos)",
-    "torcida_aliada": "Guarani (Fúria Independente)"
+    "torcida_aliada": "Guarani (Fúria Independente)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#2563eb"
   },
   {
     "estado": "PR",
@@ -1143,7 +1285,9 @@
     "perfil_predominante": "Força do Norte Paranaense",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Maringá FC (Força Maringaense)",
-    "rival_secundario": "Paraná Clube (Fúria Independente)"
+    "rival_secundario": "Paraná Clube (Fúria Independente)",
+    "primaryColor": "#0284c7",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "PR",
@@ -1158,7 +1302,9 @@
     "perfil_predominante": "Caldeirão de Ponta Grossa",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Londrina (Falange Azul)",
-    "rival_secundario": "Paraná Clube (Fúria Independente)"
+    "rival_secundario": "Paraná Clube (Fúria Independente)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "PR",
@@ -1173,7 +1319,9 @@
     "perfil_predominante": "Força Regional em Ascensão",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Londrina (Falange Azul)",
-    "rival_secundario": "Paraná Clube (Fúria Independente)"
+    "rival_secundario": "Paraná Clube (Fúria Independente)",
+    "primaryColor": "#15803d",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SC",
@@ -1189,7 +1337,9 @@
     "eixo_alianca": "DPA",
     "rival_principal": "Figueirense (Gaviões Alvinegros)",
     "rival_secundario": "Criciúma (Os Tigres (Barra))",
-    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)"
+    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)",
+    "primaryColor": "#2563eb",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SC",
@@ -1204,7 +1354,9 @@
     "perfil_predominante": "Maior de Floripa & Eixo DPA",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Avaí (Mancha Azul)",
-    "rival_secundario": "Criciúma (Os Tigres (Barra))"
+    "rival_secundario": "Criciúma (Os Tigres (Barra))",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SC",
@@ -1219,7 +1371,9 @@
     "perfil_predominante": "Estilo Murga/Barra no Caldeirão",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Avaí (Mancha Azul)",
-    "rival_secundario": "Marcílio Dias (Fúria Marcilista)"
+    "rival_secundario": "Marcílio Dias (Fúria Marcilista)",
+    "primaryColor": "#eab308",
+    "secondaryColor": "#09090b"
   },
   {
     "estado": "SC",
@@ -1234,7 +1388,9 @@
     "perfil_predominante": "Linha de Frente Carvoeira",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Avaí (Mancha Azul)",
-    "rival_secundario": "Marcílio Dias (Fúria Marcilista)"
+    "rival_secundario": "Marcílio Dias (Fúria Marcilista)",
+    "primaryColor": "#eab308",
+    "secondaryColor": "#09090b"
   },
   {
     "estado": "SC",
@@ -1249,7 +1405,9 @@
     "perfil_predominante": "Festa e Canto no Oeste Catarinense",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Avaí (Mancha Azul)",
-    "rival_secundario": "Marcílio Dias (Fúria Marcilista)"
+    "rival_secundario": "Marcílio Dias (Fúria Marcilista)",
+    "primaryColor": "#15803d",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SC",
@@ -1264,7 +1422,9 @@
     "perfil_predominante": "Força do Norte Catarinense & DPA",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Avaí (Mancha Azul)",
-    "rival_secundario": "Marcílio Dias (Fúria Marcilista)"
+    "rival_secundario": "Marcílio Dias (Fúria Marcilista)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SC",
@@ -1281,7 +1441,8 @@
     "primaryColor": "#963a9c",
     "rival_principal": "Joinville (União Tricolor)",
     "rival_secundario": "Figueirense (Gaviões Alvinegros)",
-    "torcida_aliada": "Guarani (Fúria Independente)"
+    "torcida_aliada": "Guarani (Fúria Independente)",
+    "secondaryColor": "#09090b"
   },
   {
     "estado": "BA",
@@ -1297,7 +1458,9 @@
     "eixo_alianca": "DPA",
     "rival_principal": "Vitória (Os Imbatíveis)",
     "rival_secundario": "Ceará (Cearamor)",
-    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)"
+    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#2563eb"
   },
   {
     "estado": "BA",
@@ -1313,7 +1476,9 @@
     "eixo_alianca": "PUNHO_CRUZADO",
     "rival_principal": "Bahia (Torcida Bamor)",
     "rival_secundario": "Santa Cruz (Inferno Coral)",
-    "torcida_aliada": "Cruzeiro (Máfia Azul)"
+    "torcida_aliada": "Cruzeiro (Máfia Azul)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#09090b"
   },
   {
     "estado": "PE",
@@ -1329,7 +1494,9 @@
     "eixo_alianca": "PUNHO_CRUZADO",
     "rival_principal": "Santa Cruz (Inferno Coral)",
     "rival_secundario": "Náutico (Fanáutico)",
-    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)"
+    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#09090b"
   },
   {
     "estado": "PE",
@@ -1345,7 +1512,9 @@
     "eixo_alianca": "DPA",
     "rival_principal": "Sport Recife (Torcida Jovem do Sport)",
     "rival_secundario": "Bahia (Torcida Bamor)",
-    "torcida_aliada": "Corinthians (Gaviões da Fiel)"
+    "torcida_aliada": "Corinthians (Gaviões da Fiel)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "PE",
@@ -1360,7 +1529,9 @@
     "perfil_predominante": "Tradição Alvirrubra",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Sport Recife (Torcida Jovem do Sport)",
-    "rival_secundario": "Santa Cruz (Inferno Coral)"
+    "rival_secundario": "Santa Cruz (Inferno Coral)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "CE",
@@ -1376,7 +1547,9 @@
     "eixo_alianca": "LADO_B",
     "rival_principal": "Fortaleza (Leões da TUF)",
     "rival_secundario": "Bahia (Torcida Bamor)",
-    "torcida_aliada": "Botafogo (Fúria Jovem do Botafogo)"
+    "torcida_aliada": "Botafogo (Fúria Jovem do Botafogo)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "CE",
@@ -1392,7 +1565,9 @@
     "eixo_alianca": "LADO_A",
     "rival_principal": "Ceará (Cearamor)",
     "rival_secundario": "Bahia (Torcida Bamor)",
-    "torcida_aliada": "Santa Cruz (Inferno Coral)"
+    "torcida_aliada": "Santa Cruz (Inferno Coral)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#2563eb"
   },
   {
     "estado": "CE",
@@ -1408,7 +1583,9 @@
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Ceará (Cearamor)",
     "rival_secundario": "Bahia (Torcida Bamor)",
-    "torcida_aliada": "Santa Cruz (Inferno Coral)"
+    "torcida_aliada": "Santa Cruz (Inferno Coral)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#2563eb"
   },
   {
     "estado": "RN",
@@ -1423,7 +1600,9 @@
     "perfil_predominante": "Tradição Potiguar & Dérbi",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "América RN (Máfia Vermelha)",
-    "rival_secundario": "Corinthians (Gaviões da Fiel)"
+    "rival_secundario": "Corinthians (Gaviões da Fiel)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "RN",
@@ -1439,7 +1618,9 @@
     "eixo_alianca": "LADO_A",
     "rival_principal": "ABC de Natal (Gang Alvinegra)",
     "rival_secundario": "Corinthians (Gaviões da Fiel)",
-    "torcida_aliada": "Fortaleza (Leões da TUF)"
+    "torcida_aliada": "Fortaleza (Leões da TUF)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "AL",
@@ -1455,7 +1636,9 @@
     "eixo_alianca": "LADO_B",
     "rival_principal": "CSA (Mancha Azul de Alagoas)",
     "rival_secundario": "Corinthians (Gaviões da Fiel)",
-    "torcida_aliada": "Ceará (Cearamor)"
+    "torcida_aliada": "Ceará (Cearamor)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "AL",
@@ -1471,7 +1654,9 @@
     "eixo_alianca": "LADO_A",
     "rival_principal": "CRB (Comando Alvi-Rubro)",
     "rival_secundario": "Corinthians (Gaviões da Fiel)",
-    "torcida_aliada": "Fortaleza (Leões da TUF)"
+    "torcida_aliada": "Fortaleza (Leões da TUF)",
+    "primaryColor": "#2563eb",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "MA",
@@ -1487,7 +1672,9 @@
     "eixo_alianca": "LADO_B",
     "rival_principal": "Moto Club (Motofiel)",
     "rival_secundario": "Corinthians (Gaviões da Fiel)",
-    "torcida_aliada": "Ceará (Cearamor)"
+    "torcida_aliada": "Ceará (Cearamor)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "MA",
@@ -1502,7 +1689,9 @@
     "perfil_predominante": "Dérbi Sam-Moto",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Sampaio Corrêa (Tubarões da Fiel)",
-    "rival_secundario": "Corinthians (Gaviões da Fiel)"
+    "rival_secundario": "Corinthians (Gaviões da Fiel)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#09090b"
   },
   {
     "estado": "PB",
@@ -1518,7 +1707,9 @@
     "eixo_alianca": "LADO_B",
     "rival_principal": "Treze (Jovem do Treze)",
     "rival_secundario": "Campinense (Fúria Rubro-Negra)",
-    "torcida_aliada": "Ceará (Cearamor)"
+    "torcida_aliada": "Ceará (Cearamor)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "PB",
@@ -1533,7 +1724,9 @@
     "perfil_predominante": "Clássico Tradição (Campina)",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Campinense (Fúria Rubro-Negra)",
-    "rival_secundario": "Botafogo-PB (Fúria Independente BFP)"
+    "rival_secundario": "Botafogo-PB (Fúria Independente BFP)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "PB",
@@ -1548,7 +1741,9 @@
     "perfil_predominante": "Força de Campina Grande",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Treze (Jovem do Treze)",
-    "rival_secundario": "Botafogo-PB (Fúria Independente BFP)"
+    "rival_secundario": "Botafogo-PB (Fúria Independente BFP)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#09090b"
   },
   {
     "estado": "SE",
@@ -1564,7 +1759,9 @@
     "eixo_alianca": "LADO_A",
     "rival_principal": "Sergipe (Torcida Esquadrão Colorado)",
     "rival_secundario": "Corinthians (Gaviões da Fiel)",
-    "torcida_aliada": "Fortaleza (Leões da TUF)"
+    "torcida_aliada": "Fortaleza (Leões da TUF)",
+    "primaryColor": "#2563eb",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "SE",
@@ -1579,7 +1776,9 @@
     "perfil_predominante": "Dérbi Sergipano",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Confiança (Torcida Trovão Azul)",
-    "rival_secundario": "Corinthians (Gaviões da Fiel)"
+    "rival_secundario": "Corinthians (Gaviões da Fiel)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "GO",
@@ -1595,7 +1794,9 @@
     "eixo_alianca": "DPA",
     "rival_principal": "Vila Nova (Esquadrão Vilanovense)",
     "rival_secundario": "Atlético-GO (Dragões do Atlético)",
-    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)"
+    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)",
+    "primaryColor": "#15803d",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "GO",
@@ -1610,7 +1811,9 @@
     "perfil_predominante": "Pressão de Bancada & Punho Cruzado",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Goiás (Força Jovem Goiás)",
-    "rival_secundario": "Atlético-GO (Dragões do Atlético)"
+    "rival_secundario": "Atlético-GO (Dragões do Atlético)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "GO",
@@ -1625,7 +1828,9 @@
     "perfil_predominante": "Crescimento em Goiânia",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Goiás (Força Jovem Goiás)",
-    "rival_secundario": "Vila Nova (Esquadrão Vilanovense)"
+    "rival_secundario": "Vila Nova (Esquadrão Vilanovense)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#09090b"
   },
   {
     "estado": "GO",
@@ -1640,7 +1845,9 @@
     "perfil_predominante": "Força do Interior Goiano",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Goiás (Força Jovem Goiás)",
-    "rival_secundario": "Vila Nova (Esquadrão Vilanovense)"
+    "rival_secundario": "Vila Nova (Esquadrão Vilanovense)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "DF",
@@ -1655,7 +1862,9 @@
     "perfil_predominante": "Presença no DF",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Vasco da Gama (Força Jovem do Vasco)",
-    "rival_secundario": "Gama (Torcida IRA Jovem do Gama)"
+    "rival_secundario": "Gama (Torcida IRA Jovem do Gama)",
+    "primaryColor": "#eab308",
+    "secondaryColor": "#15803d"
   },
   {
     "estado": "DF",
@@ -1672,7 +1881,8 @@
     "primaryColor": "#026600",
     "rival_principal": "Brasiliense (Torcida Facção Brasiliense)",
     "rival_secundario": "Corinthians (Gaviões da Fiel)",
-    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)"
+    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "MT",
@@ -1687,7 +1897,9 @@
     "perfil_predominante": "Apoio na Série A/B & Crescimento",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Mixto (Boca Suja)",
-    "rival_secundario": "Corinthians (Gaviões da Fiel)"
+    "rival_secundario": "Corinthians (Gaviões da Fiel)",
+    "primaryColor": "#eab308",
+    "secondaryColor": "#15803d"
   },
   {
     "estado": "MT",
@@ -1702,7 +1914,9 @@
     "perfil_predominante": "Mais Tradicional de MT",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Cuiabá (Torcida Fúria Cuiabana)",
-    "rival_secundario": "Corinthians (Gaviões da Fiel)"
+    "rival_secundario": "Corinthians (Gaviões da Fiel)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "MS",
@@ -1717,7 +1931,9 @@
     "perfil_predominante": "Clássico Comerotio",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Comercial-MS (Falange Vermelha)",
-    "rival_secundario": "Corinthians (Gaviões da Fiel)"
+    "rival_secundario": "Corinthians (Gaviões da Fiel)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "MS",
@@ -1732,7 +1948,9 @@
     "perfil_predominante": "Tradição de Campo Grande",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Operário-MS (Torcida Garra Operariana)",
-    "rival_secundario": "Corinthians (Gaviões da Fiel)"
+    "rival_secundario": "Corinthians (Gaviões da Fiel)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "PA",
@@ -1748,7 +1966,9 @@
     "eixo_alianca": "LADO_B",
     "rival_principal": "Remo (Torcida Camisa 33)",
     "rival_secundario": "Corinthians (Gaviões da Fiel)",
-    "torcida_aliada": "Ceará (Cearamor)"
+    "torcida_aliada": "Ceará (Cearamor)",
+    "primaryColor": "#2563eb",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "PA",
@@ -1763,7 +1983,9 @@
     "perfil_predominante": "O Pulso do Baenão/Mangueirão",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Paysandu (Terror Bicolor)",
-    "rival_secundario": "Corinthians (Gaviões da Fiel)"
+    "rival_secundario": "Corinthians (Gaviões da Fiel)",
+    "primaryColor": "#2563eb",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "PA",
@@ -1778,7 +2000,9 @@
     "perfil_predominante": "Linha de Frente Azulina",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Paysandu (Terror Bicolor)",
-    "rival_secundario": "Corinthians (Gaviões da Fiel)"
+    "rival_secundario": "Corinthians (Gaviões da Fiel)",
+    "primaryColor": "#2563eb",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "AM",
@@ -1793,7 +2017,9 @@
     "perfil_predominante": "Tradição Amazonense",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Amazonas FC (Onça Fiel)",
-    "rival_secundario": "São Raimundo-AM (Torcida Tufão)"
+    "rival_secundario": "São Raimundo-AM (Torcida Tufão)",
+    "primaryColor": "#2563eb",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "AM",
@@ -1808,7 +2034,9 @@
     "perfil_predominante": "Torcida Nova / Apoio Empresarial",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Nacional-AM (Torcida Naça)",
-    "rival_secundario": "São Raimundo-AM (Torcida Tufão)"
+    "rival_secundario": "São Raimundo-AM (Torcida Tufão)",
+    "primaryColor": "#eab308",
+    "secondaryColor": "#09090b"
   },
   {
     "estado": "AM",
@@ -1823,7 +2051,9 @@
     "perfil_predominante": "Bairro da Colina",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Nacional-AM (Torcida Naça)",
-    "rival_secundario": "Amazonas FC (Onça Fiel)"
+    "rival_secundario": "Amazonas FC (Onça Fiel)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   },
   {
     "estado": "AC",
@@ -1838,6 +2068,8 @@
     "perfil_predominante": "Tradição Acreana",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Corinthians (Gaviões da Fiel)",
-    "rival_secundario": "Corinthians (Gaviões da Fiel)"
+    "rival_secundario": "Corinthians (Gaviões da Fiel)",
+    "primaryColor": "#09090b",
+    "secondaryColor": "#f4f4f5"
   }
 ]
