@@ -246,6 +246,9 @@ export interface OfficialTorcida {
   eixo_alianca: string;
   primaryColor?: string;
   secondaryColor?: string;
+  rival_principal?: string;
+  rival_secundario?: string;
+  torcida_aliada?: string;
   electionCrisis?: ElectionCrisisInfo;
 }
 
@@ -1071,6 +1074,35 @@ export function getDerbyForMatch(
       break;
     default:
       break;
+  }
+
+  // Override with custom rival/ally values if configured directly in admin portal JSON
+  if (currentTorcida.rival_principal) {
+    const customMain = rivalsOnly.find(
+      (t) =>
+        t.clube.toLowerCase().includes(currentTorcida.rival_principal!.toLowerCase()) ||
+        t.torcida.toLowerCase().includes(currentTorcida.rival_principal!.toLowerCase()) ||
+        currentTorcida.rival_principal!.toLowerCase().includes(t.clube.toLowerCase())
+    );
+    if (customMain) mainRival = customMain;
+  }
+  if (currentTorcida.rival_secundario) {
+    const customSecond = rivalsOnly.find(
+      (t) =>
+        t.clube.toLowerCase().includes(currentTorcida.rival_secundario!.toLowerCase()) ||
+        t.torcida.toLowerCase().includes(currentTorcida.rival_secundario!.toLowerCase()) ||
+        currentTorcida.rival_secundario!.toLowerCase().includes(t.clube.toLowerCase())
+    );
+    if (customSecond) secondRival = customSecond;
+  }
+  if (currentTorcida.torcida_aliada) {
+    const customAlly = rivalsOnly.find(
+      (t) =>
+        t.clube.toLowerCase().includes(currentTorcida.torcida_aliada!.toLowerCase()) ||
+        t.torcida.toLowerCase().includes(currentTorcida.torcida_aliada!.toLowerCase()) ||
+        currentTorcida.torcida_aliada!.toLowerCase().includes(t.clube.toLowerCase())
+    );
+    if (customAlly) allyTorcida = customAlly;
   }
 
   // Fallbacks ensuring rival is strictly different club
@@ -4091,6 +4123,19 @@ export function isPrincipalRival(clubA: string, clubB: string): boolean {
 
   const matches = (c1: string, c2: string) =>
     (a.includes(c1) && b.includes(c2)) || (a.includes(c2) && b.includes(c1));
+
+  // Dynamic check against custom rivals set in JSON
+  const allTorcidas = teamsData as OfficialTorcida[];
+  const teamA = allTorcidas.find((t) => norm(t.clube) === a || norm(t.torcida) === a);
+  if (teamA) {
+    if (teamA.rival_principal && (b.includes(norm(teamA.rival_principal)) || norm(teamA.rival_principal).includes(b))) return true;
+    if (teamA.rival_secundario && (b.includes(norm(teamA.rival_secundario)) || norm(teamA.rival_secundario).includes(b))) return true;
+  }
+  const teamB = allTorcidas.find((t) => norm(t.clube) === b || norm(t.torcida) === b);
+  if (teamB) {
+    if (teamB.rival_principal && (a.includes(norm(teamB.rival_principal)) || norm(teamB.rival_principal).includes(a))) return true;
+    if (teamB.rival_secundario && (a.includes(norm(teamB.rival_secundario)) || norm(teamB.rival_secundario).includes(a))) return true;
+  }
 
   // Clássico do Vale do Paraíba (Taubaté x São José EC / Jecas / Dragões Alvi Azul x Mancha Azul)
   if (matches("taubate", "sao jose") || matches("jecas", "mancha azul") || matches("dragoes alvi azul", "mancha azul")) return true;

@@ -10,7 +10,10 @@
     "caravana": 95,
     "autonomia_financeira": 95,
     "perfil_predominante": "Superpotência de Massa, Caravana & Samba",
-    "eixo_alianca": "ALIANCA_ALVINEGRA"
+    "eixo_alianca": "ALIANCA_ALVINEGRA",
+    "rival_principal": "Palmeiras",
+    "rival_secundario": "São Paulo",
+    "torcida_aliada": "Fúria Jovem do Botafogo"
   },
   {
     "estado": "SP",
@@ -23,7 +26,10 @@
     "caravana": 95,
     "autonomia_financeira": 95,
     "perfil_predominante": "Potência Máxima de Estrada & Pista",
-    "eixo_alianca": "DPA"
+    "eixo_alianca": "DPA",
+    "rival_principal": "Corinthians",
+    "rival_secundario": "São Paulo",
+    "torcida_aliada": "Força Jovem do Vasco"
   },
   {
     "estado": "SP",
@@ -36,7 +42,10 @@
     "caravana": 95,
     "autonomia_financeira": 90,
     "perfil_predominante": "Comboios Pesados pelo Brasil",
-    "eixo_alianca": "PUNHO_CRUZADO"
+    "eixo_alianca": "PUNHO_CRUZADO",
+    "rival_principal": "Corinthians",
+    "rival_secundario": "Palmeiras",
+    "torcida_aliada": "Torcida Jovem do Fla"
   },
   {
     "estado": "SP",
@@ -49,7 +58,10 @@
     "caravana": 92,
     "autonomia_financeira": 88,
     "perfil_predominante": "Tradição Litorânea & Presença na Capital",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Corinthians",
+    "rival_secundario": "Palmeiras",
+    "torcida_aliada": "Força Jovem do Vasco"
   },
   {
     "estado": "SP",
@@ -62,7 +74,10 @@
     "caravana": 70,
     "autonomia_financeira": 70,
     "perfil_predominante": "Caravanas Tradicionais de Campinas",
-    "eixo_alianca": "IRMANDADE"
+    "eixo_alianca": "IRMANDADE",
+    "rival_principal": "Guarani",
+    "rival_secundario": "Corinthians",
+    "torcida_aliada": "Mancha Alvinegra"
   },
   {
     "estado": "SP",
@@ -101,7 +116,10 @@
     "caravana": 60,
     "autonomia_financeira": 75,
     "perfil_predominante": "Eixo Forte na Estrada & União PC",
-    "eixo_alianca": "PUNHO_COLADO"
+    "eixo_alianca": "PUNHO_COLADO",
+    "rival_principal": "Ponte Preta",
+    "rival_secundario": "São Paulo",
+    "torcida_aliada": "Young Flu"
   },
   {
     "estado": "SP",
@@ -1065,7 +1083,8 @@
     "caravana": 50,
     "autonomia_financeira": 50,
     "perfil_predominante": "Força Litorânea SC & União Punho Colado",
-    "eixo_alianca": "PUNHO_COLADO"
+    "eixo_alianca": "PUNHO_COLADO",
+    "primaryColor": "#963a9c"
   },
   {
     "estado": "BA",
@@ -1390,7 +1409,8 @@
     "caravana": 45,
     "autonomia_financeira": 45,
     "perfil_predominante": "Clássico Verde-Amarelo",
-    "eixo_alianca": "DPA"
+    "eixo_alianca": "DPA",
+    "primaryColor": "#026600"
   },
   {
     "estado": "MT",
