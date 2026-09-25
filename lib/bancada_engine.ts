@@ -681,15 +681,16 @@ export function createCustomTorcidaWithArchetype(
   return { torcida, state: stateTrackers };
 }
 
-// REAL BRAZILIAN DERBIES & CLASSICOS MAPPING
-export function getDerbyForMatch(
-  currentTorcida: OfficialTorcida,
-  gameIndex: number, // 1, 2, 3, 4
-  clubStatus: ClubStatus,
-  season: number = 1,
-  challengedRivalTorcida?: string | null,
-  isTorcidaUnica?: boolean
-): DerbyMatchInfo {
+// RESOLVE TORCIDA RIVALRIES & ALLIES (ENGINE RESOLUTION)
+export function resolveTorcidaRivalries(currentTorcida: OfficialTorcida): {
+  mainRival: OfficialTorcida;
+  secondRival: OfficialTorcida;
+  allyTorcida?: OfficialTorcida;
+  sameStateRivals: OfficialTorcida[];
+  otherStateRivals: OfficialTorcida[];
+  allies: OfficialTorcida[];
+  userClub: string;
+} {
   const all = teamsData as OfficialTorcida[];
   const userClub = currentTorcida.clube.trim().toLowerCase();
 
@@ -1111,6 +1112,28 @@ export function getDerbyForMatch(
   if (!allyTorcida && currentTorcida.eixo_alianca !== "INDEPENDENTE") {
     allyTorcida = allies.find((a) => a.clube !== mainRival!.clube && a.clube !== secondRival!.clube) || rivalsOnly.find((r) => r.clube !== mainRival!.clube) || rivalsOnly[0];
   }
+
+  return {
+    mainRival: mainRival!,
+    secondRival: secondRival!,
+    allyTorcida,
+    sameStateRivals,
+    otherStateRivals,
+    allies,
+    userClub,
+  };
+}
+
+// REAL BRAZILIAN DERBIES & CLASSICOS MAPPING
+export function getDerbyForMatch(
+  currentTorcida: OfficialTorcida,
+  gameIndex: number, // 1, 2, 3, 4
+  clubStatus: ClubStatus,
+  season: number = 1,
+  challengedRivalTorcida?: string | null,
+  isTorcidaUnica?: boolean
+): DerbyMatchInfo {
+  const { mainRival, secondRival, allyTorcida, otherStateRivals, allies, userClub } = resolveTorcidaRivalries(currentTorcida);
 
   // Helper for stadiums
   const getStadium = (club: string): { stadium: string; cityState: string } => {

@@ -90,7 +90,9 @@
     "caravana": 80,
     "autonomia_financeira": 75,
     "perfil_predominante": "Presença Constante em Viagens",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Palmeiras (Mancha Alvi-Verde)",
+    "rival_secundario": "São Paulo (Torcida Tricolor Indep.)"
   },
   {
     "estado": "SP",
@@ -103,7 +105,10 @@
     "caravana": 75,
     "autonomia_financeira": 85,
     "perfil_predominante": "Caravanas Estruturadas & Conforto",
-    "eixo_alianca": "PUNHO_CRUZADO"
+    "eixo_alianca": "PUNHO_CRUZADO",
+    "rival_principal": "Corinthians (Gaviões da Fiel)",
+    "rival_secundario": "Palmeiras (Mancha Alvi-Verde)",
+    "torcida_aliada": "Cruzeiro (Máfia Azul)"
   },
   {
     "estado": "SP",
@@ -132,7 +137,10 @@
     "caravana": 55,
     "autonomia_financeira": 50,
     "perfil_predominante": "Viagens Tradicionais Alviverdes",
-    "eixo_alianca": "DPA"
+    "eixo_alianca": "DPA",
+    "rival_principal": "Corinthians (Gaviões da Fiel)",
+    "rival_secundario": "São Paulo (Torcida Tricolor Indep.)",
+    "torcida_aliada": "Vasco da Gama (Força Jovem do Vasco)"
   },
   {
     "estado": "SP",
@@ -145,7 +153,9 @@
     "caravana": 70,
     "autonomia_financeira": 70,
     "perfil_predominante": "Presença Fiel em Caravanas",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Palmeiras (Mancha Alvi-Verde)",
+    "rival_secundario": "São Paulo (Torcida Tricolor Indep.)"
   },
   {
     "estado": "SP",
@@ -158,7 +168,10 @@
     "caravana": 55,
     "autonomia_financeira": 65,
     "perfil_predominante": "Viagens pelo Interior & Série B",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Comercial-RP (Mancha Alvinegra)",
+    "rival_secundario": "Santos (Torcida Jovem do Santos)",
+    "torcida_aliada": "Ponte Preta (Torcida Jovem Ponte)"
   },
   {
     "estado": "SP",
@@ -171,7 +184,10 @@
     "caravana": 70,
     "autonomia_financeira": 60,
     "perfil_predominante": "Caravanas Tradicionais pelo Interior",
-    "eixo_alianca": "FAMILIA_INTERIOR"
+    "eixo_alianca": "FAMILIA_INTERIOR",
+    "rival_principal": "Corinthians (Gaviões da Fiel)",
+    "rival_secundario": "Palmeiras (Mancha Alvi-Verde)",
+    "torcida_aliada": "Santo André (Fúria Andreense)"
   },
   {
     "estado": "SP",
@@ -184,7 +200,10 @@
     "caravana": 60,
     "autonomia_financeira": 50,
     "perfil_predominante": "Invasões no Vale & Litoral",
-    "eixo_alianca": "IRMANDADE"
+    "eixo_alianca": "IRMANDADE",
+    "rival_principal": "Taubaté (Dragões Alvi Azul)",
+    "rival_secundario": "Santo André (Fúria Andreense)",
+    "torcida_aliada": "Botafogo-SP (Fiel Força Tricolor)"
   },
   {
     "estado": "SP",
@@ -197,7 +216,10 @@
     "caravana": 65,
     "autonomia_financeira": 60,
     "perfil_predominante": "Linha de Frente na Estrada",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Corinthians (Gaviões da Fiel)",
+    "rival_secundario": "Palmeiras (Mancha Alvi-Verde)",
+    "torcida_aliada": "Vasco da Gama (Força Jovem do Vasco)"
   },
   {
     "estado": "SP",
@@ -212,7 +234,10 @@
     "perfil_predominante": "Bate-Volta no Interior",
     "eixo_alianca": "IRMANDADE",
     "primaryColor": "#09090b",
-    "secondaryColor": "#f4f4f5"
+    "secondaryColor": "#f4f4f5",
+    "rival_principal": "Botafogo-SP (Fiel Força Tricolor)",
+    "rival_secundario": "Noroeste (Sangue Rubro)",
+    "torcida_aliada": "Ponte Preta (Torcida Jovem Ponte)"
   },
   {
     "estado": "SP",
@@ -225,7 +250,10 @@
     "caravana": 65,
     "autonomia_financeira": 60,
     "perfil_predominante": "Caravana Pesada no Interior de SP",
-    "eixo_alianca": "FAMILIA_INTERIOR"
+    "eixo_alianca": "FAMILIA_INTERIOR",
+    "rival_principal": "São Caetano (Comando Azul)",
+    "rival_secundario": "São José EC (Torcida Mancha Azul)",
+    "torcida_aliada": "Portuguesa (Leões da Fabulosa)"
   },
   {
     "estado": "SP",
@@ -238,7 +266,10 @@
     "caravana": 60,
     "autonomia_financeira": 50,
     "perfil_predominante": "Força Regional em Viagens",
-    "eixo_alianca": "FAMILIA_INTERIOR"
+    "eixo_alianca": "FAMILIA_INTERIOR",
+    "rival_principal": "União Barbarense (Sangue Barbarense)",
+    "rival_secundario": "Inter de Limeira (Torcida Interror)",
+    "torcida_aliada": "Santo André (Fúria Andreense)"
   },
   {
     "estado": "SP",
@@ -251,7 +282,10 @@
     "caravana": 60,
     "autonomia_financeira": 45,
     "perfil_predominante": "Presença Regional Forte",
-    "eixo_alianca": "PUNHO_SEGURO"
+    "eixo_alianca": "PUNHO_SEGURO",
+    "rival_principal": "Rio Branco (Malucos do Tigre)",
+    "rival_secundario": "Inter de Limeira (Torcida Interror)",
+    "torcida_aliada": "Inter de Limeira (Torcida Interror)"
   },
   {
     "estado": "SP",
@@ -264,7 +298,10 @@
     "caravana": 60,
     "autonomia_financeira": 50,
     "perfil_predominante": "Viagens Regionais de Acesso",
-    "eixo_alianca": "PUNHO_COLADO"
+    "eixo_alianca": "PUNHO_COLADO",
+    "rival_principal": "Ponte Preta (Torcida Jovem Ponte)",
+    "rival_secundario": "São Paulo (Torcida Tricolor Indep.)",
+    "torcida_aliada": "Guarani (Fúria Independente)"
   },
   {
     "estado": "SP",
@@ -277,7 +314,9 @@
     "caravana": 80,
     "autonomia_financeira": 55,
     "perfil_predominante": "Presença Visual em Jogos Fora",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Palmeiras (Mancha Alvi-Verde)",
+    "rival_secundario": "São Paulo (Torcida Tricolor Indep.)"
   },
   {
     "estado": "SP",
@@ -290,7 +329,10 @@
     "caravana": 50,
     "autonomia_financeira": 35,
     "perfil_predominante": "Presença Fiel no Interior",
-    "eixo_alianca": "FAMILIA_INTERIOR"
+    "eixo_alianca": "FAMILIA_INTERIOR",
+    "rival_principal": "São José EC (Torcida Mancha Azul)",
+    "rival_secundario": "Santo André (Fúria Andreense)",
+    "torcida_aliada": "Portuguesa (Leões da Fabulosa)"
   },
   {
     "estado": "SP",
@@ -303,7 +345,9 @@
     "caravana": 55,
     "autonomia_financeira": 30,
     "perfil_predominante": "Presença Fiel no Interior",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "São José EC (Torcida Mancha Azul)",
+    "rival_secundario": "Santo André (Fúria Andreense)"
   },
   {
     "estado": "SP",
@@ -316,7 +360,10 @@
     "caravana": 55,
     "autonomia_financeira": 55,
     "perfil_predominante": "Apoio em Jogos Fora",
-    "eixo_alianca": "DPA"
+    "eixo_alianca": "DPA",
+    "rival_principal": "Corinthians (Gaviões da Fiel)",
+    "rival_secundario": "São Paulo (Torcida Tricolor Indep.)",
+    "torcida_aliada": "Vasco da Gama (Força Jovem do Vasco)"
   },
   {
     "estado": "SP",
@@ -329,7 +376,10 @@
     "caravana": 50,
     "autonomia_financeira": 45,
     "perfil_predominante": "Viagens na Linha Paulista",
-    "eixo_alianca": "FAMILIA_INTERIOR"
+    "eixo_alianca": "FAMILIA_INTERIOR",
+    "rival_principal": "Corinthians (Gaviões da Fiel)",
+    "rival_secundario": "Palmeiras (Mancha Alvi-Verde)",
+    "torcida_aliada": "Botafogo-SP (Fiel Força Tricolor)"
   },
   {
     "estado": "SP",
@@ -342,7 +392,10 @@
     "caravana": 45,
     "autonomia_financeira": 35,
     "perfil_predominante": "Viagens Financeiras / Acesso",
-    "eixo_alianca": "PUNHO_SEGURO"
+    "eixo_alianca": "PUNHO_SEGURO",
+    "rival_principal": "EC São Bernardo (Esquadrão Alvinegro)",
+    "rival_secundario": "São Caetano (Comando Azul)",
+    "torcida_aliada": "União Barbarense (Sangue Barbarense)"
   },
   {
     "estado": "SP",
@@ -355,7 +408,9 @@
     "caravana": 50,
     "autonomia_financeira": 70,
     "perfil_predominante": "Convivência em Viagens",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Palmeiras (Mancha Alvi-Verde)",
+    "rival_secundario": "São Paulo (Torcida Tricolor Indep.)"
   },
   {
     "estado": "SP",
@@ -368,7 +423,10 @@
     "caravana": 58,
     "autonomia_financeira": 52,
     "perfil_predominante": "Ônibus Conforto / Família",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "EC São Bernardo (Esquadrão Alvinegro)",
+    "rival_secundario": "São Caetano (Comando Azul)",
+    "torcida_aliada": "União Barbarense (Sangue Barbarense)"
   },
   {
     "estado": "SP",
@@ -381,7 +439,9 @@
     "caravana": 50,
     "autonomia_financeira": 35,
     "perfil_predominante": "Viagens Locais no ABC & Litoral",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "São Bernardo FC (Guerreiros do Tigre)",
+    "rival_secundario": "São Caetano (Comando Azul)"
   },
   {
     "estado": "SP",
@@ -394,7 +454,10 @@
     "caravana": 40,
     "autonomia_financeira": 45,
     "perfil_predominante": "Presença Regional",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Santo André (Fúria Andreense)",
+    "rival_secundario": "São José EC (Torcida Mancha Azul)",
+    "torcida_aliada": "Comercial-RP (Mancha Alvinegra)"
   },
   {
     "estado": "SP",
@@ -407,7 +470,10 @@
     "caravana": 35,
     "autonomia_financeira": 25,
     "perfil_predominante": "Escolta / Linha de Frente",
-    "eixo_alianca": "PUNHO_SEGURO"
+    "eixo_alianca": "PUNHO_SEGURO",
+    "rival_principal": "Santo André (Fúria Andreense)",
+    "rival_secundario": "São José EC (Torcida Mancha Azul)",
+    "torcida_aliada": "Comercial-RP (Mancha Alvinegra)"
   },
   {
     "estado": "SP",
@@ -420,7 +486,10 @@
     "caravana": 40,
     "autonomia_financeira": 35,
     "perfil_predominante": "Viagens Curtas Locais",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "São Caetano (Comando Azul)",
+    "rival_secundario": "São José EC (Torcida Mancha Azul)",
+    "torcida_aliada": "Portuguesa (Leões da Fabulosa)"
   },
   {
     "estado": "SP",
@@ -433,7 +502,10 @@
     "caravana": 45,
     "autonomia_financeira": 40,
     "perfil_predominante": "Tradição Caipira & Pista de Limeira",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Rio Branco (Malucos do Tigre)",
+    "rival_secundario": "Guarani (Fúria Independente)",
+    "torcida_aliada": "União Barbarense (Sangue Barbarense)"
   },
   {
     "estado": "SP",
@@ -446,7 +518,9 @@
     "caravana": 50,
     "autonomia_financeira": 55,
     "perfil_predominante": "Força Bragantina de Pista & Arquibancada",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Ponte Preta (Torcida Jovem Ponte)",
+    "rival_secundario": "Guarani (Fúria Independente)"
   },
   {
     "estado": "SP",
@@ -459,7 +533,9 @@
     "caravana": 45,
     "autonomia_financeira": 40,
     "perfil_predominante": "Rubro-Negro de Itu & Presença no Interior",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Guarani (Fúria Independente)",
+    "rival_secundario": "Ponte Preta (Torcida Jovem Ponte)"
   },
   {
     "estado": "SP",
@@ -472,7 +548,9 @@
     "caravana": 45,
     "autonomia_financeira": 45,
     "perfil_predominante": "Força de Novo Horizonte & Clássico do Interior",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Mirassol (Fúria do Leão)",
+    "rival_secundario": "Botafogo-SP (Fiel Força Tricolor)"
   },
   {
     "estado": "SP",
@@ -485,7 +563,10 @@
     "caravana": 45,
     "autonomia_financeira": 45,
     "perfil_predominante": "Região de Rio Preto & União Andreense",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Novorizontino (Garra do Tigre)",
+    "rival_secundario": "Botafogo-SP (Fiel Força Tricolor)",
+    "torcida_aliada": "Santo André (Fúria Andreense)"
   },
   {
     "estado": "SP",
@@ -498,7 +579,10 @@
     "caravana": 45,
     "autonomia_financeira": 40,
     "perfil_predominante": "Caldeirão de Diadema & Eixo do ABC",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "São Bernardo FC (Guerreiros do Tigre)",
+    "rival_secundario": "Santo André (Fúria Andreense)",
+    "torcida_aliada": "Santo André (Fúria Andreense)"
   },
   {
     "estado": "SP",
@@ -511,7 +595,9 @@
     "caravana": 35,
     "autonomia_financeira": 35,
     "perfil_predominante": "Força Grená da Região de Ribeirão Preto",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Comercial-RP (Mancha Alvinegra)",
+    "rival_secundario": "Corinthians (Gaviões da Fiel)"
   },
   {
     "estado": "SP",
@@ -524,7 +610,10 @@
     "caravana": 35,
     "autonomia_financeira": 35,
     "perfil_predominante": "Tradição do Sapo & União Andreense",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Itapirense (Kueio Loco)",
+    "rival_secundario": "Guarani (Fúria Independente)",
+    "torcida_aliada": "Santo André (Fúria Andreense)"
   },
   {
     "estado": "SP",
@@ -537,7 +626,10 @@
     "caravana": 35,
     "autonomia_financeira": 35,
     "perfil_predominante": "Tradição de Itapira & União UPS",
-    "eixo_alianca": "UPS"
+    "eixo_alianca": "UPS",
+    "rival_principal": "Mogi Mirim (Mancha Vermelha do Mogi)",
+    "rival_secundario": "Guarani (Fúria Independente)",
+    "torcida_aliada": "Santo André (Fúria Andreense)"
   },
   {
     "estado": "RJ",
@@ -550,7 +642,10 @@
     "caravana": 85,
     "autonomia_financeira": 85,
     "perfil_predominante": "Invasões Interestaduais de Pista",
-    "eixo_alianca": "PUNHO_CRUZADO"
+    "eixo_alianca": "PUNHO_CRUZADO",
+    "rival_principal": "Vasco da Gama (Força Jovem do Vasco)",
+    "rival_secundario": "Fluminense (Young Flu)",
+    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)"
   },
   {
     "estado": "RJ",
@@ -563,7 +658,10 @@
     "caravana": 85,
     "autonomia_financeira": 80,
     "perfil_predominante": "Tradição Gigante em Rodovias",
-    "eixo_alianca": "DPA"
+    "eixo_alianca": "DPA",
+    "rival_principal": "Flamengo (Torcida Jovem do Fla)",
+    "rival_secundario": "Fluminense (Young Flu)",
+    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)"
   },
   {
     "estado": "RJ",
@@ -576,7 +674,10 @@
     "caravana": 85,
     "autonomia_financeira": 80,
     "perfil_predominante": "Arrastão de Massa em Aeroportos/Estradas",
-    "eixo_alianca": "PUNHO_CRUZADO"
+    "eixo_alianca": "PUNHO_CRUZADO",
+    "rival_principal": "Vasco da Gama (Força Jovem do Vasco)",
+    "rival_secundario": "Fluminense (Young Flu)",
+    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)"
   },
   {
     "estado": "RJ",
@@ -589,7 +690,10 @@
     "caravana": 85,
     "autonomia_financeira": 75,
     "perfil_predominante": "Caravanas Consolidadas no Brasil",
-    "eixo_alianca": "PUNHO_COLADO"
+    "eixo_alianca": "PUNHO_COLADO",
+    "rival_principal": "Flamengo (Torcida Jovem do Fla)",
+    "rival_secundario": "Botafogo (Fúria Jovem do Botafogo)",
+    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)"
   },
   {
     "estado": "RJ",
@@ -602,7 +706,10 @@
     "caravana": 78,
     "autonomia_financeira": 70,
     "perfil_predominante": "Linha de Frente Interestadual",
-    "eixo_alianca": "ALIANCA_ALVINEGRA"
+    "eixo_alianca": "ALIANCA_ALVINEGRA",
+    "rival_principal": "Flamengo (Torcida Jovem do Fla)",
+    "rival_secundario": "Fluminense (Young Flu)",
+    "torcida_aliada": "Ceará (Cearamor)"
   },
   {
     "estado": "RJ",
@@ -615,7 +722,10 @@
     "caravana": 70,
     "autonomia_financeira": 70,
     "perfil_predominante": "Festa e Canto Fora do Rio",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Vasco da Gama (Força Jovem do Vasco)",
+    "rival_secundario": "Fluminense (Young Flu)",
+    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)"
   },
   {
     "estado": "RJ",
@@ -628,7 +738,10 @@
     "caravana": 80,
     "autonomia_financeira": 65,
     "perfil_predominante": "Canto Ininterrupto Fora de Casa",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Flamengo (Torcida Jovem do Fla)",
+    "rival_secundario": "Fluminense (Young Flu)",
+    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)"
   },
   {
     "estado": "RJ",
@@ -641,7 +754,10 @@
     "caravana": 50,
     "autonomia_financeira": 55,
     "perfil_predominante": "Apoio de Canto Interestadual",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Flamengo (Torcida Jovem do Fla)",
+    "rival_secundario": "Botafogo (Fúria Jovem do Botafogo)",
+    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)"
   },
   {
     "estado": "RJ",
@@ -654,7 +770,9 @@
     "caravana": 50,
     "autonomia_financeira": 10,
     "perfil_predominante": "Apoio Forte em Casa",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "America RJ (Torcida Sangue Rubro)",
+    "rival_secundario": "Flamengo (Torcida Jovem do Fla)"
   },
   {
     "estado": "RJ",
@@ -667,7 +785,9 @@
     "caravana": 35,
     "autonomia_financeira": 20,
     "perfil_predominante": "Viagens Locais na Carioca",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "America RJ (Torcida Sangue Rubro)",
+    "rival_secundario": "Flamengo (Torcida Jovem do Fla)"
   },
   {
     "estado": "RJ",
@@ -680,7 +800,9 @@
     "caravana": 25,
     "autonomia_financeira": 25,
     "perfil_predominante": "Deslocamentos Pequenos",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Olaria (Jovem Olaria)",
+    "rival_secundario": "Flamengo (Torcida Jovem do Fla)"
   },
   {
     "estado": "MG",
@@ -693,7 +815,10 @@
     "caravana": 91,
     "autonomia_financeira": 90,
     "perfil_predominante": "Comboios Pesados & Eixo DPA",
-    "eixo_alianca": "DPA"
+    "eixo_alianca": "DPA",
+    "rival_principal": "Cruzeiro (Máfia Azul)",
+    "rival_secundario": "America MG (Barra do Coelho)",
+    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)"
   },
   {
     "estado": "MG",
@@ -706,7 +831,10 @@
     "caravana": 91,
     "autonomia_financeira": 93,
     "perfil_predominante": "Invasões Históricas & Eixo PC",
-    "eixo_alianca": "PUNHO_CRUZADO"
+    "eixo_alianca": "PUNHO_CRUZADO",
+    "rival_principal": "Atlético MG (Galoucura)",
+    "rival_secundario": "Flamengo (Torcida Jovem do Fla)",
+    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)"
   },
   {
     "estado": "MG",
@@ -719,7 +847,10 @@
     "caravana": 75,
     "autonomia_financeira": 85,
     "perfil_predominante": "Caravana Pesada de Pista",
-    "eixo_alianca": "PUNHO_CRUZADO"
+    "eixo_alianca": "PUNHO_CRUZADO",
+    "rival_principal": "Atlético MG (Galoucura)",
+    "rival_secundario": "Flamengo (Torcida Jovem do Fla)",
+    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)"
   },
   {
     "estado": "MG",
@@ -732,7 +863,9 @@
     "caravana": 65,
     "autonomia_financeira": 60,
     "perfil_predominante": "Apoio em Viagens Longas",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Cruzeiro (Máfia Azul)",
+    "rival_secundario": "America MG (Barra do Coelho)"
   },
   {
     "estado": "MG",
@@ -745,7 +878,10 @@
     "caravana": 55,
     "autonomia_financeira": 50,
     "perfil_predominante": "Canto em Jogos Fora",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Atlético MG (Galoucura)",
+    "rival_secundario": "Flamengo (Torcida Jovem do Fla)",
+    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)"
   },
   {
     "estado": "MG",
@@ -758,7 +894,9 @@
     "caravana": 10,
     "autonomia_financeira": 15,
     "perfil_predominante": "Viagens Regionais no Mineiro",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Atlético MG (Galoucura)",
+    "rival_secundario": "Cruzeiro (Máfia Azul)"
   },
   {
     "estado": "MG",
@@ -771,7 +909,9 @@
     "caravana": 35,
     "autonomia_financeira": 30,
     "perfil_predominante": "Viagens no Triângulo/Alto Paranaíba",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Mamoré (Patos) (Pavilhão Sapo)",
+    "rival_secundario": "Atlético MG (Galoucura)"
   },
   {
     "estado": "MG",
@@ -784,7 +924,9 @@
     "caravana": 35,
     "autonomia_financeira": 20,
     "perfil_predominante": "Viagens na Zona da Mata",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Atlético MG (Galoucura)",
+    "rival_secundario": "Cruzeiro (Máfia Azul)"
   },
   {
     "estado": "MG",
@@ -797,7 +939,9 @@
     "caravana": 30,
     "autonomia_financeira": 30,
     "perfil_predominante": "Deslocamentos no Interior",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "URT (Patos) (Trovão Azul)",
+    "rival_secundario": "Atlético MG (Galoucura)"
   },
   {
     "estado": "MG",
@@ -810,7 +954,9 @@
     "caravana": 30,
     "autonomia_financeira": 25,
     "perfil_predominante": "Viagens no Sul de Minas",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Atlético MG (Galoucura)",
+    "rival_secundario": "Cruzeiro (Máfia Azul)"
   },
   {
     "estado": "RS",
@@ -823,7 +969,10 @@
     "caravana": 85,
     "autonomia_financeira": 85,
     "perfil_predominante": "Invasões na América do Sul & BR",
-    "eixo_alianca": "DPA"
+    "eixo_alianca": "DPA",
+    "rival_principal": "Internacional (Guarda Popular)",
+    "rival_secundario": "Palmeiras (Mancha Alvi-Verde)",
+    "torcida_aliada": "Vasco da Gama (Força Jovem do Vasco)"
   },
   {
     "estado": "RS",
@@ -836,7 +985,10 @@
     "caravana": 85,
     "autonomia_financeira": 80,
     "perfil_predominante": "Invasões de Murga & Libertadores",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Grêmio (Geral do Grêmio)",
+    "rival_secundario": "Corinthians (Gaviões da Fiel)",
+    "torcida_aliada": "Cruzeiro (Máfia Azul)"
   },
   {
     "estado": "RS",
@@ -849,7 +1001,10 @@
     "caravana": 82,
     "autonomia_financeira": 75,
     "perfil_predominante": "Comboios Históricos de Estrada",
-    "eixo_alianca": "PUNHO_CRUZADO"
+    "eixo_alianca": "PUNHO_CRUZADO",
+    "rival_principal": "Grêmio (Geral do Grêmio)",
+    "rival_secundario": "Corinthians (Gaviões da Fiel)",
+    "torcida_aliada": "Cruzeiro (Máfia Azul)"
   },
   {
     "estado": "RS",
@@ -862,7 +1017,10 @@
     "caravana": 80,
     "autonomia_financeira": 70,
     "perfil_predominante": "Pista & Presença na Estrada",
-    "eixo_alianca": "DPA"
+    "eixo_alianca": "DPA",
+    "rival_principal": "Internacional (Guarda Popular)",
+    "rival_secundario": "Palmeiras (Mancha Alvi-Verde)",
+    "torcida_aliada": "Vasco da Gama (Força Jovem do Vasco)"
   },
   {
     "estado": "RS",
@@ -875,7 +1033,9 @@
     "caravana": 60,
     "autonomia_financeira": 50,
     "perfil_predominante": "Viagens de Serra Gaúcha",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Caxias (Força Grená)",
+    "rival_secundario": "Internacional (Guarda Popular)"
   },
   {
     "estado": "RS",
@@ -888,7 +1048,9 @@
     "caravana": 65,
     "autonomia_financeira": 40,
     "perfil_predominante": "Invasões Xavantes / Raça Pura",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Pelotas (Força Jovem Lobos)",
+    "rival_secundario": "Grêmio (Geral do Grêmio)"
   },
   {
     "estado": "RS",
@@ -901,7 +1063,9 @@
     "caravana": 50,
     "autonomia_financeira": 45,
     "perfil_predominante": "Rivalidade do Sul / Caxias",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Juventude (Mancha Verde Juventude)",
+    "rival_secundario": "Grêmio (Geral do Grêmio)"
   },
   {
     "estado": "RS",
@@ -914,7 +1078,9 @@
     "caravana": 40,
     "autonomia_financeira": 35,
     "perfil_predominante": "Deslocamentos no Sul Gaúcho",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Brasil de Pelotas (Máfia Xavante)",
+    "rival_secundario": "Internacional (Guarda Popular)"
   },
   {
     "estado": "PR",
@@ -927,7 +1093,10 @@
     "caravana": 80,
     "autonomia_financeira": 85,
     "perfil_predominante": "Galeria Pesada (Caveira) & Independente",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Coritiba (Império Alviverde)",
+    "rival_secundario": "São Paulo (Torcida Tricolor Indep.)",
+    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)"
   },
   {
     "estado": "PR",
@@ -940,7 +1109,10 @@
     "caravana": 80,
     "autonomia_financeira": 85,
     "perfil_predominante": "Potência de Pista & Eixo DPA",
-    "eixo_alianca": "DPA"
+    "eixo_alianca": "DPA",
+    "rival_principal": "Athletico-PR (Os Fanáticos)",
+    "rival_secundario": "Grêmio (Geral do Grêmio)",
+    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)"
   },
   {
     "estado": "PR",
@@ -953,7 +1125,10 @@
     "caravana": 70,
     "autonomia_financeira": 60,
     "perfil_predominante": "Resistência Tricolor & Eixo PC",
-    "eixo_alianca": "PUNHO_COLADO"
+    "eixo_alianca": "PUNHO_COLADO",
+    "rival_principal": "Coritiba (Império Alviverde)",
+    "rival_secundario": "Athletico-PR (Os Fanáticos)",
+    "torcida_aliada": "Guarani (Fúria Independente)"
   },
   {
     "estado": "PR",
@@ -966,7 +1141,9 @@
     "caravana": 55,
     "autonomia_financeira": 50,
     "perfil_predominante": "Força do Norte Paranaense",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Maringá FC (Força Maringaense)",
+    "rival_secundario": "Paraná Clube (Fúria Independente)"
   },
   {
     "estado": "PR",
@@ -979,7 +1156,9 @@
     "caravana": 50,
     "autonomia_financeira": 45,
     "perfil_predominante": "Caldeirão de Ponta Grossa",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Londrina (Falange Azul)",
+    "rival_secundario": "Paraná Clube (Fúria Independente)"
   },
   {
     "estado": "PR",
@@ -992,7 +1171,9 @@
     "caravana": 45,
     "autonomia_financeira": 45,
     "perfil_predominante": "Força Regional em Ascensão",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Londrina (Falange Azul)",
+    "rival_secundario": "Paraná Clube (Fúria Independente)"
   },
   {
     "estado": "SC",
@@ -1005,7 +1186,10 @@
     "caravana": 65,
     "autonomia_financeira": 65,
     "perfil_predominante": "Tradição da Ilha & Eixo DPA",
-    "eixo_alianca": "DPA"
+    "eixo_alianca": "DPA",
+    "rival_principal": "Figueirense (Gaviões Alvinegros)",
+    "rival_secundario": "Criciúma (Os Tigres (Barra))",
+    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)"
   },
   {
     "estado": "SC",
@@ -1018,7 +1202,9 @@
     "caravana": 65,
     "autonomia_financeira": 65,
     "perfil_predominante": "Maior de Floripa & Eixo DPA",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Avaí (Mancha Azul)",
+    "rival_secundario": "Criciúma (Os Tigres (Barra))"
   },
   {
     "estado": "SC",
@@ -1031,7 +1217,9 @@
     "caravana": 55,
     "autonomia_financeira": 55,
     "perfil_predominante": "Estilo Murga/Barra no Caldeirão",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Avaí (Mancha Azul)",
+    "rival_secundario": "Marcílio Dias (Fúria Marcilista)"
   },
   {
     "estado": "SC",
@@ -1044,7 +1232,9 @@
     "caravana": 55,
     "autonomia_financeira": 45,
     "perfil_predominante": "Linha de Frente Carvoeira",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Avaí (Mancha Azul)",
+    "rival_secundario": "Marcílio Dias (Fúria Marcilista)"
   },
   {
     "estado": "SC",
@@ -1057,7 +1247,9 @@
     "caravana": 60,
     "autonomia_financeira": 50,
     "perfil_predominante": "Festa e Canto no Oeste Catarinense",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Avaí (Mancha Azul)",
+    "rival_secundario": "Marcílio Dias (Fúria Marcilista)"
   },
   {
     "estado": "SC",
@@ -1070,7 +1262,9 @@
     "caravana": 60,
     "autonomia_financeira": 55,
     "perfil_predominante": "Força do Norte Catarinense & DPA",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Avaí (Mancha Azul)",
+    "rival_secundario": "Marcílio Dias (Fúria Marcilista)"
   },
   {
     "estado": "SC",
@@ -1084,7 +1278,10 @@
     "autonomia_financeira": 50,
     "perfil_predominante": "Força Litorânea SC & União Punho Colado",
     "eixo_alianca": "PUNHO_COLADO",
-    "primaryColor": "#963a9c"
+    "primaryColor": "#963a9c",
+    "rival_principal": "Joinville (União Tricolor)",
+    "rival_secundario": "Figueirense (Gaviões Alvinegros)",
+    "torcida_aliada": "Guarani (Fúria Independente)"
   },
   {
     "estado": "BA",
@@ -1097,7 +1294,10 @@
     "caravana": 82,
     "autonomia_financeira": 80,
     "perfil_predominante": "Massa Tricolor & Eixo PC",
-    "eixo_alianca": "DPA"
+    "eixo_alianca": "DPA",
+    "rival_principal": "Vitória (Os Imbatíveis)",
+    "rival_secundario": "Ceará (Cearamor)",
+    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)"
   },
   {
     "estado": "BA",
@@ -1110,7 +1310,10 @@
     "caravana": 80,
     "autonomia_financeira": 78,
     "perfil_predominante": "Linha de Frente Rubro-Negra & Eixo DPA",
-    "eixo_alianca": "PUNHO_CRUZADO"
+    "eixo_alianca": "PUNHO_CRUZADO",
+    "rival_principal": "Bahia (Torcida Bamor)",
+    "rival_secundario": "Santa Cruz (Inferno Coral)",
+    "torcida_aliada": "Cruzeiro (Máfia Azul)"
   },
   {
     "estado": "PE",
@@ -1123,7 +1326,10 @@
     "caravana": 83,
     "autonomia_financeira": 80,
     "perfil_predominante": "União Forte Pesada & Eixo PC",
-    "eixo_alianca": "PUNHO_CRUZADO"
+    "eixo_alianca": "PUNHO_CRUZADO",
+    "rival_principal": "Santa Cruz (Inferno Coral)",
+    "rival_secundario": "Náutico (Fanáutico)",
+    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)"
   },
   {
     "estado": "PE",
@@ -1136,7 +1342,10 @@
     "caravana": 80,
     "autonomia_financeira": 75,
     "perfil_predominante": "Canto de Massa & Eixo DPA",
-    "eixo_alianca": "DPA"
+    "eixo_alianca": "DPA",
+    "rival_principal": "Sport Recife (Torcida Jovem do Sport)",
+    "rival_secundario": "Bahia (Torcida Bamor)",
+    "torcida_aliada": "Corinthians (Gaviões da Fiel)"
   },
   {
     "estado": "PE",
@@ -1149,7 +1358,9 @@
     "caravana": 65,
     "autonomia_financeira": 65,
     "perfil_predominante": "Tradição Alvirrubra",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Sport Recife (Torcida Jovem do Sport)",
+    "rival_secundario": "Santa Cruz (Inferno Coral)"
   },
   {
     "estado": "CE",
@@ -1162,7 +1373,10 @@
     "caravana": 82,
     "autonomia_financeira": 80,
     "perfil_predominante": "Massa Alvinegra & Eixo PC",
-    "eixo_alianca": "LADO_B"
+    "eixo_alianca": "LADO_B",
+    "rival_principal": "Fortaleza (Leões da TUF)",
+    "rival_secundario": "Bahia (Torcida Bamor)",
+    "torcida_aliada": "Botafogo (Fúria Jovem do Botafogo)"
   },
   {
     "estado": "CE",
@@ -1175,7 +1389,10 @@
     "caravana": 82,
     "autonomia_financeira": 82,
     "perfil_predominante": "Mosaicos Históricos & Eixo PC",
-    "eixo_alianca": "LADO_A"
+    "eixo_alianca": "LADO_A",
+    "rival_principal": "Ceará (Cearamor)",
+    "rival_secundario": "Bahia (Torcida Bamor)",
+    "torcida_aliada": "Santa Cruz (Inferno Coral)"
   },
   {
     "estado": "CE",
@@ -1188,7 +1405,10 @@
     "caravana": 70,
     "autonomia_financeira": 60,
     "perfil_predominante": "Linha de Frente Tricolor",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Ceará (Cearamor)",
+    "rival_secundario": "Bahia (Torcida Bamor)",
+    "torcida_aliada": "Santa Cruz (Inferno Coral)"
   },
   {
     "estado": "RN",
@@ -1201,7 +1421,9 @@
     "caravana": 60,
     "autonomia_financeira": 55,
     "perfil_predominante": "Tradição Potiguar & Dérbi",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "América RN (Máfia Vermelha)",
+    "rival_secundario": "Corinthians (Gaviões da Fiel)"
   },
   {
     "estado": "RN",
@@ -1214,7 +1436,10 @@
     "caravana": 60,
     "autonomia_financeira": 55,
     "perfil_predominante": "Linha de Frente Alvirrubra",
-    "eixo_alianca": "LADO_A"
+    "eixo_alianca": "LADO_A",
+    "rival_principal": "ABC de Natal (Gang Alvinegra)",
+    "rival_secundario": "Corinthians (Gaviões da Fiel)",
+    "torcida_aliada": "Fortaleza (Leões da TUF)"
   },
   {
     "estado": "AL",
@@ -1227,7 +1452,10 @@
     "caravana": 55,
     "autonomia_financeira": 50,
     "perfil_predominante": "Linha de Frente Alagoana",
-    "eixo_alianca": "LADO_B"
+    "eixo_alianca": "LADO_B",
+    "rival_principal": "CSA (Mancha Azul de Alagoas)",
+    "rival_secundario": "Corinthians (Gaviões da Fiel)",
+    "torcida_aliada": "Ceará (Cearamor)"
   },
   {
     "estado": "AL",
@@ -1240,7 +1468,10 @@
     "caravana": 55,
     "autonomia_financeira": 50,
     "perfil_predominante": "Tradição Azulina & DPA",
-    "eixo_alianca": "LADO_A"
+    "eixo_alianca": "LADO_A",
+    "rival_principal": "CRB (Comando Alvi-Rubro)",
+    "rival_secundario": "Corinthians (Gaviões da Fiel)",
+    "torcida_aliada": "Fortaleza (Leões da TUF)"
   },
   {
     "estado": "MA",
@@ -1253,7 +1484,10 @@
     "caravana": 50,
     "autonomia_financeira": 40,
     "perfil_predominante": "Maior do Maranhão",
-    "eixo_alianca": "LADO_B"
+    "eixo_alianca": "LADO_B",
+    "rival_principal": "Moto Club (Motofiel)",
+    "rival_secundario": "Corinthians (Gaviões da Fiel)",
+    "torcida_aliada": "Ceará (Cearamor)"
   },
   {
     "estado": "MA",
@@ -1266,7 +1500,9 @@
     "caravana": 45,
     "autonomia_financeira": 40,
     "perfil_predominante": "Dérbi Sam-Moto",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Sampaio Corrêa (Tubarões da Fiel)",
+    "rival_secundario": "Corinthians (Gaviões da Fiel)"
   },
   {
     "estado": "PB",
@@ -1279,7 +1515,10 @@
     "caravana": 45,
     "autonomia_financeira": 45,
     "perfil_predominante": "Tradição Paraibana",
-    "eixo_alianca": "LADO_B"
+    "eixo_alianca": "LADO_B",
+    "rival_principal": "Treze (Jovem do Treze)",
+    "rival_secundario": "Campinense (Fúria Rubro-Negra)",
+    "torcida_aliada": "Ceará (Cearamor)"
   },
   {
     "estado": "PB",
@@ -1292,7 +1531,9 @@
     "caravana": 40,
     "autonomia_financeira": 35,
     "perfil_predominante": "Clássico Tradição (Campina)",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Campinense (Fúria Rubro-Negra)",
+    "rival_secundario": "Botafogo-PB (Fúria Independente BFP)"
   },
   {
     "estado": "PB",
@@ -1305,7 +1546,9 @@
     "caravana": 40,
     "autonomia_financeira": 35,
     "perfil_predominante": "Força de Campina Grande",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Treze (Jovem do Treze)",
+    "rival_secundario": "Botafogo-PB (Fúria Independente BFP)"
   },
   {
     "estado": "SE",
@@ -1318,7 +1561,10 @@
     "caravana": 45,
     "autonomia_financeira": 40,
     "perfil_predominante": "Força de Aracaju",
-    "eixo_alianca": "LADO_A"
+    "eixo_alianca": "LADO_A",
+    "rival_principal": "Sergipe (Torcida Esquadrão Colorado)",
+    "rival_secundario": "Corinthians (Gaviões da Fiel)",
+    "torcida_aliada": "Fortaleza (Leões da TUF)"
   },
   {
     "estado": "SE",
@@ -1331,7 +1577,9 @@
     "caravana": 40,
     "autonomia_financeira": 35,
     "perfil_predominante": "Dérbi Sergipano",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Confiança (Torcida Trovão Azul)",
+    "rival_secundario": "Corinthians (Gaviões da Fiel)"
   },
   {
     "estado": "GO",
@@ -1344,7 +1592,10 @@
     "caravana": 75,
     "autonomia_financeira": 75,
     "perfil_predominante": "Linha de Frente & Eixo DPA",
-    "eixo_alianca": "DPA"
+    "eixo_alianca": "DPA",
+    "rival_principal": "Vila Nova (Esquadrão Vilanovense)",
+    "rival_secundario": "Atlético-GO (Dragões do Atlético)",
+    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)"
   },
   {
     "estado": "GO",
@@ -1357,7 +1608,9 @@
     "caravana": 70,
     "autonomia_financeira": 70,
     "perfil_predominante": "Pressão de Bancada & Punho Cruzado",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Goiás (Força Jovem Goiás)",
+    "rival_secundario": "Atlético-GO (Dragões do Atlético)"
   },
   {
     "estado": "GO",
@@ -1370,7 +1623,9 @@
     "caravana": 50,
     "autonomia_financeira": 50,
     "perfil_predominante": "Crescimento em Goiânia",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Goiás (Força Jovem Goiás)",
+    "rival_secundario": "Vila Nova (Esquadrão Vilanovense)"
   },
   {
     "estado": "GO",
@@ -1383,7 +1638,9 @@
     "caravana": 40,
     "autonomia_financeira": 35,
     "perfil_predominante": "Força do Interior Goiano",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Goiás (Força Jovem Goiás)",
+    "rival_secundario": "Vila Nova (Esquadrão Vilanovense)"
   },
   {
     "estado": "DF",
@@ -1396,7 +1653,9 @@
     "caravana": 40,
     "autonomia_financeira": 45,
     "perfil_predominante": "Presença no DF",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Vasco da Gama (Força Jovem do Vasco)",
+    "rival_secundario": "Gama (Torcida IRA Jovem do Gama)"
   },
   {
     "estado": "DF",
@@ -1410,7 +1669,10 @@
     "autonomia_financeira": 45,
     "perfil_predominante": "Clássico Verde-Amarelo",
     "eixo_alianca": "DPA",
-    "primaryColor": "#026600"
+    "primaryColor": "#026600",
+    "rival_principal": "Brasiliense (Torcida Facção Brasiliense)",
+    "rival_secundario": "Corinthians (Gaviões da Fiel)",
+    "torcida_aliada": "Palmeiras (Mancha Alvi-Verde)"
   },
   {
     "estado": "MT",
@@ -1423,7 +1685,9 @@
     "caravana": 50,
     "autonomia_financeira": 60,
     "perfil_predominante": "Apoio na Série A/B & Crescimento",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Mixto (Boca Suja)",
+    "rival_secundario": "Corinthians (Gaviões da Fiel)"
   },
   {
     "estado": "MT",
@@ -1436,7 +1700,9 @@
     "caravana": 40,
     "autonomia_financeira": 35,
     "perfil_predominante": "Mais Tradicional de MT",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Cuiabá (Torcida Fúria Cuiabana)",
+    "rival_secundario": "Corinthians (Gaviões da Fiel)"
   },
   {
     "estado": "MS",
@@ -1449,7 +1715,9 @@
     "caravana": 30,
     "autonomia_financeira": 30,
     "perfil_predominante": "Clássico Comerotio",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Comercial-MS (Falange Vermelha)",
+    "rival_secundario": "Corinthians (Gaviões da Fiel)"
   },
   {
     "estado": "MS",
@@ -1462,7 +1730,9 @@
     "caravana": 25,
     "autonomia_financeira": 25,
     "perfil_predominante": "Tradição de Campo Grande",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Operário-MS (Torcida Garra Operariana)",
+    "rival_secundario": "Corinthians (Gaviões da Fiel)"
   },
   {
     "estado": "PA",
@@ -1475,7 +1745,10 @@
     "caravana": 70,
     "autonomia_financeira": 75,
     "perfil_predominante": "Superpotência do Norte & Punho Cruzado",
-    "eixo_alianca": "LADO_B"
+    "eixo_alianca": "LADO_B",
+    "rival_principal": "Remo (Torcida Camisa 33)",
+    "rival_secundario": "Corinthians (Gaviões da Fiel)",
+    "torcida_aliada": "Ceará (Cearamor)"
   },
   {
     "estado": "PA",
@@ -1488,7 +1761,9 @@
     "caravana": 70,
     "autonomia_financeira": 75,
     "perfil_predominante": "O Pulso do Baenão/Mangueirão",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Paysandu (Terror Bicolor)",
+    "rival_secundario": "Corinthians (Gaviões da Fiel)"
   },
   {
     "estado": "PA",
@@ -1501,7 +1776,9 @@
     "caravana": 60,
     "autonomia_financeira": 55,
     "perfil_predominante": "Linha de Frente Azulina",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Paysandu (Terror Bicolor)",
+    "rival_secundario": "Corinthians (Gaviões da Fiel)"
   },
   {
     "estado": "AM",
@@ -1514,7 +1791,9 @@
     "caravana": 35,
     "autonomia_financeira": 30,
     "perfil_predominante": "Tradição Amazonense",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Amazonas FC (Onça Fiel)",
+    "rival_secundario": "São Raimundo-AM (Torcida Tufão)"
   },
   {
     "estado": "AM",
@@ -1527,7 +1806,9 @@
     "caravana": 40,
     "autonomia_financeira": 65,
     "perfil_predominante": "Torcida Nova / Apoio Empresarial",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Nacional-AM (Torcida Naça)",
+    "rival_secundario": "São Raimundo-AM (Torcida Tufão)"
   },
   {
     "estado": "AM",
@@ -1540,7 +1821,9 @@
     "caravana": 30,
     "autonomia_financeira": 20,
     "perfil_predominante": "Bairro da Colina",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Nacional-AM (Torcida Naça)",
+    "rival_secundario": "Amazonas FC (Onça Fiel)"
   },
   {
     "estado": "AC",
@@ -1553,6 +1836,8 @@
     "caravana": 25,
     "autonomia_financeira": 20,
     "perfil_predominante": "Tradição Acreana",
-    "eixo_alianca": "INDEPENDENTE"
+    "eixo_alianca": "INDEPENDENTE",
+    "rival_principal": "Corinthians (Gaviões da Fiel)",
+    "rival_secundario": "Corinthians (Gaviões da Fiel)"
   }
 ]

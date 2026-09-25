@@ -23,6 +23,7 @@ import {
   Lock,
   RefreshCw,
 } from "lucide-react";
+import { resolveTorcidaRivalries } from "@/lib/bancada_engine";
 
 export interface TeamAdminItem {
   estado: string;
@@ -584,51 +585,60 @@ export default function AdminPage() {
                   </div>
 
                   {/* Rivalidades e Conexões Diplomáticas */}
-                  <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 space-y-2">
-                    <span className="text-[10px] font-bold text-red-400 uppercase block flex items-center gap-1">
-                      <Swords className="w-3.5 h-3.5 text-red-400" /> Rivalidades e Conexões Diplomáticas:
-                    </span>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-                      <div>
-                        <span className="text-[9px] font-bold text-zinc-400 block uppercase mb-1">
-                          🔥 Rival Principal:
-                        </span>
-                        <input
-                          type="text"
-                          value={team.rival_principal || ""}
-                          onChange={(e) => handleUpdateTeam(idx, "rival_principal", e.target.value)}
-                          placeholder="Ex: Palmeiras, Ponte..."
-                          className="bg-zinc-900 border border-zinc-800 text-red-300 font-bold text-xs rounded-xl p-2 w-full focus:border-red-500/60"
-                        />
-                      </div>
+                  {(() => {
+                    const resolved = resolveTorcidaRivalries(team as any);
+                    const mainPh = `${resolved.mainRival.clube} (${resolved.mainRival.torcida})`;
+                    const secondPh = `${resolved.secondRival.clube} (${resolved.secondRival.torcida})`;
+                    const allyPh = resolved.allyTorcida ? `${resolved.allyTorcida.clube} (${resolved.allyTorcida.torcida})` : "Sem Aliada Fixa";
 
-                      <div>
-                        <span className="text-[9px] font-bold text-zinc-400 block uppercase mb-1">
-                          ⚔️ Rival Secundário:
+                    return (
+                      <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 space-y-2">
+                        <span className="text-[10px] font-bold text-red-400 uppercase block flex items-center gap-1">
+                          <Swords className="w-3.5 h-3.5 text-red-400" /> Rivalidades e Conexões Diplomáticas:
                         </span>
-                        <input
-                          type="text"
-                          value={team.rival_secundario || ""}
-                          onChange={(e) => handleUpdateTeam(idx, "rival_secundario", e.target.value)}
-                          placeholder="Ex: São Paulo, Santos..."
-                          className="bg-zinc-900 border border-zinc-800 text-amber-300 font-bold text-xs rounded-xl p-2 w-full focus:border-amber-500/60"
-                        />
-                      </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                          <div>
+                            <span className="text-[9px] font-bold text-zinc-400 block uppercase mb-1">
+                              🔥 Rival Principal:
+                            </span>
+                            <input
+                              type="text"
+                              value={team.rival_principal || ""}
+                              onChange={(e) => handleUpdateTeam(idx, "rival_principal", e.target.value)}
+                              placeholder={mainPh}
+                              className="bg-zinc-900 border border-zinc-800 text-red-300 font-bold text-xs rounded-xl p-2 w-full focus:border-red-500/60"
+                            />
+                          </div>
 
-                      <div>
-                        <span className="text-[9px] font-bold text-zinc-400 block uppercase mb-1">
-                          🤝 Torcida Aliada:
-                        </span>
-                        <input
-                          type="text"
-                          value={team.torcida_aliada || ""}
-                          onChange={(e) => handleUpdateTeam(idx, "torcida_aliada", e.target.value)}
-                          placeholder="Ex: Fúria Jovem..."
-                          className="bg-zinc-900 border border-zinc-800 text-emerald-300 font-bold text-xs rounded-xl p-2 w-full focus:border-emerald-500/60"
-                        />
+                          <div>
+                            <span className="text-[9px] font-bold text-zinc-400 block uppercase mb-1">
+                              ⚔️ Rival Secundário:
+                            </span>
+                            <input
+                              type="text"
+                              value={team.rival_secundario || ""}
+                              onChange={(e) => handleUpdateTeam(idx, "rival_secundario", e.target.value)}
+                              placeholder={secondPh}
+                              className="bg-zinc-900 border border-zinc-800 text-amber-300 font-bold text-xs rounded-xl p-2 w-full focus:border-amber-500/60"
+                            />
+                          </div>
+
+                          <div>
+                            <span className="text-[9px] font-bold text-zinc-400 block uppercase mb-1">
+                              🤝 Torcida Aliada:
+                            </span>
+                            <input
+                              type="text"
+                              value={team.torcida_aliada || ""}
+                              onChange={(e) => handleUpdateTeam(idx, "torcida_aliada", e.target.value)}
+                              placeholder={allyPh}
+                              className="bg-zinc-900 border border-zinc-800 text-emerald-300 font-bold text-xs rounded-xl p-2 w-full focus:border-emerald-500/60"
+                            />
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                    );
+                  })()}
                 </div>
               );
             })}
