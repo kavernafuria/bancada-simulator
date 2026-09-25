@@ -45,6 +45,8 @@ const ALLIANCE_AXES = [
   { id: "ALIANCA_ALVINEGRA", label: "ALIANÇA ALVINEGRA (Gaviões, Ceará, etc.)" },
   { id: "DPA", label: "DPA (Mancha, Força Jovem, Galoucura, etc.)" },
   { id: "PUNHO_CRUZADO", label: "PUNHO CRUZADO (Independente SP, Jovem Fla, Mafiosa, etc.)" },
+  { id: "PUNHO_COLADO", label: "PUNHO COLADO (Young Flu, Fúria Ind., Raça Tricolor, Fúria Marcilista)" },
+  { id: "PC", label: "PUNHO COLADO (PC - Alias)" },
   { id: "IRMANDADE", label: "IRMANDADE (Jovem Ponte, etc.)" },
   { id: "UPS", label: "UPS (União Paulista de Torcidas)" },
   { id: "PUNHO_SEGURO", label: "PUNHO SEGURO (Sub-Sedes / Linha de Frente)" },

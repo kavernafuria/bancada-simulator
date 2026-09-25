@@ -297,8 +297,8 @@ export function getDefaultTorcidaColors(clube: string): { primary: string; secon
   if (c.includes("cruzeiro") || c.includes("grêmio") || c.includes("bahia") || c.includes("csa") || c.includes("avaí") || c.includes("são bento") || c.includes("marília") || c.includes("santo andré") || c.includes("são josé") || c.includes("água santa") || c.includes("agua santa") || c.includes("aquáticos")) {
     return { primary: "#2563eb", secondary: "#f4f4f5" };
   }
-  if (c.includes("fluminense") || c.includes("ferroviária") || c.includes("juventus") || c.includes("sertãozinho") || c.includes("sertaozinho") || c.includes("raça grená")) {
-    return { primary: "#881337", secondary: "#f4f4f5" };
+  if (c.includes("fluminense") || c.includes("marcílio dias") || c.includes("marcilio dias") || c.includes("fúria marcilista") || c.includes("furia marcilista") || c.includes("ferroviária") || c.includes("juventus") || c.includes("sertãozinho") || c.includes("sertaozinho") || c.includes("raça grená")) {
+    return { primary: "#881337", secondary: "#09090b" };
   }
   return { primary: "#09090b", secondary: "#f4f4f5" };
 }
@@ -670,7 +670,7 @@ export function createCustomTorcidaWithArchetype(
     autonomia_financeira: baseStats.autonomia_financeira,
     perfil_predominante: `${arch.subtitle} • ${isTierA ? "Nova Força Dissidente" : "Movimento Independente"}`,
     estado: mapped ? mapped.estado : "SP",
-    eixo_alianca: mapped ? mapped.eixo_alianca : "PC",
+    eixo_alianca: mapped ? mapped.eixo_alianca : "INDEPENDENTE",
     primaryColor: primaryColor || (mapped ? mapped.primaryColor : undefined) || defaultColors.primary,
     secondaryColor: secondaryColor || (mapped ? mapped.secondaryColor : undefined) || defaultColors.secondary,
   };
@@ -1026,20 +1026,30 @@ export function getDerbyForMatch(
       break;
     case "paraná clube":
     case "paraná":
+    case "parana":
       mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("coritiba")) || rivalsOnly.find((t) => t.clube.toLowerCase().includes("athletico"));
+      secondRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("athletico")) || rivalsOnly.find((t) => t.clube.toLowerCase().includes("londrina"));
+      break;
+    case "marcílio dias":
+    case "marcilio dias":
+      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("joinville")) || rivalsOnly.find((t) => t.clube.toLowerCase().includes("avaí"));
+      secondRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("figueirense")) || rivalsOnly.find((t) => t.clube.toLowerCase().includes("criciúma"));
       break;
     case "londrina":
       mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("maringá")) || rivalsOnly.find((t) => t.clube.toLowerCase().includes("operário pr"));
+      secondRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("paraná"));
       break;
     case "maringá fc":
     case "maringá":
     case "operário pr":
       mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("londrina"));
+      secondRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("paraná"));
       break;
     case "criciúma":
     case "chapecoense":
     case "joinville":
       mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("avaí")) || rivalsOnly.find((t) => t.clube.toLowerCase().includes("figueirense"));
+      secondRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("marcílio dias")) || rivalsOnly.find((t) => t.clube.toLowerCase().includes("marcilio dias"));
       break;
     case "olaria":
       mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("america rj")) || rivalsOnly.find((t) => t.clube.toLowerCase().includes("bangu")) || rivalsOnly[0];
@@ -1123,6 +1133,11 @@ export function getDerbyForMatch(
       case "sertaozinho": return { stadium: "Frederico Dalmaso (Fredericão)", cityState: "Sertãozinho - SP" };
       case "mogi mirim": return { stadium: "Vail Chaves", cityState: "Mogi Mirim - SP" };
       case "itapirense": return { stadium: "Chico Vieira", cityState: "Itapira - SP" };
+      case "marcílio dias":
+      case "marcilio dias": return { stadium: "Estádio Dr. Hercílio Luz (Gigantão das Avenidas)", cityState: "Itajaí - SC" };
+      case "paraná clube":
+      case "paraná":
+      case "parana": return { stadium: "Estádio Durival Britto e Silva (Vila Capanema)", cityState: "Curitiba - PR" };
       default: return { stadium: `Estádio Municipal de ${club}`, cityState: "Interior de SP" };
     }
   };
@@ -4149,6 +4164,7 @@ export function isPrincipalRival(clubA: string, clubB: string): boolean {
   // Santa Catarina - Dérbi Florianópolis, Clássico Catarinense
   if (matches("avai", "figueirense") || matches("mancha azul", "gavioes alvinegros")) return true;
   if (matches("criciuma", "avai") || matches("criciuma", "joinville") || matches("chapecoense", "avai")) return true;
+  if (matches("marcilio dias", "joinville") || matches("marcilio dias", "avai") || matches("marcilio dias", "figueirense") || matches("furia marcilista", "uniao tricolor")) return true;
 
   // Goiás - Dérbi Goiano
   if (matches("goias", "vila nova") || matches("forca jovem goias", "esquadrao vilanovense")) return true;

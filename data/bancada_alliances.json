@@ -39,6 +39,17 @@
         "Torcida IRA Jovem do Gama"
       ]
     },
+    "PUNHO_COLADO": {
+      "name": "União Punho Colado (PC)",
+      "symbol": "👊",
+      "description": "Aliança tradicional tricolor e litorânea, defesa conjunta de setores e comitivas.",
+      "members": [
+        "Young Flu",
+        "Fúria Independente",
+        "Torcida Raça Tricolor",
+        "Fúria Marcilista"
+      ]
+    },
     "PC": {
       "name": "União Punho Colado (PC)",
       "symbol": "👊",
@@ -46,7 +57,8 @@
       "members": [
         "Young Flu",
         "Fúria Independente",
-        "Torcida Raça Tricolor"
+        "Torcida Raça Tricolor",
+        "Fúria Marcilista"
       ]
     },
     "ALIANCA_ALVINEGRA": {
