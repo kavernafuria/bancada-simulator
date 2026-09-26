@@ -1115,8 +1115,24 @@ export default function App() {
     setActiveScoutIntel(null);
     setActiveSelectedTactic(null);
 
-    // Reinicia o fluxo a partir da Etapa 1: Reunião com a PM!
-    setMatchModalPhase("POLICE_MEETING");
+    const opponentClub = activeMatchDerby
+      ? activeMatchDerby.isHome
+        ? activeMatchDerby.awayClub || activeMatchDerby.rivalTorcida
+        : activeMatchDerby.homeClub || activeMatchDerby.rivalTorcida
+      : "";
+    const isMatchAgainstPrincipalRival = isPrincipalRival(currentTorcida?.clube || "", opponentClub);
+    const isTorcidaUnicaMatch =
+      torcidaUnicaState.isTorcidaUnica &&
+      !activeMatchDerby.isAllyGame &&
+      isMatchAgainstPrincipalRival;
+
+    if (isTorcidaUnicaMatch) {
+      setMatchModalPhase("CLOSED");
+      setActiveTorcidaUnicaModalMode("MATCHDAY_CRISIS");
+    } else {
+      // Reinicia o fluxo a partir da Etapa 1: Reunião com a PM!
+      setMatchModalPhase("POLICE_MEETING");
+    }
   };
 
   const handleExecuteTacticalChoice = (tactic: TacticalBattleChoice) => {
@@ -1215,7 +1231,7 @@ export default function App() {
     };
 
     const intel: MatchScoutReport = activeScoutIntel || {
-      playerMembersPresent: Math.max(500, stats.contingente * 40),
+      playerMembersPresent: Math.max(500, stats.contingente * 40 * (isRetryWithAdAttempt ? 2 : 1)),
       rivalMembersWaiting: 2000,
       policePresence: "MODERADA",
       scoutIntelLog: "Vigência de Torcida Única do MP.",
@@ -5174,8 +5190,8 @@ export default function App() {
                 isHome: activeMatchDerby?.isHome ?? true,
                 isAllyGame: activeMatchDerby?.isAllyGame ?? false,
                 tacticalChoice: 'maze_escape',
-                homeContingent: activeMatchDerby?.isHome ? (stats.contingente * 40) : 2000,
-                awayContingent: activeMatchDerby?.isHome ? 2000 : (stats.contingente * 40),
+                homeContingent: activeMatchDerby?.isHome ? (stats.contingente * 40 * (isRetryWithAdAttempt ? 2 : 1)) : 2000,
+                awayContingent: activeMatchDerby?.isHome ? 2000 : (stats.contingente * 40 * (isRetryWithAdAttempt ? 2 : 1)),
                 opponentTier: 'A',
                 playerTorcidaName: currentTorcida?.torcida,
                 playerClubName: currentTorcida?.clube,
@@ -5185,7 +5201,7 @@ export default function App() {
                 playerSecondaryColor: tuPlayerColors.secondary,
                 rivalPrimaryColor: tuRivalColors.primary,
                 rivalSecondaryColor: tuRivalColors.secondary,
-                contingente: stats.contingente,
+                contingente: stats.contingente * (isRetryWithAdAttempt ? 2 : 1),
                 poderPista: stats.poder_pista,
               });
               setMatchModalPhase("MINIGAME");
