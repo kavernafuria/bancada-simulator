@@ -184,7 +184,6 @@ interface CollectibleItem {
   x: number;
   y: number;
   type: 'rojao' | 'bonde';
-  label: string;
   collected: boolean;
 }
 
@@ -200,7 +199,7 @@ export interface PolicePatrolCar {
 
 export interface TorcedorMember {
   id: number;
-  role: 'leader' | 'drummer' | 'banner' | 'flare' | 'singing' | 'surdo';
+  role: 'leader' | 'drummer' | 'banner' | 'flare' | 'surdo';
   name: string;
   shirtColor: string;
   skinColor: string;
@@ -281,16 +280,17 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
   }, []);
 
   const initItemsAndEntities = () => {
-    // Collectibles: 🚀 Rojões (+5%) & 👥 Partes do Bonde (+5%)
+    // Collectibles: Rojões (+5%) & Partes do Bonde (+5%)
     itemsRef.current = [
-      { id: 1, x: 1.5, y: 1.5, type: 'rojao', label: '🚀', collected: false },
-      { id: 2, x: 7.5, y: 1.5, type: 'bonde', label: '👥', collected: false },
-      { id: 3, x: 7.5, y: 7.5, type: 'rojao', label: '🚀', collected: false },
-      { id: 4, x: 13.5, y: 11.5, type: 'bonde', label: '👥', collected: false },
-      { id: 5, x: 3.5, y: 9.5, type: 'rojao', label: '🚀', collected: false },
-      { id: 6, x: 11.5, y: 5.5, type: 'bonde', label: '👥', collected: false },
+      { id: 1, x: 1.5, y: 1.5, type: 'rojao', collected: false },
+      { id: 2, x: 7.5, y: 1.5, type: 'bonde', collected: false },
+      { id: 3, x: 7.5, y: 7.5, type: 'rojao', collected: false },
+      { id: 4, x: 13.5, y: 11.5, type: 'bonde', collected: false },
+      { id: 5, x: 3.5, y: 9.5, type: 'rojao', collected: false },
+      { id: 6, x: 11.5, y: 5.5, type: 'bonde', collected: false },
     ];
 
+    // 5 Active Police Patrol Vehicles (Norte, Sul, Leste, Oeste e Centro)
     policeCarsRef.current = [
       {
         id: 1,
@@ -298,14 +298,41 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
         y: 13.5,
         path: [{ x: 2.5, y: 13.5 }, { x: 13.5, y: 13.5 }],
         targetIdx: 0,
-        speed: 1.4,
+        speed: 1.5,
         sirenPhase: 0,
       },
       {
         id: 2,
-        x: 3.5,
+        x: 1.5,
         y: 7.5,
-        path: [{ x: 3.5, y: 7.5 }, { x: 11.5, y: 7.5 }],
+        path: [{ x: 1.5, y: 7.5 }, { x: 13.5, y: 7.5 }],
+        targetIdx: 0,
+        speed: 1.5,
+        sirenPhase: 0,
+      },
+      {
+        id: 3,
+        x: 1.5,
+        y: 3.5,
+        path: [{ x: 1.5, y: 3.5 }, { x: 13.5, y: 3.5 }],
+        targetIdx: 0,
+        speed: 1.5,
+        sirenPhase: 0,
+      },
+      {
+        id: 4,
+        x: 3.5,
+        y: 1.5,
+        path: [{ x: 3.5, y: 1.5 }, { x: 3.5, y: 13.5 }],
+        targetIdx: 0,
+        speed: 1.4,
+        sirenPhase: 0,
+      },
+      {
+        id: 5,
+        x: 11.5,
+        y: 1.5,
+        path: [{ x: 11.5, y: 1.5 }, { x: 11.5, y: 13.5 }],
         targetIdx: 0,
         speed: 1.4,
         sirenPhase: 0,
@@ -537,19 +564,85 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
         }
       }
 
-      // 2. Draw Collectible Items (🚀 Rojões & 👥 Bonde)
+      // 2. Draw Collectible Items (Custom Mortar & Real Torcedores)
       itemsRef.current.forEach((item) => {
         if (!item.collected) {
           const ix = item.x * tileSize;
           const iy = item.y * tileSize;
-          ctx.font = `${tileSize * 0.6}px sans-serif`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(item.label, ix, iy);
+
+          if (item.type === 'rojao') {
+            // CUSTOM DRAWN ROJAAN MORTAR (No rocket emoji 🚀!)
+            ctx.save();
+            ctx.translate(ix, iy);
+
+            // Mortar Tube
+            ctx.fillStyle = '#991b1b';
+            ctx.fillRect(-tileSize * 0.18, -tileSize * 0.25, tileSize * 0.36, tileSize * 0.5);
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(-tileSize * 0.18, -tileSize * 0.1, tileSize * 0.36, tileSize * 0.2);
+
+            // Lit Fuse & Sparkles
+            const sparkY = -tileSize * 0.28;
+            ctx.beginPath();
+            ctx.arc(0, sparkY, 3 + Math.sin(currentTime * 0.02) * 1.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#fbbf24';
+            ctx.fill();
+
+            // Label Tag
+            ctx.font = 'bold 9px sans-serif';
+            ctx.fillStyle = '#fef08a';
+            ctx.textAlign = 'center';
+            ctx.fillText('ROJÃO', 0, tileSize * 0.35);
+
+            ctx.restore();
+          } else if (item.type === 'bonde') {
+            // SEPARATED MEMBERS DRAWN AS REAL TORCEDORES (Igual a nós)
+            ctx.save();
+            ctx.translate(ix, iy);
+
+            // Pulsating Aura Ring
+            const pulse = 1 + Math.sin(currentTime * 0.008) * 0.15;
+            ctx.beginPath();
+            ctx.arc(0, 0, tileSize * 0.35 * pulse, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(245, 158, 11, 0.25)';
+            ctx.fill();
+
+            // Group of 3 mini torcedores
+            const offsets = [
+              { x: -tileSize * 0.12, y: -tileSize * 0.08 },
+              { x: tileSize * 0.12, y: -tileSize * 0.08 },
+              { x: 0, y: tileSize * 0.12 },
+            ];
+
+            offsets.forEach((off) => {
+              ctx.beginPath();
+              ctx.arc(off.x, off.y, tileSize * 0.14, 0, Math.PI * 2);
+              ctx.fillStyle = playerPrimaryColor;
+              ctx.fill();
+              ctx.strokeStyle = '#ffffff';
+              ctx.lineWidth = 1;
+              ctx.stroke();
+
+              // Head
+              ctx.beginPath();
+              ctx.arc(off.x, off.y - tileSize * 0.06, tileSize * 0.07, 0, Math.PI * 2);
+              ctx.fillStyle = '#e0ac69';
+              ctx.fill();
+            });
+
+            // Label Tag
+            ctx.font = 'bold 9px sans-serif';
+            ctx.fillStyle = '#38bdf8';
+            ctx.textAlign = 'center';
+            ctx.fillText('ALIADOS', 0, tileSize * 0.38);
+
+            ctx.restore();
+          }
         }
       });
 
-      // 3. Draw Police Patrol Cars (🚔)
+      // 3. Draw 5 Police Patrol Cars (🚔)
       policeCarsRef.current.forEach((car) => {
         const cx = car.x * tileSize;
         const cy = car.y * tileSize;
@@ -565,7 +658,7 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
       ctx.textBaseline = 'middle';
       ctx.fillText('💥', 13.5 * tileSize, 1.5 * tileSize);
 
-      // 5. Draw Player Crowd Trail & Members
+      // 5. Draw Player Crowd Trail & WALKING PEOPLE IN THE BONDE
       if (currentGameState === 'PLAYING' || currentGameState === 'WON') {
         const trail = trailRef.current;
         crowdRoster.forEach((member, idx) => {
@@ -575,20 +668,52 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
           const mx = pos.x * tileSize;
           const my = pos.y * tileSize;
 
+          // Walking Bob animation
+          const walkBob = Math.sin(currentTime * 0.012 + idx * 1.2) * 2.5;
+
+          ctx.save();
+          ctx.translate(mx, my + walkBob);
+
+          // Torso / Shirt
           ctx.beginPath();
-          ctx.arc(mx, my, tileSize * 0.28, 0, Math.PI * 2);
+          ctx.arc(0, 0, tileSize * 0.25, 0, Math.PI * 2);
           ctx.fillStyle = member.shirtColor;
           ctx.fill();
           ctx.strokeStyle = '#ffffff';
           ctx.lineWidth = 1.5;
           ctx.stroke();
 
-          // Member Icon / Role
-          ctx.font = `${tileSize * 0.3}px sans-serif`;
+          // Head / Skin Tone
+          ctx.beginPath();
+          ctx.arc(0, -tileSize * 0.12, tileSize * 0.13, 0, Math.PI * 2);
+          ctx.fillStyle = member.skinColor;
+          ctx.fill();
+
+          // Walking legs animation
+          const legAngle = Math.sin(currentTime * 0.015 + idx) * 0.4;
+          ctx.strokeStyle = '#18181b';
+          ctx.lineWidth = 2;
+
+          // Left Leg
+          ctx.beginPath();
+          ctx.moveTo(-tileSize * 0.08, tileSize * 0.18);
+          ctx.lineTo(-tileSize * 0.08 + Math.sin(legAngle) * 4, tileSize * 0.32);
+          ctx.stroke();
+
+          // Right Leg
+          ctx.beginPath();
+          ctx.moveTo(tileSize * 0.08, tileSize * 0.18);
+          ctx.lineTo(tileSize * 0.08 - Math.sin(legAngle) * 4, tileSize * 0.32);
+          ctx.stroke();
+
+          // Member Role Icon / Item carried
+          ctx.font = `${tileSize * 0.28}px sans-serif`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           const icon = member.role === 'leader' ? '🚩' : member.role === 'flare' ? '🔥' : '🥁';
-          ctx.fillText(icon, mx, my);
+          ctx.fillText(icon, 0, -tileSize * 0.02);
+
+          ctx.restore();
         });
       }
 
@@ -669,11 +794,11 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
 
         <div className="flex justify-between text-[11px] text-zinc-400 pt-1">
           <span className="flex items-center space-x-1">
-            <span>🚀 Rojões:</span>
+            <span>🧨 Rojões:</span>
             <strong className="text-amber-300 font-mono">{rojaoCount}</strong>
           </span>
           <span className="flex items-center space-x-1">
-            <span>👥 Partes do Bonde:</span>
+            <span>👥 Aliados Reunidos:</span>
             <strong className="text-sky-300 font-mono">{bondeCount}</strong>
           </span>
         </div>
@@ -699,7 +824,7 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
                 CONFRONTO DE PISTA NA MÃO LIMPA
               </h2>
               <p className="text-xs text-zinc-300 max-w-xs mx-auto leading-relaxed">
-                Navegue pelas ruas, recolha <strong className="text-amber-400">Rojões 🚀</strong> e <strong className="text-sky-400">Membros do Bonde 👥</strong> para acumular até <strong className="text-emerald-400">+20% de Bônus</strong>, desvie das <strong className="text-red-400">Patrulhas da PM 🚔</strong> e intercepte o <strong className="text-red-400">Bonde Rival 💥</strong> na saída!
+                Navegue pelas ruas, recolha <strong className="text-amber-400">Rojões 🧨</strong> e <strong className="text-sky-400">Aliados Dispersos 👥</strong> para acumular até <strong className="text-emerald-400">+20% de Bônus</strong>, desvie das <strong className="text-red-400">5 Patrulhas da PM 🚔</strong> e intercepte o <strong className="text-red-400">Bonde Rival 💥</strong> na saída!
               </p>
 
               <button
