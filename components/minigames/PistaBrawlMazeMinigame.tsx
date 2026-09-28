@@ -195,6 +195,8 @@ export interface PolicePatrolCar {
   targetIdx: number;
   speed: number;
   sirenPhase: number;
+  isChasing: boolean;
+  detectionRadius: number;
 }
 
 export interface TorcedorMember {
@@ -291,7 +293,7 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
       { id: 6, x: 11.5, y: 5.5, type: 'bonde', collected: false },
     ];
 
-    // 5 Active Police Patrol Vehicles
+    // 5 Active Police Patrol Vehicles with Perception Zones (Radius 2.8 tiles)
     policeCarsRef.current = [
       {
         id: 1,
@@ -301,6 +303,8 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
         targetIdx: 0,
         speed: 1.5,
         sirenPhase: 0,
+        isChasing: false,
+        detectionRadius: 2.8,
       },
       {
         id: 2,
@@ -310,6 +314,8 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
         targetIdx: 0,
         speed: 1.5,
         sirenPhase: 0,
+        isChasing: false,
+        detectionRadius: 2.8,
       },
       {
         id: 3,
@@ -319,6 +325,8 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
         targetIdx: 0,
         speed: 1.5,
         sirenPhase: 0,
+        isChasing: false,
+        detectionRadius: 2.8,
       },
       {
         id: 4,
@@ -328,6 +336,8 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
         targetIdx: 0,
         speed: 1.4,
         sirenPhase: 0,
+        isChasing: false,
+        detectionRadius: 2.8,
       },
       {
         id: 5,
@@ -337,6 +347,8 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
         targetIdx: 0,
         speed: 1.4,
         sirenPhase: 0,
+        isChasing: false,
+        detectionRadius: 2.8,
       },
     ];
 
@@ -526,23 +538,51 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
           }
         });
 
-        // Update Police Patrols
+        // Update Police Patrols (Perception Zone & Equal Speed Pursuit)
         policeCarsRef.current.forEach((car) => {
-          const target = car.path[car.targetIdx];
-          const dx = target.x - car.x;
-          const dy = target.y - car.y;
-          const dist = Math.hypot(dx, dy);
+          const pDist = Math.hypot(player.x - car.x, player.y - car.y);
 
-          if (dist < 0.2) {
-            car.targetIdx = (car.targetIdx + 1) % car.path.length;
+          // Check Perception Zone (Radius 2.8 tiles)
+          if (pDist <= car.detectionRadius) {
+            if (!car.isChasing) {
+              car.isChasing = true;
+              audio.playPoliceSiren();
+            }
+          } else if (pDist > 4.5) {
+            car.isChasing = false; // Player outmaneuvered police car!
+          }
+
+          if (car.isChasing) {
+            // PURSUIT MODE: Chase player at EQUAL SPEED (3.2 tiles/sec)
+            const dx = player.x - car.x;
+            const dy = player.y - car.y;
+            const dist = Math.hypot(dx, dy);
+
+            if (dist > 0.05) {
+              const chaseSpeed = player.speed; // 3.2 (Equal speed to player!)
+              const nextCarX = car.x + (dx / dist) * chaseSpeed * dt;
+              const nextCarY = car.y + (dy / dist) * chaseSpeed * dt;
+
+              if (!isWall(nextCarX, car.y)) car.x = nextCarX;
+              if (!isWall(car.x, nextCarY)) car.y = nextCarY;
+            }
           } else {
-            car.x += (dx / dist) * car.speed * dt;
-            car.y += (dy / dist) * car.speed * dt;
+            // PATROL MODE: Follow routine route
+            const target = car.path[car.targetIdx];
+            const dx = target.x - car.x;
+            const dy = target.y - car.y;
+            const dist = Math.hypot(dx, dy);
+
+            if (dist < 0.2) {
+              car.targetIdx = (car.targetIdx + 1) % car.path.length;
+            } else {
+              car.x += (dx / dist) * car.speed * dt;
+              car.y += (dy / dist) * car.speed * dt;
+            }
           }
 
           // Check collision with Police Car
-          const pDist = Math.hypot(player.x - car.x, player.y - car.y);
-          if (pDist < 0.7) {
+          if (pDist < 0.75) {
             audio.playPoliceSiren();
             finishGameAndReturn(false, 'POLICE');
           }
@@ -665,10 +705,31 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
         }
       });
 
-      // 3. Draw 5 Police Patrol Cars (🚔)
+      // 3. Draw 5 Police Patrol Cars with Perception Zones (🚔)
       policeCarsRef.current.forEach((car) => {
         const cx = car.x * tileSize;
         const cy = car.y * tileSize;
+
+        // Draw Perception Zone Ring
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, car.detectionRadius * tileSize, 0, Math.PI * 2);
+        ctx.fillStyle = car.isChasing ? 'rgba(239, 68, 68, 0.22)' : 'rgba(239, 68, 68, 0.08)';
+        ctx.fill();
+        ctx.strokeStyle = car.isChasing ? '#ef4444' : 'rgba(239, 68, 68, 0.4)';
+        ctx.lineWidth = car.isChasing ? 2 : 1;
+        if (!car.isChasing) ctx.setLineDash([4, 4]);
+        ctx.stroke();
+
+        if (car.isChasing) {
+          ctx.font = 'black 9px sans-serif';
+          ctx.fillStyle = '#ef4444';
+          ctx.textAlign = 'center';
+          ctx.fillText('🚨 PERSEGUIÇÃO', cx, cy - tileSize * 0.55);
+        }
+        ctx.restore();
+
+        // Draw Police Car Icon
         ctx.font = `${tileSize * 0.65}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
