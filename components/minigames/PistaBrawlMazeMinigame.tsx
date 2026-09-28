@@ -293,51 +293,51 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
       { id: 6, x: 11.5, y: 5.5, type: 'bonde', collected: false },
     ];
 
-    // 5 Active Police Patrol Vehicles with Perception Zones (Radius 2.8 tiles)
+    // 5 Active Police Patrol Vehicles with Small Perception Zones (Radius 0.5 tiles)
     policeCarsRef.current = [
       {
         id: 1,
-        x: 2.5,
+        x: 7.5,
         y: 13.5,
-        path: [{ x: 2.5, y: 13.5 }, { x: 13.5, y: 13.5 }],
+        path: [{ x: 7.5, y: 13.5 }, { x: 13.5, y: 13.5 }],
         targetIdx: 0,
         speed: 1.5,
         sirenPhase: 0,
         isChasing: false,
-        detectionRadius: 2.8,
+        detectionRadius: 0.5,
       },
       {
         id: 2,
-        x: 1.5,
+        x: 5.5,
         y: 7.5,
-        path: [{ x: 1.5, y: 7.5 }, { x: 13.5, y: 7.5 }],
+        path: [{ x: 5.5, y: 7.5 }, { x: 13.5, y: 7.5 }],
         targetIdx: 0,
         speed: 1.5,
         sirenPhase: 0,
         isChasing: false,
-        detectionRadius: 2.8,
+        detectionRadius: 0.5,
       },
       {
         id: 3,
-        x: 1.5,
+        x: 5.5,
         y: 3.5,
-        path: [{ x: 1.5, y: 3.5 }, { x: 13.5, y: 3.5 }],
+        path: [{ x: 5.5, y: 3.5 }, { x: 13.5, y: 3.5 }],
         targetIdx: 0,
         speed: 1.5,
         sirenPhase: 0,
         isChasing: false,
-        detectionRadius: 2.8,
+        detectionRadius: 0.5,
       },
       {
         id: 4,
         x: 3.5,
         y: 1.5,
-        path: [{ x: 3.5, y: 1.5 }, { x: 3.5, y: 13.5 }],
+        path: [{ x: 3.5, y: 1.5 }, { x: 3.5, y: 9.5 }],
         targetIdx: 0,
         speed: 1.4,
         sirenPhase: 0,
         isChasing: false,
-        detectionRadius: 2.8,
+        detectionRadius: 0.5,
       },
       {
         id: 5,
@@ -348,7 +348,7 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
         speed: 1.4,
         sirenPhase: 0,
         isChasing: false,
-        detectionRadius: 2.8,
+        detectionRadius: 0.5,
       },
     ];
 
@@ -548,7 +548,7 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
               car.isChasing = true;
               audio.playPoliceSiren();
             }
-          } else if (pDist > 4.5) {
+          } else if (pDist > 2.5) {
             car.isChasing = false; // Player outmaneuvered police car!
           }
 
