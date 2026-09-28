@@ -58,7 +58,7 @@ class SoundEngine {
     osc.type = 'sawtooth';
     osc.frequency.setValueAtTime(440, now);
     osc.frequency.exponentialRampToValueAtTime(1760, now + 0.18);
-    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.setValueAtTime(0.35, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
     osc.connect(gain);
     gain.connect(this.ctx.destination);
@@ -72,8 +72,8 @@ class SoundEngine {
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     osc.type = 'triangle';
-    osc.frequency.setValueAtTime(300, now);
-    osc.frequency.exponentialRampToValueAtTime(600, now + 0.15);
+    osc.frequency.setValueAtTime(320, now);
+    osc.frequency.exponentialRampToValueAtTime(640, now + 0.15);
     gain.gain.setValueAtTime(0.35, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
     osc.connect(gain);
@@ -99,185 +99,525 @@ class SoundEngine {
     osc.stop(now + 0.35);
   }
 
+  playWhistle() {
+    if (!this.ctx || !this.enabled) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(2400, now);
+    osc.frequency.setValueAtTime(2200, now + 0.08);
+    osc.frequency.setValueAtTime(2600, now + 0.16);
+    gain.gain.setValueAtTime(0.18, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.35);
+  }
+
   playBrawlClimax() {
     if (!this.ctx || !this.enabled) return;
     const now = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     osc.type = 'square';
-    osc.frequency.setValueAtTime(120, now);
-    osc.frequency.linearRampToValueAtTime(440, now + 0.4);
-    gain.gain.setValueAtTime(0.5, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+    osc.frequency.setValueAtTime(140, now);
+    osc.frequency.exponentialRampToValueAtTime(40, now + 0.4);
+    gain.gain.setValueAtTime(0.4, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
     osc.connect(gain);
     gain.connect(this.ctx.destination);
     osc.start(now);
-    osc.stop(now + 0.5);
+    osc.stop(now + 0.45);
+    setTimeout(() => this.playCheer(), 150);
+  }
+
+  playCheer() {
+    if (!this.ctx || !this.enabled) return;
+    const now = this.ctx.currentTime;
+    [440, 554.37, 659.25, 880].forEach((freq, i) => {
+      if (!this.ctx) return;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now + i * 0.08);
+      gain.gain.setValueAtTime(0.18, now + i * 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now + i * 0.08);
+      osc.stop(now + 0.5);
+    });
   }
 }
 
-const soundEngine = new SoundEngine();
+const audio = new SoundEngine();
 
-// GRID CONSTANTS
-const GRID_ROWS = 9;
-const GRID_COLS = 9;
+/* ==========================================================================
+   MAZE MAP DEFINITION (15x15 Urban Grid)
+   ========================================================================== */
+const GRID_W = 15;
+const GRID_H = 15;
 
-interface ItemSpot {
-  r: number;
-  c: number;
-  type: 'ROJAO' | 'BONDE_MEMBER' | 'POLICE_PATROL';
-  id: string;
+// 0: Rua/Pista, 1: Muro/Barreira, 3: Saída/Confronto de Pista (Bonde Rival)
+const MAZE_MAP = [
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  [1,0,0,0,1,0,0,0,0,0,1,0,0,3,1],
+  [1,0,1,0,1,0,1,1,1,0,1,0,1,0,1],
+  [1,0,1,0,0,0,0,0,1,0,0,0,1,0,1],
+  [1,0,1,1,1,1,0,1,1,1,1,0,1,0,1],
+  [1,0,0,0,0,1,0,0,0,0,1,0,0,0,1],
+  [1,1,1,0,1,1,1,0,1,0,1,1,1,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // Avenida central aberta
+  [1,0,1,1,1,0,1,0,1,0,1,1,1,0,1],
+  [1,0,1,0,0,0,0,0,0,0,0,0,1,0,1],
+  [1,0,1,0,1,1,1,0,1,1,1,0,1,0,1],
+  [1,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
+  [1,0,1,1,1,0,1,1,1,0,1,1,1,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // Largada do Bonde (1.5, 13.5)
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+];
+
+interface CollectibleItem {
+  id: number;
+  x: number;
+  y: number;
+  type: 'rojao' | 'bonde';
+  label: string;
+  collected: boolean;
+}
+
+export interface PolicePatrolCar {
+  id: number;
+  x: number;
+  y: number;
+  path: { x: number; y: number }[];
+  targetIdx: number;
+  speed: number;
+  sirenPhase: number;
+}
+
+export interface TorcedorMember {
+  id: number;
+  role: 'leader' | 'drummer' | 'banner' | 'flare' | 'singing' | 'surdo';
+  name: string;
+  shirtColor: string;
+  skinColor: string;
 }
 
 export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
-  playerTorcidaName = "Sua Torcida",
-  playerClubName = "Seu Clube",
-  rivalTorcidaName = "Torcida Rival",
-  playerPrimaryColor = "#e11d48",
-  playerSecondaryColor = "#9f1239",
-  rivalPrimaryColor = "#2563eb",
-  rivalSecondaryColor = "#1e40af",
+  playerTorcidaName = 'Torcida Organizada',
+  playerClubName = 'Nosso Clube',
+  rivalTorcidaName = 'Torcida Rival',
+  playerPrimaryColor = '#e11d48',
+  playerSecondaryColor = '#ffffff',
+  rivalPrimaryColor = '#2563eb',
+  rivalSecondaryColor = '#09090b',
   contingente = 50,
   poderPista = 50,
   onFinish,
 }) => {
-  const [playerPos, setPlayerPos] = useState<{ r: number; c: number }>({ r: 0, c: 0 });
-  const [items, setItems] = useState<ItemSpot[]>([]);
-  const [rojaoCount, setRojaoCount] = useState<number>(0);
-  const [bondeCount, setBondeCount] = useState<number>(0);
-  const [soundOn, setSoundOn] = useState<boolean>(true);
-  const [timeLeft, setTimeLeft] = useState<number>(20);
-  const [isFinished, setIsFinished] = useState<boolean>(false);
-  const [climaxText, setClimaxText] = useState<string | null>(null);
+  const crowdRoster: TorcedorMember[] = [
+    { id: 1, role: 'leader', name: 'Puxador', shirtColor: playerPrimaryColor, skinColor: '#e0ac69' },
+    { id: 2, role: 'drummer', name: 'Bumbo de Alça', shirtColor: playerSecondaryColor, skinColor: '#f1c27d' },
+    { id: 3, role: 'banner', name: 'Bandeirão', shirtColor: playerPrimaryColor, skinColor: '#8d5524' },
+    { id: 4, role: 'flare', name: 'Sinalizador', shirtColor: playerSecondaryColor, skinColor: '#ffdbac' },
+    { id: 5, role: 'surdo', name: 'Surdo de Marcação', shirtColor: playerPrimaryColor, skinColor: '#e0ac69' },
+  ];
 
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [gameState, setGameState] = useState<'READY' | 'PLAYING' | 'WON' | 'LOST'>('READY');
+  const [soundEnabled, setSoundEnabled] = useState(true);
 
-  // Initialize Items on Grid
+  const [timeLeft, setTimeLeft] = useState(40);
+  const [rojaoCount, setRojaoCount] = useState(0);
+  const [bondeCount, setBondeCount] = useState(0);
+  const [lastScore, setLastScore] = useState(85);
+
+  const gameStateRef = useRef(gameState);
+  gameStateRef.current = gameState;
+
+  const playerRef = useRef({
+    x: 1.5,
+    y: 13.5,
+    vx: 0,
+    vy: 0,
+    speed: 3.2,
+    flareActive: false,
+    flareTime: 0,
+  });
+
+  const trailRef = useRef<{ x: number; y: number }[]>([]);
+  const itemsRef = useRef<CollectibleItem[]>([]);
+  const policeCarsRef = useRef<PolicePatrolCar[]>([]);
+  const smokeParticlesRef = useRef<{ x: number; y: number; vx: number; vy: number; size: number; life: number; color: string }[]>([]);
+  const keysRef = useRef<{ [key: string]: boolean }>({});
+
+  const toggleSound = () => {
+    const next = !soundEnabled;
+    setSoundEnabled(next);
+    audio.enabled = next;
+    if (next) audio.init();
+  };
+
+  // Keyboard listeners
   useEffect(() => {
-    soundEngine.init();
-
-    const initialItems: ItemSpot[] = [
-      { r: 0, c: 3, type: 'ROJAO', id: 'r1' },
-      { r: 2, c: 1, type: 'BONDE_MEMBER', id: 'b1' },
-      { r: 2, c: 5, type: 'ROJAO', id: 'r2' },
-      { r: 4, c: 2, type: 'POLICE_PATROL', id: 'p1' },
-      { r: 4, c: 6, type: 'BONDE_MEMBER', id: 'b2' },
-      { r: 5, c: 4, type: 'ROJAO', id: 'r3' },
-      { r: 6, c: 1, type: 'POLICE_PATROL', id: 'p2' },
-      { r: 6, c: 7, type: 'BONDE_MEMBER', id: 'b3' },
-      { r: 7, c: 3, type: 'ROJAO', id: 'r4' },
-      { r: 8, c: 5, type: 'BONDE_MEMBER', id: 'b4' },
-    ];
-    setItems(initialItems);
-
-    // Timer Interval
-    timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          if (timerRef.current) clearInterval(timerRef.current);
-          handleTriggerClimax(false);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
+    const handleKeyDown = (e: KeyboardEvent) => {
+      keysRef.current[e.key.toLowerCase()] = true;
+      if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(e.key.toLowerCase())) {
+        e.preventDefault();
+      }
+    };
+    const handleKeyUp = (e: KeyboardEvent) => {
+      keysRef.current[e.key.toLowerCase()] = false;
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
     };
   }, []);
 
-  // Keyboard Movement Listener
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (isFinished) return;
-      if (['ArrowUp', 'KeyW'].includes(e.code)) movePlayer(-1, 0);
-      else if (['ArrowDown', 'KeyS'].includes(e.code)) movePlayer(1, 0);
-      else if (['ArrowLeft', 'KeyA'].includes(e.code)) movePlayer(0, -1);
-      else if (['ArrowRight', 'KeyD'].includes(e.code)) movePlayer(0, 1);
-    };
+  const initItemsAndEntities = () => {
+    // Collectibles: 🚀 Rojões (+5%) & 👥 Partes do Bonde (+5%)
+    itemsRef.current = [
+      { id: 1, x: 1.5, y: 1.5, type: 'rojao', label: '🚀', collected: false },
+      { id: 2, x: 7.5, y: 1.5, type: 'bonde', label: '👥', collected: false },
+      { id: 3, x: 7.5, y: 7.5, type: 'rojao', label: '🚀', collected: false },
+      { id: 4, x: 13.5, y: 11.5, type: 'bonde', label: '👥', collected: false },
+      { id: 5, x: 3.5, y: 9.5, type: 'rojao', label: '🚀', collected: false },
+      { id: 6, x: 11.5, y: 5.5, type: 'bonde', label: '👥', collected: false },
+    ];
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [playerPos, isFinished, items]);
+    policeCarsRef.current = [
+      {
+        id: 1,
+        x: 2.5,
+        y: 13.5,
+        path: [{ x: 2.5, y: 13.5 }, { x: 13.5, y: 13.5 }],
+        targetIdx: 0,
+        speed: 1.4,
+        sirenPhase: 0,
+      },
+      {
+        id: 2,
+        x: 3.5,
+        y: 7.5,
+        path: [{ x: 3.5, y: 7.5 }, { x: 11.5, y: 7.5 }],
+        targetIdx: 0,
+        speed: 1.4,
+        sirenPhase: 0,
+      },
+    ];
 
-  const movePlayer = (dr: number, dc: number) => {
-    if (isFinished) return;
-
-    const newR = Math.max(0, Math.min(GRID_ROWS - 1, playerPos.r + dr));
-    const newC = Math.max(0, Math.min(GRID_COLS - 1, playerPos.c + dc));
-
-    if (newR === playerPos.r && newC === playerPos.c) return;
-
-    soundEngine.playBumbo();
-    setPlayerPos({ r: newR, c: newC });
-
-    // Check item pickup / collision
-    const hitItem = items.find((it) => it.r === newR && it.c === newC);
-    if (hitItem) {
-      if (hitItem.type === 'ROJAO') {
-        soundEngine.playRojaoPickup();
-        setRojaoCount((prev) => prev + 1);
-        setItems((prev) => prev.filter((it) => it.id !== hitItem.id));
-      } else if (hitItem.type === 'BONDE_MEMBER') {
-        soundEngine.playBondePickup();
-        setBondeCount((prev) => prev + 1);
-        setItems((prev) => prev.filter((it) => it.id !== hitItem.id));
-      } else if (hitItem.type === 'POLICE_PATROL') {
-        soundEngine.playPoliceSiren();
-        setTimeLeft((prev) => Math.max(1, prev - 2));
-      }
-    }
-
-    // Check reaching exit (Rival Bonde at GRID_ROWS - 1, GRID_COLS - 1)
-    if (newR === GRID_ROWS - 1 && newC === GRID_COLS - 1) {
-      if (timerRef.current) clearInterval(timerRef.current);
-      handleTriggerClimax(true);
-    }
+    setRojaoCount(0);
+    setBondeCount(0);
   };
 
-  const handleTriggerClimax = (reachedRival: boolean) => {
-    if (isFinished) return;
-    setIsFinished(true);
+  const isWall = (x: number, y: number) => {
+    const gx = Math.floor(x);
+    const gy = Math.floor(y);
+    if (gx < 0 || gx >= GRID_W || gy < 0 || gy >= GRID_H) return true;
+    return MAZE_MAP[gy][gx] === 1;
+  };
 
-    soundEngine.playBrawlClimax();
+  const startMinigame = () => {
+    audio.init();
+    audio.playWhistle();
 
-    // Calculate Bonus (5% per rojao, 5% per bonde member, capped at +20%)
+    const startX = 1.5;
+    const startY = 13.5;
+
+    playerRef.current = {
+      x: startX,
+      y: startY,
+      vx: 0,
+      vy: 0,
+      speed: 3.2,
+      flareActive: false,
+      flareTime: 0,
+    };
+
+    trailRef.current = Array.from({ length: 100 }, () => ({ x: startX, y: startY }));
+    smokeParticlesRef.current = [];
+
+    initItemsAndEntities();
+    setTimeLeft(40);
+    setGameState('PLAYING');
+  };
+
+  const finishGameAndReturn = (won: boolean, cause: 'REACHED_RIVAL' | 'POLICE' | 'TIMEOUT') => {
+    setGameState(won ? 'WON' : 'LOST');
+
     const rawBonusPercent = (rojaoCount + bondeCount) * 0.05;
     const finalBonusPercent = Math.min(0.20, rawBonusPercent);
     const bonusDisplayInt = Math.round(finalBonusPercent * 100);
 
-    const title = reachedRival
-      ? `💥 BONDE ENCONTROU O RIVAL NA SAÍDA DA PISTA!`
-      : `⏱️ TEMPO ESGOTADO - CONFRONTO FORÇADO NA RODOVIA!`;
+    if (won) {
+      audio.playBrawlClimax();
+      const score = Math.min(100, 70 + bonusDisplayInt);
+      setLastScore(score);
 
-    setClimaxText(title);
-
-    // Calculate Fight Win Probability
-    const baseWinProb = Math.min(0.85, Math.max(0.15, (poderPista / 100) * 0.6 + (contingente / 100) * 0.4));
-    const totalWinProb = Math.min(0.95, baseWinProb + finalBonusPercent);
-
-    const isVictory = Math.random() < totalWinProb;
-    const finalPEC = isVictory ? finalBonusPercent + 0.10 : -0.10;
-
-    setTimeout(() => {
       onFinish({
-        gameType: 'pista_brawl',
-        modifier: finalPEC,
-        rank: isVictory ? 'S' : 'F',
-        penaltyMP: isVictory ? 5 : 15,
-        description: isVictory
-          ? `VITÓRIA NA PISTA (+${bonusDisplayInt}% BÔNUS DE ROJÕES E BONDE) - ${playerTorcidaName} dominou o perímetro!`
-          : `DERROTA NA PISTA (Bônus +${bonusDisplayInt}% acumulado) - O bonde rival levou a melhor no confronto de saída.`,
+        gameType: 'pista_brawl' as any,
+        modifier: finalBonusPercent + 0.10,
+        rank: 'S',
+        penaltyMP: 5,
+        description: `🥊 TRIUNFO NO CONFRONTO DE PISTA! O bonde da ${playerTorcidaName} coletou rojões e reuniu sub-sedes no percurso (Bônus +${bonusDisplayInt}%), encurralou o Bonde Rival na saída e venceu o embate (+${Math.round((finalBonusPercent + 0.10) * 100)}% PEC, +15 Moral)!`,
       });
-    }, 2200);
+    } else {
+      audio.playWhistle();
+      if (cause === 'POLICE') {
+        setLastScore(25);
+        onFinish({
+          gameType: 'pista_brawl' as any,
+          modifier: -0.20,
+          rank: 'F',
+          penaltyMP: 20,
+          description: `🚓 INTERCEPTAÇÃO POLICIAL NA PISTA! As patrulhas da PM interceptaram o bonde durante o deslocamento. Houve apreensão de rojões e detenções de membros (+20% Risco MP, -20% PEC, -12 Moral).`,
+        });
+      } else {
+        setLastScore(35);
+        onFinish({
+          gameType: 'pista_brawl' as any,
+          modifier: -0.15,
+          rank: 'F',
+          penaltyMP: 10,
+          description: `⏱️ TEMPO ESGOTADO NA PISTA! O bonde demorou no percurso e foi surpreendido antes de se estruturar no confronto de saída (-15% PEC, -8 Moral, +10% Risco MP).`,
+        });
+      }
+    }
   };
 
-  // Calculate HUD Bonus Display
+  // Timer loop
+  useEffect(() => {
+    let timer: NodeJS.Timeout | null = null;
+    if (gameState === 'PLAYING') {
+      timer = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev % 4 === 0) audio.playBumbo();
+          if (prev <= 1) {
+            finishGameAndReturn(false, 'TIMEOUT');
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [gameState, rojaoCount, bondeCount]);
+
+  // Main Canvas Render & Animation Loop (60 FPS)
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animId: number;
+    let lastTime = performance.now();
+
+    const renderLoop = (currentTime: number) => {
+      const dt = Math.min((currentTime - lastTime) / 1000, 0.1);
+      lastTime = currentTime;
+
+      const currentGameState = gameStateRef.current;
+      const player = playerRef.current;
+      const tileSize = canvas.width / GRID_W;
+
+      // Update game physics if playing
+      if (currentGameState === 'PLAYING') {
+        const keys = keysRef.current;
+        let moveX = 0;
+        let moveY = 0;
+        if (keys['arrowup'] || keys['w']) moveY -= 1;
+        if (keys['arrowdown'] || keys['s']) moveY += 1;
+        if (keys['arrowleft'] || keys['a']) moveX -= 1;
+        if (keys['arrowright'] || keys['d']) moveX += 1;
+
+        if (moveX !== 0 || moveY !== 0) {
+          const len = Math.hypot(moveX, moveY);
+          player.vx = moveX / len;
+          player.vy = moveY / len;
+        }
+
+        const speed = player.speed;
+        const nextX = player.x + player.vx * speed * dt;
+        const nextY = player.y + player.vy * speed * dt;
+
+        if (!isWall(nextX, player.y)) player.x = nextX;
+        if (!isWall(player.x, nextY)) player.y = nextY;
+
+        // Check Items pickup
+        itemsRef.current.forEach((item) => {
+          if (!item.collected) {
+            const dist = Math.hypot(player.x - item.x, player.y - item.y);
+            if (dist < 0.6) {
+              item.collected = true;
+              if (item.type === 'rojao') {
+                audio.playRojaoPickup();
+                setRojaoCount((c) => c + 1);
+              } else if (item.type === 'bonde') {
+                audio.playBondePickup();
+                setBondeCount((c) => c + 1);
+              }
+            }
+          }
+        });
+
+        // Update Police Patrols
+        policeCarsRef.current.forEach((car) => {
+          const target = car.path[car.targetIdx];
+          const dx = target.x - car.x;
+          const dy = target.y - car.y;
+          const dist = Math.hypot(dx, dy);
+
+          if (dist < 0.2) {
+            car.targetIdx = (car.targetIdx + 1) % car.path.length;
+          } else {
+            car.x += (dx / dist) * car.speed * dt;
+            car.y += (dy / dist) * car.speed * dt;
+          }
+
+          // Check collision with Police Car
+          const pDist = Math.hypot(player.x - car.x, player.y - car.y);
+          if (pDist < 0.7) {
+            audio.playPoliceSiren();
+            finishGameAndReturn(false, 'POLICE');
+          }
+        });
+
+        // Check reaching Exit / Rival Bonde at (13.5, 1.5)
+        const exitDist = Math.hypot(player.x - 13.5, player.y - 1.5);
+        if (exitDist < 0.8) {
+          finishGameAndReturn(true, 'REACHED_RIVAL');
+        }
+
+        // Update crowd trail
+        trailRef.current.unshift({ x: player.x, y: player.y });
+        if (trailRef.current.length > 100) trailRef.current.pop();
+      }
+
+      // ==========================================
+      // CANVAS DRAWING SECTION
+      // ==========================================
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 1. Draw Map Tiles
+      for (let r = 0; r < GRID_H; r++) {
+        for (let c = 0; c < GRID_W; c++) {
+          const tile = MAZE_MAP[r][c];
+          const px = c * tileSize;
+          const py = r * tileSize;
+
+          if (tile === 1) {
+            // Concrete Wall
+            ctx.fillStyle = '#18181b';
+            ctx.fillRect(px, py, tileSize, tileSize);
+            ctx.strokeStyle = '#27272a';
+            ctx.strokeRect(px + 1, py + 1, tileSize - 2, tileSize - 2);
+          } else if (tile === 3) {
+            // Exit Gate / Bonde Rival Zone
+            ctx.fillStyle = 'rgba(220, 38, 38, 0.25)';
+            ctx.fillRect(px, py, tileSize, tileSize);
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(px + 2, py + 2, tileSize - 4, tileSize - 4);
+          } else {
+            // Street Asphalt
+            ctx.fillStyle = '#09090b';
+            ctx.fillRect(px, py, tileSize, tileSize);
+            ctx.strokeStyle = '#18181b';
+            ctx.strokeRect(px, py, tileSize, tileSize);
+          }
+        }
+      }
+
+      // 2. Draw Collectible Items (🚀 Rojões & 👥 Bonde)
+      itemsRef.current.forEach((item) => {
+        if (!item.collected) {
+          const ix = item.x * tileSize;
+          const iy = item.y * tileSize;
+          ctx.font = `${tileSize * 0.6}px sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(item.label, ix, iy);
+        }
+      });
+
+      // 3. Draw Police Patrol Cars (🚔)
+      policeCarsRef.current.forEach((car) => {
+        const cx = car.x * tileSize;
+        const cy = car.y * tileSize;
+        ctx.font = `${tileSize * 0.65}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🚔', cx, cy);
+      });
+
+      // 4. Draw Rival Bonde on Exit (💥)
+      ctx.font = `${tileSize * 0.75}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('💥', 13.5 * tileSize, 1.5 * tileSize);
+
+      // 5. Draw Player Crowd Trail & Members
+      if (currentGameState === 'PLAYING' || currentGameState === 'WON') {
+        const trail = trailRef.current;
+        crowdRoster.forEach((member, idx) => {
+          const posIdx = Math.min(idx * 12, trail.length - 1);
+          const pos = trail[posIdx] || { x: player.x, y: player.y };
+
+          const mx = pos.x * tileSize;
+          const my = pos.y * tileSize;
+
+          ctx.beginPath();
+          ctx.arc(mx, my, tileSize * 0.28, 0, Math.PI * 2);
+          ctx.fillStyle = member.shirtColor;
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+
+          // Member Icon / Role
+          ctx.font = `${tileSize * 0.3}px sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          const icon = member.role === 'leader' ? '🚩' : member.role === 'flare' ? '🔥' : '🥁';
+          ctx.fillText(icon, mx, my);
+        });
+      }
+
+      animId = requestAnimationFrame(renderLoop);
+    };
+
+    animId = requestAnimationFrame(renderLoop);
+    return () => cancelAnimationFrame(animId);
+  }, [gameState]);
+
+  // Touch D-Pad Handler
+  const handleDPadMove = (dir: 'UP' | 'DOWN' | 'LEFT' | 'RIGHT') => {
+    const keys = keysRef.current;
+    keys['w'] = dir === 'UP';
+    keys['s'] = dir === 'DOWN';
+    keys['a'] = dir === 'LEFT';
+    keys['d'] = dir === 'RIGHT';
+    setTimeout(() => {
+      keys['w'] = false;
+      keys['s'] = false;
+      keys['a'] = false;
+      keys['d'] = false;
+    }, 200);
+  };
+
   const currentBonusPercent = Math.min(20, (rojaoCount + bondeCount) * 5);
 
   return (
-    <div className="relative w-full max-w-lg mx-auto bg-zinc-950 border border-red-500/50 rounded-3xl p-4 shadow-2xl text-white space-y-3 font-sans animate-fade-in">
+    <div className="relative w-full max-w-xl mx-auto bg-zinc-950 border border-red-500/50 rounded-3xl p-4 shadow-2xl text-white space-y-3 font-sans animate-fade-in">
       {/* HEADER HUD */}
       <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
         <div className="flex items-center space-x-2">
@@ -291,19 +631,16 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
         </div>
 
         <button
-          onClick={() => {
-            soundEngine.enabled = !soundEngine.enabled;
-            setSoundOn(soundEngine.enabled);
-          }}
-          className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400"
+          onClick={toggleSound}
+          className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 cursor-pointer"
         >
-          {soundOn ? <Volume2 className="w-4 h-4 text-amber-400" /> : <VolumeX className="w-4 h-4" />}
+          {soundEnabled ? <Volume2 className="w-4 h-4 text-amber-400" /> : <VolumeX className="w-4 h-4" />}
         </button>
 
         <div className="flex items-center space-x-2 text-right">
           <div>
             <h3 className="text-xs font-black text-white uppercase tracking-wider">{rivalTorcidaName}</h3>
-            <span className="text-[10px] text-zinc-400">Rival de Pista</span>
+            <span className="text-[10px] text-zinc-400">Bonde Rival</span>
           </div>
           <div className="w-8 h-8 rounded-full border border-blue-500/50 flex items-center justify-center font-black text-xs" style={{ backgroundColor: rivalPrimaryColor }}>
             💥
@@ -311,14 +648,14 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
         </div>
       </div>
 
-      {/* BONUS ACCUMULATOR & METRICS BAR */}
+      {/* BONUS HUD BAR */}
       <div className="space-y-1.5 bg-zinc-900/90 rounded-2xl p-3 border border-zinc-800">
         <div className="flex items-center justify-between text-xs font-bold">
           <span className="flex items-center space-x-1 text-amber-400">
             <Zap className="w-3.5 h-3.5 fill-amber-400" />
             <span>BÔNUS DE CONFRONTO: +{currentBonusPercent}% (MÁX 20%)</span>
           </span>
-          <span className={`font-mono ${timeLeft <= 5 ? 'text-red-400 animate-pulse font-black text-sm' : 'text-zinc-300'}`}>
+          <span className={`font-mono ${timeLeft <= 10 ? 'text-red-400 animate-pulse font-black text-sm' : 'text-zinc-300'}`}>
             ⏱️ {timeLeft}s
           </span>
         </div>
@@ -342,88 +679,76 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
         </div>
       </div>
 
-      {/* CLIMAX OVERLAY MODAL */}
-      {climaxText && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/90 p-4 rounded-3xl backdrop-blur-sm animate-fade-in text-center space-y-4">
-          <div className="space-y-2">
-            <div className="mx-auto w-16 h-16 rounded-full bg-red-600/30 border border-red-500 flex items-center justify-center text-3xl animate-bounce">
-              🥊
-            </div>
-            <h2 className="text-base font-black text-amber-300 uppercase">{climaxText}</h2>
-            <p className="text-xs text-zinc-300">
-              Bônus total acumulado no percurso: <strong className="text-emerald-400 font-mono">+{currentBonusPercent}%</strong>
-            </p>
-            <p className="text-[11px] text-zinc-400 animate-pulse">Calculando resultado do combate de pista...</p>
-          </div>
-        </div>
-      )}
+      {/* CANVAS DISPLAY AREA */}
+      <div className="relative w-full aspect-square rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-950 flex items-center justify-center">
+        <canvas
+          ref={canvasRef}
+          width={450}
+          height={450}
+          className="w-full h-full object-contain"
+        />
 
-      {/* 2D MAP GRID */}
-      <div className="grid grid-cols-9 gap-1 bg-zinc-900 p-2 rounded-2xl border border-zinc-800 relative aspect-square">
-        {Array.from({ length: GRID_ROWS }).map((_, r) =>
-          Array.from({ length: GRID_COLS }).map((_, c) => {
-            const isPlayer = playerPos.r === r && playerPos.c === c;
-            const isRival = r === GRID_ROWS - 1 && c === GRID_COLS - 1;
-            const itemHere = items.find((it) => it.r === r && it.c === c);
-
-            return (
-              <div
-                key={`${r}-${c}`}
-                className={`relative flex items-center justify-center rounded-lg border text-xs font-bold transition-all ${
-                  isPlayer
-                    ? 'bg-emerald-500/30 border-emerald-400 text-white shadow-lg shadow-emerald-500/20 scale-105 z-10'
-                    : isRival
-                    ? 'bg-red-950/80 border-red-500 text-red-300 animate-pulse'
-                    : 'bg-zinc-950/80 border-zinc-800/60'
-                }`}
-              >
-                {isPlayer && <span className="text-base animate-bounce">🚩</span>}
-                {!isPlayer && isRival && <span className="text-base">💥</span>}
-                {!isPlayer && !isRival && itemHere?.type === 'ROJAO' && <span>🚀</span>}
-                {!isPlayer && !isRival && itemHere?.type === 'BONDE_MEMBER' && <span>👥</span>}
-                {!isPlayer && !isRival && itemHere?.type === 'POLICE_PATROL' && <span className="animate-pulse">🚔</span>}
+        {/* START SCREEN OVERLAY */}
+        {gameState === 'READY' && (
+          <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/85 p-6 text-center space-y-4 backdrop-blur-sm">
+            <div className="space-y-3">
+              <div className="mx-auto w-14 h-14 rounded-full bg-red-600/30 border border-red-500 flex items-center justify-center text-3xl animate-bounce">
+                🥊
               </div>
-            );
-          })
+              <h2 className="text-base font-black text-amber-300 uppercase tracking-wider">
+                CONFRONTO DE PISTA NA MÃO LIMPA
+              </h2>
+              <p className="text-xs text-zinc-300 max-w-xs mx-auto leading-relaxed">
+                Navegue pelas ruas, recolha <strong className="text-amber-400">Rojões 🚀</strong> e <strong className="text-sky-400">Membros do Bonde 👥</strong> para acumular até <strong className="text-emerald-400">+20% de Bônus</strong>, desvie das <strong className="text-red-400">Patrulhas da PM 🚔</strong> e intercepte o <strong className="text-red-400">Bonde Rival 💥</strong> na saída!
+              </p>
+
+              <button
+                onClick={startMinigame}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-black text-sm uppercase tracking-wider transition transform active:scale-95 shadow-lg shadow-red-600/30 cursor-pointer"
+              >
+                INICIAR CONFRONTO ➔
+              </button>
+            </div>
+          </div>
         )}
       </div>
 
-      {/* CONTROLS (ON-SCREEN D-PAD) */}
+      {/* TOUCH CONTROLS (D-PAD) */}
       <div className="pt-2">
         <div className="grid grid-cols-3 gap-1.5 w-48 mx-auto">
           <div />
           <button
-            onClick={() => movePlayer(-1, 0)}
-            disabled={isFinished}
-            className="py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 font-black text-sm active:scale-95 disabled:opacity-50"
+            onClick={() => handleDPadMove('UP')}
+            disabled={gameState !== 'PLAYING'}
+            className="py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 font-black text-sm active:scale-95 disabled:opacity-50 cursor-pointer"
           >
             ▲
           </button>
           <div />
           <button
-            onClick={() => movePlayer(0, -1)}
-            disabled={isFinished}
-            className="py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 font-black text-sm active:scale-95 disabled:opacity-50"
+            onClick={() => handleDPadMove('LEFT')}
+            disabled={gameState !== 'PLAYING'}
+            className="py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 font-black text-sm active:scale-95 disabled:opacity-50 cursor-pointer"
           >
             ◄
           </button>
           <button
-            onClick={() => movePlayer(1, 0)}
-            disabled={isFinished}
-            className="py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 font-black text-sm active:scale-95 disabled:opacity-50"
+            onClick={() => handleDPadMove('DOWN')}
+            disabled={gameState !== 'PLAYING'}
+            className="py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 font-black text-sm active:scale-95 disabled:opacity-50 cursor-pointer"
           >
             ▼
           </button>
           <button
-            onClick={() => movePlayer(0, 1)}
-            disabled={isFinished}
-            className="py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 font-black text-sm active:scale-95 disabled:opacity-50"
+            onClick={() => handleDPadMove('RIGHT')}
+            disabled={gameState !== 'PLAYING'}
+            className="py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 font-black text-sm active:scale-95 disabled:opacity-50 cursor-pointer"
           >
             ►
           </button>
         </div>
         <p className="text-[10px] text-center text-zinc-500 mt-2">
-          Dica: Use as setas do teclado ou o controle na tela para recolher rojões 🚀 e membros 👥 até o bonde rival 💥!
+          Controles: W, A, S, D / Setas do teclado ou D-Pad na tela.
         </p>
       </div>
     </div>
