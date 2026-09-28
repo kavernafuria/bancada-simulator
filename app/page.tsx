@@ -13,6 +13,7 @@ import {
   Shield,
   Users,
   Wallet,
+  Coins,
   Scale,
   Trophy,
   Flame,
@@ -306,10 +307,13 @@ export default function App() {
   const [showMockAdModal, setShowMockAdModal] = useState<boolean>(false);
   const [purchasedInvestments, setPurchasedInvestments] = useState<string[]>([]);
   const [merchandiseOrders, setMerchandiseOrders] = useState<MerchandiseOrder[]>([]);
-  const [unforeseenExpenseModal, setUnforeseenExpenseModal] = useState<UnforeseenExpense | null>(null);
   const [showGameTutorialModal, setShowGameTutorialModal] = useState<boolean>(false);
   const [showStoryCardModal, setShowStoryCardModal] = useState<boolean>(false);
   const [activeStoryCardData, setActiveStoryCardData] = useState<StoryCardData | null>(null);
+  const [activeMerchandiseProfitModal, setActiveMerchandiseProfitModal] = useState<{
+    totalReturn: number;
+    items: { title: string; returnAmount: number }[];
+  } | null>(null);
 
   const handleOpenStoryCard = (cardType: "MATCH_VICTORY" | "SEASON_CLOSING" | "TORCIDA_PROFILE" = "TORCIDA_PROFILE") => {
     if (!currentTorcida) return;
@@ -645,6 +649,7 @@ export default function App() {
           if (parsed.merchandiseOrders) setMerchandiseOrders(parsed.merchandiseOrders);
           if (parsed.purchasedInvestments) setPurchasedInvestments(parsed.purchasedInvestments);
           if (parsed.seasonHistory) setSeasonHistory(parsed.seasonHistory);
+          if (parsed.seasonStartSnapshot) setSeasonStartSnapshot(parsed.seasonStartSnapshot);
           if (parsed.rivalryRecords) {
             setRivalryRecords(parsed.rivalryRecords);
           }
@@ -716,6 +721,7 @@ export default function App() {
           merchandiseOrders,
           purchasedInvestments,
           seasonHistory,
+          seasonStartSnapshot,
         })
       );
     }
@@ -742,6 +748,7 @@ export default function App() {
     merchandiseOrders,
     purchasedInvestments,
     seasonHistory,
+    seasonStartSnapshot,
   ]);
 
   const pipeline = currentTorcida
@@ -1261,23 +1268,38 @@ export default function App() {
     }
 
     if (transport.id === 'CORTEJO_ONIBUS_TIME' || activeMatchMiniGameContext?.tacticalChoice === 'flag_waving') {
-      setBankBalance((prev) => prev + 1500);
+      setBankBalance((prev) => prev + 3500);
+      setStats((st) => ({
+        ...st,
+        contingente: applyDiminishingReturns(st.contingente, 12),
+        pressao_bancada: applyDiminishingReturns(st.pressao_bancada, 10),
+      }));
       setStateTrackers((st) => ({
         ...st,
-        moral: Math.min(100, st.moral + 10),
+        moral: Math.min(100, st.moral + 12),
       }));
     } else if (activeMatchMiniGameContext?.tacticalChoice === 'rhythm_bateria' || activeMatchMiniGameContext?.tacticalChoice === 'rhythm_mosaic') {
-      setBankBalance((prev) => prev + 1500);
+      setBankBalance((prev) => prev + 4500);
+      setStats((st) => ({
+        ...st,
+        contingente: applyDiminishingReturns(st.contingente, 10),
+        pressao_bancada: applyDiminishingReturns(st.pressao_bancada, 18),
+      }));
       setStateTrackers((st) => ({
         ...st,
         moral: Math.min(100, st.moral + 15),
       }));
     } else if (activeMatchMiniGameContext?.tacticalChoice === 'caldeirao_pitch') {
-      setBankBalance((prev) => prev + 2000);
+      setBankBalance((prev) => prev + 5500);
+      setStats((st) => ({
+        ...st,
+        contingente: applyDiminishingReturns(st.contingente, 14),
+        pressao_bancada: applyDiminishingReturns(st.pressao_bancada, 16),
+      }));
       setStateTrackers((st) => ({
         ...st,
-        moral: Math.min(100, st.moral + 15),
-        respeito_nacional: Math.min(100, st.respeito_nacional + 8),
+        moral: Math.min(100, st.moral + 18),
+        respeito_nacional: Math.min(100, st.respeito_nacional + 10),
       }));
     } else if (activeMatchMiniGameContext?.tacticalChoice === 'maze_escape') {
       if (finalPECModifier >= 0) {
@@ -1660,15 +1682,15 @@ export default function App() {
       };
 
       const fallbackStart: SeasonStartSnapshot = seasonStartSnapshot || {
-        contingente: stats.contingente,
-        pressao_bancada: stats.pressao_bancada,
-        poder_pista: stats.poder_pista,
-        caravana: stats.caravana,
-        bankBalance: bankBalance,
-        moral: stateTrackers.moral,
-        risco_mp: stateTrackers.risco_mp,
-        respeito_nacional: stateTrackers.respeito_nacional,
-        rank: endRank,
+        contingente: currentTorcida ? (currentTorcida.tier === 'A' ? 80 : currentTorcida.tier === 'B' ? 55 : 35) : 50,
+        pressao_bancada: currentTorcida ? (currentTorcida.tier === 'A' ? 85 : currentTorcida.tier === 'B' ? 60 : 35) : 50,
+        poder_pista: currentTorcida ? (currentTorcida.tier === 'A' ? 80 : currentTorcida.tier === 'B' ? 55 : 30) : 50,
+        caravana: currentTorcida ? (currentTorcida.tier === 'A' ? 85 : currentTorcida.tier === 'B' ? 50 : 25) : 50,
+        bankBalance: currentTorcida ? (currentTorcida.tier === 'A' ? 50000 : currentTorcida.tier === 'B' ? 25000 : 10000) : 20000,
+        moral: 50,
+        risco_mp: 20,
+        respeito_nacional: 50,
+        rank: Math.min(35, endRank + 4),
       };
 
       setSeasonEndReport({
@@ -1707,6 +1729,11 @@ export default function App() {
           const totalReturn = maturedMerch.reduce((sum, ord) => sum + ord.returnAmount, 0);
           setBankBalance((prev) => prev + totalReturn);
           setMerchandiseOrders((prev) => prev.filter((ord) => ord.maturitySeason > nextSeason));
+
+          setActiveMerchandiseProfitModal({
+            totalReturn,
+            items: maturedMerch.map((ord) => ({ title: ord.title, returnAmount: ord.returnAmount })),
+          });
 
           maturedMerch.forEach((ord) => {
             setHistoryLog((prev) => [
@@ -4733,6 +4760,51 @@ export default function App() {
             setShowMockAdModal(false);
           }}
         />
+      )}
+
+      {/* 9.A. STORE PROFIT MATURATION MODAL (1 YEAR AFTER PURCHASE) */}
+      {activeMerchandiseProfitModal && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/85 p-4 backdrop-blur-md animate-fade-in">
+          <div className="relative w-full max-w-md rounded-3xl border border-emerald-500/50 bg-zinc-900 p-6 shadow-2xl text-center space-y-4">
+            <div className="mx-auto w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/40 animate-pulse">
+              <Coins className="w-8 h-8" />
+            </div>
+
+            <div>
+              <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest block">
+                💰 RETORNO DE INVESTIMENTO DA LOJA OFICIAL
+              </span>
+              <h3 className="text-base font-black text-white uppercase mt-0.5">
+                Vendas de Vestuário Concluídas (1 Ano Pós-Compra)
+              </h3>
+            </div>
+
+            <div className="bg-zinc-950 p-4 rounded-2xl border border-zinc-800 text-left space-y-2.5 text-xs">
+              <p className="text-zinc-300 leading-relaxed">
+                Após 1 temporada de confecção e vendas nas sedes e subsedes, o lote de vestuário foi totalmente esgotado com <strong>Lucro Dobrado (2x)</strong>!
+              </p>
+              <div className="space-y-1.5 pt-1 border-t border-zinc-800">
+                {activeMerchandiseProfitModal.items.map((it, idx) => (
+                  <div key={idx} className="flex items-center justify-between text-[11px]">
+                    <span className="text-zinc-400 font-medium">📦 {it.title}</span>
+                    <span className="text-emerald-400 font-black">+R$ {it.returnAmount.toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="pt-2 border-t border-zinc-800 flex items-center justify-between font-black text-xs">
+                <span className="text-white">VALOR TOTAL CREDITADO NO CAIXA:</span>
+                <span className="text-emerald-400 text-sm">+R$ {activeMerchandiseProfitModal.totalReturn.toLocaleString()}</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setActiveMerchandiseProfitModal(null)}
+              className="w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+            >
+              <CheckCircle2 className="w-4 h-4" /> RECOLHER LUCRO E INJETAR NO CAIXA
+            </button>
+          </div>
+        </div>
       )}
 
       {/* 9.B. ALLIANCE DIPLOMATIC PROPOSAL MODAL */}
