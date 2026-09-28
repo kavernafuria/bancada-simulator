@@ -163,7 +163,10 @@ import {
   PressConferenceChoice,
   getPressConference,
   PRESS_CONFERENCES,
+  SocialMediaLeak,
+  getRandomPostBrawlLeak,
 } from "@/lib/bancada_engine";
+import { SocialMediaLeakCard } from "@/components/SocialMediaLeakCard";
 import { isInteriorSP } from "@/lib/season_events";
 
 export interface SeasonStartSnapshot {
@@ -364,6 +367,7 @@ export default function App() {
   const [activeTorcidaUnicaModalMode, setActiveTorcidaUnicaModalMode] = useState<"ACTIVATION_NEWS" | "REVOCATION_NEWS" | "MATCHDAY_CRISIS" | null>(null);
   const [torcidaUnicaActionAppliedForStep, setTorcidaUnicaActionAppliedForStep] = useState<number | null>(null);
   const [activePressConference, setActivePressConference] = useState<PressConference | null>(null);
+  const [activeSocialMediaLeak, setActiveSocialMediaLeak] = useState<SocialMediaLeak | null>(null);
   const [shownPressConferenceIds, setShownPressConferenceIds] = useState<string[]>([]);
   const [rivalAngry, setRivalAngry] = useState<boolean>(false);
   const [activeInquiryTrigger, setActiveInquiryTrigger] = useState<{
@@ -1574,6 +1578,28 @@ export default function App() {
           triggerReason: `Investigação ciber-digital emergencial instaurada pela DRADE após a captura de faixa/patrimônio da torcida ${activeMatchDerby.rivalTorcida || "rival"}.`,
           initialConvictionBase: 30,
         });
+      }
+
+      // MÓDULO 4: Gatilho de Vídeo Vazado nas Redes Sociais (@ritmodetorcida & @ettorcida.oficiall) - 25% Chance em Pista/Briga
+      if (result.isPistaFight || result.bannerCaptured || tactic.pistaMod > 0) {
+        const leak = getRandomPostBrawlLeak();
+        if (leak) {
+          setActiveSocialMediaLeak(leak);
+          if (leak.impactDeltas) {
+            if (leak.impactDeltas.moral) {
+              setStateTrackers((st) => ({ ...st, moral: Math.min(100, st.moral + leak.impactDeltas.moral!) }));
+            }
+            if (leak.impactDeltas.risco_mp) {
+              setStateTrackers((st) => ({ ...st, risco_mp: Math.min(100, st.risco_mp + leak.impactDeltas.risco_mp!) }));
+            }
+            if (leak.impactDeltas.poder_pista) {
+              setStats((st) => ({ ...st, poder_pista: Math.min(100, st.poder_pista + leak.impactDeltas.poder_pista!) }));
+            }
+            if (leak.impactDeltas.pressao_bancada) {
+              setStats((st) => ({ ...st, pressao_bancada: Math.min(100, st.pressao_bancada + leak.impactDeltas.pressao_bancada!) }));
+            }
+          }
+        }
       }
 
       advancePipeline();
@@ -2859,13 +2885,15 @@ export default function App() {
               <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
               <span className="hidden sm:inline">Guia</span>
             </button>
-            <Link
-              href="/bancada/minigames"
-              className="p-1.5 px-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition-colors flex items-center gap-1 text-[10px] font-bold cursor-pointer"
-              title="Testar Mini-Games Individuais"
-            >
-              🎮 <span className="hidden sm:inline">Mini-Games</span>
-            </Link>
+            {process.env.NODE_ENV === "development" && (
+              <Link
+                href="/bancada/minigames"
+                className="p-1.5 px-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition-colors flex items-center gap-1 text-[10px] font-bold cursor-pointer"
+                title="Testar Mini-Games Individuais (Apenas Localhost)"
+              >
+                🎮 <span className="hidden sm:inline">Mini-Games</span>
+              </Link>
+            )}
             <button
               onClick={handleExportSave}
               className="p-1.5 px-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 transition-colors flex items-center gap-1 text-[10px] font-bold cursor-pointer"
@@ -5289,6 +5317,26 @@ export default function App() {
             }
           }}
         />
+      )}
+
+      {/* MODAL REDES SOCIAIS: VAZAMENTO VIRAL PÓS-BRIGA (@ritmodetorcida / @ettorcida.oficiall) */}
+      {activeSocialMediaLeak && (
+        <div className="fixed inset-0 z-[125] flex items-center justify-center bg-black/85 p-4 backdrop-blur-md animate-fade-in">
+          <div className="w-full max-w-md">
+            <SocialMediaLeakCard
+              leak={activeSocialMediaLeak}
+              onDismiss={() => {
+                if (activeSocialMediaLeak.pressConferenceId) {
+                  const conf = getPressConference(activeSocialMediaLeak.pressConferenceId);
+                  if (conf) {
+                    setActivePressConference(conf);
+                  }
+                }
+                setActiveSocialMediaLeak(null);
+              }}
+            />
+          </div>
+        </div>
       )}
 
       {/* MODAL MÓDULO 2: COLETIVA DE IMPRENSA */}

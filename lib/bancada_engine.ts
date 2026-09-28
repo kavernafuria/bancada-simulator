@@ -4690,6 +4690,98 @@ export interface PressConference {
   choices: PressConferenceChoice[];
 }
 
+export interface SocialMediaLeak {
+  id: string;
+  handle: "@ritmodetorcida" | "@ettorcida.oficiall";
+  profileName: string;
+  verified: boolean;
+  avatarColor: string;
+  headline: string;
+  snippetText: string;
+  viewsCount: string;
+  likesCount: string;
+  sharesCount: string;
+  postedAgo: string;
+  impactDeltas: {
+    moral?: number;
+    poder_pista?: number;
+    risco_mp?: number;
+    pressao_bancada?: number;
+  };
+  pressConferenceId?: string;
+}
+
+export const POST_BRAWL_LEAKS: Record<string, SocialMediaLeak> = {
+  LEAK_RITMO_PISTA_RODOVIA: {
+    id: "LEAK_RITMO_PISTA_RODOVIA",
+    handle: "@ritmodetorcida",
+    profileName: "Ritmo de Torcida",
+    verified: true,
+    avatarColor: "bg-red-600",
+    headline: "🎥 IMAGENS EXCLUSIVAS DA PISTA RODORIÁRIA!",
+    snippetText: "Vídeo gravado em alta definição flagra o deslocamento do bonde em rodovia com sinalizadores e trovas de pista. Repercussão pesada!",
+    viewsCount: "640K",
+    likesCount: "42K",
+    sharesCount: "12K",
+    postedAgo: "Há 18 min",
+    impactDeltas: { poder_pista: 8, moral: 6, risco_mp: 8 },
+    pressConferenceId: "ENTREVISTA_BRIGA_PISTA"
+  },
+  LEAK_ETTORCIDA_WHATSAPP_EMBOSCADA: {
+    id: "LEAK_ETTORCIDA_WHATSAPP_EMBOSCADA",
+    handle: "@ettorcida.oficiall",
+    profileName: "E.T Torcida Oficial",
+    verified: true,
+    avatarColor: "bg-emerald-600",
+    headline: "🚨 VAZOU NO WHATSAPP! CENAS LAMENTÁVEIS DA PISTA",
+    snippetText: "Vídeo de celular vazado em grupos do WhatsApp mostra embate direto em avenida próxima ao estádio. O material já circula nos gabinetes do MP!",
+    viewsCount: "890K",
+    likesCount: "58K",
+    sharesCount: "19K",
+    postedAgo: "Há 8 min",
+    impactDeltas: { pressao_bancada: 6, risco_mp: 12, moral: 4 },
+    pressConferenceId: "ENTREVISTA_BRIGA_PISTA"
+  },
+  LEAK_RITMO_FAIXAS_PISTA: {
+    id: "LEAK_RITMO_FAIXAS_PISTA",
+    handle: "@ritmodetorcida",
+    profileName: "Ritmo de Torcida",
+    verified: true,
+    avatarColor: "bg-amber-600",
+    headline: "🥁 REGISTRO DE PISTA: CAMINHADA E CORTEJO DA MASSA",
+    snippetText: "Perfil publica imagens da escolta do bonde de caminhada e faixas estendidas em clima de trovas e celebração de poder de pista.",
+    viewsCount: "420K",
+    likesCount: "31K",
+    sharesCount: "8.5K",
+    postedAgo: "Há 35 min",
+    impactDeltas: { poder_pista: 6, moral: 8, risco_mp: 4 },
+    pressConferenceId: "ENTREVISTA_BRIGA_PISTA"
+  },
+  LEAK_ETTORCIDA_TROVA_CLUSTERS: {
+    id: "LEAK_ETTORCIDA_TROVA_CLUSTERS",
+    handle: "@ettorcida.oficiall",
+    profileName: "E.T Torcida Oficial",
+    verified: true,
+    avatarColor: "bg-purple-600",
+    headline: "🔥 EXCLUSIVO: COBRANÇA NA ARQUIBANCADA VAZADA",
+    snippetText: "Áudio e vídeo gravados no setor da organizada mostram a cobrança interna de bancada e trovas disparadas contra a diretoria rival.",
+    viewsCount: "750K",
+    likesCount: "51K",
+    sharesCount: "15K",
+    postedAgo: "Há 12 min",
+    impactDeltas: { pressao_bancada: 8, moral: 4, risco_mp: 6 },
+    pressConferenceId: "ENTREVISTA_BRIGA_PISTA"
+  }
+};
+
+export function getRandomPostBrawlLeak(): SocialMediaLeak | null {
+  // 25% chance of triggering post-brawl social media leak
+  if (Math.random() > 0.25) return null;
+  const keys = Object.keys(POST_BRAWL_LEAKS);
+  const randomIndex = Math.floor(Math.random() * keys.length);
+  return POST_BRAWL_LEAKS[keys[randomIndex]];
+}
+
 export const PRESS_CONFERENCES: Record<string, PressConference> = {
   ENTREVISTA_INICIAL_RACHA: {
     id: "ENTREVISTA_INICIAL_RACHA",
@@ -5032,10 +5124,10 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
   ENTREVISTA_BRIGA_PISTA: {
     id: "ENTREVISTA_BRIGA_PISTA",
     triggerEvent: "Repercussão de Confronto em Rodovia / Pista",
-    title: "🎙️ COLETIVA DE IMPRENSA: EMBOSCADA NA RODOVIA",
+    title: "🎙️ COLETIVA DE IMPRENSA: VÍDEOS VAZADOS NAS REDES SOCIAL",
     journalist: "Cesar Tralli / Jornal da Cidade",
     outlet: "Noticiário Policial & TV",
-    question: "Imagens de um grave confronto de torcidas numa rodovia viralizaram hoje. A diretoria da organizada teve participação no agendamento dessa briga?",
+    question: "Vídeos vazados recentemente nos perfis @ritmodetorcida e @ettorcida.oficiall mostram membros da organizada envolvidos no confronto de pista. A diretoria da organizada apoia essas ações ou repudia as imagens viralizadas?",
     choices: [
       {
         id: "RESP_INSTITUCIONAL_BRIGA",
