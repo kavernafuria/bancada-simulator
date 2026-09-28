@@ -34,10 +34,11 @@ import { RuadaFlagWavingModal } from "@/components/flag_waving/RuadaFlagWavingMo
 import { RhythmBateriaModal } from "@/components/rhythm_bateria/RhythmBateriaModal";
 import { ArquibancadaMinigame } from "@/components/minigames/caldeirao/ArquibancadaMinigame";
 import { MazeEscapeMinigame } from "@/components/minigames/MazeEscapeMinigame";
+import { PistaBrawlMazeMinigame } from "@/components/minigames/PistaBrawlMazeMinigame";
 
 export default function MiniGamesTestPage() {
   const [activeTab, setActiveTab] = useState<
-    "caldeirao" | "festa_caldeirao" | "runner3d" | "whack" | "punch" | "rojon" | "rhythm" | "dodge" | "memory" | "gate" | "ruada"
+    "caldeirao" | "festa_caldeirao" | "runner3d" | "whack" | "punch" | "rojon" | "rhythm" | "dodge" | "memory" | "gate" | "ruada" | "pista_brawl"
   >("caldeirao");
 
   // Viewport Switcher Mode (Desktop vs Mobile simulation)
@@ -367,6 +368,27 @@ export default function MiniGamesTestPage() {
           </div>
           <span className="text-[9px] text-zinc-500 block mt-0.5">Portão Local</span>
         </button>
+
+        {/* PISTA BRAWL (ROJÕES E BONDE) */}
+        <button
+          onClick={() => {
+            setActiveTab("pista_brawl");
+            setLastResult(null);
+            setGameKey((k) => k + 1);
+          }}
+          className={`p-2.5 rounded-2xl border text-left transition-all cursor-pointer ${
+            activeTab === "pista_brawl"
+              ? "bg-red-950/80 border-red-500 text-white shadow-xl scale-[1.02]"
+              : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+          }`}
+        >
+          <div className="flex items-center justify-between font-black text-xs">
+            <span className="flex items-center gap-1 text-red-400 text-[11px]">
+              <Swords className="w-3.5 h-3.5" /> Pista Brawl (Rojões)
+            </span>
+          </div>
+          <span className="text-[9px] text-zinc-500 block mt-0.5">Coleta de Bônus de Pista</span>
+        </button>
       </div>
 
       {/* PLAYGROUND CONTAINER (DESKTOP vs MOBILE SIMULATOR FRAME) */}
@@ -515,6 +537,21 @@ export default function MiniGamesTestPage() {
                 description: msg,
               });
             }}
+          />
+        )}
+
+        {activeTab === "pista_brawl" && (
+          <PistaBrawlMazeMinigame
+            key={gameKey}
+            playerTorcidaName="Mancha Verde"
+            playerClubName="Palmeiras"
+            rivalTorcidaName="Gaviões da Fiel"
+            playerPrimaryColor="#15803d"
+            playerSecondaryColor="#ffffff"
+            rivalPrimaryColor="#dc2626"
+            contingente={runnerContingente}
+            poderPista={runnerPoderPista}
+            onFinish={(res) => handleFinishMiniGame(res)}
           />
         )}
       </div>
