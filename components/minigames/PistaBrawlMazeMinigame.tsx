@@ -226,13 +226,15 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
   ];
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [gameState, setGameState] = useState<'READY' | 'PLAYING' | 'WON' | 'LOST'>('READY');
+  const [gameState, setGameState] = useState<'READY' | 'PLAYING' | 'SIMULATING_BRAWL' | 'WON' | 'LOST'>('READY');
   const [soundEnabled, setSoundEnabled] = useState(true);
 
   const [timeLeft, setTimeLeft] = useState(40);
   const [rojaoCount, setRojaoCount] = useState(0);
   const [bondeCount, setBondeCount] = useState(0);
-  const [lastScore, setLastScore] = useState(85);
+  const [brawlPhaseStep, setBrawlPhaseStep] = useState(0);
+  const [brawlTickerText, setBrawlTickerText] = useState('CHOQUE DE LINHA DE FRENTE IMINENTE!');
+  const [brawlPowerBar, setBrawlPowerBar] = useState(50); // 0 (Rival) to 100 (Player)
 
   const gameStateRef = useRef(gameState);
   gameStateRef.current = gameState;
@@ -280,7 +282,6 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
   }, []);
 
   const initItemsAndEntities = () => {
-    // Collectibles: Rojões (+5%) & Partes do Bonde (+5%)
     itemsRef.current = [
       { id: 1, x: 1.5, y: 1.5, type: 'rojao', collected: false },
       { id: 2, x: 7.5, y: 1.5, type: 'bonde', collected: false },
@@ -290,7 +291,7 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
       { id: 6, x: 11.5, y: 5.5, type: 'bonde', collected: false },
     ];
 
-    // 5 Active Police Patrol Vehicles (Norte, Sul, Leste, Oeste e Centro)
+    // 5 Active Police Patrol Vehicles
     policeCarsRef.current = [
       {
         id: 1,
@@ -375,47 +376,76 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
     setGameState('PLAYING');
   };
 
-  const finishGameAndReturn = (won: boolean, cause: 'REACHED_RIVAL' | 'POLICE' | 'TIMEOUT') => {
-    setGameState(won ? 'WON' : 'LOST');
+  // Trigger Interactive Brawl Simulation Overlay
+  const startBrawlSimulation = (reachedRival: boolean) => {
+    setGameState('SIMULATING_BRAWL');
+    audio.playBrawlClimax();
 
     const rawBonusPercent = (rojaoCount + bondeCount) * 0.05;
     const finalBonusPercent = Math.min(0.20, rawBonusPercent);
     const bonusDisplayInt = Math.round(finalBonusPercent * 100);
 
-    if (won) {
-      audio.playBrawlClimax();
-      const score = Math.min(100, 70 + bonusDisplayInt);
-      setLastScore(score);
+    // Initial Tug of War bar starting point
+    setBrawlPowerBar(50 + bonusDisplayInt);
+    setBrawlPhaseStep(1);
+    setBrawlTickerText(`⚡ CHOQUE DE LINHA DE FRENTE! O bonde da ${playerTorcidaName} colidiu com o Bonde Rival da ${rivalTorcidaName}!`);
 
-      onFinish({
-        gameType: 'pista_brawl' as any,
-        modifier: finalBonusPercent + 0.10,
-        rank: 'S',
-        penaltyMP: 5,
-        description: `🥊 TRIUNFO NO CONFRONTO DE PISTA! O bonde da ${playerTorcidaName} coletou rojões e reuniu sub-sedes no percurso (Bônus +${bonusDisplayInt}%), encurralou o Bonde Rival na saída e venceu o embate (+${Math.round((finalBonusPercent + 0.10) * 100)}% PEC, +15 Moral)!`,
-      });
-    } else {
-      audio.playWhistle();
-      if (cause === 'POLICE') {
-        setLastScore(25);
-        onFinish({
-          gameType: 'pista_brawl' as any,
-          modifier: -0.20,
-          rank: 'F',
-          penaltyMP: 20,
-          description: `🚓 INTERCEPTAÇÃO POLICIAL NA PISTA! As patrulhas da PM interceptaram o bonde durante o deslocamento. Houve apreensão de rojões e detenções de membros (+20% Risco MP, -20% PEC, -12 Moral).`,
-        });
+    // Step 2 (1.2s): Firework & Allies barrage
+    setTimeout(() => {
+      setBrawlPhaseStep(2);
+      setBrawlTickerText(`🧨 DISPARO DE ROJÕES E REFORÇO DAS SUB-SEDES! (+${bonusDisplayInt}% Bônus de Pista em ação!)`);
+      setBrawlPowerBar((prev) => Math.min(95, prev + 15));
+      audio.playRojaoPickup();
+    }, 1200);
+
+    // Step 3 (2.4s): Battle Outcome & Final Finish Call
+    setTimeout(() => {
+      setBrawlPhaseStep(3);
+
+      const baseWinProb = Math.min(0.85, Math.max(0.15, (poderPista / 100) * 0.6 + (contingente / 100) * 0.4));
+      const totalWinProb = Math.min(0.95, baseWinProb + finalBonusPercent);
+      const isVictory = Math.random() < totalWinProb;
+      const finalPEC = isVictory ? finalBonusPercent + 0.10 : -0.10;
+
+      if (isVictory) {
+        audio.playCheer();
+        setBrawlTickerText(`🏆 DOMÍNIO TOTAL DA PISTA! O bonde da ${playerTorcidaName} venceu o confronto de saída!`);
+        setBrawlPowerBar(95);
       } else {
-        setLastScore(35);
+        audio.playWhistle();
+        setBrawlTickerText(`🚨 RECUO E EMBOSCADA RIVAL! O bonde rival conteve o avanço no perímetro.`);
+        setBrawlPowerBar(25);
+      }
+
+      setTimeout(() => {
         onFinish({
           gameType: 'pista_brawl' as any,
-          modifier: -0.15,
-          rank: 'F',
-          penaltyMP: 10,
-          description: `⏱️ TEMPO ESGOTADO NA PISTA! O bonde demorou no percurso e foi surpreendido antes de se estruturar no confronto de saída (-15% PEC, -8 Moral, +10% Risco MP).`,
+          modifier: finalPEC,
+          rank: isVictory ? 'S' : 'F',
+          penaltyMP: isVictory ? 5 : 15,
+          description: isVictory
+            ? `🥊 TRIUNFO NO CONFRONTO DE PISTA! O bonde da ${playerTorcidaName} coletou rojões e reuniu sub-sedes no percurso (Bônus +${bonusDisplayInt}%), encurralou o Bonde Rival da ${rivalTorcidaName} na saída e venceu o embate (+${Math.round((finalPEC) * 100)}% PEC, +15 Moral)!`
+            : `DERROTA NA PISTA (Bônus +${bonusDisplayInt}% acumulado) - O bonde rival levou a melhor no confronto de saída.`,
         });
-      }
+      }, 1800);
+    }, 2500);
+  };
+
+  const finishGameAndReturn = (won: boolean, cause: 'REACHED_RIVAL' | 'POLICE' | 'TIMEOUT') => {
+    if (cause === 'REACHED_RIVAL' || cause === 'TIMEOUT') {
+      startBrawlSimulation(cause === 'REACHED_RIVAL');
+      return;
     }
+
+    setGameState('LOST');
+    audio.playWhistle();
+    onFinish({
+      gameType: 'pista_brawl' as any,
+      modifier: -0.20,
+      rank: 'F',
+      penaltyMP: 20,
+      description: `🚓 INTERCEPTAÇÃO POLICIAL NA PISTA! As patrulhas da PM interceptaram o bonde durante o deslocamento. Houve apreensão de rojões e detenções de membros (+20% Risco MP, -20% PEC, -12 Moral).`,
+    });
   };
 
   // Timer loop
@@ -549,7 +579,7 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
             ctx.strokeRect(px + 1, py + 1, tileSize - 2, tileSize - 2);
           } else if (tile === 3) {
             // Exit Gate / Bonde Rival Zone
-            ctx.fillStyle = 'rgba(220, 38, 38, 0.25)';
+            ctx.fillStyle = 'rgba(220, 38, 38, 0.35)';
             ctx.fillRect(px, py, tileSize, tileSize);
             ctx.strokeStyle = '#ef4444';
             ctx.lineWidth = 2;
@@ -571,25 +601,22 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
           const iy = item.y * tileSize;
 
           if (item.type === 'rojao') {
-            // CUSTOM DRAWN ROJAAN MORTAR (No rocket emoji 🚀!)
+            // CUSTOM DRAWN ROJAAN MORTAR
             ctx.save();
             ctx.translate(ix, iy);
 
-            // Mortar Tube
             ctx.fillStyle = '#991b1b';
             ctx.fillRect(-tileSize * 0.18, -tileSize * 0.25, tileSize * 0.36, tileSize * 0.5);
             ctx.strokeStyle = '#f59e0b';
             ctx.lineWidth = 1.5;
             ctx.strokeRect(-tileSize * 0.18, -tileSize * 0.1, tileSize * 0.36, tileSize * 0.2);
 
-            // Lit Fuse & Sparkles
             const sparkY = -tileSize * 0.28;
             ctx.beginPath();
             ctx.arc(0, sparkY, 3 + Math.sin(currentTime * 0.02) * 1.5, 0, Math.PI * 2);
             ctx.fillStyle = '#fbbf24';
             ctx.fill();
 
-            // Label Tag
             ctx.font = 'bold 9px sans-serif';
             ctx.fillStyle = '#fef08a';
             ctx.textAlign = 'center';
@@ -597,18 +624,16 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
 
             ctx.restore();
           } else if (item.type === 'bonde') {
-            // SEPARATED MEMBERS DRAWN AS REAL TORCEDORES (Igual a nós)
+            // SEPARATED MEMBERS DRAWN AS REAL TORCEDORES
             ctx.save();
             ctx.translate(ix, iy);
 
-            // Pulsating Aura Ring
             const pulse = 1 + Math.sin(currentTime * 0.008) * 0.15;
             ctx.beginPath();
             ctx.arc(0, 0, tileSize * 0.35 * pulse, 0, Math.PI * 2);
             ctx.fillStyle = 'rgba(245, 158, 11, 0.25)';
             ctx.fill();
 
-            // Group of 3 mini torcedores
             const offsets = [
               { x: -tileSize * 0.12, y: -tileSize * 0.08 },
               { x: tileSize * 0.12, y: -tileSize * 0.08 },
@@ -624,14 +649,12 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
               ctx.lineWidth = 1;
               ctx.stroke();
 
-              // Head
               ctx.beginPath();
               ctx.arc(off.x, off.y - tileSize * 0.06, tileSize * 0.07, 0, Math.PI * 2);
               ctx.fillStyle = '#e0ac69';
               ctx.fill();
             });
 
-            // Label Tag
             ctx.font = 'bold 9px sans-serif';
             ctx.fillStyle = '#38bdf8';
             ctx.textAlign = 'center';
@@ -652,11 +675,51 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
         ctx.fillText('🚔', cx, cy);
       });
 
-      // 4. Draw Rival Bonde on Exit (💥)
-      ctx.font = `${tileSize * 0.75}px sans-serif`;
+      // 4. DRAW RIVAL BONDE CLEARLY ON EXIT TILE (13.5, 1.5)
+      ctx.save();
+      const rx = 13.5 * tileSize;
+      const ry = 1.5 * tileSize;
+      ctx.translate(rx, ry);
+
+      // Pulsating Red Warning Ring around Rival Bonde
+      const rivalPulse = 1 + Math.sin(currentTime * 0.01) * 0.18;
+      ctx.beginPath();
+      ctx.arc(0, 0, tileSize * 0.45 * rivalPulse, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.35)';
+      ctx.fill();
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Group of 3 Rival Torcedores
+      const rivalOffsets = [
+        { x: -tileSize * 0.14, y: -tileSize * 0.1 },
+        { x: tileSize * 0.14, y: -tileSize * 0.1 },
+        { x: 0, y: tileSize * 0.12 },
+      ];
+
+      rivalOffsets.forEach((off) => {
+        ctx.beginPath();
+        ctx.arc(off.x, off.y, tileSize * 0.15, 0, Math.PI * 2);
+        ctx.fillStyle = rivalPrimaryColor;
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(off.x, off.y - tileSize * 0.07, tileSize * 0.08, 0, Math.PI * 2);
+        ctx.fillStyle = '#8d5524';
+        ctx.fill();
+      });
+
+      // Explicit Label Text for Rival Bonde
+      ctx.font = 'black 10px sans-serif';
+      ctx.fillStyle = '#fca5a5';
       ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('💥', 13.5 * tileSize, 1.5 * tileSize);
+      ctx.fillText(`⚔️ BONDE RIVAL`, 0, -tileSize * 0.42);
+
+      ctx.restore();
 
       // 5. Draw Player Crowd Trail & WALKING PEOPLE IN THE BONDE
       if (currentGameState === 'PLAYING' || currentGameState === 'WON') {
@@ -668,13 +731,11 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
           const mx = pos.x * tileSize;
           const my = pos.y * tileSize;
 
-          // Walking Bob animation
           const walkBob = Math.sin(currentTime * 0.012 + idx * 1.2) * 2.5;
 
           ctx.save();
           ctx.translate(mx, my + walkBob);
 
-          // Torso / Shirt
           ctx.beginPath();
           ctx.arc(0, 0, tileSize * 0.25, 0, Math.PI * 2);
           ctx.fillStyle = member.shirtColor;
@@ -683,30 +744,25 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
           ctx.lineWidth = 1.5;
           ctx.stroke();
 
-          // Head / Skin Tone
           ctx.beginPath();
           ctx.arc(0, -tileSize * 0.12, tileSize * 0.13, 0, Math.PI * 2);
           ctx.fillStyle = member.skinColor;
           ctx.fill();
 
-          // Walking legs animation
           const legAngle = Math.sin(currentTime * 0.015 + idx) * 0.4;
           ctx.strokeStyle = '#18181b';
           ctx.lineWidth = 2;
 
-          // Left Leg
           ctx.beginPath();
           ctx.moveTo(-tileSize * 0.08, tileSize * 0.18);
           ctx.lineTo(-tileSize * 0.08 + Math.sin(legAngle) * 4, tileSize * 0.32);
           ctx.stroke();
 
-          // Right Leg
           ctx.beginPath();
           ctx.moveTo(tileSize * 0.08, tileSize * 0.18);
           ctx.lineTo(tileSize * 0.08 - Math.sin(legAngle) * 4, tileSize * 0.32);
           ctx.stroke();
 
-          // Member Role Icon / Item carried
           ctx.font = `${tileSize * 0.28}px sans-serif`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
@@ -746,7 +802,7 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
       {/* HEADER HUD */}
       <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 rounded-full border border-red-500/50 flex items-center justify-center font-black text-xs" style={{ backgroundColor: playerPrimaryColor }}>
+          <div className="w-8 h-8 rounded-full border border-red-500/50 flex items-center justify-center font-black text-xs shadow" style={{ backgroundColor: playerPrimaryColor }}>
             ⚔️
           </div>
           <div>
@@ -765,9 +821,9 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
         <div className="flex items-center space-x-2 text-right">
           <div>
             <h3 className="text-xs font-black text-white uppercase tracking-wider">{rivalTorcidaName}</h3>
-            <span className="text-[10px] text-zinc-400">Bonde Rival</span>
+            <span className="text-[10px] text-red-400 font-bold">🎯 ALVO: BONDE RIVAL</span>
           </div>
-          <div className="w-8 h-8 rounded-full border border-blue-500/50 flex items-center justify-center font-black text-xs" style={{ backgroundColor: rivalPrimaryColor }}>
+          <div className="w-8 h-8 rounded-full border border-red-500/80 flex items-center justify-center font-black text-xs shadow" style={{ backgroundColor: rivalPrimaryColor }}>
             💥
           </div>
         </div>
@@ -824,7 +880,7 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
                 CONFRONTO DE PISTA NA MÃO LIMPA
               </h2>
               <p className="text-xs text-zinc-300 max-w-xs mx-auto leading-relaxed">
-                Navegue pelas ruas, recolha <strong className="text-amber-400">Rojões 🧨</strong> e <strong className="text-sky-400">Aliados Dispersos 👥</strong> para acumular até <strong className="text-emerald-400">+20% de Bônus</strong>, desvie das <strong className="text-red-400">5 Patrulhas da PM 🚔</strong> e intercepte o <strong className="text-red-400">Bonde Rival 💥</strong> na saída!
+                Navegue pelas ruas, recolha <strong className="text-amber-400">Rojões 🧨</strong> e <strong className="text-sky-400">Aliados 👥</strong> para acumular até <strong className="text-emerald-400">+20% de Bônus</strong>, desvie da <strong className="text-red-400">PM 🚔</strong> e intercepte o <strong className="text-red-400">Bonde Rival ({rivalTorcidaName}) 💥</strong> no canto oposto do mapa!
               </p>
 
               <button
@@ -833,6 +889,60 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
               >
                 INICIAR CONFRONTO ➔
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* INTERACTIVE BRAWL SIMULATION OVERLAY */}
+        {gameState === 'SIMULATING_BRAWL' && (
+          <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/90 p-4 text-center space-y-4 backdrop-blur-md animate-fade-in">
+            <div className="w-full space-y-4">
+              <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-red-500/20 border border-red-500 text-red-400 font-black text-xs uppercase tracking-widest animate-pulse">
+                <Swords className="w-4 h-4" /> SIMULANDO CONFRONTO DE PISTA
+              </div>
+
+              {/* ARENA LINEUP HEADERS */}
+              <div className="grid grid-cols-2 gap-3 items-center">
+                {/* PLAYER SIDE */}
+                <div className="bg-zinc-900/90 border border-emerald-500/40 p-3 rounded-2xl space-y-1 text-left">
+                  <div className="flex items-center space-x-1.5">
+                    <div className="w-5 h-5 rounded-full border border-white" style={{ backgroundColor: playerPrimaryColor }} />
+                    <span className="text-xs font-black text-white truncate">{playerTorcidaName}</span>
+                  </div>
+                  <span className="text-[10px] text-emerald-400 block font-bold">
+                    +${currentBonusPercent}% Bônus de Rojões/Aliados
+                  </span>
+                </div>
+
+                {/* RIVAL SIDE */}
+                <div className="bg-zinc-900/90 border border-red-500/40 p-3 rounded-2xl space-y-1 text-right">
+                  <div className="flex items-center justify-end space-x-1.5">
+                    <span className="text-xs font-black text-white truncate">{rivalTorcidaName}</span>
+                    <div className="w-5 h-5 rounded-full border border-white" style={{ backgroundColor: rivalPrimaryColor }} />
+                  </div>
+                  <span className="text-[10px] text-red-400 block font-bold">Bonde Rival em Linha</span>
+                </div>
+              </div>
+
+              {/* TUG OF WAR CLASH POWER BAR */}
+              <div className="space-y-1">
+                <div className="flex justify-between text-[10px] font-bold text-zinc-400">
+                  <span>Força {playerTorcidaName}</span>
+                  <span>VS</span>
+                  <span>Força {rivalTorcidaName}</span>
+                </div>
+                <div className="w-full h-3 bg-zinc-950 rounded-full border border-zinc-800 p-0.5 overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-emerald-500 via-amber-500 to-red-500 transition-all duration-700 rounded-full shadow-lg shadow-amber-500/30"
+                    style={{ width: `${brawlPowerBar}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* ACTION TICKER LOG */}
+              <div className="bg-zinc-900 p-3 rounded-xl border border-zinc-800 font-mono text-xs text-amber-300 min-h-[50px] flex items-center justify-center">
+                <span className="animate-pulse">{brawlTickerText}</span>
+              </div>
             </div>
           </div>
         )}
