@@ -893,45 +893,60 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
           </div>
         )}
 
-        {/* INTERACTIVE BRAWL SIMULATION OVERLAY */}
+        {/* INTERACTIVE BRAWL SIMULATION OVERLAY WITH VIDEO */}
         {gameState === 'SIMULATING_BRAWL' && (
-          <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/90 p-4 text-center space-y-4 backdrop-blur-md animate-fade-in">
-            <div className="w-full space-y-4">
-              <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-red-500/20 border border-red-500 text-red-400 font-black text-xs uppercase tracking-widest animate-pulse">
-                <Swords className="w-4 h-4" /> SIMULANDO CONFRONTO DE PISTA
+          <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/95 p-3 text-center space-y-2 backdrop-blur-md animate-fade-in overflow-hidden">
+            <div className="w-full space-y-2">
+              <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-red-500/20 border border-red-500 text-red-400 font-black text-[10px] uppercase tracking-widest animate-pulse">
+                <Swords className="w-3.5 h-3.5" /> CONFRONTO DE PISTA EM ANDAMENTO
+              </div>
+
+              {/* BRAWL VIDEO PLAYER */}
+              <div className="relative w-full aspect-video rounded-2xl overflow-hidden border-2 border-red-500/60 shadow-2xl bg-black">
+                <video
+                  src="/videos/briganamao.mp4"
+                  autoPlay
+                  playsInline
+                  muted={false}
+                  controls={false}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/70 border border-red-500/40 text-[9px] font-black text-red-400 uppercase tracking-wider">
+                  🔴 IMAGENS DO EMBATE DE PISTA
+                </div>
               </div>
 
               {/* ARENA LINEUP HEADERS */}
-              <div className="grid grid-cols-2 gap-3 items-center">
+              <div className="grid grid-cols-2 gap-2 items-center">
                 {/* PLAYER SIDE */}
-                <div className="bg-zinc-900/90 border border-emerald-500/40 p-3 rounded-2xl space-y-1 text-left">
+                <div className="bg-zinc-900/90 border border-emerald-500/40 p-2 rounded-xl space-y-0.5 text-left">
                   <div className="flex items-center space-x-1.5">
-                    <div className="w-5 h-5 rounded-full border border-white" style={{ backgroundColor: playerPrimaryColor }} />
-                    <span className="text-xs font-black text-white truncate">{playerTorcidaName}</span>
+                    <div className="w-4 h-4 rounded-full border border-white" style={{ backgroundColor: playerPrimaryColor }} />
+                    <span className="text-[11px] font-black text-white truncate">{playerTorcidaName}</span>
                   </div>
-                  <span className="text-[10px] text-emerald-400 block font-bold">
-                    +${currentBonusPercent}% Bônus de Rojões/Aliados
+                  <span className="text-[9px] text-emerald-400 block font-bold">
+                    +{currentBonusPercent}% Bônus de Rojões/Aliados
                   </span>
                 </div>
 
                 {/* RIVAL SIDE */}
-                <div className="bg-zinc-900/90 border border-red-500/40 p-3 rounded-2xl space-y-1 text-right">
+                <div className="bg-zinc-900/90 border border-red-500/40 p-2 rounded-xl space-y-0.5 text-right">
                   <div className="flex items-center justify-end space-x-1.5">
-                    <span className="text-xs font-black text-white truncate">{rivalTorcidaName}</span>
-                    <div className="w-5 h-5 rounded-full border border-white" style={{ backgroundColor: rivalPrimaryColor }} />
+                    <span className="text-[11px] font-black text-white truncate">{rivalTorcidaName}</span>
+                    <div className="w-4 h-4 rounded-full border border-white" style={{ backgroundColor: rivalPrimaryColor }} />
                   </div>
-                  <span className="text-[10px] text-red-400 block font-bold">Bonde Rival em Linha</span>
+                  <span className="text-[9px] text-red-400 block font-bold">Bonde Rival em Linha</span>
                 </div>
               </div>
 
               {/* TUG OF WAR CLASH POWER BAR */}
-              <div className="space-y-1">
-                <div className="flex justify-between text-[10px] font-bold text-zinc-400">
+              <div className="space-y-0.5">
+                <div className="flex justify-between text-[9px] font-bold text-zinc-400">
                   <span>Força {playerTorcidaName}</span>
                   <span>VS</span>
                   <span>Força {rivalTorcidaName}</span>
                 </div>
-                <div className="w-full h-3 bg-zinc-950 rounded-full border border-zinc-800 p-0.5 overflow-hidden">
+                <div className="w-full h-2.5 bg-zinc-950 rounded-full border border-zinc-800 p-0.5 overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-emerald-500 via-amber-500 to-red-500 transition-all duration-700 rounded-full shadow-lg shadow-amber-500/30"
                     style={{ width: `${brawlPowerBar}%` }}
@@ -940,7 +955,7 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
               </div>
 
               {/* ACTION TICKER LOG */}
-              <div className="bg-zinc-900 p-3 rounded-xl border border-zinc-800 font-mono text-xs text-amber-300 min-h-[50px] flex items-center justify-center">
+              <div className="bg-zinc-900 p-2 rounded-xl border border-zinc-800 font-mono text-[11px] text-amber-300 min-h-[36px] flex items-center justify-center">
                 <span className="animate-pulse">{brawlTickerText}</span>
               </div>
             </div>
