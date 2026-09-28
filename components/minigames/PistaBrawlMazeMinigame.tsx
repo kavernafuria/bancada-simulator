@@ -234,12 +234,20 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
   const [timeLeft, setTimeLeft] = useState(40);
   const [rojaoCount, setRojaoCount] = useState(0);
   const [bondeCount, setBondeCount] = useState(0);
+  const [policeNotice, setPoliceNotice] = useState('');
   const [brawlPhaseStep, setBrawlPhaseStep] = useState(0);
   const [brawlTickerText, setBrawlTickerText] = useState('CHOQUE DE LINHA DE FRENTE IMINENTE!');
   const [brawlPowerBar, setBrawlPowerBar] = useState(50); // 0 (Rival) to 100 (Player)
 
   const gameStateRef = useRef(gameState);
   gameStateRef.current = gameState;
+
+  const bondeCountRef = useRef(bondeCount);
+  bondeCountRef.current = bondeCount;
+  const rojaoCountRef = useRef(rojaoCount);
+  rojaoCountRef.current = rojaoCount;
+
+  const noticeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const playerRef = useRef({
     x: 1.5,
@@ -249,6 +257,7 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
     speed: 3.2,
     flareActive: false,
     flareTime: 0,
+    invincibleTimer: 0,
   });
 
   const trailRef = useRef<{ x: number; y: number }[]>([]);
@@ -378,6 +387,7 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
       speed: 3.2,
       flareActive: false,
       flareTime: 0,
+      invincibleTimer: 0,
     };
 
     trailRef.current = Array.from({ length: 100 }, () => ({ x: startX, y: startY }));
@@ -385,6 +395,7 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
 
     initItemsAndEntities();
     setTimeLeft(40);
+    setPoliceNotice('');
     setGameState('PLAYING');
   };
 
@@ -500,6 +511,10 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
 
       // Update game physics if playing
       if (currentGameState === 'PLAYING') {
+        if (player.invincibleTimer > 0) {
+          player.invincibleTimer = Math.max(0, player.invincibleTimer - dt);
+        }
+
         const keys = keysRef.current;
         let moveX = 0;
         let moveY = 0;
@@ -542,7 +557,7 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
         policeCarsRef.current.forEach((car) => {
           const pDist = Math.hypot(player.x - car.x, player.y - car.y);
 
-          // Check Perception Zone (Radius 2.8 tiles)
+          // Check Perception Zone (Radius 0.5 tiles)
           if (pDist <= car.detectionRadius) {
             if (!car.isChasing) {
               car.isChasing = true;
@@ -581,10 +596,27 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
             }
           }
 
-          // Check collision with Police Car
-          if (pDist < 0.75) {
+          // Check collision with Police Car (Deduct members instead of instant game over)
+          if (pDist < 0.75 && player.invincibleTimer <= 0) {
+            player.invincibleTimer = 1.8; // 1.8s invincibility window
+            car.isChasing = false; // Disengage police car pursuit temporarily
             audio.playPoliceSiren();
-            finishGameAndReturn(false, 'POLICE');
+
+            if (bondeCountRef.current > 0) {
+              setBondeCount((c) => Math.max(0, c - 1));
+              setPoliceNotice('🚨 INTERCEPTAÇÃO POLICIAL! PERDEU 1 ALIADO (-5% BÔNUS)');
+            } else if (rojaoCountRef.current > 0) {
+              setRojaoCount((c) => Math.max(0, c - 1));
+              setPoliceNotice('🚨 POLÍCIA APREENDEU 1 ROJÃO (-5% BÔNUS)!');
+            } else {
+              setTimeLeft((t) => Math.max(1, t - 5));
+              setPoliceNotice('🚨 INTERCEPTAÇÃO POLICIAL! (-5 SEG DE TEMPO)');
+            }
+
+            if (noticeTimeoutRef.current) clearTimeout(noticeTimeoutRef.current);
+            noticeTimeoutRef.current = setTimeout(() => {
+              setPoliceNotice('');
+            }, 2500);
           }
         });
 
@@ -784,18 +816,23 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
 
       // 5. Draw Player Crowd Trail & WALKING PEOPLE IN THE BONDE
       if (currentGameState === 'PLAYING' || currentGameState === 'WON') {
-        const trail = trailRef.current;
-        crowdRoster.forEach((member, idx) => {
-          const posIdx = Math.min(idx * 12, trail.length - 1);
-          const pos = trail[posIdx] || { x: player.x, y: player.y };
+        const isInvincible = player.invincibleTimer > 0;
+        const blinkVisible = !isInvincible || Math.floor(currentTime / 80) % 2 === 0;
 
-          const mx = pos.x * tileSize;
-          const my = pos.y * tileSize;
+        if (blinkVisible) {
+          const trail = trailRef.current;
+          crowdRoster.forEach((member, idx) => {
+            const posIdx = Math.min(idx * 12, trail.length - 1);
+            const pos = trail[posIdx] || { x: player.x, y: player.y };
 
-          const walkBob = Math.sin(currentTime * 0.012 + idx * 1.2) * 2.5;
+            const mx = pos.x * tileSize;
+            const my = pos.y * tileSize;
 
-          ctx.save();
-          ctx.translate(mx, my + walkBob);
+            const walkBob = Math.sin(currentTime * 0.012 + idx * 1.2) * 2.5;
+
+            ctx.save();
+            if (isInvincible) ctx.globalAlpha = 0.55;
+            ctx.translate(mx, my + walkBob);
 
           ctx.beginPath();
           ctx.arc(0, 0, tileSize * 0.25, 0, Math.PI * 2);
@@ -832,6 +869,7 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
 
           ctx.restore();
         });
+        }
       }
 
       animId = requestAnimationFrame(renderLoop);
@@ -923,6 +961,11 @@ export const PistaBrawlMazeMinigame: React.FC<PistaBrawlMazeMinigameProps> = ({
 
       {/* CANVAS DISPLAY AREA */}
       <div className="relative w-full aspect-square rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-950 flex items-center justify-center">
+        {policeNotice && (
+          <div className="absolute top-3 inset-x-3 z-30 px-3 py-2 bg-red-950/90 text-red-200 border-2 border-red-500 rounded-xl text-center text-xs font-black shadow-xl animate-bounce backdrop-blur-sm">
+            {policeNotice}
+          </div>
+        )}
         <canvas
           ref={canvasRef}
           width={450}
