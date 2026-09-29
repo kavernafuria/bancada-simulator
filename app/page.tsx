@@ -4427,16 +4427,27 @@ export default function App() {
       {/* 7. SEASON END OBJECTIVES CELEBRATION MODAL */}
       {seasonEndReport && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 z-[100] animate-fade-in">
-          <div className="bg-zinc-900 border border-emerald-500/50 rounded-3xl max-w-lg w-full p-4 sm:p-5 text-center shadow-2xl space-y-3.5 relative max-h-[90vh] overflow-y-auto pb-10">
-            <div className="mx-auto w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30 shadow-lg">
-              <Award className="w-7 h-7" />
+          <div className="bg-zinc-900 border border-emerald-500/50 rounded-3xl max-w-lg w-full p-4 sm:p-5 text-center shadow-2xl space-y-3.5 relative max-h-[90vh] overflow-y-auto pb-10 overflow-hidden">
+            {/* Header Image Illustration (Fim de Temporada Layout) */}
+            <div className="relative -mx-4 -mt-4 mb-2 sm:-mx-5 sm:-mt-5 h-48 sm:h-52 overflow-hidden border-b border-emerald-500/40 rounded-t-3xl">
+              <img
+                src="/images/fimtemporada.jpg"
+                alt="Encerramento de Temporada de Torcida"
+                className="w-full h-full object-cover object-center opacity-90"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/30 to-transparent" />
+              <div className="absolute bottom-2.5 left-4 text-left">
+                <span className="text-[9.5px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-950/90 px-2.5 py-0.5 rounded border border-emerald-800/60 shadow">
+                  👑 FECHAMENTO DA TEMPORADA {season - 1}
+                </span>
+              </div>
             </div>
 
-            <div>
-              <span className="text-[9.5px] font-black text-emerald-400 uppercase tracking-widest block bg-emerald-950/60 px-2.5 py-0.5 rounded border border-emerald-800/50 w-fit mx-auto mb-1">
-                FECHAMENTO DA TEMPORADA {season - 1}
-              </span>
-              <h3 className="text-base font-black text-white uppercase tracking-tight">
+            <div className="flex items-center justify-center gap-2">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30 shadow-lg">
+                <Award className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-black text-white uppercase tracking-tight">
                 Balanço de Desempenho & Metas
               </h3>
             </div>

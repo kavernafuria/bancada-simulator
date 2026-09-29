@@ -37,13 +37,33 @@ export function StoryCardModal({ isOpen, onClose, data }: StoryCardModalProps) {
 
   useEffect(() => {
     if (isOpen && data && canvasRef.current) {
-      drawStoryCard(canvasRef.current, data);
+      const imgSrc =
+        data.cardType === "SEASON_CLOSING"
+          ? "/images/fimtemporada.jpg"
+          : data.cardType === "MATCH_VICTORY"
+          ? "/images/vitoria01.jpeg"
+          : "/images/bateria.jpeg";
+
+      const img = new Image();
+      img.src = imgSrc;
+      img.onload = () => {
+        if (canvasRef.current) {
+          drawStoryCard(canvasRef.current, data, img);
+        }
+      };
+      img.onerror = () => {
+        if (canvasRef.current) {
+          drawStoryCard(canvasRef.current, data, null);
+        }
+      };
+
+      drawStoryCard(canvasRef.current, data, null);
     }
   }, [isOpen, data]);
 
   if (!isOpen || !data) return null;
 
-  const drawStoryCard = (canvas: HTMLCanvasElement, d: StoryCardData) => {
+  const drawStoryCard = (canvas: HTMLCanvasElement, d: StoryCardData, loadedImg?: HTMLImageElement | null) => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -200,9 +220,57 @@ export function StoryCardModal({ isOpen, onClose, data }: StoryCardModalProps) {
       ctx.fillText(`🥊 PISTA: ${d.poderPista || 75}/100   •   💰 CAIXA: R$ ${(d.bankBalance || 15000).toLocaleString()}`, W / 2, statY + 24);
     }
 
+    // 5.B FEATURED ILLUSTRATION BANNER IMAGE
+    const imgBoxY = 425;
+    const imgBoxH = 130;
+    const imgBoxW = W - 80;
+
+    if (loadedImg) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(40, imgBoxY, imgBoxW, imgBoxH, 14);
+      ctx.clip();
+
+      const imgAspect = loadedImg.width / loadedImg.height;
+      let renderW = imgBoxW;
+      let renderH = imgBoxW / imgAspect;
+      if (renderH < imgBoxH) {
+        renderH = imgBoxH;
+        renderW = imgBoxH * imgAspect;
+      }
+      const renderX = 40 + (imgBoxW - renderW) / 2;
+      const renderY = imgBoxY + (imgBoxH - renderH) / 2;
+
+      ctx.drawImage(loadedImg, renderX, renderY, renderW, renderH);
+
+      const grad = ctx.createLinearGradient(0, imgBoxY, 0, imgBoxY + imgBoxH);
+      grad.addColorStop(0, "rgba(0, 0, 0, 0.15)");
+      grad.addColorStop(1, "rgba(0, 0, 0, 0.75)");
+      ctx.fillStyle = grad;
+      ctx.fillRect(40, imgBoxY, imgBoxW, imgBoxH);
+
+      ctx.strokeStyle = "rgba(245, 158, 11, 0.6)";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(40, imgBoxY, imgBoxW, imgBoxH);
+
+      const bannerBadgeText =
+        d.cardType === "SEASON_CLOSING"
+          ? "🏆 REGISTRO HISTÓRICO DA TEMPORADA"
+          : d.cardType === "MATCH_VICTORY"
+          ? "🔥 REGISTRO DO CONFRONTO & ARQUIBANCADA"
+          : "🥁 TRADIÇÃO & BATUCADA DA TORCIDA";
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "900 11px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(bannerBadgeText, W / 2, imgBoxY + imgBoxH - 10);
+
+      ctx.restore();
+    }
+
     // 6. CHRONICLE / NARRATIVE BOX
-    const chronicleBoxY = 430;
-    const chronicleBoxH = 390;
+    const chronicleBoxY = loadedImg ? 565 : 430;
+    const chronicleBoxH = loadedImg ? 260 : 390;
     ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
     ctx.beginPath();
     ctx.roundRect(40, chronicleBoxY, W - 80, chronicleBoxH, 16);
@@ -213,17 +281,17 @@ export function StoryCardModal({ isOpen, onClose, data }: StoryCardModalProps) {
 
     ctx.fillStyle = "#f59e0b";
     ctx.font = "900 12px sans-serif";
-    ctx.fillText("📖 CRÔNICA OFICIAL DA AGREMIAÇÃO", W / 2, chronicleBoxY + 30);
+    ctx.fillText("📖 CRÔNICA OFICIAL DA AGREMIAÇÃO", W / 2, chronicleBoxY + 28);
 
     // Wrap chronicle text
     ctx.fillStyle = "#e2e8f0";
-    ctx.font = "500 13px sans-serif";
+    ctx.font = "500 12px sans-serif";
     ctx.textAlign = "left";
 
     const chronicleText = d.chronicle || "O respeito da nossa torcida foi mantido com bravura e lealdade nas arquibancadas e nas ruas de todo o Brasil!";
     const words = chronicleText.split(" ");
     let line = "";
-    let lineY = chronicleBoxY + 60;
+    let lineY = chronicleBoxY + 52;
     const maxWidth = W - 110;
 
     for (let n = 0; n < words.length; n++) {
@@ -233,13 +301,13 @@ export function StoryCardModal({ isOpen, onClose, data }: StoryCardModalProps) {
       if (testWidth > maxWidth && n > 0) {
         ctx.fillText(line, 55, lineY);
         line = words[n] + " ";
-        lineY += 21;
-        if (lineY > chronicleBoxY + chronicleBoxH - 30) break;
+        lineY += 19;
+        if (lineY > chronicleBoxY + chronicleBoxH - 25) break;
       } else {
         line = testLine;
       }
     }
-    if (lineY <= chronicleBoxY + chronicleBoxH - 30) {
+    if (lineY <= chronicleBoxY + chronicleBoxH - 25) {
       ctx.fillText(line, 55, lineY);
     }
 
