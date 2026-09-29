@@ -4775,9 +4775,8 @@ export const POST_BRAWL_LEAKS: Record<string, SocialMediaLeak> = {
 };
 
 export function getRandomPostBrawlLeak(): SocialMediaLeak | null {
-  // 25% chance of triggering post-brawl social media leak
-  if (Math.random() > 0.25) return null;
   const keys = Object.keys(POST_BRAWL_LEAKS);
+  if (keys.length === 0) return null;
   const randomIndex = Math.floor(Math.random() * keys.length);
   return POST_BRAWL_LEAKS[keys[randomIndex]];
 }

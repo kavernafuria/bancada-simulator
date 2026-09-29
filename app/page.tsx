@@ -382,6 +382,7 @@ export default function App() {
   const [torcidaUnicaActionAppliedForStep, setTorcidaUnicaActionAppliedForStep] = useState<number | null>(null);
   const [activePressConference, setActivePressConference] = useState<PressConference | null>(null);
   const [activeSocialMediaLeak, setActiveSocialMediaLeak] = useState<SocialMediaLeak | null>(null);
+  const [pendingSocialMediaLeak, setPendingSocialMediaLeak] = useState<SocialMediaLeak | null>(null);
   const [shownPressConferenceIds, setShownPressConferenceIds] = useState<string[]>([]);
   const [rivalAngry, setRivalAngry] = useState<boolean>(false);
   const [activeInquiryTrigger, setActiveInquiryTrigger] = useState<{
@@ -1594,23 +1595,33 @@ export default function App() {
         });
       }
 
-      // MÓDULO 4: Gatilho de Vídeo Vazado nas Redes Sociais (@ritmodetorcida & @ettorcida.oficiall) - 25% Chance em Pista/Briga
-      if (result.isPistaFight || result.bannerCaptured || tactic.pistaMod > 0) {
-        const leak = getRandomPostBrawlLeak();
-        if (leak) {
-          setActiveSocialMediaLeak(leak);
-          if (leak.impactDeltas) {
-            if (leak.impactDeltas.moral) {
-              setStateTrackers((st) => ({ ...st, moral: Math.min(100, st.moral + leak.impactDeltas.moral!) }));
-            }
-            if (leak.impactDeltas.risco_mp) {
-              setStateTrackers((st) => ({ ...st, risco_mp: Math.min(100, st.risco_mp + leak.impactDeltas.risco_mp!) }));
-            }
-            if (leak.impactDeltas.poder_pista) {
-              setStats((st) => ({ ...st, poder_pista: Math.min(100, st.poder_pista + leak.impactDeltas.poder_pista!) }));
-            }
-            if (leak.impactDeltas.pressao_bancada) {
-              setStats((st) => ({ ...st, pressao_bancada: Math.min(100, st.pressao_bancada + leak.impactDeltas.pressao_bancada!) }));
+      // MÓDULO 4: Gatilho de Vídeo Vazado nas Redes Sociais (@ritmodetorcida & @ettorcida.oficiall)
+      // Agendado para surgir APÓS o jogador fechar o quadro de detalhes do jogo (ao clicar em Continuar Carreira).
+      // Frequência: 25% em briga de pista padrão / 50% se for briga em Torcida Única.
+      const tid = (tactic.id || "").toUpperCase();
+      const isPistaFightMatch = result.isPistaFight || result.bannerCaptured || tid.includes("MAO_LIMPA") || tid.includes("PISTA_BRAWL") || tid.includes("BRIGA") || tid.includes("SOCO") || tid.includes("DISPOSICAO") || tid.includes("CONFRONTO") || tid.includes("PERIMETRO") || tid.includes("PORTAO") || tid.includes("BARRA_FERRO") || tid.includes("FRONTAL");
+
+      if (isPistaFightMatch) {
+        const isTorcidaUnicaFight = torcidaUnicaState.isTorcidaUnica || activeTorcidaUnicaModalMode !== null;
+        const leakChance = isTorcidaUnicaFight ? 0.50 : 0.25;
+
+        if (Math.random() < leakChance) {
+          const leak = getRandomPostBrawlLeak();
+          if (leak) {
+            setPendingSocialMediaLeak(leak);
+            if (leak.impactDeltas) {
+              if (leak.impactDeltas.moral) {
+                setStateTrackers((st) => ({ ...st, moral: Math.min(100, st.moral + leak.impactDeltas.moral!) }));
+              }
+              if (leak.impactDeltas.risco_mp) {
+                setStateTrackers((st) => ({ ...st, risco_mp: Math.min(100, st.risco_mp + leak.impactDeltas.risco_mp!) }));
+              }
+              if (leak.impactDeltas.poder_pista) {
+                setStats((st) => ({ ...st, poder_pista: Math.min(100, st.poder_pista + leak.impactDeltas.poder_pista!) }));
+              }
+              if (leak.impactDeltas.pressao_bancada) {
+                setStats((st) => ({ ...st, pressao_bancada: Math.min(100, st.pressao_bancada + leak.impactDeltas.pressao_bancada!) }));
+              }
             }
           }
         }
@@ -4429,7 +4440,13 @@ export default function App() {
             )}
 
             <button
-              onClick={() => setActiveMatchResult(null)}
+              onClick={() => {
+                setActiveMatchResult(null);
+                if (pendingSocialMediaLeak) {
+                  setActiveSocialMediaLeak(pendingSocialMediaLeak);
+                  setPendingSocialMediaLeak(null);
+                }
+              }}
               className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider shadow-lg active:scale-95 transition-all cursor-pointer"
             >
               Continuar Carreira
@@ -5351,7 +5368,9 @@ export default function App() {
             <SocialMediaLeakCard
               leak={activeSocialMediaLeak}
               onDismiss={() => {
-                if (activeSocialMediaLeak.pressConferenceId) {
+                // A coletiva sobre isso deve aparecer apenas em metade das ocasiões que a mensagem dos perfis aparecer (50% de chance)
+                const shouldTriggerColetiva = Math.random() < 0.50;
+                if (shouldTriggerColetiva && activeSocialMediaLeak.pressConferenceId) {
                   const conf = getPressConference(activeSocialMediaLeak.pressConferenceId);
                   if (conf) {
                     setActivePressConference(conf);
