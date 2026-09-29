@@ -728,14 +728,27 @@ export function applyTierElectionCrisis(t: OfficialTorcida): OfficialTorcida {
   };
 }
 
-// Diminishing Returns Curve Math - strictly progressive & stabilized
+// Diminishing Returns Curve Math - strictly progressive, fair & stabilized
 export function applyDiminishingReturns(currentVal: number, delta: number): number {
   if (delta <= 0) return Math.max(0, currentVal + delta);
-  if (currentVal < 40) return Math.min(100, currentVal + delta);
-  if (currentVal < 55) return Math.min(100, Math.round(currentVal + delta * 0.45));
-  if (currentVal < 70) return Math.min(100, Math.round(currentVal + delta * 0.22));
-  if (currentVal < 85) return Math.min(100, Math.round(currentVal + delta * 0.10));
-  return Math.min(100, Math.round(currentVal + delta * 0.04));
+  if (currentVal >= 100) return 100;
+
+  let factor = 1.0;
+  if (currentVal < 40) {
+    factor = 1.0;
+  } else if (currentVal < 60) {
+    factor = 0.70;
+  } else if (currentVal < 80) {
+    factor = 0.50;
+  } else if (currentVal < 95) {
+    factor = 0.35;
+  } else {
+    factor = 0.20;
+  }
+
+  // Garantia: Qualquer escolha com delta positivo (> 0) gera pelo menos +1 de aumento real
+  const gain = Math.max(1, Math.round(delta * factor));
+  return Math.min(100, currentVal + gain);
 }
 
 // Create Custom Torcida with Archetype & Colors

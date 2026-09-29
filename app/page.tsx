@@ -1029,16 +1029,34 @@ export default function App() {
 
     setBankBalance((prev) => prev - choice.cost);
 
-    if (choice.statEffects) {
-      setStats((prev) => {
-        const updated = { ...prev };
+    setStats((prev) => {
+      const updated = { ...prev };
+      if (choice.statEffects) {
         Object.entries(choice.statEffects).forEach(([key, val]) => {
           const k = key as keyof TorcidaStats;
           if (val) updated[k] = applyDiminishingReturns(updated[k], val);
         });
-        return updated;
-      });
-    }
+      }
+
+      // Safeguard: Se a escolha possui deltas de bancada/massa formatados, assegura a aplicação caso statEffects não tenha a chave
+      if (choice.formattedDeltas && Array.isArray(choice.formattedDeltas)) {
+        for (const delta of choice.formattedDeltas) {
+          const l = (delta.label || "").toLowerCase();
+          const numMatch = (delta.value || "").match(/\+(\d+)/);
+          if (numMatch) {
+            const val = parseInt(numMatch[1], 10);
+            if (!isNaN(val) && val > 0) {
+              if ((l.includes("bancada") || l.includes("mosaico") || l.includes("festa") || l.includes("pressão")) && (!choice.statEffects || choice.statEffects.pressao_bancada === undefined)) {
+                updated.pressao_bancada = applyDiminishingReturns(updated.pressao_bancada, val);
+              } else if ((l.includes("massa") || l.includes("contingente") || l.includes("sócios")) && (!choice.statEffects || choice.statEffects.contingente === undefined)) {
+                updated.contingente = applyDiminishingReturns(updated.contingente, val);
+              }
+            }
+          }
+        }
+      }
+      return updated;
+    });
 
     if (choice.stateEffects) {
       setStateTrackers((prev) => {
