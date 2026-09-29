@@ -728,14 +728,14 @@ export function applyTierElectionCrisis(t: OfficialTorcida): OfficialTorcida {
   };
 }
 
-// Diminishing Returns Curve Math - strictly progressive
+// Diminishing Returns Curve Math - strictly progressive & stabilized
 export function applyDiminishingReturns(currentVal: number, delta: number): number {
   if (delta <= 0) return Math.max(0, currentVal + delta);
-  if (currentVal < 45) return Math.min(100, currentVal + delta);
-  if (currentVal < 65) return Math.min(100, Math.round(currentVal + delta * 0.6));
-  if (currentVal < 80) return Math.min(100, Math.round(currentVal + delta * 0.32));
-  if (currentVal < 90) return Math.min(100, Math.round(currentVal + delta * 0.16));
-  return Math.min(100, Math.round(currentVal + delta * 0.06));
+  if (currentVal < 40) return Math.min(100, currentVal + delta);
+  if (currentVal < 55) return Math.min(100, Math.round(currentVal + delta * 0.45));
+  if (currentVal < 70) return Math.min(100, Math.round(currentVal + delta * 0.22));
+  if (currentVal < 85) return Math.min(100, Math.round(currentVal + delta * 0.10));
+  return Math.min(100, Math.round(currentVal + delta * 0.04));
 }
 
 // Create Custom Torcida with Archetype & Colors
@@ -4718,8 +4718,8 @@ export const POST_BRAWL_LEAKS: Record<string, SocialMediaLeak> = {
     profileName: "Ritmo de Torcida",
     verified: true,
     avatarColor: "bg-red-600",
-    headline: "🎥 IMAGENS EXCLUSIVAS DA PISTA RODORIÁRIA!",
-    snippetText: "Vídeo gravado em alta definição flagra o deslocamento do bonde em rodovia com sinalizadores e trovas de pista. Repercussão pesada!",
+    headline: "🎥 IMAGENS EXCLUSIVAS DA PISTA RODOVIÁRIA!",
+    snippetText: "Vídeo gravado em alta definição flagra o deslocamento do bonde em rodovia com sinalizadores e provocações de pista. Repercussão pesada!",
     viewsCount: "640K",
     likesCount: "42K",
     sharesCount: "12K",
@@ -4749,7 +4749,7 @@ export const POST_BRAWL_LEAKS: Record<string, SocialMediaLeak> = {
     verified: true,
     avatarColor: "bg-amber-600",
     headline: "🥁 REGISTRO DE PISTA: CAMINHADA E CORTEJO DA MASSA",
-    snippetText: "Perfil publica imagens da escolta do bonde de caminhada e faixas estendidas em clima de trovas e celebração de poder de pista.",
+    snippetText: "Perfil publica imagens da escolta do bonde de caminhada e faixas estendidas em clima de alfinetadas e celebração de poder de pista.",
     viewsCount: "420K",
     likesCount: "31K",
     sharesCount: "8.5K",
@@ -4757,14 +4757,14 @@ export const POST_BRAWL_LEAKS: Record<string, SocialMediaLeak> = {
     impactDeltas: { poder_pista: 6, moral: 8, risco_mp: 4 },
     pressConferenceId: "ENTREVISTA_BRIGA_PISTA"
   },
-  LEAK_ETTORCIDA_TROVA_CLUSTERS: {
-    id: "LEAK_ETTORCIDA_TROVA_CLUSTERS",
+  LEAK_ETTORCIDA_PROVOCACAO_CLUSTERS: {
+    id: "LEAK_ETTORCIDA_PROVOCACAO_CLUSTERS",
     handle: "@ettorcida.oficiall",
     profileName: "E.T Torcida Oficial",
     verified: true,
     avatarColor: "bg-purple-600",
     headline: "🔥 EXCLUSIVO: COBRANÇA NA ARQUIBANCADA VAZADA",
-    snippetText: "Áudio e vídeo gravados no setor da organizada mostram a cobrança interna de bancada e trovas disparadas contra a diretoria rival.",
+    snippetText: "Áudio e vídeo gravados no setor da organizada mostram a cobrança interna de bancada e tirada de sarro disparada contra a diretoria rival.",
     viewsCount: "750K",
     likesCount: "51K",
     sharesCount: "15K",

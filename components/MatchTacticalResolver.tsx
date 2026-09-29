@@ -1076,7 +1076,8 @@ export const MatchTacticalResolver: React.FC<{
 
     // Seleção de mini-game conforme tática padrão
     if (context.tacticalChoice === 'maze_escape') setActiveMiniGame('maze_escape');
-    if (context.tacticalChoice === 'pista_brawl' || context.tacticalChoice === 'front_charge' || context.tacticalChoice === 'punch_combat') setActiveMiniGame('pista_brawl');
+    if (context.tacticalChoice === 'pista_brawl') setActiveMiniGame('pista_brawl');
+    if (context.tacticalChoice === 'punch_combat' || context.tacticalChoice === 'front_charge') setActiveMiniGame('punch');
     if (context.tacticalChoice === 'caldeirao_pitch') setActiveMiniGame('caldeirao_pitch');
     if (context.tacticalChoice === 'runner_3d') setActiveMiniGame('runner_3d');
     if (context.tacticalChoice === 'rojon_barrage') setActiveMiniGame('rojon');

@@ -1174,10 +1174,10 @@ export default function App() {
       mappedChoice = 'maze_escape';
     } else if (tid.includes("RUNNER_3D") || tid === "ATAQUE_FRONTAL_RUNNER_3D") {
       mappedChoice = 'runner_3d';
-    } else if (tid.includes("MAO_LIMPA") || tid.includes("PISTA_BRAWL") || tid.includes("BRIGA") || tid.includes("SOCO") || tid.includes("DISPOSICAO")) {
-      mappedChoice = 'pista_brawl';
-    } else if (tid.includes("BARRA") || tid.includes("CONFRONTO_BARRA_FERRO") || tid.includes("LINHA_FRENTE")) {
-      mappedChoice = 'front_charge'; // Minigame 3D Linha de Frente com Barras
+    } else if (tid.includes("MAO_LIMPA") || tid.includes("PISTA_BRAWL") || tid === "BRIGA_NA_MAO_LIMPA") {
+      mappedChoice = 'pista_brawl'; // Novo Minigame Labirinto
+    } else if (tid.includes("BARRA") || tid.includes("CONFRONTO_BARRA_FERRO") || tid.includes("LINHA_FRENTE") || tid.includes("SOCO") || tid.includes("DISPOSICAO") || tid.includes("BRIGA")) {
+      mappedChoice = 'punch_combat'; // Jogo Antigo Disputa de Barras de Ferro
     } else if (tid.includes("ROJOES") || tid.includes("MORTEIROS")) {
       mappedChoice = 'rojon_barrage';
     } else if (tid.includes("EMBOSCADA") || tid.includes("SURPRESA") || tid.includes("FLANCO") || tid.includes("RODOVIA")) {
@@ -1290,35 +1290,35 @@ export default function App() {
       setBankBalance((prev) => prev + 3500);
       setStats((st) => ({
         ...st,
-        contingente: applyDiminishingReturns(st.contingente, 12),
-        pressao_bancada: applyDiminishingReturns(st.pressao_bancada, 10),
+        contingente: applyDiminishingReturns(st.contingente, 3),
+        pressao_bancada: applyDiminishingReturns(st.pressao_bancada, 3),
       }));
       setStateTrackers((st) => ({
         ...st,
-        moral: Math.min(100, st.moral + 12),
+        moral: Math.min(100, st.moral + 6),
       }));
     } else if (activeMatchMiniGameContext?.tacticalChoice === 'rhythm_bateria' || activeMatchMiniGameContext?.tacticalChoice === 'rhythm_mosaic') {
       setBankBalance((prev) => prev + 4500);
       setStats((st) => ({
         ...st,
-        contingente: applyDiminishingReturns(st.contingente, 10),
-        pressao_bancada: applyDiminishingReturns(st.pressao_bancada, 18),
+        contingente: applyDiminishingReturns(st.contingente, 2),
+        pressao_bancada: applyDiminishingReturns(st.pressao_bancada, 4),
       }));
       setStateTrackers((st) => ({
         ...st,
-        moral: Math.min(100, st.moral + 15),
+        moral: Math.min(100, st.moral + 8),
       }));
     } else if (activeMatchMiniGameContext?.tacticalChoice === 'caldeirao_pitch') {
       setBankBalance((prev) => prev + 5500);
       setStats((st) => ({
         ...st,
-        contingente: applyDiminishingReturns(st.contingente, 14),
-        pressao_bancada: applyDiminishingReturns(st.pressao_bancada, 16),
+        contingente: applyDiminishingReturns(st.contingente, 3),
+        pressao_bancada: applyDiminishingReturns(st.pressao_bancada, 4),
       }));
       setStateTrackers((st) => ({
         ...st,
-        moral: Math.min(100, st.moral + 18),
-        respeito_nacional: Math.min(100, st.respeito_nacional + 10),
+        moral: Math.min(100, st.moral + 10),
+        respeito_nacional: Math.min(100, st.respeito_nacional + 5),
       }));
     } else if (activeMatchMiniGameContext?.tacticalChoice === 'maze_escape') {
       if (finalPECModifier >= 0) {
