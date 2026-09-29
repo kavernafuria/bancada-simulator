@@ -1177,7 +1177,7 @@ export default function App() {
     } else if (tid.includes("MAO_LIMPA") || tid.includes("PISTA_BRAWL") || tid === "BRIGA_NA_MAO_LIMPA") {
       mappedChoice = 'pista_brawl'; // Novo Minigame Labirinto
     } else if (tid.includes("BARRA") || tid.includes("CONFRONTO_BARRA_FERRO") || tid.includes("LINHA_FRENTE") || tid.includes("SOCO") || tid.includes("DISPOSICAO") || tid.includes("BRIGA")) {
-      mappedChoice = 'punch_combat'; // Jogo Antigo Disputa de Barras de Ferro
+      mappedChoice = 'punch_combat'; // Jogo Antigo Disputa de Barras de Ferro (Runner3D clash_bars)
     } else if (tid.includes("ROJOES") || tid.includes("MORTEIROS")) {
       mappedChoice = 'rojon_barrage';
     } else if (tid.includes("EMBOSCADA") || tid.includes("SURPRESA") || tid.includes("FLANCO") || tid.includes("RODOVIA")) {
@@ -1601,7 +1601,7 @@ export default function App() {
       const tid = (tactic.id || "").toUpperCase();
       const isPistaFightMatch = result.isPistaFight || result.bannerCaptured || tid.includes("MAO_LIMPA") || tid.includes("PISTA_BRAWL") || tid.includes("BRIGA") || tid.includes("SOCO") || tid.includes("DISPOSICAO") || tid.includes("CONFRONTO") || tid.includes("PERIMETRO") || tid.includes("PORTAO") || tid.includes("BARRA_FERRO") || tid.includes("FRONTAL");
 
-      if (isPistaFightMatch) {
+      if (!activeMatchDerby?.isAllyGame && isPistaFightMatch) {
         const isTorcidaUnicaFight = torcidaUnicaState.isTorcidaUnica || activeTorcidaUnicaModalMode !== null;
         const leakChance = isTorcidaUnicaFight ? 0.50 : 0.25;
 
