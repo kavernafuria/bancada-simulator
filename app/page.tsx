@@ -327,15 +327,28 @@ export default function App() {
     let chronicle = "";
     let matchTitle = "";
     let score = "";
+    let matchImage: string | undefined = undefined;
 
     if (cardType === "MATCH_VICTORY" && activeMatchResult) {
       chronicle = activeMatchResult.chronicleText;
       matchTitle = activeMatchDerby?.matchTitle || "Derby Clássico";
       score = `${activeMatchResult.scorePlayerClub} x ${activeMatchResult.scoreRivalClub}`;
+
+      if (activeMatchResult.bannerCaptured) {
+        matchImage = "/images/faixa_capturada.jpeg";
+      } else if (activeMatchResult.isPistaFight) {
+        matchImage = activeMatchResult.isVictoryPista ? "/images/vitoria01.jpeg" : "/images/derrota.jpeg";
+      } else {
+        matchImage = (activeMatchResult.scorePlayerClub >= activeMatchResult.scoreRivalClub)
+          ? "/images/vitoriajogo.jpeg"
+          : "/images/derrotajogo.jpeg";
+      }
     } else if (cardType === "SEASON_CLOSING") {
       chronicle = `Fechamento glorioso da Temporada ${season - 1}! A ${currentTorcida.torcida} alcançou o ${playerRankEntry?.rank || 1}º Lugar no Ranking Nacional com ${playerRankEntry?.powerScore || 500} pts de autoridade!`;
+      matchImage = "/images/fimtemporada.jpg";
     } else {
       chronicle = `Agremiação ${currentTorcida.torcida} do ${currentTorcida.clube}. Respeito e lealdade nas arquibancadas e nas ruas de todo o Brasil!`;
+      matchImage = "/images/bateria.jpeg";
     }
 
     setActiveStoryCardData({
@@ -356,6 +369,7 @@ export default function App() {
       pressaoBancada: stats.pressao_bancada,
       poderPista: stats.poder_pista,
       bankBalance: bankBalance,
+      matchImage: matchImage,
     });
 
     setShowStoryCardModal(true);
@@ -1159,8 +1173,8 @@ export default function App() {
       mappedChoice = 'maze_escape';
     } else if (tid.includes("RUNNER_3D") || tid === "ATAQUE_FRONTAL_RUNNER_3D") {
       mappedChoice = 'runner_3d';
-    } else if (tid.includes("MAO_LIMPA") || tid.includes("SOCO") || tid.includes("DISPOSICAO")) {
-      mappedChoice = 'punch_combat';
+    } else if (tid.includes("MAO_LIMPA") || tid.includes("PISTA_BRAWL") || tid.includes("BRIGA") || tid.includes("SOCO") || tid.includes("DISPOSICAO")) {
+      mappedChoice = 'pista_brawl';
     } else if (tid.includes("BARRA") || tid.includes("CONFRONTO_BARRA_FERRO") || tid.includes("LINHA_FRENTE")) {
       mappedChoice = 'front_charge'; // Minigame 3D Linha de Frente com Barras
     } else if (tid.includes("ROJOES") || tid.includes("MORTEIROS")) {

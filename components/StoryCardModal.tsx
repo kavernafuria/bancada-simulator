@@ -22,6 +22,7 @@ export interface StoryCardData {
   poderPista?: number;
   bankBalance?: number;
   completedObjectives?: number;
+  matchImage?: string;
 }
 
 interface StoryCardModalProps {
@@ -38,11 +39,12 @@ export function StoryCardModal({ isOpen, onClose, data }: StoryCardModalProps) {
   useEffect(() => {
     if (isOpen && data && canvasRef.current) {
       const imgSrc =
-        data.cardType === "SEASON_CLOSING"
+        data.matchImage ||
+        (data.cardType === "SEASON_CLOSING"
           ? "/images/fimtemporada.jpg"
           : data.cardType === "MATCH_VICTORY"
           ? "/images/vitoria01.jpeg"
-          : "/images/bateria.jpeg";
+          : "/images/bateria.jpeg");
 
       const img = new Image();
       img.src = imgSrc;
@@ -256,6 +258,12 @@ export function StoryCardModal({ isOpen, onClose, data }: StoryCardModalProps) {
       const bannerBadgeText =
         d.cardType === "SEASON_CLOSING"
           ? "🏆 REGISTRO HISTÓRICO DA TEMPORADA"
+          : d.matchImage?.includes("faixa")
+          ? "🏴‍☠️ FAIXA RIVAL CAPTURADA & TOMADA"
+          : d.matchImage?.includes("vitoriajogo")
+          ? "🥁 FESTA DA BANCADA & VITÓRIA NO JOGO"
+          : d.matchImage?.includes("derrotajogo") || d.matchImage?.includes("derrota")
+          ? "💀 REVÉS NO JOGO & ARQUIBANCADA"
           : d.cardType === "MATCH_VICTORY"
           ? "🔥 REGISTRO DO CONFRONTO & ARQUIBANCADA"
           : "🥁 TRADIÇÃO & BATUCADA DA TORCIDA";
