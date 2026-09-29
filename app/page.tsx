@@ -1524,16 +1524,113 @@ export default function App() {
         risco_mp: newMP,
       }));
 
-      setStats((prev) => ({
-        ...prev,
-        contingente: Math.max(10, prev.contingente - Math.floor(result.membersLost / 10)),
-        poder_pista: result.isVictoryPista
-          ? applyDiminishingReturns(prev.poder_pista, 3 + tactic.pistaMod)
-          : Math.max(10, prev.poder_pista - 4),
-        pressao_bancada: tactic.isMosaicTactic
-          ? applyDiminishingReturns(prev.pressao_bancada, 8)
-          : prev.pressao_bancada,
-      }));
+      setStats((prev) => {
+        const tid = (tactic.id || "").toUpperCase();
+        const isAlly = activeMatchDerby?.isAllyGame ?? false;
+
+        // 1. PRESSÃO DE BANCADA GAIN
+        let baseBancadaGain = 0;
+
+        // Extrai delta explícito formatado se houver (ex: "+15", "+8", "+7 Bancada")
+        if (tactic.formattedDeltas && Array.isArray(tactic.formattedDeltas)) {
+          for (const delta of tactic.formattedDeltas) {
+            const l = (delta.label || "").toLowerCase();
+            if (l.includes("bancada") || l.includes("mosaico") || l.includes("festa") || l.includes("pressão") || l.includes("show")) {
+              const numMatch = (delta.value || "").match(/\+(\d+)/);
+              if (numMatch) {
+                const val = parseInt(numMatch[1], 10);
+                if (!isNaN(val) && val > baseBancadaGain) {
+                  baseBancadaGain = val;
+                }
+              }
+            }
+          }
+        }
+
+        // Valoração base por palavra-chave da tática ou vitória caso não haja delta explícito
+        if (baseBancadaGain === 0) {
+          if (tactic.isMosaicTactic || tid.includes("MOSAICO") || tid.includes("BANDEIRAO")) {
+            baseBancadaGain = 8;
+          } else if (tid.includes("BATERIA") || tid.includes("FESTA") || tid.includes("CORREDOR") || tid.includes("RUADA") || tid.includes("SAMBA") || tid.includes("CHURRASCO") || tid.includes("ALAMBRADO") || tid.includes("HOMENAGEM") || tid.includes("UNIAO") || tid.includes("TELAO")) {
+            baseBancadaGain = 6;
+          } else if (isAlly) {
+            baseBancadaGain = 6;
+          } else if (result.isVictoryBancada || result.isVictoryPista || result.scorePlayerClub > result.scoreRivalClub) {
+            baseBancadaGain = 4;
+          }
+        }
+
+        // Bônus de alinhamento policial
+        const policeBonus = police?.bancadaBonus ? Math.round(police.bancadaBonus * 0.5) : 0;
+        let totalBancadaGain = baseBancadaGain + policeBonus;
+
+        // Multiplicador de perfil presidencial (Mestre de Bateria ganha 20% a mais de Bancada)
+        if (presidentProfile === 'MESTRE_BATERIA') {
+          totalBancadaGain = Math.round(totalBancadaGain * 1.2);
+        }
+
+        // 2. CONTINGENTE (MASSA) GAIN/LOSS
+        let baseContingenteGain = 0;
+
+        if (tactic.formattedDeltas && Array.isArray(tactic.formattedDeltas)) {
+          for (const delta of tactic.formattedDeltas) {
+            const l = (delta.label || "").toLowerCase();
+            if (l.includes("contingente") || l.includes("sócios") || l.includes("massa")) {
+              const numMatch = (delta.value || "").match(/\+(\d+)/);
+              if (numMatch) {
+                const val = parseInt(numMatch[1], 10);
+                if (!isNaN(val) && val > baseContingenteGain) {
+                  baseContingenteGain = val;
+                }
+              }
+            }
+          }
+        }
+
+        if (baseContingenteGain === 0) {
+          if (isAlly) {
+            baseContingenteGain = 4; // Confraternização em jogo de aliado atrai novos sócios
+          } else if (result.isVictoryBancada || result.isVictoryPista || result.scorePlayerClub > result.scoreRivalClub) {
+            baseContingenteGain = 3; // Vitória em jogo/pista impulsiona contratação de sócios
+          } else if (tactic.isMosaicTactic || tid.includes("BATERIA") || tid.includes("FESTA") || tid.includes("CORTEJO")) {
+            baseContingenteGain = 2;
+          }
+        }
+
+        const membersLost = isAlly ? 0 : Math.floor(result.membersLost / 10);
+
+        // 3. PODER DE PISTA
+        let newPoderPista: number;
+        if (isAlly) {
+          // Em jogos de aliados, não há perda de pista (confraternização de paz)
+          const allyPistaGain = Math.max(2, Math.min(6, tactic.pistaMod || 3));
+          newPoderPista = applyDiminishingReturns(prev.poder_pista, allyPistaGain);
+        } else if (result.isVictoryPista) {
+          newPoderPista = applyDiminishingReturns(prev.poder_pista, Math.max(1, 3 + tactic.pistaMod));
+        } else {
+          newPoderPista = Math.max(10, prev.poder_pista - 4);
+        }
+
+        // 4. NOVO VALOR DE BANCADA
+        const newPressaoBancada = totalBancadaGain > 0
+          ? applyDiminishingReturns(prev.pressao_bancada, totalBancadaGain)
+          : prev.pressao_bancada;
+
+        // 5. NOVO VALOR DE CONTINGENTE (MASSA)
+        const newContingente = Math.max(
+          10,
+          baseContingenteGain > 0
+            ? applyDiminishingReturns(prev.contingente, baseContingenteGain) - membersLost
+            : prev.contingente - membersLost
+        );
+
+        return {
+          ...prev,
+          contingente: newContingente,
+          poder_pista: newPoderPista,
+          pressao_bancada: newPressaoBancada,
+        };
+      });
 
       setHistoryLog((prev) => [
         `[Ano ${season} - ${activeMatchDerby.competition || "Jogo"}] ${result.statusTitle}. Placar: ${result.scorePlayerClub}x${result.scoreRivalClub}. Tática: ${tactic.tacticalLog} (${resultText})`,
