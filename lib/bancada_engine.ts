@@ -3684,27 +3684,27 @@ export function simulateNationalRanking(
     if (isPlayer) {
       playerIncluded = true;
       score =
-        playerStats.contingente * 1.35 +
-        playerStats.pressao_bancada * 1.25 +
-        playerStats.poder_pista * 1.25 +
-        playerStats.caravana * 1.15 +
-        playerStats.autonomia_financeira * 1.0 +
-        stateTrackers.respeito_nacional * 1.1;
+        playerStats.contingente * 1.45 +
+        playerStats.pressao_bancada * 1.35 +
+        playerStats.poder_pista * 1.35 +
+        playerStats.caravana * 1.25 +
+        playerStats.autonomia_financeira * 0.25 +
+        stateTrackers.respeito_nacional * 1.15;
 
-      // Logarithmic resistance at top ranks (> 550 points)
-      if (score > 550) {
-        const excess = score - 550;
-        score = 550 + Math.round(excess * 0.45);
+      // Logarithmic resistance at top ranks (> 580 points)
+      if (score > 580) {
+        const excess = score - 580;
+        score = 580 + Math.round(excess * 0.60);
       }
 
       list.push({ torcida: playerTorcida, rawScore: score, isPlayer: true });
     } else {
       const base =
-        t.contingente * 1.35 +
-        t.pressao_bancada * 1.25 +
-        t.poder_pista * 1.25 +
-        t.caravana * 1.15 +
-        t.autonomia_financeira * 1.0 +
+        t.contingente * 1.45 +
+        t.pressao_bancada * 1.35 +
+        t.poder_pista * 1.35 +
+        t.caravana * 1.25 +
+        t.autonomia_financeira * 0.25 +
         60;
 
       let seed = (season * 17 + (t.torcida.charCodeAt(0) || 65) * 31 + (t.torcida.charCodeAt(1) || 66) * 13) % 100;
@@ -3721,16 +3721,16 @@ export function simulateNationalRanking(
 
   if (!playerIncluded) {
     let score =
-      playerStats.contingente * 1.35 +
-      playerStats.pressao_bancada * 1.25 +
-      playerStats.poder_pista * 1.25 +
-      playerStats.caravana * 1.15 +
-      playerStats.autonomia_financeira * 1.0 +
-      stateTrackers.respeito_nacional * 1.1;
+      playerStats.contingente * 1.45 +
+      playerStats.pressao_bancada * 1.35 +
+      playerStats.poder_pista * 1.35 +
+      playerStats.caravana * 1.25 +
+      playerStats.autonomia_financeira * 0.25 +
+      stateTrackers.respeito_nacional * 1.15;
 
-    if (score > 550) {
-      const excess = score - 550;
-      score = 550 + Math.round(excess * 0.45);
+    if (score > 580) {
+      const excess = score - 580;
+      score = 580 + Math.round(excess * 0.60);
     }
     list.push({ torcida: playerTorcida, rawScore: score, isPlayer: true });
   }
