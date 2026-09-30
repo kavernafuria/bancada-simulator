@@ -274,6 +274,7 @@ export default function App() {
   // Season Objectives & Snapshots
   const [seasonObjectives, setSeasonObjectives] = useState<SeasonObjective[]>([]);
   const [seasonStartSnapshot, setSeasonStartSnapshot] = useState<SeasonStartSnapshot | null>(null);
+  const [careerStartSnapshot, setCareerStartSnapshot] = useState<SeasonStartSnapshot | null>(null);
   const [seasonEndReport, setSeasonEndReport] = useState<{
     completedCount: number;
     totalCashBonus: number;
@@ -344,12 +345,20 @@ export default function App() {
           : "/images/derrotajogo.jpeg";
       }
     } else if (cardType === "SEASON_CLOSING") {
-      chronicle = `Fechamento glorioso da Temporada ${season - 1}! A ${currentTorcida.torcida} alcançou o ${playerRankEntry?.rank || 1}º Lugar no Ranking Nacional com ${playerRankEntry?.powerScore || 500} pts de autoridade!`;
+      const isEnd15 = season >= 15;
+      const initRank = careerStartSnapshot?.rank || seasonStartSnapshot?.rank || 1;
+      const endRank = playerRankEntry?.rank || 1;
+
+      chronicle = isEnd15
+        ? `👑 MANDATO HISTÓRICO DE 15 TEMPORADAS CONCLUÍDO! A agremiação ${currentTorcida.torcida} assumiu o comando no #${initRank}º Lugar no Ano 1 e encerrou a carreira consagrada no #${endRank}º Lugar Nacional com ${playerRankEntry?.powerScore || 500} pts de autoridade!`
+        : `Fechamento glorioso da Temporada ${season - 1}! A ${currentTorcida.torcida} alcançou o ${playerRankEntry?.rank || 1}º Lugar no Ranking Nacional com ${playerRankEntry?.powerScore || 500} pts de autoridade!`;
       matchImage = "/images/fimtemporada.jpg";
     } else {
       chronicle = `Agremiação ${currentTorcida.torcida} do ${currentTorcida.clube}. Respeito e lealdade nas arquibancadas e nas ruas de todo o Brasil!`;
       matchImage = "/images/bateria.jpeg";
     }
+
+    const initSnap = careerStartSnapshot || seasonStartSnapshot;
 
     setActiveStoryCardData({
       torcidaName: currentTorcida.torcida,
@@ -370,6 +379,12 @@ export default function App() {
       poderPista: stats.poder_pista,
       bankBalance: bankBalance,
       matchImage: matchImage,
+      initialRank: initSnap?.rank || 1,
+      initialContingente: initSnap?.contingente || 35,
+      initialPressaoBancada: initSnap?.pressao_bancada || 35,
+      initialPoderPista: initSnap?.poder_pista || 30,
+      initialBankBalance: initSnap?.bankBalance || 10000,
+      isCareerEnd: season >= 15,
     });
 
     setShowStoryCardModal(true);
@@ -669,6 +684,7 @@ export default function App() {
           if (parsed.purchasedInvestments) setPurchasedInvestments(parsed.purchasedInvestments);
           if (parsed.seasonHistory) setSeasonHistory(parsed.seasonHistory);
           if (parsed.seasonStartSnapshot) setSeasonStartSnapshot(parsed.seasonStartSnapshot);
+          if (parsed.careerStartSnapshot) setCareerStartSnapshot(parsed.careerStartSnapshot);
           if (parsed.rivalryRecords) {
             setRivalryRecords(parsed.rivalryRecords);
           }
@@ -741,6 +757,7 @@ export default function App() {
           purchasedInvestments,
           seasonHistory,
           seasonStartSnapshot,
+          careerStartSnapshot,
         })
       );
     }
@@ -768,6 +785,7 @@ export default function App() {
     purchasedInvestments,
     seasonHistory,
     seasonStartSnapshot,
+    careerStartSnapshot,
   ]);
 
   const pipeline = currentTorcida
@@ -939,6 +957,7 @@ export default function App() {
         }, { moral: 80, risco_mp: 10, relacao_clube: 50, respeito_nacional: 80 }, 1).find((r) => r.isPlayer)?.rank || 1,
       };
       setSeasonStartSnapshot(initialSnapshotHist);
+      setCareerStartSnapshot(initialSnapshotHist);
       setIsStarted(true);
       setShowGameTutorialModal(true);
       return;
@@ -1019,6 +1038,7 @@ export default function App() {
       }, state, 1).find((r) => r.isPlayer)?.rank || 1,
     };
     setSeasonStartSnapshot(initialSnapshotCustom);
+    setCareerStartSnapshot(initialSnapshotCustom);
     setIsStarted(true);
     setShowGameTutorialModal(true);
   };
@@ -1847,17 +1867,19 @@ export default function App() {
         rank: endRank,
       };
 
-      const fallbackStart: SeasonStartSnapshot = seasonStartSnapshot || {
-        contingente: currentTorcida ? (currentTorcida.tier === 'A' ? 80 : currentTorcida.tier === 'B' ? 55 : 35) : 50,
-        pressao_bancada: currentTorcida ? (currentTorcida.tier === 'A' ? 85 : currentTorcida.tier === 'B' ? 60 : 35) : 50,
-        poder_pista: currentTorcida ? (currentTorcida.tier === 'A' ? 80 : currentTorcida.tier === 'B' ? 55 : 30) : 50,
-        caravana: currentTorcida ? (currentTorcida.tier === 'A' ? 85 : currentTorcida.tier === 'B' ? 50 : 25) : 50,
-        bankBalance: currentTorcida ? (currentTorcida.tier === 'A' ? 50000 : currentTorcida.tier === 'B' ? 25000 : 10000) : 20000,
-        moral: 50,
-        risco_mp: 20,
-        respeito_nacional: 50,
-        rank: Math.min(35, endRank + 4),
-      };
+      const fallbackStart: SeasonStartSnapshot = (season >= 15 && careerStartSnapshot)
+        ? careerStartSnapshot
+        : (seasonStartSnapshot || {
+            contingente: currentTorcida ? (currentTorcida.tier === 'A' ? 80 : currentTorcida.tier === 'B' ? 55 : 35) : 50,
+            pressao_bancada: currentTorcida ? (currentTorcida.tier === 'A' ? 85 : currentTorcida.tier === 'B' ? 60 : 35) : 50,
+            poder_pista: currentTorcida ? (currentTorcida.tier === 'A' ? 80 : currentTorcida.tier === 'B' ? 55 : 30) : 50,
+            caravana: currentTorcida ? (currentTorcida.tier === 'A' ? 85 : currentTorcida.tier === 'B' ? 50 : 25) : 50,
+            bankBalance: currentTorcida ? (currentTorcida.tier === 'A' ? 50000 : currentTorcida.tier === 'B' ? 25000 : 10000) : 20000,
+            moral: 50,
+            risco_mp: 20,
+            respeito_nacional: 50,
+            rank: Math.min(35, endRank + 4),
+          });
 
       setSeasonEndReport({
         completedCount: evaluation.completedCount,
@@ -4583,18 +4605,18 @@ export default function App() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/30 to-transparent" />
               <div className="absolute bottom-2.5 left-4 text-left">
-                <span className="text-[9.5px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-950/90 px-2.5 py-0.5 rounded border border-emerald-800/60 shadow">
-                  👑 FECHAMENTO DA TEMPORADA {season - 1}
+                <span className="text-[9.5px] font-black text-amber-400 uppercase tracking-widest bg-amber-950/90 px-2.5 py-0.5 rounded border border-amber-800/60 shadow">
+                  {season >= 15 ? "👑 BALANÇO FINAL DE 15 TEMPORADAS DE MANDATO" : `👑 FECHAMENTO DA TEMPORADA ${season - 1}`}
                 </span>
               </div>
             </div>
 
             <div className="flex items-center justify-center gap-2">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30 shadow-lg">
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30 shadow-lg">
                 <Award className="w-6 h-6" />
               </div>
               <h3 className="text-lg font-black text-white uppercase tracking-tight">
-                Balanço de Desempenho & Metas
+                {season >= 15 ? "Consagração do Legado de 15 Anos" : "Balanço de Desempenho & Metas"}
               </h3>
             </div>
 
@@ -4645,11 +4667,13 @@ export default function App() {
               </div>
             )}
 
-            {/* 📊 COMPARATIVO DE EVOLUÇÃO DO ANO (INÍCIO vs FINAL) */}
+            {/* 📊 COMPARATIVO DE EVOLUÇÃO (COMO ASSUMIU vs COMO FICOU) */}
             {seasonEndReport.startSnapshot && seasonEndReport.endSnapshot && (
               <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 text-left space-y-2">
-                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-wider block border-b border-zinc-800 pb-1.5">
-                  📊 Comparativo de Evolução do Ano (Início vs Final)
+                <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider block border-b border-zinc-800 pb-1.5">
+                  {season >= 15
+                    ? "📊 Comparativo do Mandato: Como Assumiu (Ano 1) vs Como Ficou no Final (Ano 15)"
+                    : "📊 Comparativo de Evolução do Ano (Início vs Final)"}
                 </span>
 
                 <div className="grid grid-cols-2 gap-2 text-xs font-bold pt-0.5">

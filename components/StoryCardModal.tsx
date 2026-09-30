@@ -23,6 +23,13 @@ export interface StoryCardData {
   bankBalance?: number;
   completedObjectives?: number;
   matchImage?: string;
+  // Comparativo do Mandato (Como Assumiu no Ano 1 vs Como Ficou):
+  initialRank?: number | string;
+  initialContingente?: number;
+  initialPressaoBancada?: number;
+  initialPoderPista?: number;
+  initialBankBalance?: number;
+  isCareerEnd?: boolean;
 }
 
 interface StoryCardModalProps {
@@ -125,15 +132,18 @@ export function StoryCardModal({ isOpen, onClose, data }: StoryCardModalProps) {
     // Title Tag Banner
     const isVictory = d.cardType === "MATCH_VICTORY";
     const isSeason = d.cardType === "SEASON_CLOSING";
+    const isEnd15 = d.isCareerEnd || d.season >= 15;
     const tagText = isVictory
       ? "🔥 VITÓRIA DE ARQUIBANCADA & PISTA"
+      : isEnd15
+      ? "👑 LEGADO HISTÓRICO DE 15 TEMPORADAS"
       : isSeason
       ? `👑 FECHAMENTO DA TEMPORADA ${d.season}`
       : "🛡️ PERFIL DA AGREMIAÇÃO";
 
-    ctx.fillStyle = isVictory ? "#991b1b" : isSeason ? "#065f46" : "#1e1b4b";
+    ctx.fillStyle = isVictory ? "#991b1b" : isEnd15 ? "#78350f" : isSeason ? "#065f46" : "#1e1b4b";
     ctx.beginPath();
-    ctx.roundRect(W / 2 - 170, 68, 340, 32, 8);
+    ctx.roundRect(W / 2 - 175, 68, 350, 32, 8);
     ctx.fill();
     ctx.strokeStyle = "#f59e0b";
     ctx.lineWidth = 1;
@@ -178,15 +188,21 @@ export function StoryCardModal({ isOpen, onClose, data }: StoryCardModalProps) {
 
     ctx.fillStyle = "#94a3b8";
     ctx.font = "800 11px sans-serif";
-    ctx.fillText("POSIÇÃO NO RANKING NACIONAL DE TORCIDAS", W / 2, 238);
-
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "900 42px sans-serif";
-    ctx.fillText(`#${d.rank}º LUGAR`, W / 2, 282);
+    if (isEnd15 && d.initialRank !== undefined) {
+      ctx.fillText("EVOLUÇÃO DO RANKING NACIONAL (ANO 1 ➔ ANO 15)", W / 2, 238);
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "900 36px sans-serif";
+      ctx.fillText(`#${d.initialRank}º ➔ #${d.rank}º LUGAR`, W / 2, 282);
+    } else {
+      ctx.fillText("POSIÇÃO NO RANKING NACIONAL DE TORCIDAS", W / 2, 238);
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "900 42px sans-serif";
+      ctx.fillText(`#${d.rank}º LUGAR`, W / 2, 282);
+    }
 
     ctx.fillStyle = "#f59e0b";
     ctx.font = "800 12px sans-serif";
-    ctx.fillText(`POWER SCORE: ${d.powerScore} PTS`, W / 2, 308);
+    ctx.fillText(`POWER SCORE FINAL: ${d.powerScore} PTS`, W / 2, 308);
 
     // 5. MATCH / DERBY SECTION OR SEASON STATS
     if (isVictory && d.matchTitle) {
@@ -215,11 +231,22 @@ export function StoryCardModal({ isOpen, onClose, data }: StoryCardModalProps) {
       ctx.lineWidth = 1.5;
       ctx.stroke();
 
-      const statY = 368;
-      ctx.fillStyle = "#cbd5e1";
-      ctx.font = "700 11px sans-serif";
-      ctx.fillText(`👥 MASSA: ${d.contingente || 75}/100   •   🥁 BANCADA: ${d.pressaoBancada || 75}/100`, W / 2, statY);
-      ctx.fillText(`🥊 PISTA: ${d.poderPista || 75}/100   •   💰 CAIXA: R$ ${(d.bankBalance || 15000).toLocaleString()}`, W / 2, statY + 24);
+      if (isEnd15 && d.initialContingente !== undefined) {
+        ctx.fillStyle = "#fbbf24";
+        ctx.font = "900 10px sans-serif";
+        ctx.fillText("📊 COMPARATIVO DE ATRIBUTOS (COMO ASSUMIU ➔ COMO FICOU)", W / 2, 355);
+
+        ctx.fillStyle = "#cbd5e1";
+        ctx.font = "700 10.5px sans-serif";
+        ctx.fillText(`👥 MASSA: ${d.initialContingente} ➔ ${d.contingente || 75}   •   🥁 BANCADA: ${d.initialPressaoBancada} ➔ ${d.pressaoBancada || 75}`, W / 2, 375);
+        ctx.fillText(`🥊 PISTA: ${d.initialPoderPista} ➔ ${d.poderPista || 75}   •   💰 CAIXA: R$ ${(d.initialBankBalance || 10000).toLocaleString()} ➔ R$ ${(d.bankBalance || 15000).toLocaleString()}`, W / 2, 396);
+      } else {
+        const statY = 368;
+        ctx.fillStyle = "#cbd5e1";
+        ctx.font = "700 11px sans-serif";
+        ctx.fillText(`👥 MASSA: ${d.contingente || 75}/100   •   🥁 BANCADA: ${d.pressaoBancada || 75}/100`, W / 2, statY);
+        ctx.fillText(`🥊 PISTA: ${d.poderPista || 75}/100   •   💰 CAIXA: R$ ${(d.bankBalance || 15000).toLocaleString()}`, W / 2, statY + 24);
+      }
     }
 
     // 5.B FEATURED ILLUSTRATION BANNER IMAGE
