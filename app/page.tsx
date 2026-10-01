@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ENDGAME_INVESTMENTS, EndGameInvestment, triggerRandomUnforeseenExpense, UnforeseenExpense } from "@/lib/bancada_engine";
 import { AgeGateService } from "@/lib/age_gate_service";
 import { AgeGateModal } from "@/components/AgeGateModal";
+import { MusicService } from "@/lib/music_service";
 import { AdService } from "@/lib/ad_service";
 import { MockAdProvider } from "@/lib/mock_ad_provider";
 import { MockAdModal } from "@/components/MockAdModal";
@@ -2390,6 +2391,14 @@ export default function App() {
     const verified = AgeGateService.isVerified();
     setIsAgeVerified(verified);
 
+    if (verified) {
+      const unlockAudio = () => {
+        MusicService.startTheme();
+      };
+      window.addEventListener("click", unlockAudio, { once: true });
+      window.addEventListener("touchstart", unlockAudio, { once: true });
+    }
+
     // Initialize AdService with MockAdProvider for development
     const mockProvider = new MockAdProvider();
     AdService.setProvider(mockProvider);
@@ -2398,6 +2407,7 @@ export default function App() {
   const handleConfirmAge = () => {
     AgeGateService.setVerified(true);
     setIsAgeVerified(true);
+    MusicService.startTheme();
   };
 
   // Dynamic Theme Colors

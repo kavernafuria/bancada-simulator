@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { MusicService } from '@/lib/music_service';
 import { Runner3DGame } from './minigames/Runner3DGame';
 import { RojonShooterCanvas } from './minigames/RojonShooterCanvas';
 import { RuadaFlagWavingModal } from './flag_waving/RuadaFlagWavingModal';
@@ -1087,6 +1088,17 @@ export const MatchTacticalResolver: React.FC<{
     if (context.tacticalChoice === 'flag_waving') setActiveMiniGame('flag_waving');
     if (context.tacticalChoice === 'rhythm_bateria' || context.tacticalChoice === 'rhythm_mosaic') setActiveMiniGame('rhythm_bateria');
   }, [context, onMatchComplete]);
+
+  useEffect(() => {
+    if (activeMiniGame) {
+      MusicService.notifyMinigameStart();
+    } else {
+      MusicService.notifyMinigameEnd();
+    }
+    return () => {
+      MusicService.notifyMinigameEnd();
+    };
+  }, [activeMiniGame]);
 
   const handleMiniGameFinish = (result: MiniGameResult) => {
     setActiveMiniGame(null);

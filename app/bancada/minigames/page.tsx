@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { MusicService } from "@/lib/music_service";
 import {
   ArrowLeft,
   Drum,
@@ -40,6 +41,13 @@ export default function MiniGamesTestPage() {
   const [activeTab, setActiveTab] = useState<
     "caldeirao" | "festa_caldeirao" | "runner3d" | "whack" | "punch" | "rojon" | "rhythm" | "dodge" | "memory" | "gate" | "ruada" | "pista_brawl"
   >("caldeirao");
+
+  useEffect(() => {
+    MusicService.notifyMinigameStart();
+    return () => {
+      MusicService.notifyMinigameEnd();
+    };
+  }, []);
 
   // Viewport Switcher Mode (Desktop vs Mobile simulation)
   const [viewportMode, setViewportMode] = useState<"desktop" | "mobile">("desktop");
