@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ThemeScript } from "@/components/ThemeScript";
 import { BrandHeader } from "@/components/BrandHeader";
+import { AdTickerBanner } from "@/components/AdTickerBanner";
 import { BrandFooter } from "@/components/BrandFooter";
 import { FloatingDock } from "@/components/FloatingDock";
 
@@ -29,6 +30,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased selection:bg-kavers-purple selection:text-white min-h-screen flex flex-col relative">
         <BrandHeader />
+        <AdTickerBanner />
         {children}
         <BrandFooter />
         <FloatingDock />
