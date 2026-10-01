@@ -35,8 +35,8 @@ class BackgroundMusicService {
     themeTrack: null,
   };
 
-  private wasPlayingBeforeMinigame = false;
   private initialized = false;
+  private userPausePreference = false; // True ONLY if the user manually clicked Pause!
 
   constructor() {
     if (typeof window !== "undefined") {
@@ -63,7 +63,7 @@ class BackgroundMusicService {
     this.audio = new Audio();
     this.audio.volume = this.state.isMuted ? 0 : this.state.volume;
 
-    // Track ended listener -> play next random track
+    // Track ended listener -> play next random track continuously
     this.audio.addEventListener("ended", () => {
       this.handleTrackEnded();
     });
@@ -76,6 +76,17 @@ class BackgroundMusicService {
 
     // Fetch dynamic track list from API
     await this.fetchTracks();
+
+    // Setup global user interaction listener to bypass browser autoplay restrictions
+    const unlockAutoplay = () => {
+      if (!this.state.isPlaying && !this.userPausePreference) {
+        this.startTheme();
+      }
+    };
+
+    window.addEventListener("click", unlockAutoplay, { once: true });
+    window.addEventListener("touchstart", unlockAutoplay, { once: true });
+    window.addEventListener("keydown", unlockAutoplay, { once: true });
 
     // Listen for custom global events
     window.addEventListener("bancada:music:start-theme", () => this.startTheme());
@@ -91,7 +102,6 @@ class BackgroundMusicService {
         this.state.themeTrack = data.themeTrack || null;
         this.state.availableTracks = data.tracks || [];
 
-        // Fallback default tracks if API returned empty
         if (!this.state.themeTrack && this.state.availableTracks.length === 0) {
           this.setupFallbackTracks();
         }
@@ -122,10 +132,11 @@ class BackgroundMusicService {
   }
 
   /**
-   * Starts playing the official "tema" music when exiting +18 screen
+   * Starts playing the official "tema" music
    */
   public async startTheme() {
     await this.init();
+    this.userPausePreference = false;
     this.state.hasStartedTheme = true;
 
     const trackToPlay = this.state.themeTrack || (this.state.availableTracks[0] ?? null);
@@ -136,7 +147,7 @@ class BackgroundMusicService {
   }
 
   /**
-   * Play a specific track
+   * Play a specific track (Always plays continuously unless user paused)
    */
   public async playTrack(track: AudioTrackInfo) {
     if (!this.audio) return;
@@ -146,7 +157,7 @@ class BackgroundMusicService {
       this.audio.volume = this.state.isMuted ? 0 : this.state.volume;
       this.state.currentTrack = track;
 
-      if (!this.state.isMinigameActive) {
+      if (!this.userPausePreference) {
         await this.audio.play();
         this.state.isPlaying = true;
       }
@@ -161,7 +172,9 @@ class BackgroundMusicService {
    * Called automatically when track ends -> plays random next track
    */
   private handleTrackEnded() {
-    this.nextTrack();
+    if (!this.userPausePreference) {
+      this.nextTrack();
+    }
   }
 
   /**
@@ -175,7 +188,6 @@ class BackgroundMusicService {
 
     if (pool.length === 0) return;
 
-    // Filter out current track if there are multiple tracks
     const candidatePool =
       pool.length > 1
         ? pool.filter((t) => t.url !== this.state.currentTrack?.url)
@@ -188,15 +200,17 @@ class BackgroundMusicService {
   }
 
   /**
-   * Toggle play / pause manually
+   * Toggle play / pause manually by the USER ONLY
    */
   public togglePlay() {
     if (!this.audio) return;
 
     if (this.state.isPlaying) {
+      this.userPausePreference = true; // User explicitly paused!
       this.audio.pause();
       this.state.isPlaying = false;
     } else {
+      this.userPausePreference = false; // User explicitly unpaused!
       if (!this.state.currentTrack) {
         this.startTheme();
         return;
@@ -208,30 +222,15 @@ class BackgroundMusicService {
   }
 
   /**
-   * Called when entering minigames -> pauses music
+   * Minigames no longer force pause background music per user preference
    */
   public notifyMinigameStart() {
     this.state.isMinigameActive = true;
-    if (this.audio && this.state.isPlaying) {
-      this.wasPlayingBeforeMinigame = true;
-      this.audio.pause();
-      this.state.isPlaying = false;
-    } else {
-      this.wasPlayingBeforeMinigame = false;
-    }
     this.emitChange();
   }
 
-  /**
-   * Called when leaving minigames -> resumes music if it was playing
-   */
   public notifyMinigameEnd() {
     this.state.isMinigameActive = false;
-    if (this.audio && this.wasPlayingBeforeMinigame) {
-      this.audio.play().catch(console.warn);
-      this.state.isPlaying = true;
-      this.wasPlayingBeforeMinigame = false;
-    }
     this.emitChange();
   }
 

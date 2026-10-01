@@ -3428,19 +3428,20 @@ export function evaluateSeasonEndObjectives(
   };
 }
 
-// 9 TAILORED ACTION EVENTS EXACTLY MATCHING THE 9 NON-GAME PIPELINE STEPS
+// TAILORED ACTION EVENTS MATCHING PIPELINE STEPS (0, 1, 3, 5, 7, 8)
 export function getActionStepEvents(status: ClubStatus, season: number = 1, currentTorcida?: OfficialTorcida | null): Record<number, ActionStepEvent> {
   const isInterior = isInteriorSP(currentTorcida);
   return {
     0: getSeasonalActionEvent(1, season, 0, isInterior),
     1: getSeasonalActionEvent(1, season, 1, isInterior),
+    2: getSeasonalActionEvent(2, season, 2, isInterior),
     3: getSeasonalActionEvent(2, season, 3, isInterior),
-    4: getSeasonalActionEvent(2, season, 4, isInterior),
-    6: getSeasonalActionEvent(3, season, 6, isInterior),
-    7: getSeasonalActionEvent(3, season, 7, isInterior),
-    9: getSeasonalActionEvent(4, season, 9, isInterior),
-    10: getSeasonalActionEvent(4, season, 10, isInterior),
-    12: getSeasonalActionEvent(5, season, 12, isInterior),
+    4: getSeasonalActionEvent(3, season, 4, isInterior),
+    5: getSeasonalActionEvent(3, season, 5, isInterior),
+    6: getSeasonalActionEvent(4, season, 6, isInterior),
+    7: getSeasonalActionEvent(4, season, 7, isInterior),
+    8: getSeasonalActionEvent(5, season, 8, isInterior),
+    9: getSeasonalActionEvent(5, season, 9, isInterior),
   };
 }
 

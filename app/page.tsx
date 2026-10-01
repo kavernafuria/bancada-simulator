@@ -2384,7 +2384,7 @@ export default function App() {
   };
 
   const currentStep = pipeline[pipelineIndex] || pipeline[0];
-  const activeActionEvent = actionEvents[pipelineIndex];
+  const activeActionEvent = currentStep?.actionEvent || actionEvents[pipelineIndex];
 
   // Age Gate 18+ verification on mount
   useEffect(() => {
