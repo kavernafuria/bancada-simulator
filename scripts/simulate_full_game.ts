@@ -437,7 +437,7 @@ function runFullTierSimulation(targetName: string, tierLabel: string): FullTorci
 }
 
 async function main() {
-  console.log("=== INICIANDO SIMULAÇÃO COMPLETA DE 195 ETAPAS (15 TEMPORADAS x 13 ETAPAS) PARA 3 TORCIDAS ===");
+  console.log("=== INICIANDO SIMULAÇÃO COMPLETA DE 150 ETAPAS (15 TEMPORADAS x 10 ETAPAS) PARA 3 TORCIDAS ===");
 
   const reportS = runFullTierSimulation("Gaviões", "Tier S");
   const reportA = runFullTierSimulation("Ponte", "Tier A");

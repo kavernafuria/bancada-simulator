@@ -630,32 +630,32 @@ export const ARCHETYPES: Record<ArchetypeId, ArchetypeDefinition> = {
   PADRAO: {
     id: "PADRAO",
     name: "Torcida Organizada Tradicional",
-    subtitle: "Perfil Equilibrado & Bateria de Samba",
-    description: "Foco em confecção própria, quadra social, bateria pesada de samba e comboios regulares de ônibus.",
+    subtitle: "Equilibrado & Bateria de Samba",
+    description: "Equilíbrio em festa visual, comboios de caravanas e confecção de fardamentos.",
     statModifiers: { contingente: 5, caravana: 5, autonomia_financeira: 5 },
     stateModifiers: { moral: 5, risco_mp: 0 },
   },
   BARRA_BRAVA: {
     id: "BARRA_BRAVA",
     name: "Barra Brava / Movimento Popular",
-    subtitle: "Perfil Musical, Murgas & Tirantes",
-    description: "Canto contínuo os 90 minutos, instrumentos de sopro, tirantes verticais. Pouco foco em loja física.",
+    subtitle: "Canto Ininterrupto & Tirantes",
+    description: "Foco total em cantos de 90 min, instrumentos e festa na arquibancada.",
     statModifiers: { pressao_bancada: 15, contingente: 5, poder_pista: -10, autonomia_financeira: -15 },
     stateModifiers: { moral: 10, risco_mp: -5 },
   },
   BONDE_PISTA: {
     id: "BONDE_PISTA",
     name: "Linha de Frente & Bonde de Pista",
-    subtitle: "Perfil Combate, Escolta & Rodovia",
-    description: "Domínio de território, proteção de faixas e respeito de rua. Alta vigilância policial e do MP.",
+    subtitle: "Combate de Rua & Escolta",
+    description: "Força máxima de pista, escolta rodoviária e defesa de território urbano.",
     statModifiers: { poder_pista: 25, pressao_bancada: -15, autonomia_financeira: -10 },
     stateModifiers: { risco_mp: 15, respeito_nacional: 10 },
   },
   COLETIVO_POPULAR: {
     id: "COLETIVO_POPULAR",
     name: "Coletivo Popular Autônomo",
-    subtitle: "Perfil Comunitário & Ingressos Acessíveis",
-    description: "Foco em direitos do torcedor, ação social nas favelas e resistência política. Sem viés bélico.",
+    subtitle: "Comunitário & Ação Social",
+    description: "Foco em ações sociais nas favelas, ingressos populares e massa.",
     statModifiers: { contingente: 10, poder_pista: -15, autonomia_financeira: 5 },
     stateModifiers: { moral: 10, risco_mp: -10, relacao_clube: 15 },
   },
@@ -3444,7 +3444,7 @@ export function getActionStepEvents(status: ClubStatus, season: number = 1, curr
   };
 }
 
-// 13 PIPELINE STEPS (4 GAMES, 9 ACTIONS) WITH SEASONAL VARIETY
+// 10 PIPELINE STEPS PER SEASON (4 MATCHES AT STEPS 3, 5, 7, 10 & 6 ACTION EVENTS)
 export function getAnnualPipelineWithMatches(
   currentTorcida: OfficialTorcida,
   clubStatus: ClubStatus,
@@ -3461,12 +3461,9 @@ export function getAnnualPipelineWithMatches(
   const act0 = getSeasonalActionEvent(1, season, 0, isInterior);
   const act1 = getSeasonalActionEvent(1, season, 1, isInterior);
   const act3 = getSeasonalActionEvent(2, season, 3, isInterior);
-  const act4 = getSeasonalActionEvent(2, season, 4, isInterior);
-  const act6 = getSeasonalActionEvent(3, season, 6, isInterior);
-  const act7 = getSeasonalActionEvent(3, season, 7, isInterior);
-  const act9 = getSeasonalActionEvent(4, season, 9, isInterior);
-  const act10 = getSeasonalActionEvent(4, season, 10, isInterior);
-  const act12 = getSeasonalActionEvent(5, season, 12, isInterior);
+  const act5 = getSeasonalActionEvent(3, season, 5, isInterior);
+  const act7 = getSeasonalActionEvent(4, season, 7, isInterior);
+  const act8 = getSeasonalActionEvent(5, season, 8, isInterior);
 
   return [
     {
@@ -3503,14 +3500,6 @@ export function getAnnualPipelineWithMatches(
     },
     {
       stepIndex: 4,
-      type: "action" as const,
-      title: act4.title,
-      category: act4.category,
-      description: act4.contextNarrative,
-      actionEvent: act4,
-    },
-    {
-      stepIndex: 5,
       type: "key_game" as const,
       title: `🤝 JOGO 2: ${derby2.matchTitle} - ${derby2.derbyName}`,
       description: `${derby2.importanceDescription} Estádio: ${derby2.stadium} (${derby2.cityState}).`,
@@ -3518,12 +3507,20 @@ export function getAnnualPipelineWithMatches(
       derby: derby2,
     },
     {
-      stepIndex: 6,
+      stepIndex: 5,
       type: "action" as const,
-      title: act6.title,
-      category: act6.category,
-      description: act6.contextNarrative,
-      actionEvent: act6,
+      title: act5.title,
+      category: act5.category,
+      description: act5.contextNarrative,
+      actionEvent: act5,
+    },
+    {
+      stepIndex: 6,
+      type: "key_game" as const,
+      title: `🔥 JOGO 3: ${derby3.matchTitle} - ${derby3.derbyName}`,
+      description: `${derby3.importanceDescription} Estádio: ${derby3.stadium} (${derby3.cityState}).`,
+      gameNumber: 3,
+      derby: derby3,
     },
     {
       stepIndex: 7,
@@ -3535,43 +3532,19 @@ export function getAnnualPipelineWithMatches(
     },
     {
       stepIndex: 8,
-      type: "key_game" as const,
-      title: `🔥 JOGO 3: ${derby3.matchTitle} - ${derby3.derbyName}`,
-      description: `${derby3.importanceDescription} Estádio: ${derby3.stadium} (${derby3.cityState}).`,
-      gameNumber: 3,
-      derby: derby3,
+      type: "action" as const,
+      title: act8.title,
+      category: act8.category,
+      description: act8.contextNarrative,
+      actionEvent: act8,
     },
     {
       stepIndex: 9,
-      type: "action" as const,
-      title: act9.title,
-      category: act9.category,
-      description: act9.contextNarrative,
-      actionEvent: act9,
-    },
-    {
-      stepIndex: 10,
-      type: "action" as const,
-      title: act10.title,
-      category: act10.category,
-      description: act10.contextNarrative,
-      actionEvent: act10,
-    },
-    {
-      stepIndex: 11,
       type: "key_game" as const,
       title: `🏆 JOGO 4: ${derby4.matchTitle} - ${derby4.derbyName}`,
       description: `${derby4.importanceDescription} Estádio: ${derby4.stadium} (${derby4.cityState}).`,
       gameNumber: 4,
       derby: derby4,
-    },
-    {
-      stepIndex: 12,
-      type: "action" as const,
-      title: act12.title,
-      category: act12.category,
-      description: act12.contextNarrative,
-      actionEvent: act12,
     },
   ];
 }
