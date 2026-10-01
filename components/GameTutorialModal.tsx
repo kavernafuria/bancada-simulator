@@ -70,14 +70,14 @@ const TUTORIAL_STEPS = [
   },
   {
     step: 2,
-    title: "O Ciclo da Temporada & As 13 Etapas",
+    title: "O Ciclo da Temporada & As 10 Etapas",
     subtitle: "Como Funciona a Progressão de Jogos e Ações",
     icon: <Sparkles className="w-5 h-5 text-amber-400" />,
     badge: "FLUXO DE JOGO",
     content: (
       <div className="space-y-3 text-xs leading-relaxed text-zinc-300">
         <p>
-          Cada temporada é dividida em <strong className="text-amber-400">13 Etapas</strong> sequenciais. Você avançará passo a passo no calendário oficial do futebol nacional:
+          Cada temporada é dividida em <strong className="text-amber-400">10 Etapas</strong> sequenciais. Você avançará passo a passo no calendário oficial do futebol nacional:
         </p>
 
         <div className="space-y-2 pt-1">

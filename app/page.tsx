@@ -3267,7 +3267,7 @@ export default function App() {
 
             <div className="flex items-center justify-between mb-2">
               <span className="bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider">
-                ANO {season} • ETAPA {pipelineIndex + 1} DE 13
+                ANO {season} • ETAPA {pipelineIndex + 1} DE {pipeline.length}
               </span>
               <span className="text-[9px] font-bold text-zinc-400 uppercase">
                 {currentStep.type === "action" ? (currentStep.category || "Ação de Diretoria") : "🔥 Grande Confronto"}
