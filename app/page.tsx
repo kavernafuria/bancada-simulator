@@ -1767,7 +1767,7 @@ export default function App() {
   };
 
   const advancePipeline = () => {
-    if (pipelineIndex + 1 < 13) {
+    if (pipelineIndex + 1 < pipeline.length) {
       setPipelineIndex((prev) => prev + 1);
     } else {
       // Record Season History Evolution
@@ -3018,7 +3018,7 @@ export default function App() {
                 {currentTorcida?.torcida} • {currentTorcida?.clube}
               </span>
               <h2 className="text-xs font-black text-white uppercase flex items-center gap-1.5 flex-wrap">
-                <span>TEMPORADA {season} DE 15 • ETAPA {pipelineIndex + 1}/13</span>
+                <span>TEMPORADA {season} DE 15 • ETAPA {pipelineIndex + 1}/{pipeline.length}</span>
               </h2>
             </div>
           </div>
