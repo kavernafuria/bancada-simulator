@@ -3369,125 +3369,104 @@ export default function App() {
           }}
         />
 
-        {/* Top Brand Logo Banner & Controls */}
-        <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-zinc-800/80">
-          <div className="flex items-center gap-2">
+        {/* Single Integrated Compact Header Bar */}
+        <div className="flex items-center justify-between gap-2 flex-wrap pb-1 border-b border-zinc-800/60 mb-2">
+          {/* Left: Logo & Torcida Crest / Name */}
+          <div className="flex items-center gap-2 min-w-0">
             <img
               src="/bancada_logo.png"
-              alt="Bancada Simulator Logo"
-              className="h-7 sm:h-8 w-auto object-contain filter drop-shadow-[0_4px_12px_rgba(220,38,38,0.4)]"
+              alt="Bancada Simulator"
+              className="h-6 sm:h-7 w-auto object-contain filter drop-shadow-[0_2px_8px_rgba(220,38,38,0.4)] shrink-0"
             />
-            <span className="text-[9px] font-black px-2 py-0.5 rounded bg-zinc-800 text-amber-300 border border-zinc-700 uppercase">
-              {season <= 3 ? "Fase 1: Construção" : season <= 6 ? "Fase 2: Expansão" : season <= 9 ? "Fase 3: Consolidação" : season <= 12 ? "Fase 4: Influência" : "Fase 5: Legado"}
-            </span>
-          </div>
 
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => setSoundEnabled(!soundEnabled)}
-              className="p-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white cursor-pointer"
-              title="Alternar Som"
-            >
-              {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-amber-400" /> : <VolumeX className="w-3.5 h-3.5" />}
-            </button>
-            <button
-              onClick={() => setShowGameTutorialModal(true)}
-              className="p-1 px-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-amber-300 transition-colors flex items-center gap-1 text-[10px] font-bold cursor-pointer"
-              title="Abrir Guia & Tutorial Interativo"
-            >
-              <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
-              <span className="hidden sm:inline">Guia</span>
-            </button>
-            {process.env.NODE_ENV === "development" && (
-              <Link
-                href="/bancada/minigames"
-                className="p-1 px-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition-colors flex items-center gap-1 text-[10px] font-bold cursor-pointer"
-                title="Testar Mini-Games Individuais (Apenas Localhost)"
-              >
-                🎮 <span className="hidden sm:inline">Mini-Games</span>
-              </Link>
-            )}
-            <button
-              onClick={handleExportSave}
-              className="p-1 px-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 transition-colors flex items-center gap-1 text-[10px] font-bold cursor-pointer"
-              title="Exportar Save JSON para backup"
-            >
-              <Download className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="hidden sm:inline">Save</span>
-            </button>
-            <button
-              onClick={() => setShowResetConfirm(true)}
-              className="p-1 px-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-amber-400 transition-colors flex items-center gap-1 text-[10px] font-bold cursor-pointer"
-              title="Voltar ao início / Reiniciar carreira (Ano 1)"
-            >
-              <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
-              <span className="hidden sm:inline">Reiniciar</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Torcida Header Pill & Green Bank Balance Pill */}
-        <div className="flex items-center justify-between pt-0.5 gap-2 flex-wrap mb-2">
-          <div className="flex items-center gap-2 min-w-0">
-            {/* Dynamic Shield Badge with Torcida Colors */}
-            <div className="relative shrink-0 flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-950 border border-zinc-700 shadow-md">
-              <div className="w-4 h-4 rounded-full border border-white/30 flex items-center justify-center overflow-hidden" style={{ backgroundColor: themePrimary }}>
+            <div className="flex items-center gap-1.5 min-w-0 bg-zinc-950/80 px-2 py-0.5 rounded-xl border border-zinc-800">
+              <div className="relative shrink-0 flex items-center justify-center w-4 h-4 rounded-md overflow-hidden border border-white/20" style={{ backgroundColor: themePrimary }}>
                 <div className="w-full h-1/2 bottom-0 absolute" style={{ backgroundColor: themeSecondary }} />
-                <Shield className="w-3 h-3 text-white drop-shadow relative z-10" />
+                <Shield className="w-2.5 h-2.5 text-white relative z-10" />
               </div>
-            </div>
-
-            <div className="truncate">
-              <div className="flex items-center gap-1">
-                <span className="text-xs font-black tracking-wider text-amber-400 uppercase truncate">
-                  {currentTorcida?.torcida}
-                </span>
-                <span className="text-amber-300 text-xs">👑</span>
-                <span className="text-[10px] font-bold text-zinc-400 uppercase truncate">
-                  ({currentTorcida?.clube})
-                </span>
-              </div>
-              <div className="text-[10px] font-black text-white uppercase flex items-center gap-1.5">
-                <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[9px]">
-                  📅 CICLO ATUAL {pipelineIndex + 1}/{pipeline.length}
-                </span>
-                <span className="text-zinc-400 font-bold text-[9px]">ANO {season}/15</span>
-              </div>
+              <span className="text-xs font-black text-amber-400 uppercase tracking-wide truncate">
+                {currentTorcida?.torcida}
+              </span>
+              <span className="text-amber-300 text-xs shrink-0">👑</span>
+              <span className="text-[9px] font-bold text-zinc-400 uppercase truncate hidden sm:inline">
+                ({currentTorcida?.clube})
+              </span>
             </div>
           </div>
 
-          {/* Green Bank Balance Pill (Caixa da Torcida) & Attributes Collapse Toggle */}
-          <div className="flex items-center gap-2">
-            <div className="px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/50 shadow-[0_0_12px_rgba(16,185,129,0.15)] flex items-center gap-1.5">
-              <span className="text-xs">💰</span>
-              <div className="flex flex-col">
-                <span className="text-[7px] font-black text-emerald-400 uppercase tracking-widest leading-none">CAIXA</span>
-                <span className={`text-xs font-black leading-tight ${bankBalance >= 0 ? "text-emerald-300" : "text-red-400 animate-pulse"}`}>
-                  R$ {bankBalance.toLocaleString('pt-BR')}
-                </span>
-              </div>
+          {/* Center/Right: Caixa, Ciclo, Temporada & Actions */}
+          <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
+            {/* Caixa Pill */}
+            <div className="px-2.5 py-0.5 rounded-full bg-emerald-950/90 border border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.15)] flex items-center gap-1">
+              <span className="text-[10px]">💰</span>
+              <span className="text-[7px] font-black text-emerald-400 uppercase tracking-widest">CAIXA</span>
+              <span className={`text-xs font-black ${bankBalance >= 0 ? "text-emerald-300" : "text-red-400 animate-pulse"}`}>
+                R$ {bankBalance.toLocaleString('pt-BR')}
+              </span>
             </div>
 
-            <button
-              onClick={() => setIsAttributesCollapsed(!isAttributesCollapsed)}
-              className="p-1.5 rounded-xl bg-zinc-800/80 border border-zinc-700 hover:border-amber-500 text-zinc-300 hover:text-amber-400 transition-colors flex items-center justify-center gap-1 text-[10px] font-bold cursor-pointer"
-              title={isAttributesCollapsed ? "Expandir Painel de Atributos" : "Recolher Painel de Atributos"}
-            >
-              {isAttributesCollapsed ? <ChevronDown className="w-4 h-4 text-amber-400" /> : <ChevronUp className="w-4 h-4 text-amber-400" />}
-              <span className="hidden md:inline text-[9px] uppercase">{isAttributesCollapsed ? "Atributos" : "Recolher"}</span>
-            </button>
+            {/* Ciclo Pill */}
+            <span className="px-2 py-0.5 rounded-xl bg-zinc-950/90 border border-amber-500/30 text-amber-300 text-[9px] font-black uppercase tracking-wider">
+              📅 CICLO {pipelineIndex + 1}/{pipeline.length}
+            </span>
+
+            {/* Ano Pill */}
+            <span className="px-2 py-0.5 rounded-xl bg-zinc-950/90 border border-zinc-800 text-zinc-300 text-[9px] font-black uppercase tracking-wider">
+              ANO {season}/15
+            </span>
+
+            {/* Compact Action Buttons */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setSoundEnabled(!soundEnabled)}
+                className="p-1 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white cursor-pointer"
+                title="Alternar Som"
+              >
+                {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-amber-400" /> : <VolumeX className="w-3.5 h-3.5" />}
+              </button>
+              <button
+                onClick={() => setShowGameTutorialModal(true)}
+                className="p-1 px-1.5 rounded-lg bg-zinc-950 border border-zinc-800 hover:bg-zinc-800 text-amber-300 transition-colors flex items-center gap-1 text-[9px] font-bold cursor-pointer"
+                title="Abrir Guia"
+              >
+                <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
+                <span className="hidden md:inline">Guia</span>
+              </button>
+              <button
+                onClick={handleExportSave}
+                className="p-1 px-1.5 rounded-lg bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-900/60 transition-colors flex items-center gap-1 text-[9px] font-bold cursor-pointer"
+                title="Save JSON"
+              >
+                <Download className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="hidden md:inline">Save</span>
+              </button>
+              <button
+                onClick={() => setShowResetConfirm(true)}
+                className="p-1 px-1.5 rounded-lg bg-zinc-950 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-amber-400 transition-colors flex items-center gap-1 text-[9px] font-bold cursor-pointer"
+                title="Reiniciar"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
+              </button>
+              <button
+                onClick={() => setIsAttributesCollapsed(!isAttributesCollapsed)}
+                className="p-1 px-1.5 rounded-lg bg-zinc-950 border border-zinc-800 hover:border-amber-500 text-zinc-400 hover:text-amber-400 transition-colors flex items-center gap-1 text-[9px] font-bold cursor-pointer"
+                title={isAttributesCollapsed ? "Expandir Atributos" : "Recolher Atributos"}
+              >
+                {isAttributesCollapsed ? <ChevronDown className="w-3.5 h-3.5 text-amber-400" /> : <ChevronUp className="w-3.5 h-3.5 text-amber-400" />}
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* MP Ban Alert Banner */}
       {isBannedByMP && (
-        <div className="mb-2.5 p-2.5 rounded-2xl bg-red-600 text-white text-xs font-black text-center shadow-lg animate-pulse flex items-center justify-center gap-2 relative z-10">
+        <div className="mb-2.5 p-2 rounded-2xl bg-red-600 text-white text-xs font-black text-center shadow-lg animate-pulse flex items-center justify-center gap-2 relative z-10">
           <AlertOctagon className="w-4 h-4" /> BANIDO PELO MP • 1 TEMPORADA SEM FAIXAS & BATERIA
         </div>
       )}
 
-      {/* Grouped Attributes Panel (3 Blocks) */}
+      {/* Content-Proportional Attributes Panel (3 Blocks) */}
       {isAttributesCollapsed ? (
         <div className="mb-2.5 p-1.5 px-3 rounded-2xl bg-zinc-900/90 border border-zinc-800 flex items-center justify-between text-[10px] font-black gap-2 relative z-10 overflow-x-auto shadow">
           <div className="flex items-center gap-3 shrink-0">
@@ -3505,96 +3484,123 @@ export default function App() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2.5 relative z-10">
-          {/* Card 1: Força & Mobilização */}
-          <div className="bg-zinc-900/90 p-2 rounded-2xl border border-purple-500/20 shadow-md">
-            <div className="text-[9px] font-black text-purple-400 uppercase tracking-wider mb-1 flex items-center gap-1">
-              <span>💜 Força & Mobilização</span>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 mb-2.5 relative z-10">
+          {/* Card 1: Força & Mobilização (4 Stats -> col-span-5) */}
+          <div className="lg:col-span-5 bg-zinc-900/95 p-2 rounded-2xl border border-purple-500/30 shadow-md flex flex-col justify-between">
+            <div className="text-[9px] font-black text-purple-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+              <span>💜 FORÇA E MOBILIZAÇÃO</span>
             </div>
-            <div className="grid grid-cols-4 gap-1 text-center">
-              <div className="bg-zinc-950/70 p-1 rounded-xl border border-purple-900/30">
-                <span className="text-[7.5px] font-black text-zinc-400 block uppercase truncate">Massa</span>
-                <span className="text-xs font-black text-amber-400">{stats.contingente}</span>
+            <div className="grid grid-cols-4 gap-1.5 text-center">
+              <div className="bg-zinc-950 p-1.5 rounded-xl border border-purple-900/40 flex flex-col items-center justify-between">
+                <span className="text-[8px] sm:text-[9px] font-black text-zinc-300 uppercase tracking-tight flex items-center gap-0.5 whitespace-nowrap">
+                  👥 MASSA
+                </span>
+                <span className="text-xs sm:text-sm font-black text-white my-0.5">{stats.contingente}</span>
+                <div className="w-full h-1 rounded-full bg-purple-500" />
               </div>
-              <div className="bg-zinc-950/70 p-1 rounded-xl border border-purple-900/30">
-                <span className="text-[7.5px] font-black text-zinc-400 block uppercase truncate">Bancada</span>
-                <span className="text-xs font-black text-orange-400">{stats.pressao_bancada}</span>
+              <div className="bg-zinc-950 p-1.5 rounded-xl border border-purple-900/40 flex flex-col items-center justify-between">
+                <span className="text-[8px] sm:text-[9px] font-black text-zinc-300 uppercase tracking-tight flex items-center gap-0.5 whitespace-nowrap">
+                  🥁 BANCADA
+                </span>
+                <span className="text-xs sm:text-sm font-black text-white my-0.5">{stats.pressao_bancada}</span>
+                <div className="w-full h-1 rounded-full bg-rose-500" />
               </div>
-              <div className="bg-zinc-950/70 p-1 rounded-xl border border-purple-900/30">
-                <span className="text-[7.5px] font-black text-zinc-400 block uppercase truncate">Pista</span>
-                <span className="text-xs font-black text-red-400">{stats.poder_pista}</span>
+              <div className="bg-zinc-950 p-1.5 rounded-xl border border-purple-900/40 flex flex-col items-center justify-between">
+                <span className="text-[8px] sm:text-[9px] font-black text-zinc-300 uppercase tracking-tight flex items-center gap-0.5 whitespace-nowrap">
+                  🥊 PISTA
+                </span>
+                <span className="text-xs sm:text-sm font-black text-white my-0.5">{stats.poder_pista}</span>
+                <div className="w-full h-1 rounded-full bg-red-500" />
               </div>
-              <div className="bg-zinc-950/70 p-1 rounded-xl border border-purple-900/30">
-                <span className="text-[7.5px] font-black text-zinc-400 block uppercase truncate">Caravana</span>
-                <span className="text-xs font-black text-blue-400">{stats.caravana}</span>
+              <div className="bg-zinc-950 p-1.5 rounded-xl border border-purple-900/40 flex flex-col items-center justify-between">
+                <span className="text-[8px] sm:text-[9px] font-black text-zinc-300 uppercase tracking-tight flex items-center gap-0.5 whitespace-nowrap">
+                  🚌 CARAVANA
+                </span>
+                <span className="text-xs sm:text-sm font-black text-white my-0.5">{stats.caravana}</span>
+                <div className="w-full h-1 rounded-full bg-blue-500" />
               </div>
             </div>
           </div>
 
-          {/* Card 2: Gestão */}
-          <div className="bg-zinc-900/90 p-2 rounded-2xl border border-amber-500/20 shadow-md">
-            <div className="text-[9px] font-black text-amber-400 uppercase tracking-wider mb-1 flex items-center gap-1">
-              <span>💛 Gestão</span>
+          {/* Card 2: Gestão (2 Stats -> col-span-3) */}
+          <div className="lg:col-span-3 bg-zinc-900/95 p-2 rounded-2xl border border-amber-500/30 shadow-md flex flex-col justify-between">
+            <div className="text-[9px] font-black text-amber-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+              <span>💛 GESTÃO</span>
             </div>
-            <div className="grid grid-cols-2 gap-1 text-center">
-              <div className="bg-zinc-950/70 p-1 rounded-xl border border-amber-900/30">
-                <span className="text-[7.5px] font-black text-zinc-400 block uppercase truncate">Finanças</span>
-                <span className="text-xs font-black text-emerald-400">{stats.autonomia_financeira}</span>
+            <div className="grid grid-cols-2 gap-1.5 text-center">
+              <div className="bg-zinc-950 p-1.5 rounded-xl border border-amber-900/40 flex flex-col items-center justify-between">
+                <span className="text-[8px] sm:text-[9px] font-black text-zinc-300 uppercase tracking-tight flex items-center gap-0.5 whitespace-nowrap">
+                  💰 FINANÇAS
+                </span>
+                <span className="text-xs sm:text-sm font-black text-white my-0.5">{stats.autonomia_financeira}</span>
+                <div className="w-full h-1 rounded-full bg-amber-500" />
               </div>
-              <div className="bg-zinc-950/70 p-1 rounded-xl border border-amber-900/30">
-                <span className="text-[7.5px] font-black text-zinc-400 block uppercase truncate">Risco MP</span>
-                <span className={`text-xs font-black ${stateTrackers.risco_mp > 65 ? "text-red-400 animate-pulse" : "text-zinc-200"}`}>
+              <div className="bg-zinc-950 p-1.5 rounded-xl border border-amber-900/40 flex flex-col items-center justify-between">
+                <span className="text-[8px] sm:text-[9px] font-black text-zinc-300 uppercase tracking-tight flex items-center gap-0.5 whitespace-nowrap">
+                  ⚖️ RISCO MP
+                </span>
+                <span className={`text-xs sm:text-sm font-black my-0.5 ${stateTrackers.risco_mp > 65 ? "text-red-400 animate-pulse" : "text-white"}`}>
                   {stateTrackers.risco_mp}%
                 </span>
+                <div className="w-full h-1 rounded-full bg-zinc-400" />
               </div>
             </div>
           </div>
 
-          {/* Card 3: Reputação & Relacionamento */}
-          <div className="bg-zinc-900/90 p-2 rounded-2xl border border-emerald-500/20 shadow-md">
-            <div className="text-[9px] font-black text-emerald-400 uppercase tracking-wider mb-1 flex items-center gap-1">
-              <span>💚 Reputação & Relacionamento</span>
+          {/* Card 3: Reputação & Relacionamento (3 Stats -> col-span-4) */}
+          <div className="lg:col-span-4 bg-zinc-900/95 p-2 rounded-2xl border border-emerald-500/30 shadow-md flex flex-col justify-between">
+            <div className="text-[9px] font-black text-emerald-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+              <span>💚 REPUTAÇÃO E RELACIONAMENTO</span>
             </div>
-            <div className="grid grid-cols-3 gap-1 text-center">
-              <div className="bg-zinc-950/70 p-1 rounded-xl border border-emerald-900/30">
-                <span className="text-[7.5px] font-black text-zinc-400 block uppercase truncate">Moral</span>
-                <span className="text-xs font-black text-amber-400">{stateTrackers.moral}%</span>
+            <div className="grid grid-cols-3 gap-1.5 text-center">
+              <div className="bg-zinc-950 p-1.5 rounded-xl border border-emerald-900/40 flex flex-col items-center justify-between">
+                <span className="text-[8px] sm:text-[9px] font-black text-zinc-300 uppercase tracking-tight flex items-center gap-0.5 whitespace-nowrap">
+                  🙂 MORAL
+                </span>
+                <span className="text-xs sm:text-sm font-black text-white my-0.5">{stateTrackers.moral}%</span>
+                <div className="w-full h-1 rounded-full bg-emerald-500" />
               </div>
-              <div className="bg-zinc-950/70 p-1 rounded-xl border border-emerald-900/30">
-                <span className="text-[7.5px] font-black text-zinc-400 block uppercase truncate">Clube</span>
-                <span className="text-xs font-black text-indigo-400">{stateTrackers.relacao_clube}</span>
+              <div className="bg-zinc-950 p-1.5 rounded-xl border border-emerald-900/40 flex flex-col items-center justify-between">
+                <span className="text-[8px] sm:text-[9px] font-black text-zinc-300 uppercase tracking-tight flex items-center gap-0.5 whitespace-nowrap">
+                  🛡️ CLUBE
+                </span>
+                <span className="text-xs sm:text-sm font-black text-white my-0.5">{stateTrackers.relacao_clube}</span>
+                <div className="w-full h-1 rounded-full bg-indigo-500" />
               </div>
-              <div className="bg-zinc-950/70 p-1 rounded-xl border border-emerald-900/30">
-                <span className="text-[7.5px] font-black text-zinc-400 block uppercase truncate">Respeito</span>
-                <span className="text-xs font-black text-purple-400">{stateTrackers.respeito_nacional}</span>
+              <div className="bg-zinc-950 p-1.5 rounded-xl border border-emerald-900/40 flex flex-col items-center justify-between">
+                <span className="text-[8px] sm:text-[9px] font-black text-zinc-300 uppercase tracking-tight flex items-center gap-0.5 whitespace-nowrap">
+                  ⭐ RESPEITO
+                </span>
+                <span className="text-xs sm:text-sm font-black text-white my-0.5">{stateTrackers.respeito_nacional}</span>
+                <div className="w-full h-1 rounded-full bg-purple-400" />
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Navigation Tabs Bar */}
-      <div className="grid grid-cols-5 sm:grid-cols-9 gap-1 mb-2.5 relative z-10">
+      {/* Navigation Tabs Bar (Flex Wrap 2-Rows) */}
+      <div className="flex flex-wrap items-center gap-1.5 mb-2.5 relative z-10">
         <button
           onClick={() => handleTabChange("pipeline")}
-          className={`py-2 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer ${
+          className={`py-1.5 px-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ${
             activeTab === "pipeline"
-              ? "bg-amber-500/20 text-amber-300 border border-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.2)] font-black"
-              : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700"
+              ? "bg-amber-500/10 text-amber-300 border-2 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.25)] font-black"
+              : "bg-zinc-950/90 text-zinc-400 border border-zinc-800 hover:border-zinc-700 hover:text-zinc-200"
           }`}
         >
-          <Sparkles className="w-3 h-3 text-amber-400" /> Ciclo
+          <Sparkles className="w-3.5 h-3.5 text-amber-400" /> CICLO
         </button>
 
         <button
           onClick={() => handleTabChange("clube")}
-          className={`py-2 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer relative ${
+          className={`py-1.5 px-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer relative ${
             activeTab === "clube"
-              ? "bg-amber-500/20 text-amber-300 border border-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.2)] font-black"
-              : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700"
+              ? "bg-amber-500/10 text-amber-300 border-2 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.25)] font-black"
+              : "bg-zinc-950/90 text-zinc-400 border border-zinc-800 hover:border-zinc-700 hover:text-zinc-200"
           }`}
         >
-          <Building2 className="w-3 h-3 text-indigo-400" /> Clube
+          <Building2 className="w-3.5 h-3.5 text-indigo-400" /> CLUBE
           {!visitedTabsSeason.includes("clube") && (
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 absolute top-1 right-1 animate-pulse" />
           )}
@@ -3602,13 +3608,13 @@ export default function App() {
 
         <button
           onClick={() => handleTabChange("varzea")}
-          className={`py-2 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer relative ${
+          className={`py-1.5 px-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer relative ${
             activeTab === "varzea"
-              ? "bg-amber-500/20 text-amber-300 border border-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.2)] font-black"
-              : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700"
+              ? "bg-amber-500/10 text-amber-300 border-2 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.25)] font-black"
+              : "bg-zinc-950/90 text-zinc-400 border border-zinc-800 hover:border-zinc-700 hover:text-zinc-200"
           }`}
         >
-          <HeartHandshake className="w-3 h-3 text-amber-400" /> Várzea
+          <HeartHandshake className="w-3.5 h-3.5 text-amber-400" /> VÁRZEA
           {organizacaoPoints >= 50 && (
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 absolute top-1 right-1 animate-pulse" />
           )}
@@ -3619,35 +3625,35 @@ export default function App() {
 
         <button
           onClick={() => handleTabChange("ranking")}
-          className={`py-2 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer ${
+          className={`py-1.5 px-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ${
             activeTab === "ranking"
-              ? "bg-amber-500/20 text-amber-300 border border-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.2)] font-black"
-              : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700"
+              ? "bg-amber-500/10 text-amber-300 border-2 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.25)] font-black"
+              : "bg-zinc-950/90 text-zinc-400 border border-zinc-800 hover:border-zinc-700 hover:text-zinc-200"
           }`}
         >
-          <Crown className="w-3 h-3 text-amber-400" /> Ranking
+          <Crown className="w-3.5 h-3.5 text-amber-400" /> RANKING
         </button>
 
         <button
           onClick={() => handleTabChange("standings")}
-          className={`py-2 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer ${
+          className={`py-1.5 px-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ${
             activeTab === "standings"
-              ? "bg-amber-500/20 text-amber-300 border border-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.2)] font-black"
-              : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700"
+              ? "bg-amber-500/10 text-amber-300 border-2 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.25)] font-black"
+              : "bg-zinc-950/90 text-zinc-400 border border-zinc-800 hover:border-zinc-700 hover:text-zinc-200"
           }`}
         >
-          <Trophy className="w-3 h-3 text-amber-400" /> Tabela
+          <Trophy className="w-3.5 h-3.5 text-amber-400" /> TABELA
         </button>
 
         <button
           onClick={() => handleTabChange("objectives")}
-          className={`py-2 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer relative ${
+          className={`py-1.5 px-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer relative ${
             activeTab === "objectives"
-              ? "bg-amber-500/20 text-amber-300 border border-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.2)] font-black"
-              : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700"
+              ? "bg-amber-500/10 text-amber-300 border-2 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.25)] font-black"
+              : "bg-zinc-950/90 text-zinc-400 border border-zinc-800 hover:border-zinc-700 hover:text-zinc-200"
           }`}
         >
-          <Target className="w-3 h-3 text-emerald-400" /> Metas
+          <Target className="w-3.5 h-3.5 text-emerald-400" /> METAS
           {seasonObjectives.some((o) => o.isCompleted) && (
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute top-1 right-1" />
           )}
@@ -3655,24 +3661,24 @@ export default function App() {
 
         <button
           onClick={() => handleTabChange("profile")}
-          className={`py-2 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer ${
+          className={`py-1.5 px-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ${
             activeTab === "profile"
-              ? "bg-amber-500/20 text-amber-300 border border-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.2)] font-black"
-              : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700"
+              ? "bg-amber-500/10 text-amber-300 border-2 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.25)] font-black"
+              : "bg-zinc-950/90 text-zinc-400 border border-zinc-800 hover:border-zinc-700 hover:text-zinc-200"
           }`}
         >
-          <Shield className="w-3 h-3 text-blue-400" /> Perfil
+          <Shield className="w-3.5 h-3.5 text-blue-400" /> PERFIL
         </button>
 
         <button
           onClick={() => handleTabChange("alliances")}
-          className={`py-2 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer relative ${
+          className={`py-1.5 px-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer relative ${
             activeTab === "alliances"
-              ? "bg-amber-500/20 text-amber-300 border border-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.2)] font-black"
-              : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700"
+              ? "bg-amber-500/10 text-amber-300 border-2 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.25)] font-black"
+              : "bg-zinc-950/90 text-zinc-400 border border-zinc-800 hover:border-zinc-700 hover:text-zinc-200"
           }`}
         >
-          <Compass className="w-3 h-3 text-purple-400" /> Alianças
+          <Compass className="w-3.5 h-3.5 text-purple-400" /> ALIANÇAS
           {!visitedTabsSeason.includes("alliances") && (
             <span className="w-1.5 h-1.5 rounded-full bg-purple-400 absolute top-1 right-1 animate-pulse" />
           )}
@@ -3680,13 +3686,13 @@ export default function App() {
 
         <button
           onClick={() => handleTabChange("loja")}
-          className={`py-2 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer relative ${
+          className={`py-1.5 px-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer relative ${
             activeTab === "loja"
-              ? "bg-amber-500/20 text-amber-300 border border-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.2)] font-black"
-              : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700"
+              ? "bg-amber-500/10 text-amber-300 border-2 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.25)] font-black"
+              : "bg-zinc-950/90 text-zinc-400 border border-zinc-800 hover:border-zinc-700 hover:text-zinc-200"
           }`}
         >
-          <ShoppingBag className="w-3 h-3 text-emerald-400" /> Loja
+          <ShoppingBag className="w-3.5 h-3.5 text-emerald-400" /> LOJA
           {merchandiseOrders.some((o) => season >= o.maturitySeason) ? (
             <span className="w-2 h-2 rounded-full bg-emerald-400 absolute top-1 right-1 animate-ping" />
           ) : !visitedTabsSeason.includes("loja") ? (
