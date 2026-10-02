@@ -3484,50 +3484,50 @@ export default function App() {
           </div>
         </div>
       ) : (
-        <div className="bg-zinc-950 border border-zinc-800/80 rounded-2xl p-1.5 sm:p-2 shadow-xl mb-2.5 relative z-10 max-w-full overflow-hidden flex flex-col gap-1.5">
+        <div className="bg-zinc-950 border border-zinc-800/80 rounded-2xl p-1.5 sm:p-2 shadow-xl mb-2.5 relative z-10 max-w-full overflow-hidden flex flex-col gap-1 sm:gap-1.5">
           {/* Line 1: 5 Shortest Attributes (MASSA, PISTA, BANCADA, MORAL, CLUBE) */}
-          <div className="grid grid-cols-5 gap-1 divide-x divide-zinc-800/50">
-            <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0">
-              <span className="text-[7.5px] sm:text-[10px] xl:text-xs font-extrabold text-purple-300 whitespace-nowrap">👥 MASSA</span>
-              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stats.contingente}</span>
+          <div className="grid grid-cols-5 gap-0.5 sm:gap-1 divide-x divide-zinc-800/50">
+            <div className="flex items-center justify-center gap-0.5 px-0.5 min-w-0">
+              <span className="text-[7px] sm:text-[8.5px] font-extrabold text-purple-300 whitespace-nowrap">👥 MASSA</span>
+              <span className="text-[10px] sm:text-xs font-black text-white ml-0.5 shrink-0">{stats.contingente}</span>
             </div>
-            <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0 pl-1">
-              <span className="text-[7.5px] sm:text-[10px] xl:text-xs font-extrabold text-red-300 whitespace-nowrap">🥊 PISTA</span>
-              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stats.poder_pista}</span>
+            <div className="flex items-center justify-center gap-0.5 px-0.5 min-w-0 pl-0.5 sm:pl-1">
+              <span className="text-[7px] sm:text-[8.5px] font-extrabold text-red-300 whitespace-nowrap">🥊 PISTA</span>
+              <span className="text-[10px] sm:text-xs font-black text-white ml-0.5 shrink-0">{stats.poder_pista}</span>
             </div>
-            <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0 pl-1">
-              <span className="text-[7.5px] sm:text-[10px] xl:text-xs font-extrabold text-rose-300 whitespace-nowrap">🥁 BANCADA</span>
-              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stats.pressao_bancada}</span>
+            <div className="flex items-center justify-center gap-0.5 px-0.5 min-w-0 pl-0.5 sm:pl-1">
+              <span className="text-[7px] sm:text-[8.5px] font-extrabold text-rose-300 whitespace-nowrap">🥁 BANCADA</span>
+              <span className="text-[10px] sm:text-xs font-black text-white ml-0.5 shrink-0">{stats.pressao_bancada}</span>
             </div>
-            <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0 pl-1">
-              <span className="text-[7.5px] sm:text-[10px] xl:text-xs font-extrabold text-emerald-300 whitespace-nowrap">🔥 MORAL</span>
-              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stateTrackers.moral}%</span>
+            <div className="flex items-center justify-center gap-0.5 px-0.5 min-w-0 pl-0.5 sm:pl-1">
+              <span className="text-[7px] sm:text-[8.5px] font-extrabold text-emerald-300 whitespace-nowrap">🔥 MORAL</span>
+              <span className="text-[10px] sm:text-xs font-black text-white ml-0.5 shrink-0">{stateTrackers.moral}%</span>
             </div>
-            <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0 pl-1">
-              <span className="text-[7.5px] sm:text-[10px] xl:text-xs font-extrabold text-indigo-300 whitespace-nowrap">🏟️ CLUBE</span>
-              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stateTrackers.relacao_clube}</span>
+            <div className="flex items-center justify-center gap-0.5 px-0.5 min-w-0 pl-0.5 sm:pl-1">
+              <span className="text-[7px] sm:text-[8.5px] font-extrabold text-indigo-300 whitespace-nowrap">🏟️ CLUBE</span>
+              <span className="text-[10px] sm:text-xs font-black text-white ml-0.5 shrink-0">{stateTrackers.relacao_clube}</span>
             </div>
           </div>
 
           {/* Line 2: 4 Longer Attributes (CARAVANA, FINANÇAS, RISCO MP, RESPEITO) */}
-          <div className="grid grid-cols-4 gap-1 divide-x divide-zinc-800/50 pt-1 border-t border-zinc-900">
-            <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0">
-              <span className="text-[7.5px] sm:text-[10px] xl:text-xs font-extrabold text-blue-300 whitespace-nowrap">🚌 CARAVANA</span>
-              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stats.caravana}</span>
+          <div className="grid grid-cols-4 gap-0.5 sm:gap-1 divide-x divide-zinc-800/50 pt-1 border-t border-zinc-900">
+            <div className="flex items-center justify-center gap-0.5 px-0.5 min-w-0">
+              <span className="text-[7px] sm:text-[8.5px] font-extrabold text-blue-300 whitespace-nowrap">🚌 CARAVANA</span>
+              <span className="text-[10px] sm:text-xs font-black text-white ml-0.5 shrink-0">{stats.caravana}</span>
             </div>
-            <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0 pl-1">
-              <span className="text-[7.5px] sm:text-[9.5px] xl:text-xs font-extrabold text-amber-300 whitespace-nowrap">💰 FINANÇAS</span>
-              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stats.autonomia_financeira}</span>
+            <div className="flex items-center justify-center gap-0.5 px-0.5 min-w-0 pl-0.5 sm:pl-1">
+              <span className="text-[7px] sm:text-[8.5px] font-extrabold text-amber-300 whitespace-nowrap">💰 FINANÇAS</span>
+              <span className="text-[10px] sm:text-xs font-black text-white ml-0.5 shrink-0">{stats.autonomia_financeira}</span>
             </div>
-            <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0 pl-1">
-              <span className="text-[7.5px] sm:text-[9.5px] xl:text-xs font-extrabold text-zinc-400 whitespace-nowrap">⚖️ RISCO MP</span>
-              <span className={`text-xs sm:text-sm font-black ml-0.5 shrink-0 ${stateTrackers.risco_mp > 65 ? "text-red-400 animate-pulse" : "text-white"}`}>
+            <div className="flex items-center justify-center gap-0.5 px-0.5 min-w-0 pl-0.5 sm:pl-1">
+              <span className="text-[7px] sm:text-[8.5px] font-extrabold text-zinc-400 whitespace-nowrap">⚖️ RISCO MP</span>
+              <span className={`text-[10px] sm:text-xs font-black ml-0.5 shrink-0 ${stateTrackers.risco_mp > 65 ? "text-red-400 animate-pulse" : "text-white"}`}>
                 {stateTrackers.risco_mp}%
               </span>
             </div>
-            <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0 pl-1">
-              <span className="text-[7.5px] sm:text-[9.5px] xl:text-xs font-extrabold text-purple-300 whitespace-nowrap">⭐ RESPEITO</span>
-              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stateTrackers.respeito_nacional}</span>
+            <div className="flex items-center justify-center gap-0.5 px-0.5 min-w-0 pl-0.5 sm:pl-1">
+              <span className="text-[7px] sm:text-[8.5px] font-extrabold text-purple-300 whitespace-nowrap">⭐ RESPEITO</span>
+              <span className="text-[10px] sm:text-xs font-black text-white ml-0.5 shrink-0">{stateTrackers.respeito_nacional}</span>
             </div>
           </div>
         </div>
@@ -3774,35 +3774,35 @@ export default function App() {
 
           {/* ACTION STEP WITH 4 CHOICES (EACH WITH CLEAR TRADE-OFFS) */}
           {currentStep.type === "action" && activeActionEvent && (
-            <div className="space-y-2 mt-auto">
+            <div className="space-y-2 mt-auto max-w-full overflow-hidden min-w-0">
               <div className="text-[10px] font-black text-amber-400 uppercase tracking-wider mb-1 flex items-center gap-1">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Escolha a Postura da Diretoria (Com Prós e Contras):</span>
+                <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">Escolha a Postura da Diretoria (Com Prós e Contras):</span>
               </div>
               {activeActionEvent.choices.map((choice, idx) => (
                 <button
                   key={choice.id}
                   onClick={() => handleMakeActionChoice(choice)}
-                  className="w-full text-left p-3 rounded-2xl bg-zinc-950 border border-zinc-800/90 hover:border-amber-500 text-zinc-100 transition-all active:scale-[0.98] shadow-md group flex items-center justify-between gap-3 cursor-pointer"
+                  className="w-full text-left p-2.5 sm:p-3 rounded-2xl bg-zinc-950 border border-zinc-800/90 hover:border-amber-500 text-zinc-100 transition-all active:scale-[0.98] shadow-md group flex items-center justify-between gap-2 cursor-pointer max-w-full overflow-hidden min-w-0"
                 >
-                  <div className="flex items-start gap-3 flex-1 min-w-0">
-                    <span className="w-7 h-7 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-black text-xs flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-amber-500 group-hover:text-black group-hover:border-amber-500 transition-all shadow-sm">
+                  <div className="flex items-start gap-2 sm:gap-3 flex-1 min-w-0 overflow-hidden">
+                    <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-black text-[10px] sm:text-xs flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-amber-500 group-hover:text-black group-hover:border-amber-500 transition-all shadow-sm">
                       {idx + 1}
                     </span>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs font-black text-white leading-tight group-hover:text-amber-300 transition-colors">
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <div className="text-[11px] sm:text-xs font-black text-white leading-tight group-hover:text-amber-300 transition-colors break-words">
                         {choice.text}
                       </div>
-                      <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                      <div className="flex flex-wrap items-center gap-1 mt-1.5 min-w-0 max-w-full overflow-hidden">
                         {choice.cost > 0 && (
-                          <span className="text-[8.5px] font-black px-1.5 py-0.5 rounded-md bg-red-500/10 text-red-400 border border-red-500/20 flex items-center gap-0.5">
+                          <span className="text-[8px] sm:text-[8.5px] font-black px-1.5 py-0.5 rounded-md bg-red-500/10 text-red-400 border border-red-500/20 flex items-center gap-0.5 shrink-0">
                             -R$ {choice.cost.toLocaleString()}
                           </span>
                         )}
                         {choice.formattedDeltas.slice(0, 4).map((d, i) => (
                           <span
                             key={i}
-                            className={`text-[8.5px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-0.5 ${
+                            className={`text-[8px] sm:text-[8.5px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shrink-0 ${
                               d.isPositive
                                 ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                                 : "bg-red-500/10 text-red-400 border border-red-500/20"
@@ -3822,20 +3822,20 @@ export default function App() {
 
           {/* KEY GAME TRIGGER */}
           {currentStep.type === "key_game" && (
-            <div className="space-y-3 mt-auto bg-zinc-950 p-4 rounded-2xl border border-zinc-800">
-              <div className="space-y-1.5 text-xs">
-                <div className="flex items-center justify-between flex-wrap gap-1">
-                  <div className="flex items-center gap-1.5 text-amber-400 font-black">
-                    <MapPin className="w-4 h-4" />
-                    <span>{currentStep.derby?.stadium} ({currentStep.derby?.cityState})</span>
+            <div className="space-y-3 mt-auto bg-zinc-950 p-3 sm:p-4 rounded-2xl border border-zinc-800 max-w-full overflow-hidden min-w-0">
+              <div className="space-y-1.5 text-xs max-w-full overflow-hidden min-w-0">
+                <div className="flex items-center justify-between flex-wrap gap-1 min-w-0">
+                  <div className="flex items-center gap-1.5 text-amber-400 font-black min-w-0">
+                    <MapPin className="w-4 h-4 shrink-0" />
+                    <span className="truncate">{currentStep.derby?.stadium} ({currentStep.derby?.cityState})</span>
                   </div>
                   {currentStep.derby?.competition && (
-                    <span className="text-[8px] font-black px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 uppercase">
+                    <span className="text-[8px] font-black px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 uppercase shrink-0">
                       {currentStep.derby.competition}
                     </span>
                   )}
                 </div>
-                <div className="text-zinc-300 font-semibold text-[11px]">
+                <div className="text-zinc-300 font-semibold text-[11px] truncate">
                   {currentStep.derby?.isAllyGame ? (
                     <>
                       🤝 Torcida Aliada / Amizade: <span className="text-emerald-400 font-bold">{currentStep.derby?.rivalTorcida}</span>
@@ -3870,9 +3870,12 @@ export default function App() {
                         setActiveMatchDerby(currentStep.derby || null);
                         setActiveTorcidaUnicaModalMode("MATCHDAY_CRISIS");
                       }}
-                      className="w-full py-3.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl shadow-red-900/30 active:scale-95 transition-all cursor-pointer animate-pulse"
+                      className="w-full py-3 px-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-xl shadow-red-900/30 active:scale-95 transition-all cursor-pointer animate-pulse max-w-full overflow-hidden min-w-0"
                     >
-                      <ShieldAlert className="w-4 h-4" /> Gestão de Crise de Torcida Única (MP) — Ação Única do Dérbi
+                      <ShieldAlert className="w-4 h-4 shrink-0" />
+                      <span className="text-center leading-tight min-w-0 flex-1">
+                        Gestão de Crise de Torcida Única (MP) — Ação Única do Dérbi
+                      </span>
                     </button>
                   );
                 }
@@ -3880,9 +3883,12 @@ export default function App() {
                 return (
                   <button
                     onClick={() => handleStartMatchWorkflow(currentStep)}
-                    className="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl active:scale-95 transition-all cursor-pointer"
+                    className="w-full py-3 px-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-xl active:scale-95 transition-all cursor-pointer max-w-full overflow-hidden min-w-0"
                   >
-                    <Swords className="w-4 h-4" /> Iniciar Planejamento Completo do Jogo (Segurança, Condução & Tática)
+                    <Swords className="w-4 h-4 shrink-0" />
+                    <span className="text-center leading-tight min-w-0 flex-1">
+                      Iniciar Planejamento Completo do Jogo (Segurança, Condução & Tática)
+                    </span>
                   </button>
                 );
               })()}
