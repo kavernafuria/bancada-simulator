@@ -4,6 +4,8 @@ import {
   ClubStatus,
   DerbyMatchInfo,
   OfficialTorcida,
+  TorcidaStats,
+  StateTrackers,
 } from "./bancada_engine";
 
 export interface PipelineStepItem {
@@ -1425,11 +1427,50 @@ export function getSeasonalActionEvent(
   const hash = Math.abs((season * 37 + slotIndex * 19 + (isInterior ? 101 : 13)) % targetPool.length);
   const template = targetPool[hash];
 
+  // Scale down choice deltas centrally to guarantee slow, rewarding progression
+  const rebalancedChoices = template.choices.map((choice) => {
+    const newStatEffects: Partial<TorcidaStats> = {};
+    if (choice.statEffects) {
+      if (choice.statEffects.contingente) newStatEffects.contingente = Math.round(choice.statEffects.contingente * 0.35);
+      if (choice.statEffects.pressao_bancada) newStatEffects.pressao_bancada = Math.round(choice.statEffects.pressao_bancada * 0.35);
+      if (choice.statEffects.poder_pista) newStatEffects.poder_pista = Math.round(choice.statEffects.poder_pista * 0.35);
+      if (choice.statEffects.caravana) newStatEffects.caravana = Math.round(choice.statEffects.caravana * 0.35);
+      if (choice.statEffects.autonomia_financeira) newStatEffects.autonomia_financeira = Math.round(choice.statEffects.autonomia_financeira * 0.35);
+    }
+
+    const newStateEffects: Partial<StateTrackers> = {};
+    if (choice.stateEffects) {
+      if (choice.stateEffects.moral) newStateEffects.moral = Math.round(choice.stateEffects.moral * 0.4);
+      if (choice.stateEffects.risco_mp) newStateEffects.risco_mp = choice.stateEffects.risco_mp;
+      if (choice.stateEffects.relacao_clube) newStateEffects.relacao_clube = Math.round(choice.stateEffects.relacao_clube * 0.4);
+      if (choice.stateEffects.respeito_nacional) newStateEffects.respeito_nacional = Math.round(choice.stateEffects.respeito_nacional * 0.4);
+    }
+
+    const newFormattedDeltas = choice.formattedDeltas.map((d) => {
+      const match = d.value.match(/^([+-])(\d+)(.*)$/);
+      if (match) {
+        const sign = match[1];
+        const num = parseInt(match[2], 10);
+        const rest = match[3];
+        const scaledNum = Math.max(1, Math.round(num * 0.35));
+        return { ...d, value: `${sign}${scaledNum}${rest}` };
+      }
+      return d;
+    });
+
+    return {
+      ...choice,
+      statEffects: newStatEffects,
+      stateEffects: newStateEffects,
+      formattedDeltas: newFormattedDeltas,
+    };
+  });
+
   return {
     stepIndex: slotIndex,
     title: `Etapa ${slotIndex + 1 < 10 ? `0${slotIndex + 1}` : slotIndex + 1} - ${template.title}`,
     category: template.category,
     contextNarrative: template.contextNarrative,
-    choices: template.choices,
+    choices: rebalancedChoices,
   };
 }

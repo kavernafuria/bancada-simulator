@@ -82,7 +82,7 @@ const MERCHANDISE_CATALOG = [
     description: "Financiamento de lote de tecido, bordado e estamparia para camisas oficiais da agremiação.",
     cost: 5000,
     returnAmount: 10000,
-    statBonus: { moral: 5, contingente: 5 },
+    statBonus: { moral: 2, contingente: 2 },
   },
   {
     type: "BERMUDAS" as const,
@@ -91,7 +91,7 @@ const MERCHANDISE_CATALOG = [
     description: "Confecção de lote de bermudas oficiais de bonde para subsedes e associados da agremiação.",
     cost: 10000,
     returnAmount: 20000,
-    statBonus: { poder_pista: 8, moral: 5 },
+    statBonus: { poder_pista: 3, moral: 2 },
   },
   {
     type: "AGASALHOS" as const,
@@ -100,7 +100,7 @@ const MERCHANDISE_CATALOG = [
     description: "Produção de blusões corta-vento reforçados para comboios e caravanas de inverno.",
     cost: 25000,
     returnAmount: 50000,
-    statBonus: { caravana: 12, autonomia_financeira: 10, moral: 0 },
+    statBonus: { caravana: 4, autonomia_financeira: 3, moral: 1 },
   },
 ];
 import { TorcidaUnicaModal } from "@/components/TorcidaUnicaModal";
@@ -559,20 +559,20 @@ export default function App() {
 
       let bonusMsg = "";
       if (tab === "loja") {
-        setBankBalance((prev) => prev + 500);
-        bonusMsg = "🏆 INSPETORIA DE SEDE (LOJA): R$ 500 injetados no caixa por vistoriar os lotes de uniformes nesta temporada!";
+        setBankBalance((prev) => prev + 200);
+        bonusMsg = "🏆 INSPETORIA DE SEDE (LOJA): R$ 200 injetados no caixa por vistoriar os lotes de uniformes nesta temporada!";
         playStadiumSound("cash");
       } else if (tab === "clube") {
-        setStateTrackers((prev) => ({ ...prev, relacao_clube: Math.min(100, prev.relacao_clube + 2) }));
-        bonusMsg = "🏆 INSPETORIA DE SEDE (CLUBE): +2 de Relação com a Diretoria por manter canal de diálogo ativo!";
+        setStateTrackers((prev) => ({ ...prev, relacao_clube: Math.min(100, prev.relacao_clube + 1) }));
+        bonusMsg = "🏆 INSPETORIA DE SEDE (CLUBE): +1 de Relação com a Diretoria por manter canal de diálogo ativo!";
         playStadiumSound("whistle");
       } else if (tab === "varzea") {
-        setStateTrackers((prev) => ({ ...prev, moral: Math.min(100, prev.moral + 2) }));
-        bonusMsg = "🏆 INSPETORIA DE SEDE (VÁRZEA): +2 de Moral da Comunidade por inspecionar os trabalhos sociais!";
+        setStateTrackers((prev) => ({ ...prev, moral: Math.min(100, prev.moral + 1) }));
+        bonusMsg = "🏆 INSPETORIA DE SEDE (VÁRZEA): +1 de Moral da Comunidade por inspecionar os trabalhos sociais!";
         playStadiumSound("drum");
       } else if (tab === "alliances") {
-        setStateTrackers((prev) => ({ ...prev, respeito_nacional: Math.min(100, prev.respeito_nacional + 2) }));
-        bonusMsg = "🏆 INSPETORIA DE SEDE (ALIANÇAS): +2 de Respeito Nacional por valorizar o Eixo Diplomático!";
+        setStateTrackers((prev) => ({ ...prev, respeito_nacional: Math.min(100, prev.respeito_nacional + 1) }));
+        bonusMsg = "🏆 INSPETORIA DE SEDE (ALIANÇAS): +1 de Respeito Nacional por valorizar o Eixo Diplomático!";
         playStadiumSound("whistle");
       }
 

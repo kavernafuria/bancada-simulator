@@ -632,32 +632,32 @@ export const ARCHETYPES: Record<ArchetypeId, ArchetypeDefinition> = {
     name: "Torcida Organizada Tradicional",
     subtitle: "Equilibrado & Bateria de Samba",
     description: "Equilíbrio em festa visual, comboios de caravanas e confecção de fardamentos.",
-    statModifiers: { contingente: 5, caravana: 5, autonomia_financeira: 5 },
-    stateModifiers: { moral: 5, risco_mp: 0 },
+    statModifiers: { contingente: 2, caravana: 2, autonomia_financeira: 2 },
+    stateModifiers: { moral: 3, risco_mp: 0 },
   },
   BARRA_BRAVA: {
     id: "BARRA_BRAVA",
     name: "Barra Brava / Movimento Popular",
     subtitle: "Canto Ininterrupto & Tirantes",
     description: "Foco total em cantos de 90 min, instrumentos e festa na arquibancada.",
-    statModifiers: { pressao_bancada: 15, contingente: 5, poder_pista: -10, autonomia_financeira: -15 },
-    stateModifiers: { moral: 10, risco_mp: -5 },
+    statModifiers: { pressao_bancada: 6, contingente: 2, poder_pista: -4, autonomia_financeira: -5 },
+    stateModifiers: { moral: 4, risco_mp: -3 },
   },
   BONDE_PISTA: {
     id: "BONDE_PISTA",
     name: "Linha de Frente & Bonde de Pista",
     subtitle: "Combate de Rua & Escolta",
     description: "Força máxima de pista, escolta rodoviária e defesa de território urbano.",
-    statModifiers: { poder_pista: 25, pressao_bancada: -15, autonomia_financeira: -10 },
-    stateModifiers: { risco_mp: 15, respeito_nacional: 10 },
+    statModifiers: { poder_pista: 8, pressao_bancada: -5, autonomia_financeira: -4 },
+    stateModifiers: { risco_mp: 8, respeito_nacional: 4 },
   },
   COLETIVO_POPULAR: {
     id: "COLETIVO_POPULAR",
     name: "Coletivo Popular Autônomo",
     subtitle: "Comunitário & Ação Social",
     description: "Foco em ações sociais nas favelas, ingressos populares e massa.",
-    statModifiers: { contingente: 10, poder_pista: -15, autonomia_financeira: 5 },
-    stateModifiers: { moral: 10, risco_mp: -10, relacao_clube: 15 },
+    statModifiers: { contingente: 4, poder_pista: -5, autonomia_financeira: 2 },
+    stateModifiers: { moral: 4, risco_mp: -5, relacao_clube: 5 },
   },
 };
 
@@ -777,26 +777,26 @@ export function createCustomTorcidaWithArchetype(
   // because the historic hegemonic torcida already controls the stadium.
   const baseStats: TorcidaStats = isTierA
     ? {
-        contingente: 28,
-        pressao_bancada: 38,
-        poder_pista: 32,
-        caravana: 24,
-        autonomia_financeira: 28,
+        contingente: 18,
+        pressao_bancada: 24,
+        poder_pista: 20,
+        caravana: 16,
+        autonomia_financeira: 18,
       }
     : tier === "B"
     ? {
-        contingente: 38,
-        pressao_bancada: 45,
-        poder_pista: 38,
-        caravana: 34,
-        autonomia_financeira: 36,
+        contingente: 24,
+        pressao_bancada: 28,
+        poder_pista: 24,
+        caravana: 20,
+        autonomia_financeira: 22,
       }
     : {
-        contingente: 45,
-        pressao_bancada: 52,
-        poder_pista: 42,
-        caravana: 40,
-        autonomia_financeira: 42,
+        contingente: 28,
+        pressao_bancada: 32,
+        poder_pista: 26,
+        caravana: 22,
+        autonomia_financeira: 25,
       };
 
   Object.entries(arch.statModifiers).forEach(([key, mod]) => {
@@ -4783,15 +4783,15 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🤝 Diálogo & Anistia aos Sócios",
         badgeText: "RECONCILIAÇÃO DE MASSA",
         answerText: "Portas abertas para todos os irmãos. Vamos anistiar os desligados e mostrar que a instituição está acima de qualquer disputa de chapa.",
-        statEffects: { contingente: 8, pressao_bancada: 6 },
-        stateEffects: { moral: 4 },
-        cashDelta: 4000,
-        log: "Discurso de anistia atraiu sócios de volta (+8 Massa, +6 Bancada, +R$ 4.000 no caixa).",
+        statEffects: { contingente: 2, pressao_bancada: 2 },
+        stateEffects: { moral: 2 },
+        cashDelta: 1200,
+        log: "Discurso de anistia atraiu sócios de volta (+2 Massa, +2 Bancada, +R$ 1.200 no caixa).",
         formattedDeltas: [
-          { label: "Retorno de Sócios", value: "+8 Massa", isPositive: true },
-          { label: "Pressão de Bancada", value: "+6 Bancada", isPositive: true },
-          { label: "Apoio de Mensalidade", value: "+R$ 4.000", isPositive: true },
-          { label: "Moral da Agremiação", value: "+4 Moral", isPositive: true }
+          { label: "Retorno de Sócios", value: "+2 Massa", isPositive: true },
+          { label: "Pressão de Bancada", value: "+2 Bancada", isPositive: true },
+          { label: "Apoio de Mensalidade", value: "+R$ 1.200", isPositive: true },
+          { label: "Moral da Agremiação", value: "+2 Moral", isPositive: true }
         ]
       },
       {
@@ -4800,12 +4800,12 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🥊 Resgate da Força de Pista",
         badgeText: "RESPEITO DE RUA & LINHA DE FRENTE",
         answerText: "Quem quiser sair que saia. Nossa prioridade é reorganizar a linha de frente de rua e restabelecer o respeito que essa camisa exige nas rodovias.",
-        statEffects: { poder_pista: 6, pressao_bancada: 5 },
-        stateEffects: { risco_mp: -2 },
-        log: "Foco na segurança de rua e alinhamento do bonde (+6 Pista, +5 Bancada).",
+        statEffects: { poder_pista: 2, pressao_bancada: 1 },
+        stateEffects: { risco_mp: -1 },
+        log: "Foco na segurança de rua e alinhamento do bonde (+2 Pista, +1 Bancada).",
         formattedDeltas: [
-          { label: "Reorganização de Pista", value: "+6 Pista", isPositive: true },
-          { label: "Pressão de Bancada", value: "+5 Bancada", isPositive: true }
+          { label: "Reorganização de Pista", value: "+2 Pista", isPositive: true },
+          { label: "Pressão de Bancada", value: "+1 Bancada", isPositive: true }
         ]
       },
       {
@@ -4813,13 +4813,13 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         type: "GESTORA",
         label: "💼 Autonomia Financeira & Estrutura",
         badgeText: "GESTÃO DE CAIXA & QUADRA SOCIAL",
-        answerText: "Vamos falar de trabalho e caixa. Com finanças fortes e sede estruturada, o respeito volta naturally e o título no próximo mandato virá.",
-        statEffects: { autonomia_financeira: 8 },
-        cashDelta: 6000,
-        log: "Discurso focado em finanças e quadra (+8 Autonomia Financeira, +R$ 6.000 no Caixa).",
+        answerText: "Vamos falar de trabalho e caixa. Com finanças fortes e sede estruturada, o respeito volta naturalmente e o título no próximo mandato virá.",
+        statEffects: { autonomia_financeira: 2 },
+        cashDelta: 1500,
+        log: "Discurso focado em finanças e quadra (+2 Autonomia Financeira, +R$ 1.500 no Caixa).",
         formattedDeltas: [
-          { label: "Aporte Financeiro", value: "+R$ 6.000", isPositive: true },
-          { label: "Autonomia Financeira", value: "+8 Autonomia", isPositive: true }
+          { label: "Aporte Financeiro", value: "+R$ 1.500", isPositive: true },
+          { label: "Autonomia Financeira", value: "+2 Autonomia", isPositive: true }
         ]
       }
     ]
@@ -4839,13 +4839,13 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "👥 Expansão de Massa no Bairro",
         badgeText: "CRESCIMENTO SOCIAL E POPULAR",
         answerText: "Queremos dobrar o quadro de associados e levar a nossa bandeira para cada quebrada e subsede do estado.",
-        statEffects: { contingente: 10, pressao_bancada: 8 },
-        stateEffects: { moral: 5 },
-        log: "Definiu como meta a expansão social no bairro (+10 Massa, +8 Bancada, +5 Moral).",
+        statEffects: { contingente: 3, pressao_bancada: 2 },
+        stateEffects: { moral: 2 },
+        log: "Definiu como meta a expansão social no bairro (+3 Massa, +2 Bancada, +2 Moral).",
         formattedDeltas: [
-          { label: "Expansão de Sócios", value: "+10 Massa", isPositive: true },
-          { label: "Pressão de Bancada", value: "+8 Bancada", isPositive: true },
-          { label: "Moral da Agremiação", value: "+5 Moral", isPositive: true }
+          { label: "Expansão de Sócios", value: "+3 Massa", isPositive: true },
+          { label: "Pressão de Bancada", value: "+2 Bancada", isPositive: true },
+          { label: "Moral da Agremiação", value: "+2 Moral", isPositive: true }
         ]
       },
       {
@@ -4854,12 +4854,12 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🚌 Respeito nas Estradas e Pista",
         badgeText: "PRESENÇA EM COMBOIO & CORTEJO",
         answerText: "Nosso objetivo é garantir que nenhuma caravana nossa seja intimidada e que a agremiação imponha respeito em qualquer estádio do país.",
-        statEffects: { poder_pista: 6, caravana: 6, pressao_bancada: 5 },
-        log: "Foco em presença de caravana e escolta de pista (+6 Pista, +6 Caravana, +5 Bancada).",
+        statEffects: { poder_pista: 2, caravana: 2, pressao_bancada: 1 },
+        log: "Foco em presença de caravana e escolta de pista (+2 Pista, +2 Caravana, +1 Bancada).",
         formattedDeltas: [
-          { label: "Poder de Pista", value: "+6 Pista", isPositive: true },
-          { label: "Força de Caravana", value: "+6 Caravana", isPositive: true },
-          { label: "Pressão de Bancada", value: "+5 Bancada", isPositive: true }
+          { label: "Poder de Pista", value: "+2 Pista", isPositive: true },
+          { label: "Força de Caravana", value: "+2 Caravana", isPositive: true },
+          { label: "Pressão de Bancada", value: "+1 Bancada", isPositive: true }
         ]
       },
       {
@@ -4868,12 +4868,12 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🚩 Independência Financeira & Loja Oficial",
         badgeText: "AUTONOMIA E SEDE PRÓPRIA",
         answerText: "A meta é a independência financeira total. Ter sede própria estruturada, produtos oficiais de qualidade e caixa forte.",
-        statEffects: { autonomia_financeira: 8 },
-        cashDelta: 6000,
-        log: "Meta fixada na autonomia financeira e loja (+8 Autonomia, +R$ 6.000 Caixa).",
+        statEffects: { autonomia_financeira: 3 },
+        cashDelta: 2000,
+        log: "Meta fixada na autonomia financeira e loja (+3 Autonomia, +R$ 2.000 Caixa).",
         formattedDeltas: [
-          { label: "Injeção no Caixa", value: "+R$ 6.000", isPositive: true },
-          { label: "Autonomia Financeira", value: "+8 Autonomia", isPositive: true }
+          { label: "Injeção no Caixa", value: "+R$ 2.000", isPositive: true },
+          { label: "Autonomia Financeira", value: "+3 Autonomia", isPositive: true }
         ]
       }
     ]
@@ -4893,13 +4893,13 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🏛️ Resposta Institucional (Diplomata)",
         badgeText: "DIPLOMACIA & DISCURSO POPULAR",
         answerText: "O MP pune o povo, mas os engravatados continuam roubando o futebol. Não temos controle do que acontece a quilômetros do estádio.",
-        statEffects: { contingente: 10, pressao_bancada: 8 },
-        stateEffects: { risco_mp: -8 },
-        log: "Adotou discurso institucional popular. Aliviou o Risco MP (-8%) e expandiu o contingente e bancada (+10 Massa, +8 Bancada).",
+        statEffects: { contingente: 3, pressao_bancada: 2 },
+        stateEffects: { risco_mp: -5 },
+        log: "Adotou discurso institucional popular. Aliviou o Risco MP (-5%) e expandiu o contingente e bancada (+3 Massa, +2 Bancada).",
         formattedDeltas: [
-          { label: "Risco MP", value: "-8%", isPositive: true },
-          { label: "Contingente", value: "+10 Massa", isPositive: true },
-          { label: "Pressão de Bancada", value: "+8 Bancada", isPositive: true }
+          { label: "Risco MP", value: "-5%", isPositive: true },
+          { label: "Contingente", value: "+3 Massa", isPositive: true },
+          { label: "Pressão de Bancada", value: "+2 Bancada", isPositive: true }
         ]
       },
       {
@@ -4908,15 +4908,15 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🥊 Resposta Radical (Linha de Frente)",
         badgeText: "CONFRONTO DIRETO COM ESTADO",
         answerText: "A pista é a pista. Se vierem na nossa direção, não vamos correr. O Estado é incompetente para garantir a segurança e joga a culpa na torcida.",
-        statEffects: { poder_pista: 10, pressao_bancada: 8 },
-        stateEffects: { moral: 8, risco_mp: 15 },
-        cashDelta: -3000,
-        log: "Discurso radical e combativo. Inflou a moral da pista (+10) e bancada (+8), mas aumentou o Risco MP (+15%).",
+        statEffects: { poder_pista: 3, pressao_bancada: 2 },
+        stateEffects: { moral: 3, risco_mp: 8 },
+        cashDelta: -1500,
+        log: "Discurso radical e combativo. Inflou a moral da pista (+3) e bancada (+2), mas aumentou o Risco MP (+8%).",
         formattedDeltas: [
-          { label: "Poder de Pista", value: "+10 Pista", isPositive: true },
-          { label: "Pressão de Bancada", value: "+8 Bancada", isPositive: true },
-          { label: "Moral", value: "+8 Moral", isPositive: true },
-          { label: "Risco MP", value: "+15%", isPositive: false }
+          { label: "Poder de Pista", value: "+3 Pista", isPositive: true },
+          { label: "Pressão de Bancada", value: "+2 Bancada", isPositive: true },
+          { label: "Moral", value: "+3 Moral", isPositive: true },
+          { label: "Risco MP", value: "+8%", isPositive: false }
         ]
       },
       {
@@ -4925,12 +4925,12 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "💼 Resposta Gestora (Festa na Quadra)",
         badgeText: "MOBILIZAÇÃO SOCIAL & ARRECADAÇÃO",
         answerText: "Somos maiores que o Estado. Convoco os associados a pagarem as mensalidades. Faremos a festa na quadra!",
-        statEffects: { contingente: 6, autonomia_financeira: 8 },
-        cashDelta: 8000,
-        log: "Focou na captação financeira e eventos internos. Gerou R$ 8.000 extras para os cofres da agremiação.",
+        statEffects: { contingente: 2, autonomia_financeira: 3 },
+        cashDelta: 2500,
+        log: "Focou na captação financeira e eventos internos. Gerou R$ 2.500 extras para os cofres da agremiação.",
         formattedDeltas: [
-          { label: "Caixa", value: "+R$ 8.000", isPositive: true },
-          { label: "Contingente", value: "+6 Massa", isPositive: true }
+          { label: "Caixa", value: "+R$ 2.500", isPositive: true },
+          { label: "Contingente", value: "+2 Massa", isPositive: true }
         ]
       }
     ]
@@ -4950,13 +4950,13 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🏛️ Resposta Institucional (Patrimônio Cultural)",
         badgeText: "PATRIMÔNIO CULTURAL NACIONAL",
         answerText: "Essa é a nossa verdadeira face. A festa da arquibancada é o maior patrimônio cultural do Brasil e deve ser respeitada.",
-        statEffects: { contingente: 8, poder_pista: -3 },
-        stateEffects: { risco_mp: -10 },
-        log: "Posicionou o mosaico como patrimônio cultural. Reduziu o Risco MP (-10%) e atraiu novos associados (+8 Contingente).",
+        statEffects: { contingente: 3, poder_pista: -1 },
+        stateEffects: { risco_mp: -5 },
+        log: "Posicionou o mosaico como patrimônio cultural. Reduziu o Risco MP (-5%) e atraiu novos associados (+3 Contingente).",
         formattedDeltas: [
-          { label: "Risco MP", value: "-10%", isPositive: true },
-          { label: "Contingente", value: "+8", isPositive: true },
-          { label: "Poder de Pista", value: "-3", isPositive: false }
+          { label: "Risco MP", value: "-5%", isPositive: true },
+          { label: "Contingente", value: "+3", isPositive: true },
+          { label: "Poder de Pista", value: "-1", isPositive: false }
         ]
       },
       {
@@ -4965,13 +4965,13 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🥊 Resposta Radical (Donos da Cidade)",
         badgeText: "PROVOCAÇÃO E DOMÍNIO DE CIDADE",
         answerText: "Somos os donos da cidade. O estádio é o nosso salão de festas e ontem provamos quem manda aqui.",
-        statEffects: { pressao_bancada: 10 },
-        stateEffects: { moral: 8 },
+        statEffects: { pressao_bancada: 3 },
+        stateEffects: { moral: 3 },
         triggerRivalAmbushAlert: true,
-        log: "Provocou abertamente os rivais. Aumentou a pressão de bancada (+10) e moral (+8), mas enfureceu a torcida rival.",
+        log: "Provocou abertamente os rivais. Aumentou a pressão de bancada (+3) e moral (+3), mas enfureceu a torcida rival.",
         formattedDeltas: [
-          { label: "Pressão de Bancada", value: "+10", isPositive: true },
-          { label: "Moral", value: "+8", isPositive: true }
+          { label: "Pressão de Bancada", value: "+3", isPositive: true },
+          { label: "Moral", value: "+3", isPositive: true }
         ]
       },
       {
@@ -4980,14 +4980,14 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "💼 Resposta Gestora (Monetização da Marca)",
         badgeText: "VENDA DE ROUPAS & LOJA OFICIAL",
         answerText: "Fazer história custa caro. Entrem no nosso site e comprem a camisa oficial do mosaico. A festa só continua se o caixa estiver cheio.",
-        statEffects: { autonomia_financeira: 10 },
-        stateEffects: { respeito_nacional: -5 },
-        cashDelta: 5000,
-        log: "Capitalizou sobre o sucesso do mosaico. Arrecadou R$ 5.000 em vendas e aumentou a autonomia financeira.",
+        statEffects: { autonomia_financeira: 3 },
+        stateEffects: { respeito_nacional: -2 },
+        cashDelta: 2000,
+        log: "Capitalizou sobre o sucesso do mosaico. Arrecadou R$ 2.000 em vendas e aumentou a autonomia financeira.",
         formattedDeltas: [
-          { label: "Caixa", value: "+R$ 5.000", isPositive: true },
-          { label: "Autonomia Financeira", value: "+10", isPositive: true },
-          { label: "Respeito Nacional", value: "-5", isPositive: false }
+          { label: "Caixa", value: "+R$ 2.000", isPositive: true },
+          { label: "Autonomia Financeira", value: "+3", isPositive: true },
+          { label: "Respeito Nacional", value: "-2", isPositive: false }
         ]
       }
     ]
@@ -5007,15 +5007,15 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🥊 Resposta Radical (Cobrança Severa)",
         badgeText: "COBRANÇA EM CT & BALADAS",
         answerText: "A paz acabou. Jogadores mercenários mancharam nossa camisa. Vamos cobrar no aeroporto, no CT e na balada. Ninguém dorme em paz.",
-        statEffects: { poder_pista: 12 },
-        stateEffects: { moral: 10, risco_mp: 20 },
-        cashDelta: -4000,
+        statEffects: { poder_pista: 3 },
+        stateEffects: { moral: 3, risco_mp: 10 },
+        cashDelta: -1500,
         log: "Declarou guerra aos jogadores mercenários. Inflou a pista, mas atraiu intimação policial e arcou com custas judiciais.",
         formattedDeltas: [
-          { label: "Poder de Pista", value: "+12", isPositive: true },
-          { label: "Moral", value: "+10", isPositive: true },
-          { label: "Risco MP", value: "+20%", isPositive: false },
-          { label: "Caixa", value: "-R$ 4.000", isPositive: false }
+          { label: "Poder de Pista", value: "+3", isPositive: true },
+          { label: "Moral", value: "+3", isPositive: true },
+          { label: "Risco MP", value: "+10%", isPositive: false },
+          { label: "Caixa", value: "-R$ 1.500", isPositive: false }
         ]
       },
       {
@@ -5024,13 +5024,13 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🏛️ Resposta Institucional (Fidelidade Incondicional)",
         badgeText: "AMOR INCONDICIONAL AO ESCUDO",
         answerText: "Série A ou várzea, nós torcemos para o escudo. Ano que vem vamos lotar o estádio e carregar esse time nas costas de volta para a elite.",
-        statEffects: { pressao_bancada: 10, poder_pista: -10 },
-        stateEffects: { respeito_nacional: 10 },
+        statEffects: { pressao_bancada: 3, poder_pista: -3 },
+        stateEffects: { respeito_nacional: 3 },
         log: "Reafirmou apoio incondicional na Série B. Ganhou respeito nacional e fortalecimento de bancada, mas gerou racha com a pista.",
         formattedDeltas: [
-          { label: "Pressão de Bancada", value: "+10", isPositive: true },
-          { label: "Respeito Nacional", value: "+10", isPositive: true },
-          { label: "Poder de Pista", value: "-10", isPositive: false }
+          { label: "Pressão de Bancada", value: "+3", isPositive: true },
+          { label: "Respeito Nacional", value: "+3", isPositive: true },
+          { label: "Poder de Pista", value: "-3", isPositive: false }
         ]
       },
       {
@@ -5039,14 +5039,14 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "💼 Resposta Gestora (Ataque à Diretoria do Clube)",
         badgeText: "EXIGÊNCIA DE GESTÃO E CADEIRA NO CONSELHO",
         answerText: "O culpado é o presidente do clube. Exigimos a renúncia da diretoria e uma cadeira no conselho de futebol para a nossa torcida, ou o clube para.",
-        statEffects: { autonomia_financeira: 10 },
-        stateEffects: { risco_mp: -10, moral: -8 },
+        statEffects: { autonomia_financeira: 3 },
+        stateEffects: { risco_mp: -5, moral: -3 },
         cashDelta: 0,
         log: "Transferiu toda a culpa para os cartolas do clube e exigiu assento no conselho. Diminuiu o risco MP, mas a base acusou uso político.",
         formattedDeltas: [
-          { label: "Autonomia Financeira", value: "+10", isPositive: true },
-          { label: "Risco MP", value: "-10%", isPositive: true },
-          { label: "Moral", value: "-8", isPositive: false }
+          { label: "Autonomia Financeira", value: "+3", isPositive: true },
+          { label: "Risco MP", value: "-5%", isPositive: true },
+          { label: "Moral", value: "-3", isPositive: false }
         ]
       }
     ]
@@ -5066,13 +5066,13 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🏛️ Resposta Institucional (Apoiador Fiel)",
         badgeText: "A FESTA DO POVO",
         answerText: "Esse título é de cada torcedor que cantou os 90 minutos debaixo de chuva. A torcida é a verdadeira alma dessa conquista!",
-        statEffects: { contingente: 10, pressao_bancada: 8 },
-        stateEffects: { respeito_nacional: 12 },
-        log: "Discurso emocionante exaltando a torcida. Aumentou o contingente (+10) e o respeito nacional (+12).",
+        statEffects: { contingente: 3, pressao_bancada: 2 },
+        stateEffects: { respeito_nacional: 4 },
+        log: "Discurso emocionante exaltando a torcida. Aumentou o contingente (+3) e o respeito nacional (+4).",
         formattedDeltas: [
-          { label: "Contingente", value: "+10", isPositive: true },
-          { label: "Pressão de Bancada", value: "+8", isPositive: true },
-          { label: "Respeito Nacional", value: "+12", isPositive: true }
+          { label: "Contingente", value: "+3", isPositive: true },
+          { label: "Pressão de Bancada", value: "+2", isPositive: true },
+          { label: "Respeito Nacional", value: "+4", isPositive: true }
         ]
       },
       {
@@ -5081,13 +5081,13 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🥊 Resposta Radical (Aviso aos Rivais)",
         badgeText: "HEGEMONIA & PRESSÃO",
         answerText: "A nossa pressão na bancada e a cobrança no CT é que ganharam esse campeonato. Mostramos quem manda no futebol do país!",
-        statEffects: { poder_pista: 10 },
-        stateEffects: { moral: 10, risco_mp: 8 },
-        log: "Mandou recado combativo. Inflou a moral e a pista (+10), mas aumentou o Risco MP (+8%).",
+        statEffects: { poder_pista: 3 },
+        stateEffects: { moral: 3, risco_mp: 4 },
+        log: "Mandou recado combativo. Inflou a moral e a pista (+3), mas aumentou o Risco MP (+4%).",
         formattedDeltas: [
-          { label: "Poder de Pista", value: "+10", isPositive: true },
-          { label: "Moral", value: "+10", isPositive: true },
-          { label: "Risco MP", value: "+8%", isPositive: false }
+          { label: "Poder de Pista", value: "+3", isPositive: true },
+          { label: "Moral", value: "+3", isPositive: true },
+          { label: "Risco MP", value: "+4%", isPositive: false }
         ]
       },
       {
@@ -5096,12 +5096,12 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "💼 Resposta Gestora (Vendas do Título)",
         badgeText: "PRODUTOS EXCLUSIVOS DO CAMPEÃO",
         answerText: "Lançamos agora no site a camisa e a faixa oficial do título. Convocamos a torcida a comprar os produtos oficiais para encher o caixa!",
-        statEffects: { autonomia_financeira: 12 },
-        cashDelta: 7500,
-        log: "Capitalizou o título com produtos oficiais. Injetou R$ 7.500 nos cofres da torcida.",
+        statEffects: { autonomia_financeira: 3 },
+        cashDelta: 2500,
+        log: "Capitalizou o título com produtos oficiais. Injetou R$ 2.500 nos cofres da torcida.",
         formattedDeltas: [
-          { label: "Caixa", value: "+R$ 7.500", isPositive: true },
-          { label: "Autonomia Financeira", value: "+12", isPositive: true }
+          { label: "Caixa", value: "+R$ 2.500", isPositive: true },
+          { label: "Autonomia Financeira", value: "+3", isPositive: true }
         ]
       }
     ]
@@ -5121,13 +5121,13 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🏛️ Resposta Institucional (Desvinculação)",
         badgeText: "REPÚDIO À VIOLÊNCIA DE RODOVIA",
         answerText: "Repudiamos veementemente a violência. Foram torcedores isolados agindo por conta própria fora do perímetro do estádio.",
-        statEffects: { contingente: 8, pressao_bancada: 6 },
-        stateEffects: { risco_mp: -12 },
-        log: "Desvinculou a diretoria da briga. Reduziu o Risco MP (-12%) e expandiu o contingente (+8 Massa, +6 Bancada).",
+        statEffects: { contingente: 2, pressao_bancada: 2 },
+        stateEffects: { risco_mp: -6 },
+        log: "Desvinculou a diretoria da briga. Reduziu o Risco MP (-6%) e expandiu o contingente (+2 Massa, +2 Bancada).",
         formattedDeltas: [
-          { label: "Risco MP", value: "-12%", isPositive: true },
-          { label: "Contingente", value: "+8 Massa", isPositive: true },
-          { label: "Pressão de Bancada", value: "+6 Bancada", isPositive: true }
+          { label: "Risco MP", value: "-6%", isPositive: true },
+          { label: "Contingente", value: "+2 Massa", isPositive: true },
+          { label: "Pressão de Bancada", value: "+2 Bancada", isPositive: true }
         ]
       },
 
@@ -5137,13 +5137,13 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🏛️ Resposta Institucional (Respeito ao Regulamento)",
         badgeText: "SUBSTITUIÇÃO POR MOSAICOS DE PAPEL",
         answerText: "Pedimos desculpas ao clube pelo atraso no jogo. Trocaremos a pirotecnia por mosaicos e fumaça fria permitida.",
-        statEffects: { pressao_bancada: 6, contingente: 6 },
-        stateEffects: { risco_mp: -14 },
-        log: "Aceitou adequação ao regulamento. Reduziu o Risco MP (-14%), promovendo mosaicos organizados (+6 Bancada, +6 Massa).",
+        statEffects: { pressao_bancada: 2, contingente: 2 },
+        stateEffects: { risco_mp: -6 },
+        log: "Aceitou adequação ao regulamento. Reduziu o Risco MP (-6%), promovendo mosaicos organizados (+2 Bancada, +2 Massa).",
         formattedDeltas: [
-          { label: "Risco MP", value: "-14%", isPositive: true },
-          { label: "Pressão de Bancada", value: "+6 Bancada", isPositive: true },
-          { label: "Contingente", value: "+6 Massa", isPositive: true }
+          { label: "Risco MP", value: "-6%", isPositive: true },
+          { label: "Pressão de Bancada", value: "+2 Bancada", isPositive: true },
+          { label: "Contingente", value: "+2 Massa", isPositive: true }
         ]
       },
 
@@ -5153,15 +5153,15 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "💼 Mutirão de Cadastramento Biométrico",
         badgeText: "CADASTRO TOTAL DOS ASSOCIADOS",
         answerText: "Instalaremos catracas biométricas próprias e entregaremos o cadastro completo dos sócios aos órgãos de segurança.",
-        statEffects: { autonomia_financeira: 8, contingente: 6, pressao_bancada: 6 },
-        stateEffects: { risco_mp: -12 },
-        cashDelta: 5000,
-        log: "Implantou cadastramento biométrico. Reduziu o Risco MP (-12%), atraiu novos cadastrados e injetou R$ 5.000.",
+        statEffects: { autonomia_financeira: 2, contingente: 2, pressao_bancada: 2 },
+        stateEffects: { risco_mp: -6 },
+        cashDelta: 2000,
+        log: "Implantou cadastramento biométrico. Reduziu o Risco MP (-6%), atraiu novos cadastrados e injetou R$ 2.000.",
         formattedDeltas: [
-          { label: "Risco MP", value: "-12%", isPositive: true },
-          { label: "Autonomia", value: "+8", isPositive: true },
-          { label: "Contingente", value: "+6 Massa", isPositive: true },
-          { label: "Caixa", value: "+R$ 5.000", isPositive: true }
+          { label: "Risco MP", value: "-6%", isPositive: true },
+          { label: "Autonomia", value: "+2", isPositive: true },
+          { label: "Contingente", value: "+2 Massa", isPositive: true },
+          { label: "Caixa", value: "+R$ 2.000", isPositive: true }
         ]
       },
       {
@@ -5170,15 +5170,15 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🥊 Resposta Radical (Defesa de Honra)",
         badgeText: "LEGÍTIMA DEFESA DO BONDE",
         answerText: "Fomos emboscados covardemente pela torcida rival. O nosso bonde apenas se defendeu e honrou a nossa camisa!",
-        statEffects: { poder_pista: 12 },
-        stateEffects: { moral: 10, risco_mp: 18 },
-        cashDelta: -3000,
-        log: "Defendeu o combate na pista. Inflou a moral do bonde (+10), mas disparou o Risco MP (+18%) e gerou despesas jurídicas.",
+        statEffects: { poder_pista: 3 },
+        stateEffects: { moral: 3, risco_mp: 8 },
+        cashDelta: -1500,
+        log: "Defendeu o combate na pista. Inflou a moral do bonde (+3), mas disparou o Risco MP (+8%) e gerou despesas jurídicas.",
         formattedDeltas: [
-          { label: "Poder de Pista", value: "+12", isPositive: true },
-          { label: "Moral", value: "+10", isPositive: true },
-          { label: "Risco MP", value: "+18%", isPositive: false },
-          { label: "Caixa", value: "-R$ 3.000", isPositive: false }
+          { label: "Poder de Pista", value: "+3", isPositive: true },
+          { label: "Moral", value: "+3", isPositive: true },
+          { label: "Risco MP", value: "+8%", isPositive: false },
+          { label: "Caixa", value: "-R$ 1.500", isPositive: false }
         ]
       },
       {
@@ -5187,12 +5187,12 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "💼 Resposta Gestora (Fundo de Fianças)",
         badgeText: "ASSISTÊNCIA JURÍDICA AOS MEMBROS",
         answerText: "Instauramos uma sindicância interna e contratamos advogados para libertar os nossos associados detidos.",
-        cashDelta: -4000,
-        stateEffects: { moral: 6 },
-        log: "Prestou auxílio jurídico aos membros. Gastou R$ 4.000 em fianças mas manteve a lealdade interna.",
+        cashDelta: -1500,
+        stateEffects: { moral: 2 },
+        log: "Prestou auxílio jurídico aos membros. Gastou R$ 1.500 em fianças mas manteve a lealdade interna.",
         formattedDeltas: [
-          { label: "Moral", value: "+6", isPositive: true },
-          { label: "Caixa", value: "-R$ 4.000", isPositive: false }
+          { label: "Moral", value: "+2", isPositive: true },
+          { label: "Caixa", value: "-R$ 1.500", isPositive: false }
         ]
       }
     ]
@@ -5212,12 +5212,12 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🏛️ Resposta Institucional (Campanha de Socorro)",
         badgeText: "SOS TORCIDA / VAQUINHA NACIONAL",
         answerText: "Lançaremos uma vaquinha nacional e anistia de mensalidades. O torcedor vai tirar o clube do buraco!",
-        statEffects: { contingente: 8, autonomia_financeira: 6 },
-        cashDelta: 4000,
-        log: "Lançou vaquinha nacional de ajuda ao clube. Arrecadou R$ 4.000 e atraiu contingente.",
+        statEffects: { contingente: 2, autonomia_financeira: 2 },
+        cashDelta: 1500,
+        log: "Lançou vaquinha nacional de ajuda ao clube. Arrecadou R$ 1.500 e atraiu contingente.",
         formattedDeltas: [
-          { label: "Caixa", value: "+R$ 4.000", isPositive: true },
-          { label: "Contingente", value: "+8", isPositive: true }
+          { label: "Caixa", value: "+R$ 1.500", isPositive: true },
+          { label: "Contingente", value: "+2", isPositive: true }
         ]
       },
       {
