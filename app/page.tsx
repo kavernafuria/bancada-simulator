@@ -3484,96 +3484,50 @@ export default function App() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-1.5 sm:gap-2 mb-2.5 relative z-10 max-w-full overflow-hidden">
-          {/* Card 1: Força & Mobilização (4 Stats) */}
-          <div className="lg:col-span-5 bg-zinc-900/90 p-2 sm:p-2.5 rounded-2xl border border-purple-500/20 shadow-md flex flex-col justify-between overflow-hidden min-w-0">
-            <div className="text-[8.5px] sm:text-[9px] font-black text-purple-400 uppercase tracking-wider mb-1 flex items-center gap-1">
-              <span>💜 FORÇA E MOBILIZAÇÃO</span>
+        <div className="bg-zinc-950 border border-zinc-800/80 rounded-2xl p-1.5 sm:p-2 shadow-xl mb-2.5 relative z-10 max-w-full overflow-hidden flex flex-col gap-1.5">
+          {/* Line 1: 5 Attributes (MASSA, BANCADA, PISTA, CARAVANA, FINANÇAS) */}
+          <div className="grid grid-cols-5 gap-1 divide-x divide-zinc-800/50">
+            <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0">
+              <span className="text-[7.5px] sm:text-[9.5px] font-extrabold text-purple-300 truncate">👥 MASSA</span>
+              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stats.contingente}</span>
             </div>
-            <div className="grid grid-cols-4 gap-1">
-              <div className="bg-zinc-950 p-1 sm:p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center overflow-hidden min-w-0">
-                <span className="text-[7.5px] sm:text-[9px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
-                  👥 MASSA
-                </span>
-                <span className="text-xs sm:text-sm font-black text-white my-0.5">{stats.contingente}</span>
-                <div className="w-full h-1 rounded-full bg-purple-500 shrink-0" />
-              </div>
-              <div className="bg-zinc-950 p-1 sm:p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center overflow-hidden min-w-0">
-                <span className="text-[7.5px] sm:text-[9px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
-                  🥁 BANCADA
-                </span>
-                <span className="text-xs sm:text-sm font-black text-white my-0.5">{stats.pressao_bancada}</span>
-                <div className="w-full h-1 rounded-full bg-rose-500 shrink-0" />
-              </div>
-              <div className="bg-zinc-950 p-1 sm:p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center overflow-hidden min-w-0">
-                <span className="text-[7.5px] sm:text-[9px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
-                  🥊 PISTA
-                </span>
-                <span className="text-xs sm:text-sm font-black text-white my-0.5">{stats.poder_pista}</span>
-                <div className="w-full h-1 rounded-full bg-red-500 shrink-0" />
-              </div>
-              <div className="bg-zinc-950 p-1 sm:p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center overflow-hidden min-w-0">
-                <span className="text-[7.5px] sm:text-[9px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
-                  🚌 CARAVANA
-                </span>
-                <span className="text-xs sm:text-sm font-black text-white my-0.5">{stats.caravana}</span>
-                <div className="w-full h-1 rounded-full bg-blue-500 shrink-0" />
-              </div>
+            <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0 pl-1">
+              <span className="text-[7.5px] sm:text-[9.5px] font-extrabold text-rose-300 truncate">🥁 BANCADA</span>
+              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stats.pressao_bancada}</span>
+            </div>
+            <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0 pl-1">
+              <span className="text-[7.5px] sm:text-[9.5px] font-extrabold text-red-300 truncate">🥊 PISTA</span>
+              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stats.poder_pista}</span>
+            </div>
+            <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0 pl-1">
+              <span className="text-[7.5px] sm:text-[9.5px] font-extrabold text-blue-300 truncate">🚌 CARAVANA</span>
+              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stats.caravana}</span>
+            </div>
+            <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0 pl-1">
+              <span className="text-[7.5px] sm:text-[9.5px] font-extrabold text-amber-300 truncate">💰 FINANÇAS</span>
+              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stats.autonomia_financeira}</span>
             </div>
           </div>
 
-          {/* Card 2: Gestão (2 Stats) */}
-          <div className="lg:col-span-3 bg-zinc-900/90 p-2 sm:p-2.5 rounded-2xl border border-amber-500/20 shadow-md flex flex-col justify-between overflow-hidden min-w-0">
-            <div className="text-[8.5px] sm:text-[9px] font-black text-amber-400 uppercase tracking-wider mb-1 flex items-center gap-1">
-              <span>💛 GESTÃO</span>
+          {/* Line 2: 4 Attributes (RISCO MP, MORAL, CLUBE, RESPEITO) */}
+          <div className="grid grid-cols-4 gap-1 divide-x divide-zinc-800/50 pt-1 border-t border-zinc-900">
+            <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0">
+              <span className="text-[7.5px] sm:text-[9.5px] font-extrabold text-zinc-400 truncate">⚖️ RISCO MP</span>
+              <span className={`text-xs sm:text-sm font-black ml-0.5 shrink-0 ${stateTrackers.risco_mp > 65 ? "text-red-400 animate-pulse" : "text-white"}`}>
+                {stateTrackers.risco_mp}%
+              </span>
             </div>
-            <div className="grid grid-cols-2 gap-1">
-              <div className="bg-zinc-950 p-1 sm:p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center overflow-hidden min-w-0">
-                <span className="text-[7.5px] sm:text-[9px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
-                  💰 FINANÇAS
-                </span>
-                <span className="text-xs sm:text-sm font-black text-white my-0.5">{stats.autonomia_financeira}</span>
-                <div className="w-full h-1 rounded-full bg-amber-500 shrink-0" />
-              </div>
-              <div className="bg-zinc-950 p-1 sm:p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center overflow-hidden min-w-0">
-                <span className="text-[7.5px] sm:text-[9px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
-                  ⚖️ RISCO MP
-                </span>
-                <span className={`text-xs sm:text-sm font-black my-0.5 ${stateTrackers.risco_mp > 65 ? "text-red-400 animate-pulse" : "text-white"}`}>
-                  {stateTrackers.risco_mp}%
-                </span>
-                <div className="w-full h-1 rounded-full bg-zinc-400 shrink-0" />
-              </div>
+            <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0 pl-1">
+              <span className="text-[7.5px] sm:text-[9.5px] font-extrabold text-emerald-300 truncate">🔥 MORAL</span>
+              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stateTrackers.moral}%</span>
             </div>
-          </div>
-
-          {/* Card 3: Reputação & Relacionamento (3 Stats) */}
-          <div className="lg:col-span-4 bg-zinc-900/90 p-2 sm:p-2.5 rounded-2xl border border-emerald-500/20 shadow-md flex flex-col justify-between overflow-hidden min-w-0">
-            <div className="text-[8.5px] sm:text-[9px] font-black text-emerald-400 uppercase tracking-wider mb-1 flex items-center gap-1">
-              <span>💚 REPUTAÇÃO E RELACIONAMENTO</span>
+            <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0 pl-1">
+              <span className="text-[7.5px] sm:text-[9.5px] font-extrabold text-indigo-300 truncate">🏟️ CLUBE</span>
+              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stateTrackers.relacao_clube}</span>
             </div>
-            <div className="grid grid-cols-3 gap-1">
-              <div className="bg-zinc-950 p-1 sm:p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center overflow-hidden min-w-0">
-                <span className="text-[7.5px] sm:text-[9px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
-                  🙂 MORAL
-                </span>
-                <span className="text-xs sm:text-sm font-black text-white my-0.5">{stateTrackers.moral}%</span>
-                <div className="w-full h-1 rounded-full bg-emerald-500 shrink-0" />
-              </div>
-              <div className="bg-zinc-950 p-1 sm:p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center overflow-hidden min-w-0">
-                <span className="text-[7.5px] sm:text-[9px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
-                  🛡️ CLUBE
-                </span>
-                <span className="text-xs sm:text-sm font-black text-white my-0.5">{stateTrackers.relacao_clube}</span>
-                <div className="w-full h-1 rounded-full bg-indigo-500 shrink-0" />
-              </div>
-              <div className="bg-zinc-950 p-1 sm:p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center overflow-hidden min-w-0">
-                <span className="text-[7.5px] sm:text-[9px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
-                  ⭐ RESPEITO
-                </span>
-                <span className="text-xs sm:text-sm font-black text-white my-0.5">{stateTrackers.respeito_nacional}</span>
-                <div className="w-full h-1 rounded-full bg-purple-400 shrink-0" />
-              </div>
+            <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0 pl-1">
+              <span className="text-[7.5px] sm:text-[9.5px] font-extrabold text-purple-300 truncate">⭐ RESPEITO</span>
+              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stateTrackers.respeito_nacional}</span>
             </div>
           </div>
         </div>
