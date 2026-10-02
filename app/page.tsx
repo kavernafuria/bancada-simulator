@@ -3484,36 +3484,36 @@ export default function App() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 mb-2.5 relative z-10">
-          {/* Card 1: Força & Mobilização (4 Stats -> col-span-5) */}
-          <div className="lg:col-span-5 bg-zinc-900/90 p-2.5 rounded-2xl border border-purple-500/20 shadow-md flex flex-col justify-between overflow-hidden">
-            <div className="text-[9px] font-black text-purple-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-1.5 sm:gap-2 mb-2.5 relative z-10 max-w-full overflow-hidden">
+          {/* Card 1: Força & Mobilização (4 Stats) */}
+          <div className="lg:col-span-5 bg-zinc-900/90 p-2 sm:p-2.5 rounded-2xl border border-purple-500/20 shadow-md flex flex-col justify-between overflow-hidden min-w-0">
+            <div className="text-[8.5px] sm:text-[9px] font-black text-purple-400 uppercase tracking-wider mb-1 flex items-center gap-1">
               <span>💜 FORÇA E MOBILIZAÇÃO</span>
             </div>
             <div className="grid grid-cols-4 gap-1">
-              <div className="bg-zinc-950 p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center gap-0.5 overflow-hidden min-w-0">
-                <span className="text-[8px] sm:text-[9.5px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
+              <div className="bg-zinc-950 p-1 sm:p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center overflow-hidden min-w-0">
+                <span className="text-[7.5px] sm:text-[9px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
                   👥 MASSA
                 </span>
                 <span className="text-xs sm:text-sm font-black text-white my-0.5">{stats.contingente}</span>
                 <div className="w-full h-1 rounded-full bg-purple-500 shrink-0" />
               </div>
-              <div className="bg-zinc-950 p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center gap-0.5 overflow-hidden min-w-0">
-                <span className="text-[8px] sm:text-[9.5px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
+              <div className="bg-zinc-950 p-1 sm:p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center overflow-hidden min-w-0">
+                <span className="text-[7.5px] sm:text-[9px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
                   🥁 BANCADA
                 </span>
                 <span className="text-xs sm:text-sm font-black text-white my-0.5">{stats.pressao_bancada}</span>
                 <div className="w-full h-1 rounded-full bg-rose-500 shrink-0" />
               </div>
-              <div className="bg-zinc-950 p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center gap-0.5 overflow-hidden min-w-0">
-                <span className="text-[8px] sm:text-[9.5px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
+              <div className="bg-zinc-950 p-1 sm:p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center overflow-hidden min-w-0">
+                <span className="text-[7.5px] sm:text-[9px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
                   🥊 PISTA
                 </span>
                 <span className="text-xs sm:text-sm font-black text-white my-0.5">{stats.poder_pista}</span>
                 <div className="w-full h-1 rounded-full bg-red-500 shrink-0" />
               </div>
-              <div className="bg-zinc-950 p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center gap-0.5 overflow-hidden min-w-0">
-                <span className="text-[8px] sm:text-[9.5px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
+              <div className="bg-zinc-950 p-1 sm:p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center overflow-hidden min-w-0">
+                <span className="text-[7.5px] sm:text-[9px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
                   🚌 CARAVANA
                 </span>
                 <span className="text-xs sm:text-sm font-black text-white my-0.5">{stats.caravana}</span>
@@ -3522,21 +3522,21 @@ export default function App() {
             </div>
           </div>
 
-          {/* Card 2: Gestão (2 Stats -> col-span-3) */}
-          <div className="lg:col-span-3 bg-zinc-900/90 p-2.5 rounded-2xl border border-amber-500/20 shadow-md flex flex-col justify-between overflow-hidden">
-            <div className="text-[9px] font-black text-amber-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+          {/* Card 2: Gestão (2 Stats) */}
+          <div className="lg:col-span-3 bg-zinc-900/90 p-2 sm:p-2.5 rounded-2xl border border-amber-500/20 shadow-md flex flex-col justify-between overflow-hidden min-w-0">
+            <div className="text-[8.5px] sm:text-[9px] font-black text-amber-400 uppercase tracking-wider mb-1 flex items-center gap-1">
               <span>💛 GESTÃO</span>
             </div>
             <div className="grid grid-cols-2 gap-1">
-              <div className="bg-zinc-950 p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center gap-0.5 overflow-hidden min-w-0">
-                <span className="text-[8px] sm:text-[9.5px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
+              <div className="bg-zinc-950 p-1 sm:p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center overflow-hidden min-w-0">
+                <span className="text-[7.5px] sm:text-[9px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
                   💰 FINANÇAS
                 </span>
                 <span className="text-xs sm:text-sm font-black text-white my-0.5">{stats.autonomia_financeira}</span>
                 <div className="w-full h-1 rounded-full bg-amber-500 shrink-0" />
               </div>
-              <div className="bg-zinc-950 p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center gap-0.5 overflow-hidden min-w-0">
-                <span className="text-[8px] sm:text-[9.5px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
+              <div className="bg-zinc-950 p-1 sm:p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center overflow-hidden min-w-0">
+                <span className="text-[7.5px] sm:text-[9px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
                   ⚖️ RISCO MP
                 </span>
                 <span className={`text-xs sm:text-sm font-black my-0.5 ${stateTrackers.risco_mp > 65 ? "text-red-400 animate-pulse" : "text-white"}`}>
@@ -3547,28 +3547,28 @@ export default function App() {
             </div>
           </div>
 
-          {/* Card 3: Reputação & Relacionamento (3 Stats -> col-span-4) */}
-          <div className="lg:col-span-4 bg-zinc-900/90 p-2.5 rounded-2xl border border-emerald-500/20 shadow-md flex flex-col justify-between overflow-hidden">
-            <div className="text-[9px] font-black text-emerald-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+          {/* Card 3: Reputação & Relacionamento (3 Stats) */}
+          <div className="lg:col-span-4 bg-zinc-900/90 p-2 sm:p-2.5 rounded-2xl border border-emerald-500/20 shadow-md flex flex-col justify-between overflow-hidden min-w-0">
+            <div className="text-[8.5px] sm:text-[9px] font-black text-emerald-400 uppercase tracking-wider mb-1 flex items-center gap-1">
               <span>💚 REPUTAÇÃO E RELACIONAMENTO</span>
             </div>
             <div className="grid grid-cols-3 gap-1">
-              <div className="bg-zinc-950 p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center gap-0.5 overflow-hidden min-w-0">
-                <span className="text-[8px] sm:text-[9.5px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
+              <div className="bg-zinc-950 p-1 sm:p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center overflow-hidden min-w-0">
+                <span className="text-[7.5px] sm:text-[9px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
                   🙂 MORAL
                 </span>
                 <span className="text-xs sm:text-sm font-black text-white my-0.5">{stateTrackers.moral}%</span>
                 <div className="w-full h-1 rounded-full bg-emerald-500 shrink-0" />
               </div>
-              <div className="bg-zinc-950 p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center gap-0.5 overflow-hidden min-w-0">
-                <span className="text-[8px] sm:text-[9.5px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
+              <div className="bg-zinc-950 p-1 sm:p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center overflow-hidden min-w-0">
+                <span className="text-[7.5px] sm:text-[9px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
                   🛡️ CLUBE
                 </span>
                 <span className="text-xs sm:text-sm font-black text-white my-0.5">{stateTrackers.relacao_clube}</span>
                 <div className="w-full h-1 rounded-full bg-indigo-500 shrink-0" />
               </div>
-              <div className="bg-zinc-950 p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center gap-0.5 overflow-hidden min-w-0">
-                <span className="text-[8px] sm:text-[9.5px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
+              <div className="bg-zinc-950 p-1 sm:p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center overflow-hidden min-w-0">
+                <span className="text-[7.5px] sm:text-[9px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
                   ⭐ RESPEITO
                 </span>
                 <span className="text-xs sm:text-sm font-black text-white my-0.5">{stateTrackers.respeito_nacional}</span>
@@ -3579,64 +3579,64 @@ export default function App() {
         </div>
       )}
 
-      {/* Navigation Menu Bar (Single Integrated Container - No Individual Boxes - 4+5 Structure) */}
-      <div className="bg-zinc-950 border border-zinc-800/80 rounded-2xl p-1.5 shadow-xl mb-2.5 relative z-10">
+      {/* Navigation Menu Bar (Mobile-First Responsive 2-Row Layout: 4 Menus Top, 5 Menus Bottom) */}
+      <div className="bg-zinc-950 border border-zinc-800/80 rounded-2xl p-1 sm:p-1.5 shadow-xl mb-2.5 relative z-10 max-w-full overflow-hidden">
         {/* Row 1: 4 Menus (CICLO, CLUBE, VÁRZEA, RANKING) */}
         <div className="grid grid-cols-4 divide-x divide-zinc-800/60 mb-1">
           <button
             onClick={() => handleTabChange("pipeline")}
-            className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2 text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+            className={`w-full flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 py-1 sm:py-1.5 px-0.5 sm:px-2 text-[8.5px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer min-w-0 ${
               activeTab === "pipeline"
-                ? "bg-amber-500 text-black shadow-md rounded-xl"
-                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-xl"
+                ? "bg-amber-500 text-black shadow-md rounded-lg sm:rounded-xl font-black"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-lg sm:rounded-xl"
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400 shrink-0" />
             <span className="truncate">CICLO</span>
           </button>
 
           <button
             onClick={() => handleTabChange("clube")}
-            className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2 text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer relative ${
+            className={`w-full flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 py-1 sm:py-1.5 px-0.5 sm:px-2 text-[8.5px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer relative min-w-0 ${
               activeTab === "clube"
-                ? "bg-amber-500 text-black shadow-md rounded-xl"
-                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-xl"
+                ? "bg-amber-500 text-black shadow-md rounded-lg sm:rounded-xl font-black"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-lg sm:rounded-xl"
             }`}
           >
-            <Building2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+            <Building2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-indigo-400 shrink-0" />
             <span className="truncate">CLUBE</span>
             {!visitedTabsSeason.includes("clube") && (
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 absolute top-1 right-1 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 absolute top-0.5 right-0.5 sm:top-1 sm:right-1 animate-pulse" />
             )}
           </button>
 
           <button
             onClick={() => handleTabChange("varzea")}
-            className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2 text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer relative ${
+            className={`w-full flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 py-1 sm:py-1.5 px-0.5 sm:px-2 text-[8.5px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer relative min-w-0 ${
               activeTab === "varzea"
-                ? "bg-amber-500 text-black shadow-md rounded-xl"
-                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-xl"
+                ? "bg-amber-500 text-black shadow-md rounded-lg sm:rounded-xl font-black"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-lg sm:rounded-xl"
             }`}
           >
-            <HeartHandshake className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <HeartHandshake className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400 shrink-0" />
             <span className="truncate">VÁRZEA</span>
             {organizacaoPoints >= 50 && (
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 absolute top-1 right-1 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 absolute top-0.5 right-0.5 sm:top-1 sm:right-1 animate-pulse" />
             )}
             {!visitedTabsSeason.includes("varzea") && organizacaoPoints < 50 && (
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400/60 absolute top-1 right-1" />
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400/60 absolute top-0.5 right-0.5 sm:top-1 sm:right-1" />
             )}
           </button>
 
           <button
             onClick={() => handleTabChange("ranking")}
-            className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2 text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+            className={`w-full flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 py-1 sm:py-1.5 px-0.5 sm:px-2 text-[8.5px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer min-w-0 ${
               activeTab === "ranking"
-                ? "bg-amber-500 text-black shadow-md rounded-xl"
-                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-xl"
+                ? "bg-amber-500 text-black shadow-md rounded-lg sm:rounded-xl font-black"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-lg sm:rounded-xl"
             }`}
           >
-            <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <Crown className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400 shrink-0" />
             <span className="truncate">RANKING</span>
           </button>
         </div>
@@ -3645,72 +3645,72 @@ export default function App() {
         <div className="grid grid-cols-5 divide-x divide-zinc-800/60">
           <button
             onClick={() => handleTabChange("standings")}
-            className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2 text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+            className={`w-full flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 py-1 sm:py-1.5 px-0.5 sm:px-2 text-[8.5px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer min-w-0 ${
               activeTab === "standings"
-                ? "bg-amber-500 text-black shadow-md rounded-xl"
-                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-xl"
+                ? "bg-amber-500 text-black shadow-md rounded-lg sm:rounded-xl font-black"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-lg sm:rounded-xl"
             }`}
           >
-            <Trophy className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <Trophy className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400 shrink-0" />
             <span className="truncate">TABELA</span>
           </button>
 
           <button
             onClick={() => handleTabChange("objectives")}
-            className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2 text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer relative ${
+            className={`w-full flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 py-1 sm:py-1.5 px-0.5 sm:px-2 text-[8.5px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer relative min-w-0 ${
               activeTab === "objectives"
-                ? "bg-amber-500 text-black shadow-md rounded-xl"
-                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-xl"
+                ? "bg-amber-500 text-black shadow-md rounded-lg sm:rounded-xl font-black"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-lg sm:rounded-xl"
             }`}
           >
-            <Target className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <Target className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400 shrink-0" />
             <span className="truncate">METAS</span>
             {seasonObjectives.some((o) => o.isCompleted) && (
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute top-1 right-1" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute top-0.5 right-0.5 sm:top-1 sm:right-1" />
             )}
           </button>
 
           <button
             onClick={() => handleTabChange("profile")}
-            className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2 text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+            className={`w-full flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 py-1 sm:py-1.5 px-0.5 sm:px-2 text-[8.5px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer min-w-0 ${
               activeTab === "profile"
-                ? "bg-amber-500 text-black shadow-md rounded-xl"
-                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-xl"
+                ? "bg-amber-500 text-black shadow-md rounded-lg sm:rounded-xl font-black"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-lg sm:rounded-xl"
             }`}
           >
-            <Shield className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+            <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-400 shrink-0" />
             <span className="truncate">PERFIL</span>
           </button>
 
           <button
             onClick={() => handleTabChange("alliances")}
-            className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2 text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer relative ${
+            className={`w-full flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 py-1 sm:py-1.5 px-0.5 sm:px-2 text-[8.5px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer relative min-w-0 ${
               activeTab === "alliances"
-                ? "bg-amber-500 text-black shadow-md rounded-xl"
-                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-xl"
+                ? "bg-amber-500 text-black shadow-md rounded-lg sm:rounded-xl font-black"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-lg sm:rounded-xl"
             }`}
           >
-            <Compass className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+            <Compass className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-purple-400 shrink-0" />
             <span className="truncate">ALIANÇAS</span>
             {!visitedTabsSeason.includes("alliances") && (
-              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 absolute top-1 right-1 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 absolute top-0.5 right-0.5 sm:top-1 sm:right-1 animate-pulse" />
             )}
           </button>
 
           <button
             onClick={() => handleTabChange("loja")}
-            className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2 text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer relative ${
+            className={`w-full flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 py-1 sm:py-1.5 px-0.5 sm:px-2 text-[8.5px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer relative min-w-0 ${
               activeTab === "loja"
-                ? "bg-amber-500 text-black shadow-md rounded-xl"
-                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-xl"
+                ? "bg-amber-500 text-black shadow-md rounded-lg sm:rounded-xl font-black"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-lg sm:rounded-xl"
             }`}
           >
-            <ShoppingBag className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <ShoppingBag className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400 shrink-0" />
             <span className="truncate">LOJA</span>
             {merchandiseOrders.some((o) => season >= o.maturitySeason) ? (
-              <span className="w-2 h-2 rounded-full bg-emerald-400 absolute top-1 right-1 animate-ping" />
+              <span className="w-2 h-2 rounded-full bg-emerald-400 absolute top-0.5 right-0.5 sm:top-1 sm:right-1 animate-ping" />
             ) : !visitedTabsSeason.includes("loja") ? (
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute top-1 right-1" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute top-0.5 right-0.5 sm:top-1 sm:right-1" />
             ) : null}
           </button>
         </div>
