@@ -194,9 +194,16 @@ const TUTORIAL_STEPS = [
 
         <div className="space-y-2 pt-1">
           <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">
-            <strong className="text-amber-400 font-black block text-[11px] mb-0.5">🤝 Diplomacia & Convites de Invasão:</strong>
+            <strong className="text-amber-400 font-black block text-[11px] mb-0.5">🤝 Diplomacia & Eixos Nacionais:</strong>
             <p className="text-[10.5px] text-zinc-400">
-              Abra a aba <strong className="text-white">Alianças</strong> para fechar pactos de apoio logístico em viagens interestaduais ou convidar aliados para escoltas conjuntas.
+              Abra a aba <strong className="text-white">Alianças</strong> para consultar os Eixos Nacionais (Punho Cruzado, DPA, PC, Aliança Alvinegra, Nordeste Lado A/B) e agendar reuniões diplomáticas (+10 Moral, +10 Respeito).
+            </p>
+          </div>
+
+          <div className="bg-zinc-950 p-2.5 rounded-xl border border-amber-500/50">
+            <strong className="text-amber-400 font-black block text-[11px] mb-0.5">🚌 A Grande Invasão do Ano (Etapa 10):</strong>
+            <p className="text-[10.5px] text-zinc-400">
+              Ao avançar para a Etapa 10, o Presidente escolhe entre 4 opções de viagens (Dérbi de Tensão, Caravana da Irmandade, Alçapão do Interior ou Capital Distante) com ineditismo de torcidas! No pré-jogo, consulte o <strong className="text-emerald-400">Histórico Retrospectivo de Pista</strong>.
             </p>
           </div>
 
@@ -210,7 +217,7 @@ const TUTORIAL_STEPS = [
           <div className="bg-zinc-950 p-2.5 rounded-xl border border-amber-500/40">
             <strong className="text-amber-400 font-black block text-[11px] mb-0.5">🏟️ Relações com o Clube & 🚩 Social e Várzea:</strong>
             <p className="text-[10.5px] text-zinc-400">
-              Na aba <strong className="text-indigo-400">Clube</strong>, negocie cotas de ingressos, apoio de ônibus e conciliação política. Na aba <strong className="text-amber-400">Várzea</strong>, faça ações sociais no bairro para atrair patrocinadores locais (renda fixa por etapa) e convoque os times de várzea para encher a arquibancada (com risco de briga interna).
+              Na aba <strong className="text-indigo-400">Clube</strong> (relação estabilizada em 50 pts), negocie cotas de ingressos, apoio de ônibus e conciliação política. Na aba <strong className="text-amber-400">Várzea</strong>, atraia patrocinadores locais e convoque times de bairro para encher a bancada.
             </p>
           </div>
         </div>
