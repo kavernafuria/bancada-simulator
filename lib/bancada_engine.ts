@@ -70,8 +70,8 @@ export const ENDGAME_INVESTMENTS: EndGameInvestment[] = [
     description: "Aquisição de um ônibus de dois andares com vidros blindados e chassi reforçado para viagens interestaduais.",
     cost: 180000,
     category: "FROTA",
-    statEffects: { caravana: 15, poder_pista: 5 },
-    stateEffects: { respeito_nacional: 10, moral: 10 },
+    statEffects: { caravana: 4, poder_pista: 2 },
+    stateEffects: { respeito_nacional: 3, moral: 3 },
   },
   {
     id: "SUBSEDE_CAPITAL",
@@ -80,8 +80,8 @@ export const ENDGAME_INVESTMENTS: EndGameInvestment[] = [
     description: "Compra e reforma de imóvel próprio na capital para concentrar associados das zonas norte, sul, leste e oeste.",
     cost: 120000,
     category: "SUBSEDE",
-    statEffects: { contingente: 10, pressao_bancada: 8 },
-    stateEffects: { respeito_nacional: 10, moral: 8 },
+    statEffects: { contingente: 3, pressao_bancada: 2 },
+    stateEffects: { respeito_nacional: 3, moral: 2 },
   },
   {
     id: "SUBSEDE_LITORAL",
@@ -90,8 +90,8 @@ export const ENDGAME_INVESTMENTS: EndGameInvestment[] = [
     description: "Estruturação de subsede oficial no litoral para receber caravanas praianas e coordenar apoio rodoviário.",
     cost: 120000,
     category: "SUBSEDE",
-    statEffects: { contingente: 10, caravana: 8 },
-    stateEffects: { respeito_nacional: 10, moral: 8 },
+    statEffects: { contingente: 3, caravana: 2 },
+    stateEffects: { respeito_nacional: 3, moral: 2 },
   },
   {
     id: "SUBSEDE_EIXO_BRASIL",
@@ -100,8 +100,8 @@ export const ENDGAME_INVESTMENTS: EndGameInvestment[] = [
     description: "Instalação de subsede oficial em entroncamento rodoviário estratégico para recepção do eixo nacional.",
     cost: 120000,
     category: "SUBSEDE",
-    statEffects: { contingente: 10, poder_pista: 8 },
-    stateEffects: { respeito_nacional: 12, moral: 10 },
+    statEffects: { contingente: 3, poder_pista: 2 },
+    stateEffects: { respeito_nacional: 4, moral: 3 },
   },
   {
     id: "DOACAO_PATROCINIO_CLUBE",
@@ -110,8 +110,8 @@ export const ENDGAME_INVESTMENTS: EndGameInvestment[] = [
     description: "Doação financeira oficial da torcida organizada para as categorias de base ou infraestrutura do estádio do clube.",
     cost: 150000,
     category: "DOACAO_CLUBE",
-    statEffects: { autonomia_financeira: 10 },
-    stateEffects: { relacao_clube: 25, risco_mp: -15, moral: 15 },
+    statEffects: { autonomia_financeira: 3 },
+    stateEffects: { relacao_clube: 6, risco_mp: -5, moral: 4 },
   },
 ];
 

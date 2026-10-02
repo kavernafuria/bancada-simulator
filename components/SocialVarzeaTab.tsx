@@ -151,10 +151,10 @@ export function SocialVarzeaTab({
                   +1 Patrocinador (+R$ 1.500/etapa)
                 </span>
                 <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                  +10 Moral
+                  +2 Moral
                 </span>
                 <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                  +8 Respeito
+                  +2 Respeito
                 </span>
                 <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20">
                   -R$ 4.000 Caixa
@@ -172,12 +172,12 @@ export function SocialVarzeaTab({
                 cost: 4000,
                 orgCost: 30,
                 addSponsor: true,
-                logText: "Realizou grande ação social no bairro. Conquistou simpatia da comunidade e atraiu +1 patrocinador local (+R$ 1.500/etapa).",
-                stateEffects: { moral: 10, respeito_nacional: 8 },
+                logText: "Realizou ação social no bairro. Conquistou simpatia da comunidade e atraiu +1 patrocinador local (+R$ 1.500/etapa).",
+                stateEffects: { moral: 2, respeito_nacional: 2 },
                 deltas: [
                   { label: "Patrocinador Local", value: "+1 (+R$ 1.500/etapa)", isPositive: true },
-                  { label: "Moral", value: "+10", isPositive: true },
-                  { label: "Respeito Nacional", value: "+8", isPositive: true },
+                  { label: "Moral", value: "+2", isPositive: true },
+                  { label: "Respeito Nacional", value: "+2", isPositive: true },
                   { label: "Caixa", value: "-R$ 4.000", isPositive: false },
                   { label: "Pontos Organização", value: "-30", isPositive: false },
                 ],
@@ -209,10 +209,10 @@ export function SocialVarzeaTab({
               <span className="text-[9px] font-black text-zinc-400 uppercase block">Impacto da Convocação:</span>
               <div className="flex flex-wrap gap-1">
                 <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                  +30 Massa (Contingente)
+                  +3 Massa (Contingente)
                 </span>
                 <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20">
-                  +25 Pressão Bancada
+                  +2 Pressão Bancada
                 </span>
                 <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20">
                   -R$ 6.000 Caixa
@@ -236,10 +236,10 @@ export function SocialVarzeaTab({
                 orgCost: 40,
                 isVarzeaConvocada: true,
                 logText: "Mobilizou a Várzea e os bairros populares para tomar a bancada no próximo jogo.",
-                statEffects: { contingente: 30, pressao_bancada: 25 },
+                statEffects: { contingente: 3, pressao_bancada: 2 },
                 deltas: [
-                  { label: "Massa (Contingente)", value: "+30", isPositive: true },
-                  { label: "Pressão na Bancada", value: "+25", isPositive: true },
+                  { label: "Massa (Contingente)", value: "+3", isPositive: true },
+                  { label: "Pressão na Bancada", value: "+2", isPositive: true },
                   { label: "Caixa", value: "-R$ 6.000", isPositive: false },
                   { label: "Pontos Organização", value: "-40", isPositive: false },
                 ],

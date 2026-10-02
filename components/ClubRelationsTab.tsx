@@ -156,10 +156,10 @@ export function ClubRelationsTab({
                 </p>
                 <div className="flex flex-wrap gap-1 mt-2">
                   <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    +15 Massa
+                    +2 Massa
                   </span>
                   <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                    +5 Reputação
+                    +1 Reputação
                   </span>
                 </div>
               </div>
@@ -172,11 +172,11 @@ export function ClubRelationsTab({
                       title: "Cota Promocional Aprovada!",
                       cost: 0,
                       logText: "Negociou cota promocional de 500 ingressos com a diretoria do clube.",
-                      statEffects: { contingente: 15 },
-                      stateEffects: { relacao_clube: 5 },
+                      statEffects: { contingente: 2 },
+                      stateEffects: { relacao_clube: 1 },
                       deltas: [
-                        { label: "Massa (Contingente)", value: "+15", isPositive: true },
-                        { label: "Reputação c/ Clube", value: "+5", isPositive: true },
+                        { label: "Massa (Contingente)", value: "+2", isPositive: true },
+                        { label: "Reputação c/ Clube", value: "+1", isPositive: true },
                       ],
                     });
                   } else {
@@ -185,9 +185,9 @@ export function ClubRelationsTab({
                       title: "Pedido de Cota Recusado!",
                       cost: 0,
                       logText: "A diretoria do clube recusou ceder cota promocional devido à baixa reputação da torcida.",
-                      stateEffects: { moral: -5 },
+                      stateEffects: { moral: -2 },
                       deltas: [
-                        { label: "Moral da Torcida", value: "-5", isPositive: false },
+                        { label: "Moral da Torcida", value: "-2", isPositive: false },
                         { label: "Status", value: "Recusado (Reputação < 50)", isPositive: false },
                       ],
                     });
@@ -225,10 +225,10 @@ export function ClubRelationsTab({
                 </p>
                 <div className="flex flex-wrap gap-1 mt-2">
                   <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    +15 Massa
+                    +2 Massa
                   </span>
                   <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20">
-                    +10 Bancada
+                    +2 Bancada
                   </span>
                 </div>
               </div>
@@ -241,10 +241,10 @@ export function ClubRelationsTab({
                     title: "Ingressos Subsidiados com Sucesso!",
                     cost: 5000,
                     logText: "Bancou R$ 5.000 do caixa para baratear ingressos aos torcedores da arquibancada.",
-                    statEffects: { contingente: 15, pressao_bancada: 10 },
+                    statEffects: { contingente: 2, pressao_bancada: 2 },
                     deltas: [
-                      { label: "Massa", value: "+15", isPositive: true },
-                      { label: "Pressão na Bancada", value: "+10", isPositive: true },
+                      { label: "Massa", value: "+2", isPositive: true },
+                      { label: "Pressão na Bancada", value: "+2", isPositive: true },
                       { label: "Caixa", value: "-R$ 5.000", isPositive: false },
                     ],
                   });
@@ -278,10 +278,10 @@ export function ClubRelationsTab({
                 </p>
                 <div className="flex flex-wrap gap-1 mt-2">
                   <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                    +20 Caravana
+                    +3 Caravana
                   </span>
                   <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20">
-                    -5 Reputação
+                    -2 Reputação
                   </span>
                 </div>
               </div>
@@ -294,11 +294,11 @@ export function ClubRelationsTab({
                       title: "Ônibus Concedidos pelo Clube!",
                       cost: 0,
                       logText: "Conseguiu apoio de ônibus do clube para a caravana, gerando pequeno desgaste político.",
-                      statEffects: { caravana: 20 },
-                      stateEffects: { relacao_clube: -5 },
+                      statEffects: { caravana: 3 },
+                      stateEffects: { relacao_clube: -2 },
                       deltas: [
-                        { label: "Caravana", value: "+20", isPositive: true },
-                        { label: "Reputação c/ Clube", value: "-5", isPositive: false },
+                        { label: "Caravana", value: "+3", isPositive: true },
+                        { label: "Reputação c/ Clube", value: "-2", isPositive: false },
                       ],
                     });
                   } else {
@@ -307,9 +307,9 @@ export function ClubRelationsTab({
                       title: "Pedido de Frota Recusado!",
                       cost: 0,
                       logText: "O clube se recusou a ceder ônibus alegando falta de verba e reputação insuficiente.",
-                      stateEffects: { moral: -5 },
+                      stateEffects: { moral: -2 },
                       deltas: [
-                        { label: "Moral", value: "-5", isPositive: false },
+                        { label: "Moral", value: "-2", isPositive: false },
                         { label: "Status", value: "Recusado (Reputação < 60)", isPositive: false },
                       ],
                     });
@@ -347,10 +347,10 @@ export function ClubRelationsTab({
                 </p>
                 <div className="flex flex-wrap gap-1 mt-2">
                   <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                    +25 Caravana
+                    +3 Caravana
                   </span>
                   <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                    +10 Moral
+                    +2 Moral
                   </span>
                 </div>
               </div>
@@ -362,12 +362,12 @@ export function ClubRelationsTab({
                     id: "BANCAR_VIAGEM_POPULAR",
                     title: "Comboio Popular Financiado!",
                     cost: 8000,
-                    logText: "Bancou R$ 8.000 do caixa para organizar caravana gigante sem depender da diretoria do clube.",
-                    statEffects: { caravana: 25 },
-                    stateEffects: { moral: 10 },
+                    logText: "Bancou R$ 8.000 do caixa para organizar caravana sem depender da diretoria do clube.",
+                    statEffects: { caravana: 3 },
+                    stateEffects: { moral: 2 },
                     deltas: [
-                      { label: "Caravana", value: "+25", isPositive: true },
-                      { label: "Moral", value: "+10", isPositive: true },
+                      { label: "Caravana", value: "+3", isPositive: true },
+                      { label: "Moral", value: "+2", isPositive: true },
                       { label: "Caixa", value: "-R$ 8.000", isPositive: false },
                     ],
                   });
@@ -401,13 +401,13 @@ export function ClubRelationsTab({
                 </p>
                 <div className="flex flex-wrap gap-1 mt-2">
                   <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                    +15 Moral
+                    +3 Moral
                   </span>
                   <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20">
-                    -20 Reputação
+                    -5 Reputação
                   </span>
                   <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20">
-                    +5 Risco MP
+                    +2 Risco MP
                   </span>
                 </div>
               </div>
@@ -419,11 +419,11 @@ export function ClubRelationsTab({
                     title: "Nota de Repúdio Publicada!",
                     cost: 0,
                     logText: "Publicou nota oficial de protesto contra o clube. Inflamou os setores populares, mas azedou a relação institucional.",
-                    stateEffects: { moral: 15, relacao_clube: -20, risco_mp: 5 },
+                    stateEffects: { moral: 3, relacao_clube: -5, risco_mp: 2 },
                     deltas: [
-                      { label: "Moral da Torcida", value: "+15", isPositive: true },
-                      { label: "Reputação c/ Clube", value: "-20", isPositive: false },
-                      { label: "Risco MP", value: "+5", isPositive: false },
+                      { label: "Moral da Torcida", value: "+3", isPositive: true },
+                      { label: "Reputação c/ Clube", value: "-5", isPositive: false },
+                      { label: "Risco MP", value: "+2", isPositive: false },
                     ],
                   });
                 }}
@@ -447,10 +447,10 @@ export function ClubRelationsTab({
                 </p>
                 <div className="flex flex-wrap gap-1 mt-2">
                   <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    -15 Risco MP
+                    -5 Risco MP
                   </span>
                   <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                    +10 Reputação
+                    +2 Reputação
                   </span>
                 </div>
               </div>
@@ -463,10 +463,10 @@ export function ClubRelationsTab({
                     title: "Reunião de Conciliação Realizada!",
                     cost: 3000,
                     logText: "Realizou reunião diplomática na sede do clube. Reduziu a tensão com a PM e melhorou a imagem institucional.",
-                    stateEffects: { risco_mp: -15, relacao_clube: 10 },
+                    stateEffects: { risco_mp: -5, relacao_clube: 2 },
                     deltas: [
-                      { label: "Risco MP / Tensão", value: "-15", isPositive: true },
-                      { label: "Reputação c/ Clube", value: "+10", isPositive: true },
+                      { label: "Risco MP / Tensão", value: "-5", isPositive: true },
+                      { label: "Reputação c/ Clube", value: "+2", isPositive: true },
                       { label: "Caixa", value: "-R$ 3.000", isPositive: false },
                     ],
                   });
