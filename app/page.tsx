@@ -3486,222 +3486,231 @@ export default function App() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 mb-2.5 relative z-10">
           {/* Card 1: Força & Mobilização (4 Stats -> col-span-5) */}
-          <div className="lg:col-span-5 bg-zinc-900/90 p-2.5 rounded-2xl border border-purple-500/20 shadow-md flex flex-col justify-between">
-            <div className="text-[9px] font-black text-purple-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+          <div className="lg:col-span-5 bg-zinc-900/90 p-2.5 rounded-2xl border border-purple-500/20 shadow-md flex flex-col justify-between overflow-hidden">
+            <div className="text-[9px] font-black text-purple-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
               <span>💜 FORÇA E MOBILIZAÇÃO</span>
             </div>
-            <div className="grid grid-cols-4 gap-1.5">
-              <div className="bg-zinc-950/90 p-2 rounded-xl border border-zinc-800/80 flex flex-col items-center justify-between text-center gap-1">
-                <span className="text-[9px] sm:text-[10px] font-bold text-zinc-300 uppercase tracking-tight flex items-center gap-1">
+            <div className="grid grid-cols-4 gap-1">
+              <div className="bg-zinc-950 p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center gap-0.5 overflow-hidden min-w-0">
+                <span className="text-[8px] sm:text-[9.5px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
                   👥 MASSA
                 </span>
-                <span className="text-sm sm:text-base font-black text-white">{stats.contingente}</span>
-                <div className="w-full h-1 rounded-full bg-purple-500" />
+                <span className="text-xs sm:text-sm font-black text-white my-0.5">{stats.contingente}</span>
+                <div className="w-full h-1 rounded-full bg-purple-500 shrink-0" />
               </div>
-              <div className="bg-zinc-950/90 p-2 rounded-xl border border-zinc-800/80 flex flex-col items-center justify-between text-center gap-1">
-                <span className="text-[9px] sm:text-[10px] font-bold text-zinc-300 uppercase tracking-tight flex items-center gap-1">
+              <div className="bg-zinc-950 p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center gap-0.5 overflow-hidden min-w-0">
+                <span className="text-[8px] sm:text-[9.5px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
                   🥁 BANCADA
                 </span>
-                <span className="text-sm sm:text-base font-black text-white">{stats.pressao_bancada}</span>
-                <div className="w-full h-1 rounded-full bg-rose-500" />
+                <span className="text-xs sm:text-sm font-black text-white my-0.5">{stats.pressao_bancada}</span>
+                <div className="w-full h-1 rounded-full bg-rose-500 shrink-0" />
               </div>
-              <div className="bg-zinc-950/90 p-2 rounded-xl border border-zinc-800/80 flex flex-col items-center justify-between text-center gap-1">
-                <span className="text-[9px] sm:text-[10px] font-bold text-zinc-300 uppercase tracking-tight flex items-center gap-1">
+              <div className="bg-zinc-950 p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center gap-0.5 overflow-hidden min-w-0">
+                <span className="text-[8px] sm:text-[9.5px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
                   🥊 PISTA
                 </span>
-                <span className="text-sm sm:text-base font-black text-white">{stats.poder_pista}</span>
-                <div className="w-full h-1 rounded-full bg-red-500" />
+                <span className="text-xs sm:text-sm font-black text-white my-0.5">{stats.poder_pista}</span>
+                <div className="w-full h-1 rounded-full bg-red-500 shrink-0" />
               </div>
-              <div className="bg-zinc-950/90 p-2 rounded-xl border border-zinc-800/80 flex flex-col items-center justify-between text-center gap-1">
-                <span className="text-[9px] sm:text-[10px] font-bold text-zinc-300 uppercase tracking-tight flex items-center gap-1">
+              <div className="bg-zinc-950 p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center gap-0.5 overflow-hidden min-w-0">
+                <span className="text-[8px] sm:text-[9.5px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
                   🚌 CARAVANA
                 </span>
-                <span className="text-sm sm:text-base font-black text-white">{stats.caravana}</span>
-                <div className="w-full h-1 rounded-full bg-blue-500" />
+                <span className="text-xs sm:text-sm font-black text-white my-0.5">{stats.caravana}</span>
+                <div className="w-full h-1 rounded-full bg-blue-500 shrink-0" />
               </div>
             </div>
           </div>
 
           {/* Card 2: Gestão (2 Stats -> col-span-3) */}
-          <div className="lg:col-span-3 bg-zinc-900/90 p-2.5 rounded-2xl border border-amber-500/20 shadow-md flex flex-col justify-between">
-            <div className="text-[9px] font-black text-amber-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+          <div className="lg:col-span-3 bg-zinc-900/90 p-2.5 rounded-2xl border border-amber-500/20 shadow-md flex flex-col justify-between overflow-hidden">
+            <div className="text-[9px] font-black text-amber-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
               <span>💛 GESTÃO</span>
             </div>
-            <div className="grid grid-cols-2 gap-1.5">
-              <div className="bg-zinc-950/90 p-2 rounded-xl border border-zinc-800/80 flex flex-col items-center justify-between text-center gap-1">
-                <span className="text-[9px] sm:text-[10px] font-bold text-zinc-300 uppercase tracking-tight flex items-center gap-1">
+            <div className="grid grid-cols-2 gap-1">
+              <div className="bg-zinc-950 p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center gap-0.5 overflow-hidden min-w-0">
+                <span className="text-[8px] sm:text-[9.5px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
                   💰 FINANÇAS
                 </span>
-                <span className="text-sm sm:text-base font-black text-white">{stats.autonomia_financeira}</span>
-                <div className="w-full h-1 rounded-full bg-amber-500" />
+                <span className="text-xs sm:text-sm font-black text-white my-0.5">{stats.autonomia_financeira}</span>
+                <div className="w-full h-1 rounded-full bg-amber-500 shrink-0" />
               </div>
-              <div className="bg-zinc-950/90 p-2 rounded-xl border border-zinc-800/80 flex flex-col items-center justify-between text-center gap-1">
-                <span className="text-[9px] sm:text-[10px] font-bold text-zinc-300 uppercase tracking-tight flex items-center gap-1">
+              <div className="bg-zinc-950 p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center gap-0.5 overflow-hidden min-w-0">
+                <span className="text-[8px] sm:text-[9.5px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
                   ⚖️ RISCO MP
                 </span>
-                <span className={`text-sm sm:text-base font-black ${stateTrackers.risco_mp > 65 ? "text-red-400 animate-pulse" : "text-white"}`}>
+                <span className={`text-xs sm:text-sm font-black my-0.5 ${stateTrackers.risco_mp > 65 ? "text-red-400 animate-pulse" : "text-white"}`}>
                   {stateTrackers.risco_mp}%
                 </span>
-                <div className="w-full h-1 rounded-full bg-zinc-400" />
+                <div className="w-full h-1 rounded-full bg-zinc-400 shrink-0" />
               </div>
             </div>
           </div>
 
           {/* Card 3: Reputação & Relacionamento (3 Stats -> col-span-4) */}
-          <div className="lg:col-span-4 bg-zinc-900/90 p-2.5 rounded-2xl border border-emerald-500/20 shadow-md flex flex-col justify-between">
-            <div className="text-[9px] font-black text-emerald-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+          <div className="lg:col-span-4 bg-zinc-900/90 p-2.5 rounded-2xl border border-emerald-500/20 shadow-md flex flex-col justify-between overflow-hidden">
+            <div className="text-[9px] font-black text-emerald-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
               <span>💚 REPUTAÇÃO E RELACIONAMENTO</span>
             </div>
-            <div className="grid grid-cols-3 gap-1.5">
-              <div className="bg-zinc-950/90 p-2 rounded-xl border border-zinc-800/80 flex flex-col items-center justify-between text-center gap-1">
-                <span className="text-[9px] sm:text-[10px] font-bold text-zinc-300 uppercase tracking-tight flex items-center gap-1">
+            <div className="grid grid-cols-3 gap-1">
+              <div className="bg-zinc-950 p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center gap-0.5 overflow-hidden min-w-0">
+                <span className="text-[8px] sm:text-[9.5px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
                   🙂 MORAL
                 </span>
-                <span className="text-sm sm:text-base font-black text-white">{stateTrackers.moral}%</span>
-                <div className="w-full h-1 rounded-full bg-emerald-500" />
+                <span className="text-xs sm:text-sm font-black text-white my-0.5">{stateTrackers.moral}%</span>
+                <div className="w-full h-1 rounded-full bg-emerald-500 shrink-0" />
               </div>
-              <div className="bg-zinc-950/90 p-2 rounded-xl border border-zinc-800/80 flex flex-col items-center justify-between text-center gap-1">
-                <span className="text-[9px] sm:text-[10px] font-bold text-zinc-300 uppercase tracking-tight flex items-center gap-1">
+              <div className="bg-zinc-950 p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center gap-0.5 overflow-hidden min-w-0">
+                <span className="text-[8px] sm:text-[9.5px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
                   🛡️ CLUBE
                 </span>
-                <span className="text-sm sm:text-base font-black text-white">{stateTrackers.relacao_clube}</span>
-                <div className="w-full h-1 rounded-full bg-indigo-500" />
+                <span className="text-xs sm:text-sm font-black text-white my-0.5">{stateTrackers.relacao_clube}</span>
+                <div className="w-full h-1 rounded-full bg-indigo-500 shrink-0" />
               </div>
-              <div className="bg-zinc-950/90 p-2 rounded-xl border border-zinc-800/80 flex flex-col items-center justify-between text-center gap-1">
-                <span className="text-[9px] sm:text-[10px] font-bold text-zinc-300 uppercase tracking-tight flex items-center gap-1">
+              <div className="bg-zinc-950 p-1.5 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-between text-center gap-0.5 overflow-hidden min-w-0">
+                <span className="text-[8px] sm:text-[9.5px] font-extrabold text-zinc-300 uppercase tracking-tighter truncate w-full flex items-center justify-center gap-0.5">
                   ⭐ RESPEITO
                 </span>
-                <span className="text-sm sm:text-base font-black text-white">{stateTrackers.respeito_nacional}</span>
-                <div className="w-full h-1 rounded-full bg-purple-400" />
+                <span className="text-xs sm:text-sm font-black text-white my-0.5">{stateTrackers.respeito_nacional}</span>
+                <div className="w-full h-1 rounded-full bg-purple-400 shrink-0" />
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Navigation Menu Bar (Structured 2 Rows: 4 Menus on Top, 5 Menus on Bottom) */}
-      <div className="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-2 shadow-xl mb-2.5 relative z-10">
+      {/* Navigation Menu Bar (Single Integrated Container - No Individual Boxes - 4+5 Structure) */}
+      <div className="bg-zinc-950 border border-zinc-800/80 rounded-2xl p-1.5 shadow-xl mb-2.5 relative z-10">
         {/* Row 1: 4 Menus (CICLO, CLUBE, VÁRZEA, RANKING) */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mb-1.5">
+        <div className="grid grid-cols-4 divide-x divide-zinc-800/60 mb-1">
           <button
             onClick={() => handleTabChange("pipeline")}
-            className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+            className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2 text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === "pipeline"
-                ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20 font-black border border-amber-400 scale-[1.02]"
-                : "bg-zinc-950/80 text-zinc-400 border border-zinc-800/80 hover:border-zinc-700 hover:text-zinc-200"
+                ? "bg-amber-500 text-black shadow-md rounded-xl"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-xl"
             }`}
           >
-            <Sparkles className="w-4 h-4 text-amber-400 shrink-0" /> CICLO
+            <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <span className="truncate">CICLO</span>
           </button>
 
           <button
             onClick={() => handleTabChange("clube")}
-            className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer relative ${
+            className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2 text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer relative ${
               activeTab === "clube"
-                ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20 font-black border border-amber-400 scale-[1.02]"
-                : "bg-zinc-950/80 text-zinc-400 border border-zinc-800/80 hover:border-zinc-700 hover:text-zinc-200"
+                ? "bg-amber-500 text-black shadow-md rounded-xl"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-xl"
             }`}
           >
-            <Building2 className="w-4 h-4 text-indigo-400 shrink-0" /> CLUBE
+            <Building2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+            <span className="truncate">CLUBE</span>
             {!visitedTabsSeason.includes("clube") && (
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 absolute top-1.5 right-1.5 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 absolute top-1 right-1 animate-pulse" />
             )}
           </button>
 
           <button
             onClick={() => handleTabChange("varzea")}
-            className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer relative ${
+            className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2 text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer relative ${
               activeTab === "varzea"
-                ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20 font-black border border-amber-400 scale-[1.02]"
-                : "bg-zinc-950/80 text-zinc-400 border border-zinc-800/80 hover:border-zinc-700 hover:text-zinc-200"
+                ? "bg-amber-500 text-black shadow-md rounded-xl"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-xl"
             }`}
           >
-            <HeartHandshake className="w-4 h-4 text-amber-400 shrink-0" /> VÁRZEA
+            <HeartHandshake className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <span className="truncate">VÁRZEA</span>
             {organizacaoPoints >= 50 && (
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 absolute top-1.5 right-1.5 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 absolute top-1 right-1 animate-pulse" />
             )}
             {!visitedTabsSeason.includes("varzea") && organizacaoPoints < 50 && (
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400/60 absolute top-1.5 right-1.5" />
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400/60 absolute top-1 right-1" />
             )}
           </button>
 
           <button
             onClick={() => handleTabChange("ranking")}
-            className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+            className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2 text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === "ranking"
-                ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20 font-black border border-amber-400 scale-[1.02]"
-                : "bg-zinc-950/80 text-zinc-400 border border-zinc-800/80 hover:border-zinc-700 hover:text-zinc-200"
+                ? "bg-amber-500 text-black shadow-md rounded-xl"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-xl"
             }`}
           >
-            <Crown className="w-4 h-4 text-amber-400 shrink-0" /> RANKING
+            <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <span className="truncate">RANKING</span>
           </button>
         </div>
 
         {/* Row 2: 5 Menus (TABELA, METAS, PERFIL, ALIANÇAS, LOJA) */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
+        <div className="grid grid-cols-5 divide-x divide-zinc-800/60">
           <button
             onClick={() => handleTabChange("standings")}
-            className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+            className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2 text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === "standings"
-                ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20 font-black border border-amber-400 scale-[1.02]"
-                : "bg-zinc-950/80 text-zinc-400 border border-zinc-800/80 hover:border-zinc-700 hover:text-zinc-200"
+                ? "bg-amber-500 text-black shadow-md rounded-xl"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-xl"
             }`}
           >
-            <Trophy className="w-4 h-4 text-amber-400 shrink-0" /> TABELA
+            <Trophy className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <span className="truncate">TABELA</span>
           </button>
 
           <button
             onClick={() => handleTabChange("objectives")}
-            className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer relative ${
+            className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2 text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer relative ${
               activeTab === "objectives"
-                ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20 font-black border border-amber-400 scale-[1.02]"
-                : "bg-zinc-950/80 text-zinc-400 border border-zinc-800/80 hover:border-zinc-700 hover:text-zinc-200"
+                ? "bg-amber-500 text-black shadow-md rounded-xl"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-xl"
             }`}
           >
-            <Target className="w-4 h-4 text-emerald-400 shrink-0" /> METAS
+            <Target className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <span className="truncate">METAS</span>
             {seasonObjectives.some((o) => o.isCompleted) && (
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute top-1.5 right-1.5" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute top-1 right-1" />
             )}
           </button>
 
           <button
             onClick={() => handleTabChange("profile")}
-            className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+            className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2 text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === "profile"
-                ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20 font-black border border-amber-400 scale-[1.02]"
-                : "bg-zinc-950/80 text-zinc-400 border border-zinc-800/80 hover:border-zinc-700 hover:text-zinc-200"
+                ? "bg-amber-500 text-black shadow-md rounded-xl"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-xl"
             }`}
           >
-            <Shield className="w-4 h-4 text-blue-400 shrink-0" /> PERFIL
+            <Shield className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+            <span className="truncate">PERFIL</span>
           </button>
 
           <button
             onClick={() => handleTabChange("alliances")}
-            className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer relative ${
+            className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2 text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer relative ${
               activeTab === "alliances"
-                ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20 font-black border border-amber-400 scale-[1.02]"
-                : "bg-zinc-950/80 text-zinc-400 border border-zinc-800/80 hover:border-zinc-700 hover:text-zinc-200"
+                ? "bg-amber-500 text-black shadow-md rounded-xl"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-xl"
             }`}
           >
-            <Compass className="w-4 h-4 text-purple-400 shrink-0" /> ALIANÇAS
+            <Compass className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+            <span className="truncate">ALIANÇAS</span>
             {!visitedTabsSeason.includes("alliances") && (
-              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 absolute top-1.5 right-1.5 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 absolute top-1 right-1 animate-pulse" />
             )}
           </button>
 
           <button
             onClick={() => handleTabChange("loja")}
-            className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer relative ${
+            className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2 text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer relative ${
               activeTab === "loja"
-                ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20 font-black border border-amber-400 scale-[1.02]"
-                : "bg-zinc-950/80 text-zinc-400 border border-zinc-800/80 hover:border-zinc-700 hover:text-zinc-200"
+                ? "bg-amber-500 text-black shadow-md rounded-xl"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 rounded-xl"
             }`}
           >
-            <ShoppingBag className="w-4 h-4 text-emerald-400 shrink-0" /> LOJA
+            <ShoppingBag className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <span className="truncate">LOJA</span>
             {merchandiseOrders.some((o) => season >= o.maturitySeason) ? (
-              <span className="w-2 h-2 rounded-full bg-emerald-400 absolute top-1.5 right-1.5 animate-ping" />
+              <span className="w-2 h-2 rounded-full bg-emerald-400 absolute top-1 right-1 animate-ping" />
             ) : !visitedTabsSeason.includes("loja") ? (
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute top-1.5 right-1.5" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute top-1 right-1" />
             ) : null}
           </button>
         </div>
