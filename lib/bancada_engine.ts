@@ -162,10 +162,15 @@ export function triggerRandomUnforeseenExpense(season: number): UnforeseenExpens
 }
 
 export const GAME_BALANCE = {
-  CAREER_MAX_SEASONS: 15,
-  PRESIDENT_ELECTIONS_SEASONS: [1, 4, 7, 10, 13],
-  MILESTONE_SEASONS: [3, 6, 9, 12, 15],
+  CAREER_MAX_SEASONS: 10,
+  PRESIDENT_ELECTIONS_SEASONS: [1, 4, 7, 10],
+  MILESTONE_SEASONS: [3, 6, 9, 10],
   ANNUAL_STEPS_COUNT: 10,
+
+  // Várzea & Comunitário
+  ORGANIZACAO_MAX_POINTS: 100,
+  ORGANIZACAO_REFILL_PER_ETAPA: 20,
+  SPONSOR_REVENUE_PER_ETAPA: 1500,
 
   // Economics
   MEMBERSHIP_DUES_PER_MEMBER: 60, // R$ 60 por membro em mensalidades anuais (+20%)

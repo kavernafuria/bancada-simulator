@@ -61,6 +61,8 @@ import {
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { MatchTacticalResolver, MatchContext } from "@/components/MatchTacticalResolver";
+import { ClubRelationsTab } from "@/components/ClubRelationsTab";
+import { SocialVarzeaTab } from "@/components/SocialVarzeaTab";
 
 export interface MerchandiseOrder {
   id: string;
@@ -483,7 +485,9 @@ export default function App() {
   }[]>([]);
 
   const [historyLog, setHistoryLog] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<"pipeline" | "objectives" | "ranking" | "standings" | "profile" | "alliances" | "loja">("pipeline");
+  const [activeTab, setActiveTab] = useState<"pipeline" | "objectives" | "ranking" | "standings" | "profile" | "alliances" | "loja" | "clube" | "varzea">("pipeline");
+  const [organizacaoPoints, setOrganizacaoPoints] = useState<number>(100);
+  const [localSponsorsCount, setLocalSponsorsCount] = useState<number>(0);
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
 
   const handleExportSave = () => {
@@ -681,6 +685,8 @@ export default function App() {
           if (parsed.hasOwnHeadquarters !== undefined) setHasOwnHeadquarters(parsed.hasOwnHeadquarters);
           if (parsed.bateriaDurability !== undefined) setBateriaDurability(parsed.bateriaDurability);
           if (parsed.pyroStockCount !== undefined) setPyroStockCount(parsed.pyroStockCount);
+          if (parsed.organizacaoPoints !== undefined) setOrganizacaoPoints(parsed.organizacaoPoints);
+          if (parsed.localSponsorsCount !== undefined) setLocalSponsorsCount(parsed.localSponsorsCount);
           if (parsed.merchandiseOrders) setMerchandiseOrders(parsed.merchandiseOrders);
           if (parsed.purchasedInvestments) setPurchasedInvestments(parsed.purchasedInvestments);
           if (parsed.seasonHistory) setSeasonHistory(parsed.seasonHistory);
@@ -753,6 +759,8 @@ export default function App() {
           hasOwnHeadquarters,
           bateriaDurability,
           pyroStockCount,
+          organizacaoPoints,
+          localSponsorsCount,
           torcidaUnicaState,
           merchandiseOrders,
           purchasedInvestments,
@@ -781,6 +789,8 @@ export default function App() {
     hasOwnHeadquarters,
     bateriaDurability,
     pyroStockCount,
+    organizacaoPoints,
+    localSponsorsCount,
     torcidaUnicaState,
     merchandiseOrders,
     purchasedInvestments,
@@ -1768,6 +1778,24 @@ export default function App() {
   };
 
   const advancePipeline = () => {
+    // Recarrega Pontos de Organização (+20 a cada Etapa)
+    setOrganizacaoPoints((prev) => Math.min(GAME_BALANCE.ORGANIZACAO_MAX_POINTS, prev + GAME_BALANCE.ORGANIZACAO_REFILL_PER_ETAPA));
+
+    // Renda Recorrente dos Patrocinadores Locais (+R$ 1.500/etapa por patrocinador)
+    if (localSponsorsCount > 0) {
+      const sponsorRevenue = localSponsorsCount * GAME_BALANCE.SPONSOR_REVENUE_PER_ETAPA;
+      setBankBalance((prev) => prev + sponsorRevenue);
+    }
+
+    // Se o Risco MP for elevado (>75%), os comércios locais cancelam o apoio por medo de violência
+    if (stateTrackers.risco_mp > 75 && localSponsorsCount > 0) {
+      setLocalSponsorsCount(0);
+      setHistoryLog((prev) => [
+        `[Ano ${season} - Etapa ${pipelineIndex + 1}] Risco MP elevado (>75%). Os comércios locais cancelaram os patrocínios por receio de atos de violência.`,
+        ...prev,
+      ]);
+    }
+
     if (pipelineIndex + 1 < pipeline.length) {
       setPipelineIndex((prev) => prev + 1);
     } else {
@@ -2377,10 +2405,143 @@ export default function App() {
   };
 
   const handleShareHistory = () => {
-    const text = `🥁 Minha torcida "${currentTorcida?.torcida}" concluiu os 30 Anos no Bancada: Simulador de Torcida!\n\nTítulo Honorário: ${getHonoraryTitle()}\nContingente: ${stats.contingente}/100 | Pista: ${stats.poder_pista}/100 | Bancada: ${stats.pressao_bancada}/100\nCaixa: R$ ${bankBalance.toLocaleString()}`;
+    const text = `🥁 Minha torcida "${currentTorcida?.torcida}" concluiu os 10 Anos no Bancada: Simulador de Torcida!\n\nTítulo Honorário: ${getHonoraryTitle()}\nContingente: ${stats.contingente}/100 | Pista: ${stats.poder_pista}/100 | Bancada: ${stats.pressao_bancada}/100\nCaixa: R$ ${bankBalance.toLocaleString()}`;
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleApplyClubAction = (action: {
+    id: string;
+    title: string;
+    cost: number;
+    logText: string;
+    statEffects?: { contingente?: number; pressao_bancada?: number; caravana?: number };
+    stateEffects?: { moral?: number; risco_mp?: number; relacao_clube?: number };
+    deltas: FormattedDelta[];
+  }) => {
+    if (bankBalance < action.cost) {
+      alert("Saldo insuficiente no caixa da torcida!");
+      return;
+    }
+
+    if (soundEnabled) playStadiumSound("drum");
+
+    if (action.cost > 0) {
+      setBankBalance((prev) => prev - action.cost);
+    }
+
+    if (action.statEffects) {
+      setStats((st) => ({
+        contingente: Math.min(100, Math.max(10, st.contingente + (action.statEffects?.contingente || 0))),
+        pressao_bancada: Math.min(100, Math.max(0, st.pressao_bancada + (action.statEffects?.pressao_bancada || 0))),
+        poder_pista: st.poder_pista,
+        caravana: Math.min(100, Math.max(0, st.caravana + (action.statEffects?.caravana || 0))),
+        autonomia_financeira: st.autonomia_financeira,
+      }));
+    }
+
+    if (action.stateEffects) {
+      setStateTrackers((st) => ({
+        moral: Math.min(100, Math.max(0, st.moral + (action.stateEffects?.moral || 0))),
+        risco_mp: Math.min(100, Math.max(0, st.risco_mp + (action.stateEffects?.risco_mp || 0))),
+        relacao_clube: Math.min(100, Math.max(0, st.relacao_clube + (action.stateEffects?.relacao_clube || 0))),
+        respeito_nacional: st.respeito_nacional,
+      }));
+    }
+
+    if (action.logText) {
+      setHistoryLog((prev) => [`[Ano ${season} - Etapa ${pipelineIndex + 1}] ${action.logText}`, ...prev]);
+    }
+
+    setActionFeedback({
+      title: action.title,
+      logText: action.logText,
+      deltas: action.deltas,
+    });
+  };
+
+  const handleApplySocialAction = (action: {
+    id: string;
+    title: string;
+    cost: number;
+    orgCost: number;
+    logText: string;
+    addSponsor?: boolean;
+    isVarzeaConvocada?: boolean;
+    statEffects?: { contingente?: number; pressao_bancada?: number; poder_pista?: number };
+    stateEffects?: { moral?: number; respeito_nacional?: number; relacao_clube?: number };
+    deltas: FormattedDelta[];
+  }) => {
+    if (bankBalance < action.cost) {
+      alert("Saldo insuficiente no caixa da torcida!");
+      return;
+    }
+    if (organizacaoPoints < action.orgCost) {
+      alert(`Pontos de Organização insuficientes! Você precisa de ${action.orgCost} Pontos.`);
+      return;
+    }
+
+    if (soundEnabled) playStadiumSound("drum");
+
+    setBankBalance((prev) => prev - action.cost);
+    setOrganizacaoPoints((prev) => Math.max(0, prev - action.orgCost));
+
+    if (action.addSponsor) {
+      setLocalSponsorsCount((prev) => prev + 1);
+    }
+
+    let isBrigaInterna = false;
+    if (action.isVarzeaConvocada) {
+      if (Math.random() < 0.25) {
+        isBrigaInterna = true;
+      }
+    }
+
+    if (action.statEffects) {
+      setStats((st) => ({
+        contingente: Math.min(100, Math.max(10, st.contingente + (action.statEffects?.contingente || 0))),
+        pressao_bancada: Math.min(100, Math.max(0, st.pressao_bancada + (action.statEffects?.pressao_bancada || 0))),
+        poder_pista: Math.min(100, Math.max(0, st.poder_pista + (action.statEffects?.poder_pista || 0))),
+        caravana: st.caravana,
+        autonomia_financeira: st.autonomia_financeira,
+      }));
+    }
+
+    if (action.stateEffects) {
+      setStateTrackers((st) => ({
+        moral: Math.min(100, Math.max(0, st.moral + (action.stateEffects?.moral || 0) + (isBrigaInterna ? -10 : 0))),
+        risco_mp: st.risco_mp,
+        relacao_clube: Math.min(100, Math.max(0, st.relacao_clube + (action.stateEffects?.relacao_clube || 0) + (isBrigaInterna ? -15 : 0))),
+        respeito_nacional: Math.min(100, Math.max(0, st.respeito_nacional + (action.stateEffects?.respeito_nacional || 0))),
+      }));
+    }
+
+    const finalDeltas = [...action.deltas];
+
+    if (isBrigaInterna) {
+      if (localSponsorsCount > 0) {
+        setLocalSponsorsCount((prev) => Math.max(0, prev - 1));
+      }
+      finalDeltas.push(
+        { label: "💥 BRIGA INTERNA NA BANCADA", value: "Conflito entre Bairros", isPositive: false },
+        { label: "Reputação c/ Clube", value: "-15", isPositive: false },
+        { label: "Moral", value: "-10", isPositive: false },
+        { label: "Patrocinador Cancelado", value: "-1", isPositive: false }
+      );
+    }
+
+    const finalLog = isBrigaInterna
+      ? `${action.logText} OCORREU BRIGA INTERNA entre quebradas rivalizadas na arquibancada! A diretoria do clube aplicou advertência e 1 patrocinador cancelou o apoio.`
+      : action.logText;
+
+    setHistoryLog((prev) => [`[Ano ${season} - Etapa ${pipelineIndex + 1}] ${finalLog}`, ...prev]);
+
+    setActionFeedback({
+      title: isBrigaInterna ? "💥 VÁRZEA CONVOCADA (COM BRIGA INTERNA!)" : action.title,
+      logText: finalLog,
+      deltas: finalDeltas,
+    });
   };
 
   const currentStep = pipeline[pipelineIndex] || pipeline[0];
@@ -3140,7 +3301,7 @@ export default function App() {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="grid grid-cols-4 sm:grid-cols-7 gap-1 mb-2.5 relative z-10">
+      <div className="grid grid-cols-5 sm:grid-cols-9 gap-1 mb-2.5 relative z-10">
         <button
           onClick={() => setActiveTab("pipeline")}
           className={`py-1.5 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer ${
@@ -3150,6 +3311,28 @@ export default function App() {
           }`}
         >
           <Sparkles className="w-3 h-3" /> Ciclo
+        </button>
+
+        <button
+          onClick={() => setActiveTab("clube")}
+          className={`py-1.5 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer ${
+            activeTab === "clube"
+              ? "bg-amber-500 text-black shadow-md font-black"
+              : "bg-zinc-900 text-zinc-400 border border-zinc-800"
+          }`}
+        >
+          <Building2 className="w-3 h-3 text-indigo-400" /> Clube
+        </button>
+
+        <button
+          onClick={() => setActiveTab("varzea")}
+          className={`py-1.5 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer ${
+            activeTab === "varzea"
+              ? "bg-amber-500 text-black shadow-md font-black"
+              : "bg-zinc-900 text-zinc-400 border border-zinc-800"
+          }`}
+        >
+          <HeartHandshake className="w-3 h-3 text-amber-400" /> Várzea
         </button>
 
         <button
@@ -3997,6 +4180,29 @@ export default function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* TAB 8: CLUBE (RELAÇÕES POLÍTICAS) */}
+      {activeTab === "clube" && (
+        <ClubRelationsTab
+          relacaoClube={stateTrackers.relacao_clube}
+          riscoMp={stateTrackers.risco_mp}
+          bankBalance={bankBalance}
+          soundEnabled={soundEnabled}
+          onApplyAction={handleApplyClubAction}
+        />
+      )}
+
+      {/* TAB 9: VÁRZEA & ENGAJAMENTO COMUNITÁRIO */}
+      {activeTab === "varzea" && (
+        <SocialVarzeaTab
+          organizacaoPoints={organizacaoPoints}
+          localSponsorsCount={localSponsorsCount}
+          bankBalance={bankBalance}
+          riscoMp={stateTrackers.risco_mp}
+          soundEnabled={soundEnabled}
+          onApplySocialAction={handleApplySocialAction}
+        />
       )}
 
       {/* ---------------------------------------------------- */}

@@ -206,6 +206,13 @@ const TUTORIAL_STEPS = [
               Vencer embates táticos contra torcidas rivais permite capturar faixas oficiais do rival (Troféus de Pista), gerando bônus permanente de Moral!
             </p>
           </div>
+
+          <div className="bg-zinc-950 p-2.5 rounded-xl border border-amber-500/40">
+            <strong className="text-amber-400 font-black block text-[11px] mb-0.5">🏟️ Relações com o Clube & 🚩 Social e Várzea:</strong>
+            <p className="text-[10.5px] text-zinc-400">
+              Na aba <strong className="text-indigo-400">Clube</strong>, negocie cotas de ingressos, apoio de ônibus e conciliação política. Na aba <strong className="text-amber-400">Várzea</strong>, faça ações sociais no bairro para atrair patrocinadores locais (renda fixa por etapa) e convoque os times de várzea para encher a arquibancada (com risco de briga interna).
+            </p>
+          </div>
         </div>
       </div>
     ),
