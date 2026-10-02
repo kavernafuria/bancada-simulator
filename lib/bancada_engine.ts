@@ -632,32 +632,32 @@ export const ARCHETYPES: Record<ArchetypeId, ArchetypeDefinition> = {
     name: "Torcida Organizada Tradicional",
     subtitle: "Equilibrado & Bateria de Samba",
     description: "Equilíbrio em festa visual, comboios de caravanas e confecção de fardamentos.",
-    statModifiers: { contingente: 2, caravana: 2, autonomia_financeira: 2 },
-    stateModifiers: { moral: 3, risco_mp: 0 },
+    statModifiers: { contingente: 5, caravana: 5, autonomia_financeira: 5 },
+    stateModifiers: { moral: 5, risco_mp: 0 },
   },
   BARRA_BRAVA: {
     id: "BARRA_BRAVA",
     name: "Barra Brava / Movimento Popular",
     subtitle: "Canto Ininterrupto & Tirantes",
     description: "Foco total em cantos de 90 min, instrumentos e festa na arquibancada.",
-    statModifiers: { pressao_bancada: 6, contingente: 2, poder_pista: -4, autonomia_financeira: -5 },
-    stateModifiers: { moral: 4, risco_mp: -3 },
+    statModifiers: { pressao_bancada: 12, contingente: 5, poder_pista: -5, autonomia_financeira: -6 },
+    stateModifiers: { moral: 6, risco_mp: -3 },
   },
   BONDE_PISTA: {
     id: "BONDE_PISTA",
     name: "Linha de Frente & Bonde de Pista",
     subtitle: "Combate de Rua & Escolta",
     description: "Força máxima de pista, escolta rodoviária e defesa de território urbano.",
-    statModifiers: { poder_pista: 8, pressao_bancada: -5, autonomia_financeira: -4 },
-    stateModifiers: { risco_mp: 8, respeito_nacional: 4 },
+    statModifiers: { poder_pista: 15, pressao_bancada: -6, autonomia_financeira: -5 },
+    stateModifiers: { risco_mp: 8, respeito_nacional: 6 },
   },
   COLETIVO_POPULAR: {
     id: "COLETIVO_POPULAR",
     name: "Coletivo Popular Autônomo",
     subtitle: "Comunitário & Ação Social",
     description: "Foco em ações sociais nas favelas, ingressos populares e massa.",
-    statModifiers: { contingente: 4, poder_pista: -5, autonomia_financeira: 2 },
-    stateModifiers: { moral: 4, risco_mp: -5, relacao_clube: 5 },
+    statModifiers: { contingente: 10, poder_pista: -6, autonomia_financeira: 5 },
+    stateModifiers: { moral: 6, risco_mp: -5, relacao_clube: 10 },
   },
 };
 
@@ -777,26 +777,26 @@ export function createCustomTorcidaWithArchetype(
   // because the historic hegemonic torcida already controls the stadium.
   const baseStats: TorcidaStats = isTierA
     ? {
-        contingente: 18,
-        pressao_bancada: 24,
-        poder_pista: 20,
-        caravana: 16,
-        autonomia_financeira: 18,
+        contingente: 55,
+        pressao_bancada: 60,
+        poder_pista: 55,
+        caravana: 50,
+        autonomia_financeira: 52,
       }
     : tier === "B"
     ? {
-        contingente: 24,
-        pressao_bancada: 28,
-        poder_pista: 24,
-        caravana: 20,
-        autonomia_financeira: 22,
+        contingente: 48,
+        pressao_bancada: 54,
+        poder_pista: 50,
+        caravana: 46,
+        autonomia_financeira: 48,
       }
     : {
-        contingente: 28,
-        pressao_bancada: 32,
-        poder_pista: 26,
-        caravana: 22,
-        autonomia_financeira: 25,
+        contingente: 45,
+        pressao_bancada: 50,
+        poder_pista: 46,
+        caravana: 42,
+        autonomia_financeira: 45,
       };
 
   Object.entries(arch.statModifiers).forEach(([key, mod]) => {
