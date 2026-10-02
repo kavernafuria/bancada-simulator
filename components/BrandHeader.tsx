@@ -6,8 +6,8 @@ import { BackgroundMusicPlayer } from "@/components/BackgroundMusicPlayer";
 
 export function BrandHeader() {
   return (
-    <header className="w-full bg-paper-card/90 dark:bg-kavers-dark/95 border-b border-paper-border dark:border-kavers-border text-xs py-2 px-4 backdrop-blur-md z-40 relative shadow-sm">
-      <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-2">
+    <header className="w-full bg-paper-card/90 dark:bg-kavers-dark/95 border-b border-paper-border dark:border-kavers-border text-xs py-2 px-4 backdrop-blur-md z-40 relative shadow-sm max-w-full overflow-hidden">
+      <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-2 min-w-0">
         {/* Kavers Games Logo & Subdomain Title */}
         <div className="flex items-center gap-2 font-black tracking-tight">
           <a

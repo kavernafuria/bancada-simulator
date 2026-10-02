@@ -3485,48 +3485,48 @@ export default function App() {
         </div>
       ) : (
         <div className="bg-zinc-950 border border-zinc-800/80 rounded-2xl p-1.5 sm:p-2 shadow-xl mb-2.5 relative z-10 max-w-full overflow-hidden flex flex-col gap-1.5">
-          {/* Line 1: 5 Attributes (MASSA, BANCADA, PISTA, CARAVANA, FINANÇAS) */}
+          {/* Line 1: 5 Shortest Attributes (MASSA, PISTA, BANCADA, MORAL, CLUBE) */}
           <div className="grid grid-cols-5 gap-1 divide-x divide-zinc-800/50">
             <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0">
-              <span className="text-[7.5px] sm:text-[9.5px] font-extrabold text-purple-300 truncate">👥 MASSA</span>
+              <span className="text-[7.5px] sm:text-[10px] xl:text-xs font-extrabold text-purple-300 whitespace-nowrap">👥 MASSA</span>
               <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stats.contingente}</span>
             </div>
             <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0 pl-1">
-              <span className="text-[7.5px] sm:text-[9.5px] font-extrabold text-rose-300 truncate">🥁 BANCADA</span>
-              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stats.pressao_bancada}</span>
-            </div>
-            <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0 pl-1">
-              <span className="text-[7.5px] sm:text-[9.5px] font-extrabold text-red-300 truncate">🥊 PISTA</span>
+              <span className="text-[7.5px] sm:text-[10px] xl:text-xs font-extrabold text-red-300 whitespace-nowrap">🥊 PISTA</span>
               <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stats.poder_pista}</span>
             </div>
             <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0 pl-1">
-              <span className="text-[7.5px] sm:text-[9.5px] font-extrabold text-blue-300 truncate">🚌 CARAVANA</span>
-              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stats.caravana}</span>
+              <span className="text-[7.5px] sm:text-[10px] xl:text-xs font-extrabold text-rose-300 whitespace-nowrap">🥁 BANCADA</span>
+              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stats.pressao_bancada}</span>
             </div>
             <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0 pl-1">
-              <span className="text-[7.5px] sm:text-[9.5px] font-extrabold text-amber-300 truncate">💰 FINANÇAS</span>
-              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stats.autonomia_financeira}</span>
+              <span className="text-[7.5px] sm:text-[10px] xl:text-xs font-extrabold text-emerald-300 whitespace-nowrap">🔥 MORAL</span>
+              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stateTrackers.moral}%</span>
+            </div>
+            <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0 pl-1">
+              <span className="text-[7.5px] sm:text-[10px] xl:text-xs font-extrabold text-indigo-300 whitespace-nowrap">🏟️ CLUBE</span>
+              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stateTrackers.relacao_clube}</span>
             </div>
           </div>
 
-          {/* Line 2: 4 Attributes (RISCO MP, MORAL, CLUBE, RESPEITO) */}
+          {/* Line 2: 4 Longer Attributes (CARAVANA, FINANÇAS, RISCO MP, RESPEITO) */}
           <div className="grid grid-cols-4 gap-1 divide-x divide-zinc-800/50 pt-1 border-t border-zinc-900">
             <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0">
-              <span className="text-[7.5px] sm:text-[9.5px] font-extrabold text-zinc-400 truncate">⚖️ RISCO MP</span>
+              <span className="text-[7.5px] sm:text-[10px] xl:text-xs font-extrabold text-blue-300 whitespace-nowrap">🚌 CARAVANA</span>
+              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stats.caravana}</span>
+            </div>
+            <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0 pl-1">
+              <span className="text-[7.5px] sm:text-[9.5px] xl:text-xs font-extrabold text-amber-300 whitespace-nowrap">💰 FINANÇAS</span>
+              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stats.autonomia_financeira}</span>
+            </div>
+            <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0 pl-1">
+              <span className="text-[7.5px] sm:text-[9.5px] xl:text-xs font-extrabold text-zinc-400 whitespace-nowrap">⚖️ RISCO MP</span>
               <span className={`text-xs sm:text-sm font-black ml-0.5 shrink-0 ${stateTrackers.risco_mp > 65 ? "text-red-400 animate-pulse" : "text-white"}`}>
                 {stateTrackers.risco_mp}%
               </span>
             </div>
             <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0 pl-1">
-              <span className="text-[7.5px] sm:text-[9.5px] font-extrabold text-emerald-300 truncate">🔥 MORAL</span>
-              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stateTrackers.moral}%</span>
-            </div>
-            <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0 pl-1">
-              <span className="text-[7.5px] sm:text-[9.5px] font-extrabold text-indigo-300 truncate">🏟️ CLUBE</span>
-              <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stateTrackers.relacao_clube}</span>
-            </div>
-            <div className="flex items-center justify-center gap-0.5 sm:gap-1 px-0.5 min-w-0 pl-1">
-              <span className="text-[7.5px] sm:text-[9.5px] font-extrabold text-purple-300 truncate">⭐ RESPEITO</span>
+              <span className="text-[7.5px] sm:text-[9.5px] xl:text-xs font-extrabold text-purple-300 whitespace-nowrap">⭐ RESPEITO</span>
               <span className="text-xs sm:text-sm font-black text-white ml-0.5 shrink-0">{stateTrackers.respeito_nacional}</span>
             </div>
           </div>
@@ -3672,32 +3672,32 @@ export default function App() {
 
       {/* TAB 1: PIPELINE */}
       {activeTab === "pipeline" && currentStep && (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 shadow-xl flex-1 flex flex-col justify-between relative z-10">
-          <div>
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-3 sm:p-4 shadow-xl flex-1 flex flex-col justify-between relative z-10 max-w-full overflow-hidden min-w-0">
+          <div className="max-w-full overflow-hidden min-w-0">
             {/* Board Suggestion Compact 1-Line Ticker Bar */}
             {(() => {
               const suggestion = getBoardSuggestion();
               return (
                 <div
                   onClick={() => suggestion.tab !== "pipeline" && handleTabChange(suggestion.tab)}
-                  className={`mb-2 py-1 px-2.5 rounded-xl bg-zinc-950/90 border border-amber-500/30 flex items-center justify-between gap-2 shadow-sm text-[10px] ${
+                  className={`mb-2 py-1 px-2 rounded-xl bg-zinc-950/90 border border-amber-500/30 flex items-center justify-between gap-1.5 shadow-sm text-[10px] max-w-full overflow-hidden min-w-0 ${
                     suggestion.tab !== "pipeline" ? "cursor-pointer hover:border-amber-400 transition-colors" : ""
                   }`}
                 >
-                  <div className="flex items-center gap-1.5 overflow-hidden whitespace-nowrap min-w-0">
-                    <span className="text-[9px] font-black text-amber-400 uppercase shrink-0 flex items-center gap-1">
+                  <div className="flex items-center gap-1 overflow-hidden whitespace-nowrap min-w-0">
+                    <span className="text-[8.5px] sm:text-[9px] font-black text-amber-400 uppercase shrink-0 flex items-center gap-0.5">
                       💡 DIRETORIA
                     </span>
-                    <span className={`text-[7px] font-black px-1 py-0.5 rounded uppercase shrink-0 ${suggestion.badgeColor}`}>
+                    <span className={`text-[6.5px] sm:text-[7px] font-black px-1 py-0.5 rounded uppercase shrink-0 ${suggestion.badgeColor}`}>
                       {suggestion.badge}
                     </span>
-                    <span className="text-zinc-300 font-medium truncate text-[10px]">
+                    <span className="text-zinc-300 font-medium truncate text-[9.5px] sm:text-[10px]">
                       {suggestion.message}
                     </span>
                   </div>
 
                   {suggestion.buttonText && (
-                    <span className="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[8px] font-black uppercase whitespace-nowrap shrink-0 flex items-center gap-0.5">
+                    <span className="px-1.5 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[7.5px] sm:text-[8px] font-black uppercase whitespace-nowrap shrink-0 flex items-center gap-0.5">
                       {suggestion.buttonText.split(" ")[0]} ➔
                     </span>
                   )}
@@ -3709,22 +3709,22 @@ export default function App() {
             {seasonObjectives.length > 0 && (
               <div
                 onClick={() => setActiveTab("objectives")}
-                className="mb-3 p-2 rounded-2xl bg-zinc-950/90 border border-zinc-800 hover:border-amber-500/50 transition-colors cursor-pointer flex items-center justify-between"
+                className="mb-3 p-2 rounded-2xl bg-zinc-950/90 border border-zinc-800 hover:border-amber-500/50 transition-colors cursor-pointer flex flex-wrap items-center justify-between gap-1.5 max-w-full overflow-hidden min-w-0"
               >
-                <div className="flex items-center gap-1.5">
-                  <Target className="w-3.5 h-3.5 text-amber-400" />
-                  <span className="text-[9px] font-black text-zinc-300 uppercase">
+                <div className="flex items-center gap-1.5 min-w-0 max-w-full overflow-hidden">
+                  <Target className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span className="text-[8.5px] sm:text-[9px] font-black text-zinc-300 uppercase truncate">
                     Metas do Ano {season}:
                   </span>
-                  <span className="text-[9px] font-bold text-amber-400">
+                  <span className="text-[8.5px] sm:text-[9px] font-bold text-amber-400 shrink-0">
                     {seasonObjectives.filter((o) => o.isCompleted).length}/{seasonObjectives.length} concluídas
                   </span>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex gap-1 shrink-0">
                   {seasonObjectives.map((obj, i) => (
                     <span
                       key={i}
-                      className={`text-[9px] px-1.5 py-0.5 rounded ${
+                      className={`text-[8.5px] sm:text-[9px] px-1 py-0.5 rounded ${
                         obj.isCompleted
                           ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
                           : "bg-zinc-900 text-zinc-500 border border-zinc-800"
@@ -3739,7 +3739,7 @@ export default function App() {
 
             {/* Action Card Illustration Header */}
             {currentStep.type === "action" && (
-              <div className="relative -mx-4 -mt-4 mb-3 h-28 overflow-hidden rounded-t-2xl border-b border-zinc-800">
+              <div className="relative -mx-3 sm:-mx-4 -mt-3 sm:-mt-4 mb-3 h-28 overflow-hidden rounded-t-2xl border-b border-zinc-800">
                 <img
                   src="/images/preparativos.jpeg"
                   alt="Preparativos na Sede e Galpão da Torcida"
