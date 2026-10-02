@@ -10,9 +10,15 @@ export function BrandHeader() {
       <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-2">
         {/* Kavers Games Logo & Subdomain Title */}
         <div className="flex items-center gap-2 font-black tracking-tight">
-          <span className="bg-gradient-to-r from-amber-500 via-purple-600 to-kavers-magenta text-white px-2.5 py-0.5 rounded-lg text-[10px] uppercase font-black tracking-widest shadow-md">
-            KAVERS GAMES
-          </span>
+          <a
+            href="https://kaversgames.com.br"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-gradient-to-r from-amber-500 via-purple-600 to-kavers-magenta hover:opacity-90 text-white px-2.5 py-0.5 rounded-lg text-[10px] uppercase font-black tracking-widest shadow-md transition-all hover:scale-105 active:scale-95 flex items-center gap-1 cursor-pointer"
+            title="Ir para o site Kavers Games"
+          >
+            KAVERS GAMES <ExternalLink className="w-2.5 h-2.5 opacity-80" />
+          </a>
           <span className="text-zinc-400 dark:text-zinc-600 font-bold">|</span>
           <span className="text-zinc-800 dark:text-zinc-100 font-extrabold flex items-center gap-1">
             Simulador de Torcida ⚽
