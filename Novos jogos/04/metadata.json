@@ -1,0 +1,6 @@
+{
+  "name": "Bancada Simulator - Fuga do Labirinto",
+  "description": "Minigame hyper-casual Fuga do Labirinto e motor de simulação de partidas do Bancada Simulator com cálculo de impacto da torcida.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -41,5 +41,10 @@ scratch/
 # Localhost-only test laboratory
 Imagens/
 
+# SQLite & Database files
+*.db
+*.db-journal
+*.sqlite
+/prisma/*.db
 
 PROPOSTA_PATROCINIO_REI_PRO.md

@@ -1,0 +1,2024 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Bancada Simulator - Fuga do Labirinto</title>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --surface: #141b24;
+      --surface-light: #1e2837;
+      --primary: #10b981;
+      --primary-hover: #059669;
+      --accent: #f59e0b;
+      --danger: #ef4444;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --border: #273549;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 12px;
+      overflow-x: hidden;
+    }
+    header {
+      width: 100%;
+      max-width: 760px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      background: var(--surface);
+      padding: 12px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .header-title h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--primary);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      text-transform: uppercase;
+    }
+    .main-container {
+      width: 100%;
+      max-width: 760px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    /* GAME VIEW */
+    .game-card {
+      background: var(--surface);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+    .hud-bar {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .hud-stat {
+      background: var(--surface-light);
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+    .hud-stat-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 700;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .hud-stat-val {
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: #fff;
+    }
+    .canvas-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 580px;
+      aspect-ratio: 1 / 1;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid var(--border);
+      background: #0d131a;
+      box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8);
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      image-rendering: pixelated;
+    }
+    /* OVERLAY SCREENS */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(11, 15, 20, 0.92);
+      backdrop-filter: blur(4px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      z-index: 10;
+    }
+    .overlay.hidden {
+      display: none;
+    }
+    .overlay-title {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .overlay-desc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 18px;
+      max-width: 380px;
+    }
+    .btn {
+      background: var(--primary);
+      color: #052e16;
+      font-weight: 800;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    .btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: var(--surface-light);
+      color: var(--text);
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+    .btn-secondary:hover {
+      background: #28364a;
+    }
+    .btn-accent {
+      background: var(--accent);
+      color: #451a03;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+    /* MOBILE CONTROLS */
+    .mobile-controls {
+      display: grid;
+      grid-template-columns: repeat(3, 56px);
+      grid-template-rows: repeat(3, 56px);
+      gap: 6px;
+      margin-top: 14px;
+      justify-content: center;
+    }
+    .d-pad-btn {
+      background: var(--surface-light);
+      border: 1px solid var(--border);
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .d-pad-btn:active {
+      background: var(--primary);
+      color: #000;
+    }
+    .d-pad-btn.up { grid-column: 2; grid-row: 1; }
+    .d-pad-btn.left { grid-column: 1; grid-row: 2; }
+    .d-pad-btn.center { grid-column: 2; grid-row: 2; background: transparent; border: none; }
+    .d-pad-btn.right { grid-column: 3; grid-row: 2; }
+    .d-pad-btn.down { grid-column: 2; grid-row: 3; }
+
+    /* MATCH SIMULATOR SECTION */
+    .simulator-card {
+      background: var(--surface);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      padding: 18px;
+    }
+    .sim-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sim-header h2 {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sim-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .input-group label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+    }
+    .slider-val {
+      color: var(--primary);
+      font-weight: 800;
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--primary);
+      cursor: pointer;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--surface-light);
+    }
+    .calc-box {
+      background: #0e1620;
+      border: 1px dashed var(--primary);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: #34d399;
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .match-result-card {
+      background: var(--surface-light);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 16px;
+      margin-top: 14px;
+    }
+    .scoreboard {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 12px 0;
+      margin-bottom: 14px;
+      background: #0e1520;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .team-col {
+      text-align: center;
+      flex: 1;
+    }
+    .team-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .team-score {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #fff;
+    }
+    .versus {
+      font-size: 1rem;
+      font-weight: 900;
+      color: var(--accent);
+      padding: 0 10px;
+    }
+    .narrative-box {
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: #e5e7eb;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 14px;
+      border-radius: 8px;
+      border-left: 4px solid var(--accent);
+    }
+    .narrative-box p {
+      margin-bottom: 10px;
+    }
+    .narrative-box p:last-child {
+      margin-bottom: 0;
+    }
+    .radar-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+      width: 100%;
+    }
+    .radar-card {
+      background: #141d28;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .radar-title {
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .radar-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #cbd5e1;
+    }
+    .badge-pill {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid;
+    }
+    .badge-green {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.35);
+    }
+    .badge-red {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.35);
+    }
+    .badge-yellow {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.35);
+    }
+    .badge-blue {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border-color: rgba(59, 130, 246, 0.35);
+    }
+    @media (max-width: 600px) {
+      .hud-bar {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .radar-grid {
+        grid-template-columns: 1fr;
+      }
+      .sim-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-title">
+      <h1>🏟️ Bancada Simulator <span class="badge">Minigame</span></h1>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <button id="btn-download-zip-standalone" class="btn" style="padding: 6px 12px; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;">
+        📦 Baixar ZIP (72 KB)
+      </button>
+      <div style="font-size: 0.8rem; color: var(--text-muted);">
+        Fuga do Labirinto & Simulação Ponderada
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+    
+    <!-- MINIGAME CARD -->
+    <div class="game-card" id="game-container">
+      
+      <!-- HUD -->
+      <div class="hud-bar">
+        <div class="hud-stat">
+          <span class="hud-stat-label">Tempo</span>
+          <span class="hud-stat-val" id="hud-time">45s</span>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-stat-label">Itens Torcida</span>
+          <span class="hud-stat-val" id="hud-items">0/5</span>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-stat-label">Pelotão Torcida</span>
+          <span class="hud-stat-val" id="hud-flares" style="color: var(--primary);">4 membros</span>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-stat-label">Nota Torcida</span>
+          <span class="hud-stat-val" id="hud-score" style="color: var(--accent);">0 pts</span>
+        </div>
+      </div>
+
+      <!-- OBJECTIVES & THREAT RADAR -->
+      <div class="radar-grid">
+        <div class="radar-card">
+          <div class="radar-title">🎯 Objetivos do Bonde</div>
+          <div class="radar-row">
+            <span>1. Escapar da emboscada 🏁</span>
+            <span class="badge-pill badge-green">Principal</span>
+          </div>
+          <div class="radar-row">
+            <span>2. Encontrar bonde menor rival (3 pessoas) 👊</span>
+            <span class="badge-pill badge-yellow" id="obj-small-status">Pendente</span>
+          </div>
+        </div>
+
+        <div class="radar-card">
+          <div class="radar-title">⚠️ Radar de Ameaças</div>
+          <div class="radar-row">
+            <span>3 Bondes Maiores (6 pessoas cada):</span>
+            <span class="badge-pill badge-yellow" id="radar-rivals-status">Patrulhando</span>
+          </div>
+          <div class="radar-row">
+            <span>2 Viaturas da Polícia:</span>
+            <span class="badge-pill badge-blue">Curto alcance</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CANVAS -->
+      <div class="canvas-wrapper">
+        <canvas id="gameCanvas" width="560" height="560"></canvas>
+        
+        <!-- START OVERLAY -->
+        <div id="start-overlay" class="overlay">
+          <div class="overlay-title">⚠️ FUGA DO LABIRINTO</div>
+          <div class="overlay-desc" style="text-align: left; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.8rem; line-height: 1.5; margin-bottom: 14px;">
+            <div><strong>Cenário:</strong> Seu bonde caiu em uma tentativa de emboscada rival!</div>
+            <div style="margin-top: 6px;">• <strong>Objetivo 1 (Fuga):</strong> Escapar com a bateria até a bancada 🏟️.</div>
+            <div>• <strong>Objetivo 2 (Confronto):</strong> Se encontrar o <strong>bonde menor rival (3 pessoas) 🎯</strong>, vá pra cima e ganhe deles!</div>
+            <div style="color: #f87171; margin-top: 6px;">• <strong>Atenção:</strong> 3 bondes maiores rivais (6 pessoas cada) vêm pra cima se você chegar perto. Ao derrotar o grupo menor (3 pessoas), os 3 maiores (6 pessoas) ficam <strong>furiosos e mais rápidos</strong>! Cuidado também com as 2 viaturas 🚓.</div>
+          </div>
+          <button class="btn" id="btn-start">Iniciar Fuga da Emboscada ⚡</button>
+        </div>
+
+        <!-- GAMEOVER OVERLAY -->
+        <div id="gameover-overlay" class="overlay hidden">
+          <div class="overlay-title" id="gameover-title">FIM DA CORRIDA</div>
+          <div class="overlay-desc" id="gameover-desc">
+            Resultado calculado para o motor do Bancada Simulator.
+          </div>
+          <div style="font-size: 2rem; font-weight: 900; color: var(--accent); margin-bottom: 16px;" id="gameover-score">
+            Nota: 85/100
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn" id="btn-replay">Jogar Novamente 🔄</button>
+            <button class="btn btn-accent" id="btn-apply-sim">Aplicar no Simulador ⚽</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- VIRTUAL D-PAD FOR MOBILE -->
+      <div class="mobile-controls">
+        <button class="d-pad-btn up" id="ctrl-up">▲</button>
+        <button class="d-pad-btn left" id="ctrl-left">◀</button>
+        <div class="d-pad-btn center"></div>
+        <button class="d-pad-btn right" id="ctrl-right">▶</button>
+        <button class="d-pad-btn down" id="ctrl-down">▼</button>
+      </div>
+
+      <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; text-align: center;">
+        Controles: Setas do Teclado ou WASD • No celular, use o direcional acima
+      </div>
+
+    </div>
+
+    <!-- BANCADA SIMULATOR ENGINE SECTION -->
+    <div class="simulator-card" id="simulator-section">
+      <div class="sim-header">
+        <h2>⚽ Motor de Simulação de Partidas</h2>
+        <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: var(--accent); border-color: rgba(245, 158, 11, 0.4);">
+          Regra: 75% Time + 25% Torcida
+        </span>
+      </div>
+
+      <div class="sim-grid">
+        <div class="input-group">
+          <label>Força do Time da Casa: <span class="slider-val" id="val-home">60</span></label>
+          <input type="range" id="input-home" min="0" max="100" value="60" />
+        </div>
+        <div class="input-group">
+          <label>Força do Adversário: <span class="slider-val" id="val-away">75</span></label>
+          <input type="range" id="input-away" min="0" max="100" value="75" />
+        </div>
+        <div class="input-group">
+          <label>Recepção do Ônibus: <span class="slider-val" id="val-bus">90</span></label>
+          <input type="range" id="input-bus" min="0" max="100" value="90" />
+        </div>
+        <div class="input-group">
+          <label>Festa na Arquibancada: <span class="slider-val" id="val-party">85</span></label>
+          <input type="range" id="input-party" min="0" max="100" value="85" />
+        </div>
+      </div>
+
+      <div class="calc-box" id="calc-display">
+        <!-- Calculated dynamically -->
+      </div>
+
+      <button class="btn btn-accent" id="btn-simulate" style="width: 100%; justify-content: center; font-size: 1rem; padding: 14px;">
+        Simular Partida e Narrativa de 3 Parágrafos 📢
+      </button>
+
+      <!-- SIMULATION RESULT & NARRATIVE -->
+      <div class="match-result-card" id="result-box" style="display: none;">
+        <div class="scoreboard">
+          <div class="team-col">
+            <div class="team-name">TIME DA CASA</div>
+            <div class="team-score" id="score-home">0</div>
+          </div>
+          <div class="versus">VS</div>
+          <div class="team-col">
+            <div class="team-name">ADVERSÁRIO</div>
+            <div class="team-score" id="score-away">0</div>
+          </div>
+        </div>
+
+        <div style="font-weight: 800; font-size: 0.8rem; text-transform: uppercase; color: var(--accent); margin-bottom: 8px;">
+          Crônica Oficial da Partida
+        </div>
+        <div class="narrative-box" id="narrative-content">
+          <!-- 3 paragraphs here -->
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    /* ==========================================================================
+       SYNTHESIZED AUDIO ENGINE (Web Audio API)
+       ========================================================================== */
+    class AudioSynth {
+      constructor() {
+        this.ctx = null;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+      playBumbo() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.exponentialRampToValueAtTime(32, now + 0.28);
+        gain.gain.setValueAtTime(0.7, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      }
+      playPickup() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.12); // G5
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      }
+      playWhistle() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(2400, now);
+        osc.frequency.setValueAtTime(2200, now + 0.08);
+        osc.frequency.setValueAtTime(2600, now + 0.16);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      }
+      playCheer() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        [440, 554.37, 659.25, 880].forEach((freq, i) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + i * 0.08);
+          gain.gain.setValueAtTime(0.2, now + i * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + i * 0.08);
+          osc.stop(now + 0.6);
+        });
+      }
+    }
+    const sound = new AudioSynth();
+
+    /* ==========================================================================
+       MAZE GAME ENGINE
+       ========================================================================== */
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const GRID_W = 15;
+    const GRID_H = 15;
+    const TILE_SIZE = canvas.width / GRID_W;
+
+    // 0: path/street, 1: wall/concrete barrier, 3: exit (Bancada)
+    const MAZE_LAYOUT = [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,0,1,0,0,0,0,0,1,0,0,3,1],
+      [1,0,1,0,1,0,1,1,1,0,1,0,1,0,1],
+      [1,0,1,0,0,0,0,0,1,0,0,0,1,0,1],
+      [1,0,1,1,1,1,0,1,1,1,1,0,1,0,1],
+      [1,0,0,0,0,1,0,0,0,0,1,0,0,0,1],
+      [1,1,1,0,1,1,1,0,1,0,1,1,1,0,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // Avenida central aberta
+      [1,0,1,1,1,0,1,0,1,0,1,1,1,0,1],
+      [1,0,1,0,0,0,0,0,0,0,0,0,1,0,1], // Avenida para viatura 2
+      [1,0,1,0,1,1,1,0,1,1,1,0,1,0,1],
+      [1,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
+      [1,0,1,1,1,0,1,1,1,0,1,1,1,0,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // Avenida sul aberta para largada e viatura 1
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ];
+
+    let gameState = 'START'; // START, PLAYING, WON, LOST
+    let player = { x: 1.5, y: 13.5, vx: 0, vy: 0, speed: 3.0, size: 0.35, flareActive: false, flareTime: 0 };
+    
+    // Pelotão da Torcida (Roster & Trail)
+    const crowdRoster = [
+      { id: 1, role: 'leader', name: 'Puxador', shirtColor: '#10b981', skinColor: '#e0ac69', hairColor: '#1f2937' },
+      { id: 2, role: 'drummer', name: 'Bumbo de Alça', shirtColor: '#059669', skinColor: '#f1c27d', hairColor: '#374151' },
+      { id: 3, role: 'banner', name: 'Bandeirão', shirtColor: '#047857', skinColor: '#8d5524', hairColor: '#111827' },
+      { id: 4, role: 'singing', name: 'Cantor da Geral', shirtColor: '#10b981', skinColor: '#c68642', hairColor: '#4b5563' },
+      { id: 5, role: 'flare', name: 'Sinalizador', shirtColor: '#059669', skinColor: '#ffdbac', hairColor: '#1f2937' },
+      { id: 6, role: 'repique', name: 'Caixa de Ritmo', shirtColor: '#047857', skinColor: '#e0ac69', hairColor: '#2b2b2b' },
+      { id: 7, role: 'megaphone', name: 'Voz da Torcida', shirtColor: '#10b981', skinColor: '#8d5524', hairColor: '#111827' },
+      { id: 8, role: 'surdo', name: 'Surdo de Marcação', shirtColor: '#047857', skinColor: '#f1c27d', hairColor: '#374151' },
+    ];
+    let trail = [];
+    let chants = [];
+    let lastChantTime = 0;
+
+    // Ambush Mechanics & Entities
+    let rivalsEnraged = false;
+    let smallRivalDefeated = false;
+    let brawlBanner = null;
+
+    // 3 Bondes Maiores da Torcida Rival (perseguem ao aproximar)
+    let bigRivals = [
+      {
+        id: 1,
+        name: 'Bonde da Sul Rival',
+        x: 6.5,
+        y: 1.5,
+        path: [{ x: 3.5, y: 1.5 }, { x: 9.5, y: 1.5 }],
+        targetIdx: 0,
+        speed: 1.25,
+        isChasing: false,
+        alertTimer: 0
+      },
+      {
+        id: 2,
+        name: 'Comando Rival Central',
+        x: 7.5,
+        y: 7.5,
+        path: [{ x: 1.5, y: 7.5 }, { x: 13.5, y: 7.5 }],
+        targetIdx: 0,
+        speed: 1.35,
+        isChasing: false,
+        alertTimer: 0
+      },
+      {
+        id: 3,
+        name: 'Linha de Frente Rival',
+        x: 13.5,
+        y: 5.5,
+        path: [{ x: 13.5, y: 3.5 }, { x: 13.5, y: 8.5 }],
+        targetIdx: 0,
+        speed: 1.30,
+        isChasing: false,
+        alertTimer: 0
+      }
+    ];
+
+    // 2 Viaturas da Polícia (Patrulham com faróis/giroflex, prendem se aproximar)
+    let policeCars = [
+      {
+        id: 1,
+        x: 2.5,
+        y: 13.5,
+        path: [{ x: 2.5, y: 13.5 }, { x: 13.5, y: 13.5 }],
+        targetIdx: 0,
+        speed: 1.35,
+        heading: 'right',
+        sirenPhase: 0
+      },
+      {
+        id: 2,
+        x: 3.5,
+        y: 9.5,
+        path: [{ x: 3.5, y: 9.5 }, { x: 11.5, y: 9.5 }],
+        targetIdx: 0,
+        speed: 1.35,
+        heading: 'right',
+        sirenPhase: 0
+      }
+    ];
+
+    // 1 Bonde Menor Rival (grupo isolado para ir pra cima e vencer)
+    let smallRivalMob = {
+      x: 7.5,
+      y: 7.5,
+      defeated: false
+    };
+
+    let items = [];
+    let smokeParticles = [];
+    let timeLeft = 45;
+    let timerInterval = null;
+    let lastTime = 0;
+    let itemsCollected = 0;
+    let totalItems = 5;
+    let flaresCount = 0;
+    let lastCalculatedScore = 0;
+
+    function initItems() {
+      items = [
+        { x: 1.5, y: 1.5, type: 'flare', label: '🔥', collected: false },
+        { x: 7.5, y: 1.5, type: 'drum', label: '🥁', collected: false },
+        { x: 7.5, y: 7.5, type: 'banner', label: '🚩', collected: false },
+        { x: 13.5, y: 11.5, type: 'ticket', label: '🎟️', collected: false },
+        { x: 3.5, y: 9.5, type: 'flare', label: '🔥', collected: false },
+      ];
+      totalItems = items.length;
+      itemsCollected = 0;
+      flaresCount = 0;
+    }
+
+    function isWall(x, y) {
+      const gx = Math.floor(x);
+      const gy = Math.floor(y);
+      if (gx < 0 || gx >= GRID_W || gy < 0 || gy >= GRID_H) return true;
+      const tile = MAZE_LAYOUT[gy][gx];
+      return tile === 1;
+    }
+
+    function startMinigame() {
+      sound.init();
+      sound.playWhistle();
+      gameState = 'PLAYING';
+      player.x = 1.5;
+      player.y = 13.5;
+      player.vx = 0;
+      player.vy = 0;
+      player.speed = 3.0;
+      player.flareActive = false;
+      player.flareTime = 0;
+      trail = Array.from({ length: 140 }, () => ({ x: 1.5, y: 13.5 }));
+      chants = [{ text: 'VAMOS BANCADA! ESCAPAR DA EMBOSCADA!', x: 1.5, y: 12.8, life: 2.5, maxLife: 2.5 }];
+      lastChantTime = performance.now();
+      timeLeft = 45;
+      rivalsEnraged = false;
+      smallRivalDefeated = false;
+      brawlBanner = null;
+
+      // Reset Big Rivals
+      bigRivals = [
+        {
+          id: 1,
+          name: 'Bonde da Sul Rival',
+          x: 6.5,
+          y: 1.5,
+          path: [{ x: 3.5, y: 1.5 }, { x: 9.5, y: 1.5 }],
+          targetIdx: 0,
+          speed: 1.25,
+          isChasing: false,
+          alertTimer: 0
+        },
+        {
+          id: 2,
+          name: 'Comando Rival Central',
+          x: 7.5,
+          y: 7.5,
+          path: [{ x: 1.5, y: 7.5 }, { x: 13.5, y: 7.5 }],
+          targetIdx: 0,
+          speed: 1.35,
+          isChasing: false,
+          alertTimer: 0
+        },
+        {
+          id: 3,
+          name: 'Linha de Frente Rival',
+          x: 13.5,
+          y: 5.5,
+          path: [{ x: 13.5, y: 3.5 }, { x: 13.5, y: 8.5 }],
+          targetIdx: 0,
+          speed: 1.30,
+          isChasing: false,
+          alertTimer: 0
+        }
+      ];
+
+      // Reset Police Cars
+      policeCars = [
+        {
+          id: 1,
+          x: 2.5,
+          y: 13.5,
+          path: [{ x: 2.5, y: 13.5 }, { x: 13.5, y: 13.5 }],
+          targetIdx: 0,
+          speed: 1.35,
+          heading: 'right',
+          sirenPhase: 0
+        },
+        {
+          id: 2,
+          x: 3.5,
+          y: 9.5,
+          path: [{ x: 3.5, y: 9.5 }, { x: 11.5, y: 9.5 }],
+          targetIdx: 0,
+          speed: 1.35,
+          heading: 'right',
+          sirenPhase: 0
+        }
+      ];
+
+      // Reset Small Rival Mob
+      smallRivalMob = {
+        x: 7.5,
+        y: 7.5,
+        defeated: false
+      };
+
+      initItems();
+      smokeParticles = [];
+
+      document.getElementById('start-overlay').classList.add('hidden');
+      document.getElementById('gameover-overlay').classList.add('hidden');
+      updateHUD();
+
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        if (gameState === 'PLAYING') {
+          timeLeft--;
+          if (timeLeft % 4 === 0) sound.playBumbo();
+          updateHUD();
+          if (timeLeft <= 0) {
+            endMinigame(false, 'O tempo se esgotou antes de você escapar da emboscada!');
+          }
+        }
+      }, 1000);
+
+      lastTime = performance.now();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function endMinigame(won, message) {
+      gameState = won ? 'WON' : 'LOST';
+      clearInterval(timerInterval);
+
+      if (won) {
+        sound.playCheer();
+        const timePts = Math.min(25, Math.floor((timeLeft / 45) * 25));
+        const itemPts = Math.floor((itemsCollected / totalItems) * 15);
+        let score = 60 + timePts + itemPts;
+        if (smallRivalDefeated) {
+          score = Math.min(100, score + 25);
+        } else {
+          score = Math.min(80, Math.max(65, score));
+        }
+        lastCalculatedScore = score;
+      } else {
+        sound.playWhistle();
+        const itemPts = Math.floor((itemsCollected / totalItems) * 20);
+        lastCalculatedScore = Math.min(45, Math.max(15, itemPts + 15));
+      }
+
+      const overlay = document.getElementById('gameover-overlay');
+      const title = document.getElementById('gameover-title');
+      const desc = document.getElementById('gameover-desc');
+      const scoreEl = document.getElementById('gameover-score');
+
+      title.innerText = won 
+        ? (smallRivalDefeated ? '🏆💥 VITÓRIA TOTAL & HONRA DO BONDE!' : '🏟️ FUGA DA EMBOSCADA CONCLUÍDA!') 
+        : '🚨 RETIDO NA EMBOSCADA!';
+      title.style.color = won ? 'var(--primary)' : 'var(--danger)';
+      desc.innerText = message || (won ? 'Você escapou e inflamou o caldeirão da arquibancada!' : 'A bateria foi interceptada.');
+      scoreEl.innerText = `Desempenho da Torcida: ${lastCalculatedScore}/100`;
+
+      overlay.classList.remove('hidden');
+      updateHUD();
+    }
+
+    function updateHUD() {
+      document.getElementById('hud-time').innerText = `${timeLeft}s`;
+      document.getElementById('hud-items').innerText = `${itemsCollected}/${totalItems}`;
+      document.getElementById('hud-flares').innerText = `${Math.min(crowdRoster.length, 4 + itemsCollected)} membros`;
+      document.getElementById('hud-score').innerText = `${lastCalculatedScore} pts`;
+
+      const objSmall = document.getElementById('obj-small-status');
+      if (objSmall) {
+        if (smallRivalDefeated) {
+          objSmall.className = 'badge-pill badge-green';
+          objSmall.innerText = '✓ Vencido!';
+        } else {
+          objSmall.className = 'badge-pill badge-yellow';
+          objSmall.innerText = 'Pendente';
+        }
+      }
+
+      const radarRivals = document.getElementById('radar-rivals-status');
+      if (radarRivals) {
+        if (rivalsEnraged) {
+          radarRivals.className = 'badge-pill badge-red';
+          radarRivals.innerText = '⚡ EM FÚRIA!';
+        } else {
+          radarRivals.className = 'badge-pill badge-yellow';
+          radarRivals.innerText = 'Patrulhando';
+        }
+      }
+    }
+
+    // Input handlers
+    const keys = {};
+    window.addEventListener('keydown', (e) => {
+      keys[e.key.toLowerCase()] = true;
+      if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(e.key.toLowerCase())) {
+        e.preventDefault();
+      }
+    });
+    window.addEventListener('keyup', (e) => {
+      keys[e.key.toLowerCase()] = false;
+    });
+
+    // Touch D-Pad
+    function setDirection(dx, dy) {
+      player.vx = dx;
+      player.vy = dy;
+    }
+    const dpadButtons = [
+      { id: 'ctrl-up', dx: 0, dy: -1 },
+      { id: 'ctrl-down', dx: 0, dy: 1 },
+      { id: 'ctrl-left', dx: -1, dy: 0 },
+      { id: 'ctrl-right', dx: 1, dy: 0 },
+    ];
+    dpadButtons.forEach(({ id, dx, dy }) => {
+      const btn = document.getElementById(id);
+      const startPress = (e) => {
+        e.preventDefault();
+        sound.init();
+        setDirection(dx, dy);
+      };
+      const endPress = (e) => {
+        e.preventDefault();
+        setDirection(0, 0);
+      };
+      btn.addEventListener('mousedown', startPress);
+      btn.addEventListener('mouseup', endPress);
+      btn.addEventListener('touchstart', startPress);
+      btn.addEventListener('touchend', endPress);
+    });
+
+    // GAME LOOP
+    function gameLoop(currentTime) {
+      const dt = Math.min((currentTime - lastTime) / 1000, 0.1);
+      lastTime = currentTime;
+
+      if (gameState === 'PLAYING') {
+        update(dt);
+      }
+      render();
+
+      if (gameState === 'PLAYING') {
+        requestAnimationFrame(gameLoop);
+      }
+    }
+
+    function update(dt) {
+      // Keyboard input
+      let moveX = 0;
+      let moveY = 0;
+      if (keys['arrowup'] || keys['w']) moveY -= 1;
+      if (keys['arrowdown'] || keys['s']) moveY += 1;
+      if (keys['arrowleft'] || keys['a']) moveX -= 1;
+      if (keys['arrowright'] || keys['d']) moveX += 1;
+
+      if (moveX !== 0 || moveY !== 0) {
+        const len = Math.hypot(moveX, moveY);
+        player.vx = (moveX / len);
+        player.vy = (moveY / len);
+      } else if (!keys['arrowup'] && !keys['arrowdown'] && !keys['arrowleft'] && !keys['arrowright'] && !keys['w'] && !keys['s'] && !keys['a'] && !keys['d']) {
+        // preserve touch velocity if pressing
+      }
+
+      // Flare speed buff
+      let currentSpeed = player.speed;
+      if (player.flareActive) {
+        currentSpeed *= 1.4;
+        player.flareTime -= dt;
+        if (player.flareTime <= 0) player.flareActive = false;
+
+        // Emit smoke particles
+        if (Math.random() < 0.6) {
+          smokeParticles.push({
+            x: player.x * TILE_SIZE,
+            y: player.y * TILE_SIZE,
+            vx: (Math.random() - 0.5) * 30,
+            vy: -20 - Math.random() * 30,
+            size: 6 + Math.random() * 8,
+            life: 1.0,
+            color: Math.random() > 0.5 ? 'rgba(239, 68, 68,' : 'rgba(245, 158, 11,'
+          });
+        }
+      }
+
+      // Move player with collision
+      const nextX = player.x + player.vx * currentSpeed * dt;
+      const nextY = player.y + player.vy * currentSpeed * dt;
+
+      if (!isWall(nextX, player.y)) {
+        player.x = nextX;
+      }
+      if (!isWall(player.x, nextY)) {
+        player.y = nextY;
+      }
+
+      // Check collectibles
+      items.forEach((item) => {
+        if (!item.collected) {
+          const dist = Math.hypot(player.x - item.x, player.y - item.y);
+          if (dist < 0.6) {
+            item.collected = true;
+            itemsCollected++;
+            sound.playPickup();
+            if (item.type === 'flare') {
+              flaresCount++;
+              player.flareActive = true;
+              player.flareTime = 5; // 5s buff
+            }
+            updateHUD();
+          }
+        }
+      });
+
+      // Update smoke particles
+      for (let i = smokeParticles.length - 1; i >= 0; i--) {
+        const p = smokeParticles[i];
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.life -= dt * 1.5;
+        p.size += dt * 8;
+        if (p.life <= 0) {
+          smokeParticles.splice(i, 1);
+        }
+      }
+
+      // 1. UPDATE 3 BONDES MAIORES DA TORCIDA RIVAL
+      bigRivals.forEach((rival) => {
+        const pDist = Math.hypot(player.x - rival.x, player.y - rival.y);
+        const aggroDist = rivalsEnraged ? 5.5 : 3.2;
+
+        if (pDist <= aggroDist) {
+          // Percebem e vêm pra cima!
+          rival.isChasing = true;
+          rival.alertTimer = Math.min(1.0, rival.alertTimer + dt * 4);
+
+          const rdx = player.x - rival.x;
+          const rdy = player.y - rival.y;
+          const rlen = Math.hypot(rdx, rdy) || 1;
+          const speedMultiplier = rivalsEnraged ? 1.7 : 1.0;
+          const currentSpeed = rival.speed * speedMultiplier;
+
+          const stepX = (rdx / rlen) * currentSpeed * dt;
+          const stepY = (rdy / rlen) * currentSpeed * dt;
+
+          if (!isWall(rival.x + stepX, rival.y)) rival.x += stepX;
+          if (!isWall(rival.x, rival.y + stepY)) rival.y += stepY;
+
+          // Se alcançar nosso bonde, perdemos!
+          if (pDist < 0.65) {
+            endMinigame(false, 'Seu bonde foi cercado e derrotado por um dos bondes maiores da torcida rival!');
+          }
+        } else {
+          // Patrulha normal
+          rival.isChasing = false;
+          rival.alertTimer = Math.max(0, rival.alertTimer - dt * 2);
+
+          const target = rival.path[rival.targetIdx];
+          const gdx = target.x - rival.x;
+          const gdy = target.y - rival.y;
+          const gdist = Math.hypot(gdx, gdy);
+
+          if (gdist < 0.15) {
+            rival.targetIdx = (rival.targetIdx + 1) % rival.path.length;
+          } else {
+            const speedMultiplier = rivalsEnraged ? 1.4 : 1.0;
+            rival.x += (gdx / gdist) * rival.speed * speedMultiplier * dt;
+            rival.y += (gdy / gdist) * rival.speed * speedMultiplier * dt;
+          }
+        }
+      });
+
+      // 2. UPDATE 2 VIATURAS DA POLÍCIA
+      policeCars.forEach((car) => {
+        car.sirenPhase = (car.sirenPhase + dt * 10) % (Math.PI * 2);
+
+        const target = car.path[car.targetIdx];
+        const cdx = target.x - car.x;
+        const cdy = target.y - car.y;
+        const cdist = Math.hypot(cdx, cdy);
+
+        if (cdist < 0.15) {
+          car.targetIdx = (car.targetIdx + 1) % car.path.length;
+          car.heading = car.targetIdx === 1 ? 'right' : 'left';
+        } else {
+          car.x += (cdx / cdist) * car.speed * dt;
+          car.y += (cdy / cdist) * car.speed * dt;
+          car.heading = cdx > 0 ? 'right' : 'left';
+        }
+
+        // Detecção da viatura: toque físico OU alcance do farol frontal
+        const pdist = Math.hypot(player.x - car.x, player.y - car.y);
+        const inFrontBeam = car.heading === 'right'
+          ? (player.x > car.x && player.x < car.x + 1.6 && Math.abs(player.y - car.y) < 0.45)
+          : (player.x < car.x && player.x > car.x - 1.6 && Math.abs(player.y - car.y) < 0.45);
+
+        if (pdist < 0.65 || inFrontBeam) {
+          endMinigame(false, 'Seu bonde foi interceptado pela viatura da polícia e acabou preso!');
+        }
+      });
+
+      // 3. UPDATE BONDE MENOR RIVAL (CONFRONTO DIRETO)
+      if (!smallRivalMob.defeated) {
+        const distSmall = Math.hypot(player.x - smallRivalMob.x, player.y - smallRivalMob.y);
+        if (distSmall < 0.7) {
+          smallRivalMob.defeated = true;
+          smallRivalDefeated = true;
+          rivalsEnraged = true;
+          brawlBanner = {
+            text: '💥 BONDE MENOR (3 PESSOAS) VENCIDO! OS 3 BONDES MAIORES (6 PESSOAS) ENTRARAM EM FÚRIA!',
+            timer: 4.0
+          };
+          sound.playCheer();
+          chants.push({
+            text: 'AQUI É O NOSSO BONDE!',
+            x: player.x,
+            y: player.y - 0.8,
+            life: 2.8,
+            maxLife: 2.8
+          });
+          updateHUD();
+        }
+      }
+
+      // Update brawl banner timer
+      if (brawlBanner) {
+        brawlBanner.timer -= dt;
+        if (brawlBanner.timer <= 0) brawlBanner = null;
+      }
+
+      // Update crowd breadcrumb trail
+      const lastPt = trail[0];
+      if (!lastPt || Math.hypot(player.x - lastPt.x, player.y - lastPt.y) > 0.032) {
+        trail.unshift({ x: player.x, y: player.y });
+        if (trail.length > 140) trail.pop();
+      }
+
+      // Periodic Torcida Chants (speech balloons over the crowd)
+      const now = performance.now();
+      if (now - lastChantTime > 3400) {
+        lastChantTime = now;
+        const chantPhrases = [
+          'VAI PRA CIMA!',
+          'É A BANCADA!',
+          'VAMOS MEU TIME!',
+          'DÁ-LHE, DÁ-LHE!',
+          'EXPLODE O CALDEIRÃO!',
+          'EU SOU TORCIDA!',
+          'BATERIA A MIL!',
+          'VAI SACUDIR!'
+        ];
+        const chosenText = chantPhrases[Math.floor(Math.random() * chantPhrases.length)];
+        chants.push({
+          text: chosenText,
+          x: player.x,
+          y: player.y - 0.7,
+          life: 2.2,
+          maxLife: 2.2,
+        });
+        if (Math.random() > 0.45) {
+          sound.playBumbo();
+        }
+      }
+
+      // Update active chants
+      for (let i = chants.length - 1; i >= 0; i--) {
+        const ch = chants[i];
+        ch.life -= dt;
+        ch.y -= dt * 0.22; // gently floats up
+        if (ch.life <= 0) {
+          chants.splice(i, 1);
+        }
+      }
+
+      // Check win condition (reached Sector 3 Exit)
+      const gx = Math.floor(player.x);
+      const gy = Math.floor(player.y);
+      if (MAZE_LAYOUT[gy] && MAZE_LAYOUT[gy][gx] === 3) {
+        endMinigame(true, 'Você superou o labirinto e inflou a festa da arquibancada com sucesso!');
+      }
+    }
+
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Render maze tiles
+      for (let y = 0; y < GRID_H; y++) {
+        for (let x = 0; x < GRID_W; x++) {
+          const tile = MAZE_LAYOUT[y][x];
+          const px = x * TILE_SIZE;
+          const py = y * TILE_SIZE;
+
+          if (tile === 1) {
+            // Concrete Wall / Stadium tunnel
+            ctx.fillStyle = '#16202c';
+            ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+            ctx.strokeStyle = '#273549';
+            ctx.strokeRect(px + 1, py + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+          } else if (tile === 2) {
+            // Turnstile
+            ctx.fillStyle = '#2d1b1b';
+            ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+            ctx.fillStyle = '#ef4444';
+            ctx.font = '14px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('⛔', px + TILE_SIZE / 2, py + TILE_SIZE / 2);
+          } else if (tile === 3) {
+            // Exit: Arquibancada
+            ctx.fillStyle = '#064e3b';
+            ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(px + 2, py + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+            ctx.fillStyle = '#10b981';
+            ctx.font = '14px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🏟️', px + TILE_SIZE / 2, py + TILE_SIZE / 2);
+          } else {
+            // Floor path
+            ctx.fillStyle = '#0f1721';
+            ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+          }
+        }
+      }
+
+      // Render items
+      items.forEach((item) => {
+        if (!item.collected) {
+          const ix = item.x * TILE_SIZE;
+          const iy = item.y * TILE_SIZE;
+
+          // Glowing background
+          ctx.beginPath();
+          ctx.arc(ix, iy, 12, 0, Math.PI * 2);
+          ctx.fillStyle = item.type === 'flare' ? 'rgba(239, 68, 68, 0.25)' : 'rgba(245, 158, 11, 0.25)';
+          ctx.fill();
+
+          ctx.font = '18px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(item.label, ix, iy);
+        }
+      });
+
+      // Render smoke particles
+      smokeParticles.forEach((p) => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `${p.color} ${p.life * 0.7})`;
+        ctx.fill();
+      });
+
+      // RENDER BONDE MENOR RIVAL (CONFRONTO DIRETO - 3 PESSOAS)
+      if (!smallRivalMob.defeated) {
+        const sx = smallRivalMob.x * TILE_SIZE;
+        const sy = smallRivalMob.y * TILE_SIZE;
+
+        // Visual Target Ring
+        ctx.beginPath();
+        ctx.arc(sx, sy, 24, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(245, 158, 11, 0.2)';
+        ctx.fill();
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // 3 rival characters (formação triangular com 3 pessoas)
+        const smallOffsets = [
+          { dx: 0, dy: -6 },
+          { dx: -7, dy: 5 },
+          { dx: 7, dy: 5 }
+        ];
+
+        smallOffsets.forEach((off, idx) => {
+          ctx.beginPath();
+          ctx.arc(sx + off.dx, sy + off.dy + 3, 5.5, 0, Math.PI * 2);
+          ctx.fillStyle = idx === 0 ? '#1e3a8a' : '#2563eb';
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(sx + off.dx, sy + off.dy - 3, 4, 0, Math.PI * 2);
+          ctx.fillStyle = '#f1c27d';
+          ctx.fill();
+        });
+
+        // Label
+        ctx.font = 'bold 9px sans-serif';
+        ctx.fillStyle = '#fbbf24';
+        ctx.textAlign = 'center';
+        ctx.fillText('🎯 BONDE MENOR (3 PESSOAS)', sx, sy - 16);
+        ctx.font = '7px sans-serif';
+        ctx.fillStyle = '#fff';
+        ctx.fillText('(Vá pra cima!)', sx, sy + 18);
+      }
+
+      // RENDER 3 BONDES MAIORES DA TORCIDA RIVAL (6 PESSOAS CADA)
+      bigRivals.forEach((rival) => {
+        const rx = rival.x * TILE_SIZE;
+        const ry = rival.y * TILE_SIZE;
+
+        // Proximity detection aura / Aggro range
+        const aggroRadius = (rivalsEnraged ? 5.5 : 3.2) * TILE_SIZE;
+        ctx.beginPath();
+        ctx.arc(rx, ry, aggroRadius, 0, Math.PI * 2);
+        ctx.fillStyle = rival.isChasing
+          ? 'rgba(239, 68, 68, 0.14)'
+          : (rivalsEnraged ? 'rgba(220, 38, 38, 0.08)' : 'rgba(239, 68, 68, 0.04)');
+        ctx.fill();
+        ctx.strokeStyle = rival.isChasing
+          ? 'rgba(239, 68, 68, 0.5)'
+          : (rivalsEnraged ? 'rgba(239, 68, 68, 0.3)' : 'rgba(239, 68, 68, 0.15)');
+        ctx.lineWidth = rival.isChasing ? 1.5 : 1;
+        ctx.setLineDash([4, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Aggro indicator
+        if (rival.isChasing || rivalsEnraged) {
+          ctx.font = 'bold 10px sans-serif';
+          ctx.fillStyle = '#ef4444';
+          ctx.textAlign = 'center';
+          ctx.fillText(rivalsEnraged ? '⚡ FÚRIA! (6 PESSOAS)' : '🔥 VEM PRA CIMA! (6)', rx, ry - 20);
+        } else {
+          ctx.font = 'bold 8px sans-serif';
+          ctx.fillStyle = '#fca5a5';
+          ctx.textAlign = 'center';
+          ctx.fillText('⚠️ Bonde Maior (6)', rx, ry - 20);
+        }
+
+        // Render 6 rival members walking together as a mob
+        const mobOffsets = [
+          { dx: 0, dy: -8, isLeader: true },   // Líder na ponta
+          { dx: -8, dy: -1, isLeader: false }, // Ala esquerda
+          { dx: 8, dy: -1, isLeader: false },  // Ala direita
+          { dx: 0, dy: 3, isLeader: false },   // Centro
+          { dx: -6, dy: 9, isLeader: false },  // Retaguarda esquerda
+          { dx: 6, dy: 9, isLeader: false },   // Retaguarda direita
+        ];
+
+        mobOffsets.forEach((mo) => {
+          ctx.beginPath();
+          ctx.arc(rx + mo.dx, ry + mo.dy + 3, 5.5, 0, Math.PI * 2);
+          ctx.fillStyle = rivalsEnraged ? '#7f1d1d' : (mo.isLeader ? '#991b1b' : '#1e293b');
+          ctx.fill();
+          ctx.strokeStyle = rivalsEnraged ? '#ef4444' : '#64748b';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.arc(rx + mo.dx, ry + mo.dy - 3, 4, 0, Math.PI * 2);
+          ctx.fillStyle = '#d97706';
+          ctx.fill();
+        });
+
+        // Rival Leader Skull Flag
+        ctx.font = '10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('☠️', rx, ry - 6);
+      });
+
+      // RENDER 2 VIATURAS DA POLÍCIA
+      policeCars.forEach((car) => {
+        const cx = car.x * TILE_SIZE;
+        const cy = car.y * TILE_SIZE;
+
+        // Frontal Headlight Cone (Vision Beam)
+        ctx.save();
+        ctx.beginPath();
+        if (car.heading === 'right') {
+          ctx.moveTo(cx + 12, cy);
+          ctx.lineTo(cx + 12 + 1.6 * TILE_SIZE, cy - 14);
+          ctx.lineTo(cx + 12 + 1.6 * TILE_SIZE, cy + 14);
+        } else {
+          ctx.moveTo(cx - 12, cy);
+          ctx.lineTo(cx - 12 - 1.6 * TILE_SIZE, cy - 14);
+          ctx.lineTo(cx - 12 - 1.6 * TILE_SIZE, cy + 14);
+        }
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.18)';
+        ctx.fill();
+        ctx.restore();
+
+        // Car Body
+        ctx.fillStyle = '#0f172a';
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        if (typeof ctx.roundRect === 'function') {
+          ctx.roundRect(cx - 14, cy - 8, 28, 16, 4);
+        } else {
+          ctx.rect(cx - 14, cy - 8, 28, 16);
+        }
+        ctx.fill();
+        ctx.stroke();
+
+        // White Door panel
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(cx - 5, cy - 7, 10, 14);
+        ctx.font = 'bold 7px sans-serif';
+        ctx.fillStyle = '#0f172a';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('POL', cx, cy);
+
+        // Flashing Strobe Light (Giroflex)
+        const isRed = Math.sin(car.sirenPhase) > 0;
+        ctx.beginPath();
+        ctx.arc(cx - 3, cy - 8, 3, 0, Math.PI * 2);
+        ctx.fillStyle = isRed ? '#ef4444' : '#1e3a8a';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(cx + 3, cy - 8, 3, 0, Math.PI * 2);
+        ctx.fillStyle = !isRed ? '#3b82f6' : '#7f1d1d';
+        ctx.fill();
+      });
+
+      // Render Pelotão da Torcida (Crowd of Characters Walking Together)
+      const currentCrowdCount = Math.min(crowdRoster.length, 4 + itemsCollected);
+      const isMoving = Math.hypot(player.vx, player.vy) > 0.05;
+      const animSec = performance.now() / 1000;
+
+      const crowdToRender = [];
+
+      for (let k = 0; k < currentCrowdCount; k++) {
+        const member = crowdRoster[k];
+        if (k === 0) {
+          crowdToRender.push({
+            member,
+            x: player.x,
+            y: player.y,
+            isLeader: true,
+            index: 0,
+          });
+        } else {
+          // Sample along breadcrumb trail
+          const sampleIdx = Math.min(trail.length - 1, Math.floor(k * 3.4));
+          const basePos = trail[sampleIdx] || { x: player.x, y: player.y };
+
+          // Direction along trail to find lateral perpendicular offset
+          const prevPos = trail[Math.max(0, sampleIdx - 2)] || basePos;
+          const dtx = prevPos.x - basePos.x;
+          const dty = prevPos.y - basePos.y;
+          const tlen = Math.hypot(dtx, dty) || 1;
+          const perpX = -dty / tlen;
+          const perpY = dtx / tlen;
+
+          // Stagger lateral offset: alternate left/right to form an organic pack of fans
+          const lateralFactor = (k % 2 === 1 ? -1 : 1) * (0.13 + (k % 3) * 0.035);
+          let candX = basePos.x + perpX * lateralFactor;
+          let candY = basePos.y + perpY * lateralFactor;
+
+          if (isWall(candX, candY)) {
+            candX = basePos.x;
+            candY = basePos.y;
+          }
+
+          crowdToRender.push({
+            member,
+            x: candX,
+            y: candY,
+            isLeader: false,
+            index: k,
+          });
+        }
+      }
+
+      // Sort by Y for realistic depth layering
+      crowdToRender.sort((a, b) => a.y - b.y);
+
+      // Draw each torcedor bonequinho
+      crowdToRender.forEach(({ member, x, y, isLeader, index }) => {
+        const cx = x * TILE_SIZE;
+        const cy = y * TILE_SIZE;
+
+        // Bobbing walk cycle
+        const stepFreq = isMoving ? 13 : 4;
+        const bob = isMoving
+          ? Math.abs(Math.sin(animSec * stepFreq + index * 1.4)) * 3
+          : Math.sin(animSec * 3 + index * 1.1) * 1.2;
+        const sway = isMoving ? Math.sin(animSec * 6 + index) * 1.2 : 0;
+
+        // Flare aura for leader if active
+        if (isLeader && player.flareActive) {
+          const glowGrad = ctx.createRadialGradient(cx, cy, 3, cx, cy, 22);
+          glowGrad.addColorStop(0, 'rgba(245, 158, 11, 0.45)');
+          glowGrad.addColorStop(0.5, 'rgba(239, 68, 68, 0.22)');
+          glowGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+          ctx.fillStyle = glowGrad;
+          ctx.beginPath();
+          ctx.arc(cx, cy, 22, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Drop shadow
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.32)';
+        ctx.beginPath();
+        ctx.ellipse(cx, cy + 7, 7, 3.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Animated feet
+        const legOffset = isMoving ? Math.sin(animSec * stepFreq + index * 1.4) * 2.5 : 0;
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(cx - 3.5 + sway, cy + 3 - bob + legOffset, 2.5, 4);
+        ctx.fillRect(cx + 1 + sway, cy + 3 - bob - legOffset, 2.5, 4);
+
+        // Torso / Team Jersey
+        const torsoY = cy - 4 - bob;
+        ctx.fillStyle = member.shirtColor;
+        ctx.beginPath();
+        if (typeof ctx.roundRect === 'function') {
+          ctx.roundRect(cx - 5 + sway, torsoY, 10, 9, 2);
+        } else {
+          ctx.rect(cx - 5 + sway, torsoY, 10, 9);
+        }
+        ctx.fill();
+
+        // White stripe on jersey
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(cx - 1 + sway, torsoY, 2, 9);
+
+        // Collar
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(cx + sway, torsoY, 2.5, 0, Math.PI);
+        ctx.fill();
+
+        // Head
+        const headY = torsoY - 5;
+        ctx.fillStyle = member.skinColor;
+        ctx.beginPath();
+        ctx.arc(cx + sway, headY, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Hair / Cap
+        ctx.fillStyle = member.hairColor;
+        ctx.beginPath();
+        ctx.arc(cx + sway, headY - 1, 4.3, Math.PI * 0.9, Math.PI * 2.1);
+        ctx.fill();
+
+        // Eyes
+        ctx.fillStyle = '#111827';
+        ctx.fillRect(cx - 1.8 + sway, headY - 0.5, 1.2, 1.5);
+        ctx.fillRect(cx + 0.8 + sway, headY - 0.5, 1.2, 1.5);
+
+        // Props & Role visuals
+        if (isLeader) {
+          if (player.flareActive) {
+            // Blazing Flare
+            const fx = cx + 8 + sway;
+            const fy = torsoY - 8;
+            ctx.strokeStyle = '#9ca3af';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(cx + 4 + sway, torsoY + 2);
+            ctx.lineTo(fx, fy + 4);
+            ctx.stroke();
+
+            // Flare torch body
+            ctx.fillStyle = '#dc2626';
+            ctx.fillRect(fx - 1.5, fy + 2, 3, 5);
+
+            // Flickering fire
+            ctx.fillStyle = '#fbbf24';
+            ctx.beginPath();
+            ctx.arc(fx, fy, 4 + Math.sin(animSec * 20) * 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(fx, fy, 2, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            // Leader leading chants with arm raised
+            ctx.strokeStyle = member.skinColor;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(cx + 4 + sway, torsoY + 2);
+            ctx.lineTo(cx + 8 + sway, headY - 3 + Math.sin(animSec * 8) * 2);
+            ctx.stroke();
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(cx + 6 + sway, headY - 4 + Math.sin(animSec * 8) * 2, 3, 2);
+          }
+        } else if (member.role === 'drummer' || member.role === 'repique' || member.role === 'surdo') {
+          // Bumbo / Percussion strapped to chest
+          const drumY = torsoY + 2;
+          ctx.fillStyle = '#f59e0b';
+          ctx.beginPath();
+          ctx.ellipse(cx + sway, drumY, 6, 3.2, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = '#f8fafc';
+          ctx.beginPath();
+          ctx.ellipse(cx + sway, drumY, 4.5, 2.2, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Beating drumsticks
+          const drumBeat = Math.sin(animSec * 16 + index);
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1.4;
+          ctx.beginPath();
+          ctx.moveTo(cx - 5 + sway, drumY - 4 - drumBeat * 2.5);
+          ctx.lineTo(cx - 1 + sway, drumY);
+          ctx.moveTo(cx + 5 + sway, drumY - 4 + drumBeat * 2.5);
+          ctx.lineTo(cx + 1 + sway, drumY);
+          ctx.stroke();
+        } else if (member.role === 'banner') {
+          // Large Waving Team Banner / Bandeirão
+          const poleX = cx - 5 + sway;
+          const poleTopY = torsoY - 17;
+          ctx.strokeStyle = '#e2e8f0';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(poleX, torsoY + 5);
+          ctx.lineTo(poleX, poleTopY);
+          ctx.stroke();
+
+          // Waving fabric
+          const wave1 = Math.sin(animSec * 8 + index) * 3;
+          const wave2 = Math.cos(animSec * 8 + index + 1) * 2.5;
+          ctx.fillStyle = '#10b981';
+          ctx.beginPath();
+          ctx.moveTo(poleX, poleTopY);
+          ctx.quadraticCurveTo(poleX + 7, poleTopY + wave1, poleX + 14, poleTopY + wave2);
+          ctx.lineTo(poleX + 14, poleTopY + 10 + wave2);
+          ctx.quadraticCurveTo(poleX + 7, poleTopY + 10 + wave1, poleX, poleTopY + 8);
+          ctx.closePath();
+          ctx.fill();
+
+          // White diagonal sash across flag
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(poleX, poleTopY + 4);
+          ctx.lineTo(poleX + 14, poleTopY + 5 + wave2);
+          ctx.stroke();
+        } else if (member.role === 'singing') {
+          // Arms raised high jumping & singing
+          ctx.strokeStyle = member.skinColor;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(cx - 4 + sway, torsoY + 3);
+          ctx.lineTo(cx - 7 + sway, headY - 4);
+          ctx.moveTo(cx + 4 + sway, torsoY + 3);
+          ctx.lineTo(cx + 7 + sway, headY - 4);
+          ctx.stroke();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(cx - 8 + sway, headY - 5, 2.5, 2);
+          ctx.fillRect(cx + 6 + sway, headY - 5, 2.5, 2);
+        } else if (member.role === 'flare') {
+          // Torch with small red tip
+          const fx = cx + 6 + sway;
+          const fy = torsoY - 3;
+          ctx.fillStyle = '#ef4444';
+          ctx.beginPath();
+          ctx.arc(fx, fy, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (member.role === 'megaphone') {
+          // Megaphone
+          ctx.fillStyle = '#f59e0b';
+          ctx.beginPath();
+          ctx.moveTo(cx + 3 + sway, torsoY + 1);
+          ctx.lineTo(cx + 8 + sway, torsoY - 3);
+          ctx.lineTo(cx + 8 + sway, torsoY + 4);
+          ctx.closePath();
+          ctx.fill();
+        }
+      });
+
+      // Render Floating Torcida Chants (Comic Speech Bubbles)
+      chants.forEach((ch) => {
+        const bx = ch.x * TILE_SIZE;
+        const by = ch.y * TILE_SIZE;
+        const alpha = Math.min(1, ch.life / 0.4);
+
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.font = 'bold 11px sans-serif';
+        const textMetrics = ctx.measureText(ch.text);
+        const paddingX = 8;
+        const boxW = textMetrics.width + paddingX * 2;
+        const boxH = 20;
+
+        const startX = bx - boxW / 2;
+        const startY = by - boxH;
+
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 1.5;
+
+        ctx.beginPath();
+        if (typeof ctx.roundRect === 'function') {
+          ctx.roundRect(startX, startY, boxW, boxH, 6);
+        } else {
+          ctx.rect(startX, startY, boxW, boxH);
+        }
+        ctx.fill();
+        ctx.stroke();
+
+        // Speech pointer arrow pointing to the crowd
+        ctx.beginPath();
+        ctx.moveTo(bx - 3, startY + boxH);
+        ctx.lineTo(bx, startY + boxH + 4);
+        ctx.lineTo(bx + 3, startY + boxH);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.strokeStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.moveTo(bx - 3, startY + boxH);
+        ctx.lineTo(bx, startY + boxH + 4);
+        ctx.lineTo(bx + 3, startY + boxH);
+        ctx.stroke();
+
+        // Text
+        ctx.fillStyle = '#0f172a';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(ch.text, bx, startY + boxH / 2);
+        ctx.restore();
+      });
+
+      // Render Brawl Banner if active
+      if (brawlBanner) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.9)';
+        ctx.fillRect(0, 0, canvas.width, 36);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(brawlBanner.text, canvas.width / 2, 18);
+        ctx.restore();
+      }
+    }
+
+    document.getElementById('btn-start').addEventListener('click', startMinigame);
+    document.getElementById('btn-replay').addEventListener('click', startMinigame);
+    document.getElementById('btn-apply-sim').addEventListener('click', () => {
+      document.getElementById('val-party').innerText = lastCalculatedScore;
+      document.getElementById('input-party').value = lastCalculatedScore;
+      updateCalculationDisplay();
+      document.getElementById('simulator-section').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Initial render
+    initItems();
+    render();
+
+    /* ==========================================================================
+       BANCADA SIMULATOR MATCH ENGINE
+       ========================================================================== */
+    const inHome = document.getElementById('input-home');
+    const inAway = document.getElementById('input-away');
+    const inBus = document.getElementById('input-bus');
+    const inParty = document.getElementById('input-party');
+
+    const valHome = document.getElementById('val-home');
+    const valAway = document.getElementById('val-away');
+    const valBus = document.getElementById('val-bus');
+    const valParty = document.getElementById('val-party');
+
+    function updateCalculationDisplay() {
+      const homeStrength = parseFloat(inHome.value);
+      const awayStrength = parseFloat(inAway.value);
+      const busScore = parseFloat(inBus.value);
+      const partyScore = parseFloat(inParty.value);
+
+      valHome.innerText = homeStrength;
+      valAway.innerText = awayStrength;
+      valBus.innerText = busScore;
+      valParty.innerText = partyScore;
+
+      const mediaTorcida = (busScore + partyScore) / 2;
+      const finalHome = (homeStrength * 0.75) + (mediaTorcida * 0.25);
+      const finalAway = awayStrength;
+
+      const calcDisplay = document.getElementById('calc-display');
+      calcDisplay.innerHTML = `
+        <div>• Média da Torcida = (${busScore} + ${partyScore}) / 2 = <strong>${mediaTorcida.toFixed(1)}</strong></div>
+        <div>• Força Final Casa = (${homeStrength} × 0.75) + (${mediaTorcida.toFixed(1)} × 0.25) = <strong>${finalHome.toFixed(2)}</strong></div>
+        <div>• Força Final Adversário = <strong>${finalAway.toFixed(2)}</strong> (sem buff de torcida fora)</div>
+        <div>• Diferença de Força: <strong>${(finalHome - finalAway).toFixed(2)} pts</strong> ${Math.abs(finalHome - finalAway) <= 3 ? '(Zona de Equilíbrio / Alta Chance de Empate)' : ''}</div>
+      `;
+
+      return { homeStrength, awayStrength, busScore, partyScore, mediaTorcida, finalHome, finalAway };
+    }
+
+    [inHome, inAway, inBus, inParty].forEach(input => {
+      input.addEventListener('input', updateCalculationDisplay);
+    });
+    updateCalculationDisplay();
+
+    // Narrative and Match Simulation
+    document.getElementById('btn-simulate').addEventListener('click', () => {
+      sound.init();
+      sound.playWhistle();
+
+      const data = updateCalculationDisplay();
+      const diff = data.finalHome - data.finalAway;
+
+      let scoreH = 0;
+      let scoreA = 0;
+      let p1 = "";
+      let p2 = "";
+      let p3 = "";
+
+      // Determine score and narrative based on math
+      if (Math.abs(diff) <= 3) {
+        // Empate ou jogo decidido por detalhe
+        const tieType = Math.random();
+        if (tieType > 0.4) {
+          scoreH = 1; scoreA = 1;
+        } else if (tieType > 0.15) {
+          scoreH = 2; scoreA = 2;
+        } else {
+          scoreH = 0; scoreA = 0;
+        }
+
+        p1 = `O árbitro soou o apito inicial sob uma atmosfera densa e vibrante no estádio. Desde os primeiros toques, ficou nítido o equilíbrio milimétrico entre as equipes: a Força Final da Casa (${data.finalHome.toFixed(1)}) e a do Adversário (${data.finalAway.toFixed(1)}) se anularam taticamente, transformando o meio-campo em um verdadeiro tabuleiro de xadrez disputado palmo a palmo.`;
+        p2 = `Na segunda etapa, o calor vindo das arquibancadas tentou empurrar os mandantes, com cantos incessantes e bandeirões tremulando nos setores populares. O adversário respondeu com disciplina tática invejável e frieza cirúrgica nas transições ofensivas, impedindo que a pressão se convertesse em gols fáceis e mantendo o confronto no limite da tensão.`;
+        p3 = `Nos acréscimos dramáticos, cada bola alçada na área fez a torcida prender a respiração coletiva. O apito final confirmou a igualdade no placar com o término em ${scoreH} x ${scoreA}, refletindo fielmente a paridade matemática e coroando uma batalha intensa onde ninguém cedeu espaço.`;
+
+      } else if (diff > 3) {
+        // Vitória da Casa
+        if (diff > 20) {
+          scoreH = 3 + Math.floor(Math.random() * 2);
+          scoreA = 0;
+        } else if (diff > 10) {
+          scoreH = 2 + Math.floor(Math.random() * 2);
+          scoreA = Math.random() > 0.5 ? 1 : 0;
+        } else {
+          scoreH = 2;
+          scoreA = 1;
+        }
+
+        const crowdCarried = data.homeStrength < data.awayStrength && data.finalHome > data.awayStrength;
+
+        if (crowdCarried) {
+          // Superação heroica pelo buff da torcida!
+          p1 = `Entrando em campo como franco atirador devido à inferioridade técnica inicial (${data.homeStrength} contra ${data.awayStrength} do rival), o time da casa encontrou seu verdadeiro décimo segundo jogador na arquibancada. A festa ensurdecedora e a recepção apoteótica do ônibus (Média ${data.mediaTorcida.toFixed(1)}) geraram uma carga eletrizante que transformou o ambiente em um caldeirão inóspito para o visitante.`;
+          p2 = `O que se viu a partir dos primeiros vinte minutos foi um massacre anímico: um abafa frenético que empurrou as linhas adversárias contra a própria meta. O peso de 25% da torcida elevou a Força Final para ${data.finalHome.toFixed(1)}, desestabilizando a zaga adversária que cometeu erros infantis diante da pressão sonora e das investidas agudas dos mandantes.`;
+          p3 = `O ápice da catarse ocorreu no segundo tempo, coroado pelos gols que selaram a vitória maiúscula por ${scoreH} x ${scoreA}. Ao apito final, jogadores e torcida se uniram em uma celebração apoteótica, provando na prática como a mística da bancada é capaz de subverter qualquer prognóstico tático.`;
+        } else {
+          // Vitória com autoridade
+          p1 = `Com postura dominante desde o pré-jogo e embalado pelo apoio maciço da arquibancada, o time da casa assumiu o controle absoluto das ações no gramado. A superioridade da Força Final (${data.finalHome.toFixed(1)} contra ${data.finalAway.toFixed(1)}) se traduziu em triangulações rápidas e ocupação agressiva dos espaços desde o apito inicial.`;
+          p2 = `O visitante tentou suportar o ritmo sufocante, mas as sucessivas ondas de ataque abafaram qualquer tentativa de contragolpe. A sintonia fina entre a arquibancada pulsante e a intensidade dos atletas resultou em jogadas de rara beleza técnica e na quebra definitiva do bloco defensivo adversário.`;
+          p3 = `Consolidando a soberania da casa, o placar foi construído com autoridade indiscutível, fechando a partida em ${scoreH} x ${scoreA}. Uma exibição segura que fez a massa comemorar com sinalizadores e cantos que ecoarão por toda a semana.`;
+        }
+      } else {
+        // Vitória do Adversário
+        scoreA = 2 + Math.floor(Math.random() * 2);
+        scoreH = Math.random() > 0.4 ? 1 : 0;
+
+        p1 = `Apesar do esforço contínuo dos torcedores e da festa armada antes do apito inicial, a superioridade técnica e estrutural do adversário (${data.finalAway.toFixed(1)} contra ${data.finalHome.toFixed(1)}) se impôs logo no início. O time visitante não se intimidou com a pressão externa e ditou o ritmo com posse de bola qualificada.`;
+        p2 = `O time da casa tentou na base da vontade e do empurrão das bancadas, mas os desajustes táticos custaram caro nas transições defensivas. O visitante aproveitou as brechas deixadas no desespero de avançar as linhas e foi cirúrgico na finalização das oportunidades criadas.`;
+        p3 = `Mesmo com a arquibancada cantando até o último segundo em demonstração de lealdade incondicional, o relógio correu contra o mandante. O confronto encerrou-se com o placar de ${scoreH} x ${scoreA} a favor dos visitantes, sacramentando um duelo em que a precisão em campo superou a bravura das arquibancadas.`;
+      }
+
+      document.getElementById('score-home').innerText = scoreH;
+      document.getElementById('score-away').innerText = scoreA;
+
+      document.getElementById('narrative-content').innerHTML = `
+        <p><strong>1º Tempo:</strong> ${p1}</p>
+        <p><strong>2º Tempo:</strong> ${p2}</p>
+        <p><strong>Desfecho:</strong> ${p3}</p>
+      `;
+
+      const resultBox = document.getElementById('result-box');
+      resultBox.style.display = 'block';
+      resultBox.scrollIntoView({ behavior: 'smooth' });
+
+      if (scoreH > scoreA) {
+        sound.playCheer();
+      }
+    });
+
+    // Smart ZIP downloader with size verification to prevent 10KB HTML proxy corruption
+    document.getElementById('btn-download-zip-standalone')?.addEventListener('click', async () => {
+      const btn = document.getElementById('btn-download-zip-standalone');
+      if (btn) btn.innerText = '⏳ Verificando...';
+      try {
+        const res = await fetch('/bancada-simulator.zip');
+        const blob = await res.blob();
+        if (blob.size < 25000) {
+          // The proxy returned an HTML error/preview page (~10KB)
+          alert('Atenção: O proxy da visualização interceptou o arquivo com uma página HTML (10 KB). Por favor, utilize o botão "Baixar ZIP" na aplicação principal do React, que monta o ZIP binário diretamente na memória do seu navegador!');
+          if (btn) btn.innerText = '📦 Baixar ZIP (72 KB)';
+          return;
+        }
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'bancada-simulator.zip';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+        if (btn) btn.innerText = '✓ Baixado (72 KB)!';
+        setTimeout(() => { if (btn) btn.innerText = '📦 Baixar ZIP (72 KB)'; }, 3000);
+      } catch (err) {
+        console.error('Download error:', err);
+        window.open('/bancada-simulator.zip', '_blank');
+      }
+    });
+
+  </script>
+</body>
+</html>

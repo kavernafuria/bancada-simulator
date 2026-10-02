@@ -1,16 +1,10 @@
 
-export interface SeasonClimate {
-  season: number;
-  name: string;
-  subtitle: string;
-  description: string;
-  costMult: number;
-  cashBonus: number;
-  mpRiskMod: number;
-  massaBonus: number;
-  bancadaBonus: number;
-  pistaBonus: number;
-}
+import { SeasonClimate } from "./engine/types";
+export * from "./engine/types";
+export * from "./engine/ranking_engine";
+export * from "./engine/combat_engine";
+export * from "./engine/economy_engine";
+
 
 export const SEASON_CLIMATES: Record<number, SeasonClimate> = {
   1: { season: 1, name: "Ano de Reestruturação da Sede", subtitle: "Estruturação de Quadra & Bairro", description: "Custos equilibrados e clima de reestruturação dos associados.", costMult: 1.0, cashBonus: 0, mpRiskMod: 0, massaBonus: 0, bancadaBonus: 0, pistaBonus: 0 },
@@ -612,6 +606,7 @@ export interface MatchExecutionResult {
   chronicleText: string;
   formattedDeltas: FormattedDelta[];
   bannerCaptured?: boolean;
+  bannerLost?: boolean;
   isRetryWithAd?: boolean;
   isSecondChanceVictory?: boolean;
 }
@@ -812,7 +807,7 @@ export function createCustomTorcidaWithArchetype(
   const stateTrackers: StateTrackers = {
     moral: isTierA ? 60 + (arch.stateModifiers.moral || 0) : 65 + (arch.stateModifiers.moral || 0),
     risco_mp: Math.max(0, 5 + (arch.stateModifiers.risco_mp || 0)),
-    relacao_clube: 10 + (arch.stateModifiers.relacao_clube || 0),
+    relacao_clube: 50 + (arch.stateModifiers.relacao_clube || 0),
     respeito_nacional: isTierA ? 20 + (arch.stateModifiers.respeito_nacional || 0) : 30 + (arch.stateModifiers.respeito_nacional || 0),
   };
 
@@ -2737,7 +2732,7 @@ export function executeCompleteMatch(
       { label: "Clima no Entorno", value: "Churrasco & Irmandade", isPositive: true },
       { label: "Paz nas Arquibancadas", value: "100% União e Festa", isPositive: true },
       { label: "Efetivo Integrado", value: `${(playerMembers + rivalMembers).toLocaleString()} torcedores`, isPositive: true },
-      { label: "Placar do Jogo", value: `${scorePlayerClub} x ${scoreRivalClub}`, isPositive: true },
+      { label: "Placar do Jogo", value: derby.isHome ? `${scorePlayerClub} x ${scoreRivalClub}` : `${scoreRivalClub} x ${scorePlayerClub}`, isPositive: true },
       { label: "Moral da Torcida", value: `+${moralChange}`, isPositive: true },
       { label: "Custos da Festa", value: `R$ ${extraExpenses.toLocaleString()}`, isPositive: extraExpenses <= 1500 },
       { label: "Baixas Médicas", value: "0 feridos (Festa e Paz)", isPositive: true },
@@ -3172,7 +3167,7 @@ export function executeCompleteMatch(
       value: `${playerForce} pts vs ${rivalForce} pts`,
       isPositive: isVictoryPista,
     },
-    { label: "Placar do Jogo", value: `${scorePlayerClub} x ${scoreRivalClub}`, isPositive: scorePlayerClub >= scoreRivalClub },
+    { label: "Placar do Jogo", value: derby.isHome ? `${scorePlayerClub} x ${scoreRivalClub}` : `${scoreRivalClub} x ${scorePlayerClub}`, isPositive: scorePlayerClub >= scoreRivalClub },
     { label: "Moral da Tropa", value: moralChange >= 0 ? `+${moralChange}` : `${moralChange}`, isPositive: moralChange >= 0 },
     { label: "Custos do Jogo", value: `R$ ${extraExpenses.toLocaleString()}`, isPositive: extraExpenses === 0 },
   ];
@@ -5874,6 +5869,203 @@ export function resolveInquiryVerdict(finalConviction: number): InquiryVerdict {
       membersArrestedCount: 8,
     };
   }
+}
+
+// ==========================================
+// ETAPA 10 CARAVAN SELECTION ENGINE
+// ==========================================
+
+export interface Etapa10CaravanChoice {
+  id: string;
+  category: "DERBY" | "IRMANDADE" | "INTERIOR" | "CAPITAL";
+  badgeTitle: string;
+  badgeColor: string;
+  title: string;
+  clube: string;
+  rivalTorcida: string;
+  estado: string;
+  stadium: string;
+  cityState: string;
+  description: string;
+  impacts: { label: string; value: string; isPositive: boolean }[];
+  teamData: any;
+}
+
+export function generateEtapa10CaravanChoices(
+  currentTorcida: any,
+  facedOpponents: string[] = [],
+  playerRank: number = 1
+): Etapa10CaravanChoice[] {
+  if (!currentTorcida) return [];
+
+  // Filter out faced torcidas and current torcida itself
+  const availableTeams = (teamsData as any[]).filter(
+    (t) => t.torcida !== currentTorcida.torcida && !facedOpponents.includes(t.torcida)
+  );
+
+  // Helper to pick best matching torcida for a given club based on player rank/tier
+  const getBestTorcidaForClub = (clubName: string): any => {
+    const clubTorcidas = availableTeams.filter((t) => t.clube.toLowerCase() === clubName.toLowerCase());
+    if (clubTorcidas.length === 0) return null;
+    if (clubTorcidas.length === 1) return clubTorcidas[0];
+
+    const targetTier = playerRank <= 3 ? "S" : playerRank <= 10 ? "A" : playerRank <= 20 ? "B" : "C";
+    const exactMatch = clubTorcidas.find((t) => (t.tier || "B").toUpperCase().startsWith(targetTier));
+    return exactMatch || clubTorcidas[0];
+  };
+
+  const selectedChoices: Etapa10CaravanChoice[] = [];
+  const selectedTorcidaNames = new Set<string>();
+
+  // 1. DÉRBI DE ALTA TENSÃO (Rival Principal/Secundário ou Maior Rival do Estado)
+  let derbyTeam: any = null;
+  if (currentTorcida.rival_principal) {
+    derbyTeam = getBestTorcidaForClub(currentTorcida.rival_principal);
+  }
+  if (!derbyTeam && currentTorcida.rival_secundario) {
+    derbyTeam = getBestTorcidaForClub(currentTorcida.rival_secundario);
+  }
+  if (!derbyTeam) {
+    derbyTeam = availableTeams.find((t) => t.estado === currentTorcida.estado && (t.tier === "S" || t.tier === "A"));
+  }
+  if (!derbyTeam && availableTeams.length > 0) {
+    derbyTeam = availableTeams[0];
+  }
+
+  if (derbyTeam) {
+    selectedTorcidaNames.add(derbyTeam.torcida);
+    selectedChoices.push({
+      id: "DERBY_TENSAO",
+      category: "DERBY",
+      badgeTitle: "🔥 DÉRBI DE ALTA TENSÃO",
+      badgeColor: "red",
+      title: `Invasão ao Estádio do ${derbyTeam.clube}`,
+      clube: derbyTeam.clube,
+      rivalTorcida: derbyTeam.torcida,
+      estado: derbyTeam.estado,
+      stadium: derbyTeam.stadium || `Estádio do ${derbyTeam.clube}`,
+      cityState: `${derbyTeam.clube} - ${derbyTeam.estado}`,
+      description: `Confronto de altíssima rivalidade contra a ${derbyTeam.torcida}. Exige esquema de segurança máximo e transporte blindado.`,
+      impacts: [
+        { label: "Moral da Torcida", value: "+++ Moral Máxima", isPositive: true },
+        { label: "Respeito Nacional", value: "+15 Respeito", isPositive: true },
+        { label: "Risco Policial", value: "⚠️ Risco Elevado", isPositive: false },
+        { label: "Custo Rodoviário", value: "R$ 4.500", isPositive: false },
+      ],
+      teamData: derbyTeam,
+    });
+  }
+
+  // 2. CARAVANA DA IRMANDADE (Aliada / Eixo ou Amiga Interestadual)
+  let allyTeam: any = null;
+  if (currentTorcida.torcida_aliada) {
+    allyTeam = availableTeams.find(
+      (t) => !selectedTorcidaNames.has(t.torcida) && (t.torcida.toLowerCase().includes(currentTorcida.torcida_aliada.toLowerCase()) || currentTorcida.torcida_aliada.toLowerCase().includes(t.torcida.toLowerCase()))
+    );
+  }
+  if (!allyTeam && currentTorcida.eixo_alianca) {
+    allyTeam = availableTeams.find(
+      (t) => !selectedTorcidaNames.has(t.torcida) && t.eixo_alianca === currentTorcida.eixo_alianca
+    );
+  }
+  if (!allyTeam) {
+    allyTeam = availableTeams.find(
+      (t) => !selectedTorcidaNames.has(t.torcida) && t.estado !== currentTorcida.estado && t.rival_principal !== currentTorcida.clube
+    );
+  }
+  if (!allyTeam && availableTeams.length > 0) {
+    allyTeam = availableTeams.find((t) => !selectedTorcidaNames.has(t.torcida)) || availableTeams[0];
+  }
+
+  if (allyTeam) {
+    selectedTorcidaNames.add(allyTeam.torcida);
+    selectedChoices.push({
+      id: "CARAVANA_IRMANDADE",
+      category: "IRMANDADE",
+      badgeTitle: "🟢 CARAVANA DA IRMANDADE",
+      badgeColor: "emerald",
+      title: `Festa da União com a ${allyTeam.torcida}`,
+      clube: allyTeam.clube,
+      rivalTorcida: allyTeam.torcida,
+      estado: allyTeam.estado,
+      stadium: allyTeam.stadium || `Estádio do ${allyTeam.clube}`,
+      cityState: `${allyTeam.clube} - ${allyTeam.estado}`,
+      description: `Viagem festiva e recepção unificada em clima de amizade de eixo. Churrasco no entorno e zero confronto de pista.`,
+      impacts: [
+        { label: "Venda de Materiais", value: "+R$ 3.500 Caixa", isPositive: true },
+        { label: "Novos Integrantes", value: "+10 Massa", isPositive: true },
+        { label: "Risco Policial", value: "🛡️ Zero Risco", isPositive: true },
+        { label: "Custo Logístico", value: "R$ 1.200", isPositive: true },
+      ],
+      teamData: allyTeam,
+    });
+  }
+
+  // 3. PISTA QUENTE DO INTERIOR / ALÇAPÃO
+  let interiorTeam: any = availableTeams.find(
+    (t) => !selectedTorcidaNames.has(t.torcida) && (isInteriorSP(t) || t.tier === "B" || t.tier === "C")
+  );
+  if (!interiorTeam && availableTeams.length > 0) {
+    interiorTeam = availableTeams.find((t) => !selectedTorcidaNames.has(t.torcida)) || availableTeams[0];
+  }
+
+  if (interiorTeam) {
+    selectedTorcidaNames.add(interiorTeam.torcida);
+    selectedChoices.push({
+      id: "PISTA_INTERIOR",
+      category: "INTERIOR",
+      badgeTitle: "🟡 ALÇAPÃO REGIONAL",
+      badgeColor: "amber",
+      title: `Comboio para o Alçapão do ${interiorTeam.clube}`,
+      clube: interiorTeam.clube,
+      rivalTorcida: interiorTeam.torcida,
+      estado: interiorTeam.estado,
+      stadium: interiorTeam.stadium || `Estádio Municipal do ${interiorTeam.clube}`,
+      cityState: `${interiorTeam.clube} - ${interiorTeam.estado}`,
+      description: `Invasão rodoviária em estádio de interior. Torcida mandante de pista forte em terreno acoplado.`,
+      impacts: [
+        { label: "Poder de Pista", value: "+8 Poder Pista", isPositive: true },
+        { label: "Presença Rodoviária", value: "+5 Caravana", isPositive: true },
+        { label: "Risco Policial", value: "⚡ Risco Moderado", isPositive: false },
+        { label: "Custo Rodoviário", value: "R$ 2.200", isPositive: false },
+      ],
+      teamData: interiorTeam,
+    });
+  }
+
+  // 4. GRANDE EXCURSÃO DE CAPITAL DISTANTE
+  let capitalTeam: any = availableTeams.find(
+    (t) => !selectedTorcidaNames.has(t.torcida) && t.estado !== currentTorcida.estado && (t.tier === "S" || t.tier === "A")
+  );
+  if (!capitalTeam && availableTeams.length > 0) {
+    capitalTeam = availableTeams.find((t) => !selectedTorcidaNames.has(t.torcida)) || availableTeams[0];
+  }
+
+  if (capitalTeam) {
+    selectedTorcidaNames.add(capitalTeam.torcida);
+    selectedChoices.push({
+      id: "CAPITAL_DISTANTE",
+      category: "CAPITAL",
+      badgeTitle: "🟣 GRANDE INVASÃO DE CAPITAL",
+      badgeColor: "purple",
+      title: `Viagem Monumental ao Estádio do ${capitalTeam.clube}`,
+      clube: capitalTeam.clube,
+      rivalTorcida: capitalTeam.torcida,
+      estado: capitalTeam.estado,
+      stadium: capitalTeam.stadium || `Estádio do ${capitalTeam.clube}`,
+      cityState: `${capitalTeam.clube} - ${capitalTeam.estado}`,
+      description: `Excursão interestadual de longa distância para uma grande capital. Mídia nacional e grande contingente nas ruas.`,
+      impacts: [
+        { label: "Engajamento Social", value: "+12 Contingente", isPositive: true },
+        { label: "Projeção na Mídia", value: "+10 Respeito", isPositive: true },
+        { label: "Logística Completa", value: "R$ 5.000", isPositive: false },
+        { label: "Desgaste da Tropa", value: "Viagem Longa", isPositive: false },
+      ],
+      teamData: capitalTeam,
+    });
+  }
+
+  return selectedChoices;
 }
 
 

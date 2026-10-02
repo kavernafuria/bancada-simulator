@@ -109,6 +109,8 @@ import { ElectionCrisisModal } from "@/components/ElectionCrisisModal";
 import { InquiryModal, InquiryResultPayload } from "@/components/InquiryModal";
 import { GameTutorialModal } from "@/components/GameTutorialModal";
 import { StoryCardModal, StoryCardData } from "@/components/StoryCardModal";
+import { Etapa10CaravanModal } from "@/components/Etapa10CaravanModal";
+import { generateEtapa10CaravanChoices, Etapa10CaravanChoice } from "@/lib/bancada_engine";
 import {
   GAME_BALANCE,
   getOfficialTorcidas,
@@ -301,7 +303,7 @@ export default function App() {
   const [stateTrackers, setStateTrackers] = useState<StateTrackers>({
     moral: 70,
     risco_mp: 10,
-    relacao_clube: 15,
+    relacao_clube: 50,
     respeito_nacional: 50,
   });
 
@@ -336,7 +338,9 @@ export default function App() {
     if (cardType === "MATCH_VICTORY" && activeMatchResult) {
       chronicle = activeMatchResult.chronicleText;
       matchTitle = activeMatchDerby?.matchTitle || "Derby Clássico";
-      score = `${activeMatchResult.scorePlayerClub} x ${activeMatchResult.scoreRivalClub}`;
+      score = activeMatchDerby?.isHome
+        ? `${activeMatchResult.scorePlayerClub} x ${activeMatchResult.scoreRivalClub}`
+        : `${activeMatchResult.scoreRivalClub} x ${activeMatchResult.scorePlayerClub}`;
 
       if (activeMatchResult.bannerCaptured) {
         matchImage = "/images/faixa_capturada.jpeg";
@@ -421,6 +425,10 @@ export default function App() {
   const [activeScoutIntel, setActiveScoutIntel] = useState<MatchScoutReport | null>(null);
   const [activeMatchResult, setActiveMatchResult] = useState<MatchExecutionResult | null>(null);
   const [isGeneratingChronicle, setIsGeneratingChronicle] = useState<boolean>(false);
+  const [facedOpponentsHistory, setFacedOpponentsHistory] = useState<string[]>([]);
+  const [pistaHistoryRecord, setPistaHistoryRecord] = useState<Record<string, { win: number; loss: number; bannersCaptured: number; bannersLost: number }>>({});
+  const [etapa10Choices, setEtapa10Choices] = useState<Etapa10CaravanChoice[]>([]);
+  const [showEtapa10Modal, setShowEtapa10Modal] = useState<boolean>(false);
 
   // MÓDULO 1: Gatilho em 2 Estágios (1º Aviso MP/TAC -> 2º Decreto Definitivo de Torcida Única)
   const triggerMPRiskFlow = (newMP: number, mpDelta: number) => {
@@ -676,7 +684,7 @@ export default function App() {
           setBankBalance(parsed.bankBalance ?? 30000);
           setClubStatus(parsed.clubStatus || "LUTANDO_ACESSO");
           setStats(parsed.stats || { contingente: 70, pressao_bancada: 70, poder_pista: 70, caravana: 70, autonomia_financeira: 70 });
-          setStateTrackers(parsed.stateTrackers || { moral: 70, risco_mp: 10, relacao_clube: 15, respeito_nacional: 50 });
+          setStateTrackers(parsed.stateTrackers || { moral: 70, risco_mp: 10, relacao_clube: 50, respeito_nacional: 50 });
           setIsBannedByMP(parsed.isBannedByMP || false);
           setDebtYears(parsed.debtYears || 0);
           setPipelineIndex(parsed.pipelineIndex || 0);
@@ -915,7 +923,7 @@ export default function App() {
       setStateTrackers({
         moral: 75,
         risco_mp: 10,
-        relacao_clube: 15,
+        relacao_clube: 50,
         respeito_nacional: 80,
       });
       setBankBalance(torcidaWithColors.autonomia_financeira * 200);
@@ -1118,6 +1126,36 @@ export default function App() {
   const handleConfirmFeedback = () => {
     setActionFeedback(null);
     advancePipeline();
+  };
+
+  const handleSelectEtapa10CaravanChoice = (choice: Etapa10CaravanChoice) => {
+    setShowEtapa10Modal(false);
+    if (!currentTorcida) return;
+
+    const customDerby: DerbyMatchInfo = {
+      rivalTorcida: choice.rivalTorcida,
+      rivalSigla: choice.rivalTorcida.substring(0, 3).toUpperCase(),
+      homeClub: choice.clube,
+      awayClub: currentTorcida.clube,
+      isHome: false,
+      stadium: choice.stadium,
+      cityState: choice.cityState,
+      derbyName: choice.title,
+      importanceDescription: choice.description,
+      isAllyGame: choice.category === "IRMANDADE",
+      isLongDistance: choice.category === "CAPITAL",
+      matchTitle: `RODADA FINAL • INVASÃO AO ESTÁDIO DO ${choice.clube.toUpperCase()}`,
+      competition: "Campeonato Nacional",
+    };
+
+    const currentStep = pipeline[pipelineIndex] as any;
+    if (currentStep) {
+      currentStep.derby = customDerby;
+      currentStep.isHomeGame = false;
+      currentStep.isLongDistance = choice.category === "CAPITAL";
+    }
+
+    handleStartMatchWorkflow(currentStep || { derby: customDerby, isHomeGame: false });
   };
 
   // MULTI-STAGE MATCH WORKFLOW
@@ -1540,7 +1578,9 @@ export default function App() {
         isVictoryBancada: result.isVictoryBancada,
         isPistaFight: result.isPistaFight ?? false,
         isPeacefulMatch: !result.isPistaFight,
-        score: `${result.scorePlayerClub} x ${result.scoreRivalClub}`,
+        score: activeMatchDerby.isHome
+          ? `${result.scorePlayerClub} x ${result.scoreRivalClub}`
+          : `${result.scoreRivalClub} x ${result.scorePlayerClub}`,
         playerAttendance: intel.playerMembersPresent,
         rivalAttendance: intel.rivalMembersWaiting,
         tacticTitle: tactic.title,
@@ -1561,6 +1601,23 @@ export default function App() {
       setIsGeneratingChronicle(false);
 
       setActiveMatchResult(result);
+
+      if (activeMatchDerby?.rivalTorcida) {
+        const rName = activeMatchDerby.rivalTorcida;
+        setFacedOpponentsHistory((prev) => [...prev, rName]);
+        setPistaHistoryRecord((prev) => {
+          const cur = prev[rName] || { win: 0, loss: 0, bannersCaptured: 0, bannersLost: 0 };
+          return {
+            ...prev,
+            [rName]: {
+              win: result.isVictoryPista ? cur.win + 1 : cur.win,
+              loss: !result.isVictoryPista ? cur.loss + 1 : cur.loss,
+              bannersCaptured: result.bannerCaptured ? cur.bannersCaptured + 1 : cur.bannersCaptured,
+              bannersLost: result.bannerLost ? cur.bannersLost + 1 : cur.bannersLost,
+            },
+          };
+        });
+      }
 
       // Apply financial & attribute consequences
       setBankBalance((prev) => prev - result.extraExpenses);
@@ -1796,8 +1853,19 @@ export default function App() {
       ]);
     }
 
-    if (pipelineIndex + 1 < pipeline.length) {
-      setPipelineIndex((prev) => prev + 1);
+    const nextIdx = pipelineIndex + 1;
+    if (nextIdx < pipeline.length) {
+      setPipelineIndex(nextIdx);
+      const nextStep = pipeline[nextIdx];
+      if (nextStep && (nextStep.stepIndex === 10 || nextIdx === 9)) {
+        if (currentTorcida) {
+          const ranking = simulateNationalRanking(currentTorcida, stats, stateTrackers, season);
+          const pRank = ranking.find((r) => r.isPlayer)?.rank || 1;
+          const choices = generateEtapa10CaravanChoices(currentTorcida, facedOpponentsHistory, pRank);
+          setEtapa10Choices(choices);
+          setShowEtapa10Modal(true);
+        }
+      }
     } else {
       // Record Season History Evolution
       if (currentTorcida) {
@@ -4527,6 +4595,40 @@ export default function App() {
               </p>
             </div>
 
+            {/* Histórico Retrospectivo de Pista */}
+            {activeMatchDerby?.rivalTorcida && (
+              <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 text-left space-y-1.5 text-xs">
+                <div className="flex items-center gap-1.5 font-black text-amber-400 uppercase text-[10px] tracking-wider">
+                  <Swords className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Histórico Retrospectivo de Pista (vs {activeMatchDerby.rivalTorcida})</span>
+                </div>
+                {pistaHistoryRecord[activeMatchDerby.rivalTorcida] ? (
+                  <div className="grid grid-cols-2 gap-2 text-[11px] pt-0.5">
+                    <div className="bg-zinc-900 p-2 rounded-xl border border-zinc-800">
+                      <span className="text-[8px] text-zinc-400 font-bold block">CONFRONTOS DE PISTA</span>
+                      <span className="text-emerald-400 font-black">
+                        {pistaHistoryRecord[activeMatchDerby.rivalTorcida].win}V
+                      </span>{" "}
+                      •{" "}
+                      <span className="text-red-400 font-black">
+                        {pistaHistoryRecord[activeMatchDerby.rivalTorcida].loss}D
+                      </span>
+                    </div>
+                    <div className="bg-zinc-900 p-2 rounded-xl border border-zinc-800">
+                      <span className="text-[8px] text-zinc-400 font-bold block">FAIXAS TOMADAS</span>
+                      <span className="text-amber-300 font-black">
+                        🏴‍☠️ {pistaHistoryRecord[activeMatchDerby.rivalTorcida].bannersCaptured} Faixas
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-[10px] text-zinc-400 font-medium py-0.5">
+                    Primeiro confronto oficial registrado contra esta agremiação na história do mandato.
+                  </p>
+                )}
+              </div>
+            )}
+
             <button
               onClick={handleProceedToTacticalChoices}
               className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider shadow-lg active:scale-95 transition-all cursor-pointer"
@@ -5849,6 +5951,13 @@ export default function App() {
         isOpen={showStoryCardModal}
         onClose={() => setShowStoryCardModal(false)}
         data={activeStoryCardData}
+      />
+
+      {/* ETAPA 10 CARAVAN SELECTION MODAL */}
+      <Etapa10CaravanModal
+        isOpen={showEtapa10Modal}
+        choices={etapa10Choices}
+        onSelectChoice={handleSelectEtapa10CaravanChoice}
       />
     </div>
   );
