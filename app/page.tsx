@@ -3628,37 +3628,32 @@ export default function App() {
       {activeTab === "pipeline" && currentStep && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 shadow-xl flex-1 flex flex-col justify-between relative z-10">
           <div>
-            {/* Board Suggestion Card */}
+            {/* Board Suggestion Compact 1-Line Ticker Bar */}
             {(() => {
               const suggestion = getBoardSuggestion();
               return (
-                <div className="mb-3 p-3 rounded-2xl bg-zinc-950/90 border border-amber-500/30 flex items-center justify-between gap-3 shadow-lg">
-                  <div className="flex items-start gap-2.5">
-                    <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 mt-0.5">
-                      <Building2 className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest">
-                          💡 SUGESTÃO DA DIRETORIA
-                        </span>
-                        <span className={`text-[8px] font-black px-1.5 py-0.5 rounded uppercase ${suggestion.badgeColor}`}>
-                          {suggestion.badge}
-                        </span>
-                      </div>
-                      <h4 className="text-xs font-black text-white">{suggestion.title}</h4>
-                      <p className="text-[11px] text-zinc-300 font-medium leading-snug mt-0.5">
-                        {suggestion.message}
-                      </p>
-                    </div>
+                <div
+                  onClick={() => suggestion.tab !== "pipeline" && handleTabChange(suggestion.tab)}
+                  className={`mb-2 py-1 px-2.5 rounded-xl bg-zinc-950/90 border border-amber-500/30 flex items-center justify-between gap-2 shadow-sm text-[10px] ${
+                    suggestion.tab !== "pipeline" ? "cursor-pointer hover:border-amber-400 transition-colors" : ""
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 overflow-hidden whitespace-nowrap min-w-0">
+                    <span className="text-[9px] font-black text-amber-400 uppercase shrink-0 flex items-center gap-1">
+                      💡 DIRETORIA
+                    </span>
+                    <span className={`text-[7px] font-black px-1 py-0.5 rounded uppercase shrink-0 ${suggestion.badgeColor}`}>
+                      {suggestion.badge}
+                    </span>
+                    <span className="text-zinc-300 font-medium truncate text-[10px]">
+                      {suggestion.message}
+                    </span>
                   </div>
+
                   {suggestion.buttonText && (
-                    <button
-                      onClick={() => handleTabChange(suggestion.tab)}
-                      className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-[10px] uppercase tracking-wider whitespace-nowrap shadow transition-all active:scale-95 cursor-pointer shrink-0"
-                    >
-                      {suggestion.buttonText}
-                    </button>
+                    <span className="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[8px] font-black uppercase whitespace-nowrap shrink-0 flex items-center gap-0.5">
+                      {suggestion.buttonText.split(" ")[0]} ➔
+                    </span>
                   )}
                 </div>
               );
