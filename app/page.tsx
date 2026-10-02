@@ -3330,7 +3330,7 @@ export default function App() {
 
   // 3. MAIN GAMEPLAY DASHBOARD
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-3 sm:p-4 flex flex-col max-w-lg mx-auto relative overflow-x-hidden">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-2 sm:p-4 flex flex-col w-full max-w-lg mx-auto relative overflow-x-hidden box-border">
       {/* Floating Instagram Share Toast Notification */}
       {shareToast && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] bg-pink-600 text-white font-extrabold text-xs px-4 py-2.5 rounded-2xl shadow-2xl border border-pink-300 flex items-center gap-2 animate-in fade-in zoom-in-95 max-w-xs text-center">
@@ -3674,26 +3674,35 @@ export default function App() {
       {activeTab === "pipeline" && currentStep && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-3 sm:p-4 shadow-xl flex-1 flex flex-col justify-between relative z-10 max-w-full overflow-hidden min-w-0">
           <div className="max-w-full overflow-hidden min-w-0">
-            {/* Board Suggestion Compact 1-Line Ticker Bar */}
+            {/* Board Suggestion Compact Scrolling Marquee Ticker Bar */}
             {(() => {
               const suggestion = getBoardSuggestion();
               return (
                 <div
                   onClick={() => suggestion.tab !== "pipeline" && handleTabChange(suggestion.tab)}
-                  className={`mb-2 py-1 px-2 rounded-xl bg-zinc-950/90 border border-amber-500/30 flex items-center justify-between gap-1.5 shadow-sm text-[10px] max-w-full overflow-hidden min-w-0 ${
+                  className={`mb-2 py-1 px-2 rounded-xl bg-zinc-950/90 border border-amber-500/30 flex items-center justify-between gap-1.5 shadow-sm text-[10px] w-full max-w-full overflow-hidden ${
                     suggestion.tab !== "pipeline" ? "cursor-pointer hover:border-amber-400 transition-colors" : ""
                   }`}
                 >
-                  <div className="flex items-center gap-1 overflow-hidden whitespace-nowrap min-w-0">
-                    <span className="text-[8.5px] sm:text-[9px] font-black text-amber-400 uppercase shrink-0 flex items-center gap-0.5">
+                  <div className="flex items-center gap-1 shrink-0">
+                    <span className="text-[8.5px] sm:text-[9px] font-black text-amber-400 uppercase flex items-center gap-0.5 shrink-0">
                       💡 DIRETORIA
                     </span>
                     <span className={`text-[6.5px] sm:text-[7px] font-black px-1 py-0.5 rounded uppercase shrink-0 ${suggestion.badgeColor}`}>
                       {suggestion.badge}
                     </span>
-                    <span className="text-zinc-300 font-medium truncate text-[9.5px] sm:text-[10px]">
-                      {suggestion.message}
-                    </span>
+                  </div>
+
+                  {/* Marquee Infinite Text Ticker */}
+                  <div className="flex-1 min-w-0 overflow-hidden relative mx-1">
+                    <div className="whitespace-nowrap inline-flex animate-marquee hover:[animation-play-state:paused] items-center">
+                      <span className="text-zinc-300 font-medium text-[9.5px] sm:text-[10px] pr-8">
+                        {suggestion.message}
+                      </span>
+                      <span className="text-zinc-300 font-medium text-[9.5px] sm:text-[10px] pr-8">
+                        {suggestion.message}
+                      </span>
+                    </div>
                   </div>
 
                   {suggestion.buttonText && (
@@ -3799,18 +3808,31 @@ export default function App() {
                             -R$ {choice.cost.toLocaleString()}
                           </span>
                         )}
-                        {choice.formattedDeltas.slice(0, 4).map((d, i) => (
-                          <span
-                            key={i}
-                            className={`text-[8px] sm:text-[8.5px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shrink-0 ${
-                              d.isPositive
-                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                : "bg-red-500/10 text-red-400 border border-red-500/20"
-                            }`}
-                          >
-                            {d.label}: {d.value}
-                          </span>
-                        ))}
+                        {choice.formattedDeltas.slice(0, 4).map((d, i) => {
+                          let labelText = d.label;
+                          if (labelText.includes("Bancada")) labelText = "Bancada";
+                          else if (labelText.includes("Finan") || labelText.includes("Caixa") || labelText.includes("Autonomia")) labelText = "Caixa";
+                          else if (labelText.includes("Massa") || labelText.includes("Contingente")) labelText = "Massa";
+                          else if (labelText.includes("Pista")) labelText = "Pista";
+                          else if (labelText.includes("Caravana")) labelText = "Caravana";
+                          else if (labelText.includes("MP") || labelText.includes("Promotoria")) labelText = "MP";
+                          else if (labelText.includes("Moral")) labelText = "Moral";
+                          else if (labelText.includes("Clube")) labelText = "Clube";
+                          else if (labelText.includes("Respeito")) labelText = "Respeito";
+
+                          return (
+                            <span
+                              key={i}
+                              className={`text-[8px] sm:text-[8.5px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shrink-0 ${
+                                d.isPositive
+                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                  : "bg-red-500/10 text-red-400 border border-red-500/20"
+                              }`}
+                            >
+                              {labelText}: {d.value}
+                            </span>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
