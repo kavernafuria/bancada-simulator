@@ -495,6 +495,7 @@ export default function App() {
 
   const [historyLog, setHistoryLog] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<"pipeline" | "objectives" | "ranking" | "standings" | "profile" | "alliances" | "loja" | "clube" | "varzea">("pipeline");
+  const [visitedTabsSeason, setVisitedTabsSeason] = useState<string[]>([]);
   const [organizacaoPoints, setOrganizacaoPoints] = useState<number>(100);
   const [localSponsorsCount, setLocalSponsorsCount] = useState<number>(0);
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
@@ -548,6 +549,137 @@ export default function App() {
     navigator.clipboard.writeText(text);
     setShareToast("Texto copiado! Abra o Instagram e cole nos seus Stories / Direct.");
     setTimeout(() => setShareToast(null), 3500);
+  };
+
+  const handleTabChange = (tab: "pipeline" | "objectives" | "ranking" | "standings" | "profile" | "alliances" | "loja" | "clube" | "varzea") => {
+    setActiveTab(tab);
+
+    if (["loja", "clube", "varzea", "alliances"].includes(tab) && !visitedTabsSeason.includes(tab)) {
+      setVisitedTabsSeason((prev) => [...prev, tab]);
+
+      let bonusMsg = "";
+      if (tab === "loja") {
+        setBankBalance((prev) => prev + 500);
+        bonusMsg = "🏆 INSPETORIA DE SEDE (LOJA): R$ 500 injetados no caixa por vistoriar os lotes de uniformes nesta temporada!";
+        playStadiumSound("cash");
+      } else if (tab === "clube") {
+        setStateTrackers((prev) => ({ ...prev, relacao_clube: Math.min(100, prev.relacao_clube + 2) }));
+        bonusMsg = "🏆 INSPETORIA DE SEDE (CLUBE): +2 de Relação com a Diretoria por manter canal de diálogo ativo!";
+        playStadiumSound("whistle");
+      } else if (tab === "varzea") {
+        setStateTrackers((prev) => ({ ...prev, moral: Math.min(100, prev.moral + 2) }));
+        bonusMsg = "🏆 INSPETORIA DE SEDE (VÁRZEA): +2 de Moral da Comunidade por inspecionar os trabalhos sociais!";
+        playStadiumSound("drum");
+      } else if (tab === "alliances") {
+        setStateTrackers((prev) => ({ ...prev, respeito_nacional: Math.min(100, prev.respeito_nacional + 2) }));
+        bonusMsg = "🏆 INSPETORIA DE SEDE (ALIANÇAS): +2 de Respeito Nacional por valorizar o Eixo Diplomático!";
+        playStadiumSound("whistle");
+      }
+
+      if (bonusMsg) {
+        setActionFeedback({
+          title: "INSPETORIA DE SEDE RECOMPENSADA!",
+          logText: bonusMsg,
+          deltas: [],
+        });
+      }
+    }
+  };
+
+  const getBoardSuggestion = () => {
+    // Check Loja profit
+    const maturedOrders = merchandiseOrders.filter((o) => season >= o.maturitySeason);
+    if (maturedOrders.length > 0) {
+      const totalLucro = maturedOrders.reduce((acc, o) => acc + o.returnAmount, 0);
+      return {
+        tab: "loja" as const,
+        badge: "LUCRO PRONTO",
+        badgeColor: "bg-emerald-500 text-black",
+        title: "💰 Resgate de Uniformes Encomendados!",
+        message: `Você possui R$ ${totalLucro.toLocaleString('pt-BR')} em lucro de uniformes prontos para recolhimento na Sede. Visite a Aba Loja!`,
+        buttonText: "Visitar Loja 🛒",
+      };
+    }
+
+    if (bankBalance >= 5000 && merchandiseOrders.length === 0) {
+      return {
+        tab: "loja" as const,
+        badge: "INVESTIMENTO",
+        badgeColor: "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30",
+        title: "🎽 Dica de Finanças: Encomende Lotes de Camisas!",
+        message: `Você possui R$ ${bankBalance.toLocaleString('pt-BR')} em caixa. Encomende um lote na Aba Loja para dobrar o investimento na próxima temporada!`,
+        buttonText: "Ir para Loja 🛒",
+      };
+    }
+
+    // Check Risco MP
+    if (stateTrackers.risco_mp >= 60) {
+      return {
+        tab: "varzea" as const,
+        badge: "ALERTA MP",
+        badgeColor: "bg-rose-500/20 text-rose-400 border border-rose-500/30",
+        title: "⚖️ Risco de Torcida Única / Proibição!",
+        message: `O Risco do MP está em ${stateTrackers.risco_mp}%. Visite a Aba Várzea para organizar Ações Sociais e reduzir a pressão judicial.`,
+        buttonText: "Ir para Várzea 🏘️",
+      };
+    }
+
+    // Check Relacao Clube
+    if (stateTrackers.relacao_clube <= 45) {
+      return {
+        tab: "clube" as const,
+        badge: "RELAÇÃO BAIXA",
+        badgeColor: "bg-amber-500/20 text-amber-400 border border-amber-500/30",
+        title: "🏛️ Relacionamento com a Diretoria do Clube",
+        message: `Sua relação com a diretoria do clube é de apenas ${stateTrackers.relacao_clube} pts. Visite a Aba Clube para alinhar interesses e garantir apoio!`,
+        buttonText: "Ir para Clube 🏛️",
+      };
+    }
+
+    // Check Etapa 10 / Alianças
+    if (pipelineIndex >= 8) {
+      return {
+        tab: "alliances" as const,
+        badge: "DIPLOMACIA",
+        badgeColor: "bg-purple-500/20 text-purple-400 border border-purple-500/30",
+        title: "🤝 Caravana de Fim de Temporada & Alianças",
+        message: "Confrontos decisivos de encerramento! Visite a Aba Alianças para fortalecer o Eixo Diplomático e convocar aliados.",
+        buttonText: "Ir para Alianças 🤝",
+      };
+    }
+
+    // Check Várzea / Projetos
+    if (organizacaoPoints >= 60) {
+      return {
+        tab: "varzea" as const,
+        badge: "ORGANIZAÇÃO",
+        badgeColor: "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30",
+        title: "🏘️ Projetos de Comunidade & Patrocínios",
+        message: `Você acumulou ${organizacaoPoints} Pontos de Organização! Visite a Aba Várzea para ativar patrocínios locais e reforçar o caixa.`,
+        buttonText: "Ir para Várzea 🏘️",
+      };
+    }
+
+    // Default Inspetoria de Sede suggestion
+    if (!visitedTabsSeason.includes("loja") || !visitedTabsSeason.includes("clube") || !visitedTabsSeason.includes("varzea") || !visitedTabsSeason.includes("alliances")) {
+      return {
+        tab: "clube" as const,
+        badge: "INSPETORIA",
+        badgeColor: "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30",
+        title: "🔍 Inspetoria de Sede da Temporada",
+        message: `Você ainda não vistoriou todas as abas nesta temporada! Visite a Loja, Clube, Várzea e Alianças para resgatar bônus exclusivos.`,
+        buttonText: "Explorar Sede 🏛️",
+      };
+    }
+
+    return {
+      tab: "pipeline" as const,
+      badge: "FOCO TOTAL",
+      badgeColor: "bg-amber-500/20 text-amber-400 border border-amber-500/30",
+      title: "🔥 Rumo à Próxima Etapa!",
+      message: "Tudo em ordem na sede! Continue o planejamento e lidere a bancada rumo ao topo do Ranking Nacional.",
+      buttonText: null,
+    };
   };
 
   const renderSocialShareSection = (
@@ -2006,6 +2138,7 @@ export default function App() {
         const nextSeason = season + 1;
         setSeason(nextSeason);
         setPipelineIndex(0);
+        setVisitedTabsSeason([]);
         setTorcidaUnicaActionAppliedForStep(null);
         setChallengedRivalTorcida(null);
 
@@ -3372,7 +3505,7 @@ export default function App() {
       {/* Navigation Tabs */}
       <div className="grid grid-cols-5 sm:grid-cols-9 gap-1 mb-2.5 relative z-10">
         <button
-          onClick={() => setActiveTab("pipeline")}
+          onClick={() => handleTabChange("pipeline")}
           className={`py-1.5 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer ${
             activeTab === "pipeline"
               ? "bg-amber-500 text-black shadow-md font-black"
@@ -3383,29 +3516,38 @@ export default function App() {
         </button>
 
         <button
-          onClick={() => setActiveTab("clube")}
-          className={`py-1.5 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer ${
+          onClick={() => handleTabChange("clube")}
+          className={`py-1.5 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer relative ${
             activeTab === "clube"
               ? "bg-amber-500 text-black shadow-md font-black"
               : "bg-zinc-900 text-zinc-400 border border-zinc-800"
           }`}
         >
           <Building2 className="w-3 h-3 text-indigo-400" /> Clube
+          {!visitedTabsSeason.includes("clube") && (
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 absolute top-1 right-1 animate-pulse" />
+          )}
         </button>
 
         <button
-          onClick={() => setActiveTab("varzea")}
-          className={`py-1.5 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer ${
+          onClick={() => handleTabChange("varzea")}
+          className={`py-1.5 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer relative ${
             activeTab === "varzea"
               ? "bg-amber-500 text-black shadow-md font-black"
               : "bg-zinc-900 text-zinc-400 border border-zinc-800"
           }`}
         >
           <HeartHandshake className="w-3 h-3 text-amber-400" /> Várzea
+          {organizacaoPoints >= 50 && (
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 absolute top-1 right-1 animate-pulse" />
+          )}
+          {!visitedTabsSeason.includes("varzea") && organizacaoPoints < 50 && (
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400/60 absolute top-1 right-1" />
+          )}
         </button>
 
         <button
-          onClick={() => setActiveTab("ranking")}
+          onClick={() => handleTabChange("ranking")}
           className={`py-1.5 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer ${
             activeTab === "ranking"
               ? "bg-amber-500 text-black shadow-md font-black"
@@ -3416,7 +3558,7 @@ export default function App() {
         </button>
 
         <button
-          onClick={() => setActiveTab("standings")}
+          onClick={() => handleTabChange("standings")}
           className={`py-1.5 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer ${
             activeTab === "standings"
               ? "bg-amber-500 text-black shadow-md font-black"
@@ -3427,7 +3569,7 @@ export default function App() {
         </button>
 
         <button
-          onClick={() => setActiveTab("objectives")}
+          onClick={() => handleTabChange("objectives")}
           className={`py-1.5 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer relative ${
             activeTab === "objectives"
               ? "bg-amber-500 text-black shadow-md font-black"
@@ -3441,7 +3583,7 @@ export default function App() {
         </button>
 
         <button
-          onClick={() => setActiveTab("profile")}
+          onClick={() => handleTabChange("profile")}
           className={`py-1.5 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer ${
             activeTab === "profile"
               ? "bg-amber-500 text-black shadow-md font-black"
@@ -3452,25 +3594,33 @@ export default function App() {
         </button>
 
         <button
-          onClick={() => setActiveTab("alliances")}
-          className={`py-1.5 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer ${
+          onClick={() => handleTabChange("alliances")}
+          className={`py-1.5 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer relative ${
             activeTab === "alliances"
               ? "bg-amber-500 text-black shadow-md font-black"
               : "bg-zinc-900 text-zinc-400 border border-zinc-800"
           }`}
         >
           <Compass className="w-3 h-3" /> Alianças
+          {!visitedTabsSeason.includes("alliances") && (
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-400 absolute top-1 right-1 animate-pulse" />
+          )}
         </button>
 
         <button
-          onClick={() => setActiveTab("loja")}
-          className={`py-1.5 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer ${
+          onClick={() => handleTabChange("loja")}
+          className={`py-1.5 px-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer relative ${
             activeTab === "loja"
               ? "bg-amber-500 text-black shadow-md font-black"
               : "bg-zinc-900 text-zinc-400 border border-zinc-800"
           }`}
         >
           <ShoppingBag className="w-3 h-3" /> Loja
+          {merchandiseOrders.some((o) => season >= o.maturitySeason) ? (
+            <span className="w-2 h-2 rounded-full bg-emerald-400 absolute top-1 right-1 animate-ping" />
+          ) : !visitedTabsSeason.includes("loja") ? (
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute top-1 right-1" />
+          ) : null}
         </button>
       </div>
 
@@ -3478,6 +3628,42 @@ export default function App() {
       {activeTab === "pipeline" && currentStep && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 shadow-xl flex-1 flex flex-col justify-between relative z-10">
           <div>
+            {/* Board Suggestion Card */}
+            {(() => {
+              const suggestion = getBoardSuggestion();
+              return (
+                <div className="mb-3 p-3 rounded-2xl bg-zinc-950/90 border border-amber-500/30 flex items-center justify-between gap-3 shadow-lg">
+                  <div className="flex items-start gap-2.5">
+                    <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 mt-0.5">
+                      <Building2 className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest">
+                          💡 SUGESTÃO DA DIRETORIA
+                        </span>
+                        <span className={`text-[8px] font-black px-1.5 py-0.5 rounded uppercase ${suggestion.badgeColor}`}>
+                          {suggestion.badge}
+                        </span>
+                      </div>
+                      <h4 className="text-xs font-black text-white">{suggestion.title}</h4>
+                      <p className="text-[11px] text-zinc-300 font-medium leading-snug mt-0.5">
+                        {suggestion.message}
+                      </p>
+                    </div>
+                  </div>
+                  {suggestion.buttonText && (
+                    <button
+                      onClick={() => handleTabChange(suggestion.tab)}
+                      className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-[10px] uppercase tracking-wider whitespace-nowrap shadow transition-all active:scale-95 cursor-pointer shrink-0"
+                    >
+                      {suggestion.buttonText}
+                    </button>
+                  )}
+                </div>
+              );
+            })()}
+
             {/* Mini Season Objectives Progress Bar */}
             {seasonObjectives.length > 0 && (
               <div
