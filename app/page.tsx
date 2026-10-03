@@ -3365,65 +3365,56 @@ export default function App() {
         />
 
         {/* Single Integrated Compact Header Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pb-1 border-b border-zinc-800/60 mb-2">
-          {/* Top Row / Left: Logo, Torcida Name & Prominent Mobile Reset Button */}
-          <div className="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto min-w-0">
-            <div className="flex items-center gap-2 min-w-0">
-              <img
-                src="/bancada_logo.png"
-                alt="Bancada Simulator"
-                className="h-6 sm:h-7 w-auto object-contain filter drop-shadow-[0_2px_8px_rgba(220,38,38,0.4)] shrink-0"
-              />
+        <div className="flex flex-col gap-1.5 pb-1 border-b border-zinc-800/60 mb-2">
+          {/* Top Row: Logo & Full Torcida Name (No truncation) */}
+          <div className="flex items-center gap-2 w-full min-w-0">
+            <img
+              src="/bancada_logo.png"
+              alt="Bancada Simulator"
+              className="h-6 sm:h-7 w-auto object-contain filter drop-shadow-[0_2px_8px_rgba(220,38,38,0.4)] shrink-0"
+            />
 
-              <div className="flex items-center gap-1.5 min-w-0 bg-zinc-950/80 px-2 py-0.5 rounded-xl border border-zinc-800">
-                <div className="relative shrink-0 flex items-center justify-center w-4 h-4 rounded-md overflow-hidden border border-white/20" style={{ backgroundColor: themePrimary }}>
-                  <div className="w-full h-1/2 bottom-0 absolute" style={{ backgroundColor: themeSecondary }} />
-                  <Shield className="w-2.5 h-2.5 text-white relative z-10" />
-                </div>
-                <span className="text-xs font-black text-amber-400 uppercase tracking-wide truncate">
-                  {currentTorcida?.torcida}
-                </span>
-                <span className="text-amber-300 text-xs shrink-0">👑</span>
-                <span className="text-[9px] font-bold text-zinc-400 uppercase truncate hidden sm:inline">
-                  ({currentTorcida?.clube})
-                </span>
+            <div className="flex items-center gap-1.5 min-w-0 bg-zinc-950/80 px-2 py-1 rounded-xl border border-zinc-800 flex-wrap">
+              <div className="relative shrink-0 flex items-center justify-center w-4 h-4 rounded-md overflow-hidden border border-white/20" style={{ backgroundColor: themePrimary }}>
+                <div className="w-full h-1/2 bottom-0 absolute" style={{ backgroundColor: themeSecondary }} />
+                <Shield className="w-2.5 h-2.5 text-white relative z-10" />
               </div>
+              <span className="text-xs sm:text-sm font-black text-amber-400 uppercase tracking-wide">
+                {currentTorcida?.torcida}
+              </span>
+              <span className="text-amber-300 text-xs shrink-0">👑</span>
+              <span className="text-[9px] sm:text-xs font-bold text-zinc-400 uppercase">
+                ({currentTorcida?.clube})
+              </span>
             </div>
-
-            {/* Prominent Reset Button - Always visible top right on Mobile */}
-            <button
-              onClick={() => setShowResetConfirm(true)}
-              className="py-1 px-2.5 rounded-xl bg-red-950/90 border border-red-500/70 hover:bg-red-900 text-red-300 transition-all flex items-center gap-1.5 text-[10px] font-black uppercase cursor-pointer shrink-0 shadow-md active:scale-95"
-              title="Reiniciar Jogo e Escolher Outra Torcida"
-            >
-              <RotateCcw className="w-3.5 h-3.5 text-red-400 shrink-0" />
-              <span>Reiniciar</span>
-            </button>
           </div>
 
-          {/* Row 2 / Right: Caixa, Ciclo, Temporada & Actions */}
-          <div className="flex items-center justify-between sm:justify-end gap-1.5 shrink-0 flex-wrap w-full sm:w-auto pt-1 sm:pt-0 border-t border-zinc-800/40 sm:border-t-0">
-            {/* Caixa Pill */}
-            <div className="px-2.5 py-0.5 rounded-full bg-emerald-950/90 border border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.15)] flex items-center gap-1">
-              <span className="text-[10px]">💰</span>
-              <span className="text-[7px] font-black text-emerald-400 uppercase tracking-widest">CAIXA</span>
-              <span className={`text-xs font-black ${bankBalance >= 0 ? "text-emerald-300" : "text-red-400 animate-pulse"}`}>
-                R$ {bankBalance.toLocaleString('pt-BR')}
+          {/* Bottom Row: Caixa, Ciclo, Temporada & Compact Actions (including Reset button) */}
+          <div className="flex items-center justify-between gap-1 sm:gap-1.5 shrink-0 flex-wrap w-full pt-1 border-t border-zinc-800/40">
+            {/* Left/Center stats */}
+            <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+              {/* Caixa Pill */}
+              <div className="px-2 py-0.5 rounded-full bg-emerald-950/90 border border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.15)] flex items-center gap-1">
+                <span className="text-[9px]">💰</span>
+                <span className="text-[7px] font-black text-emerald-400 uppercase tracking-widest">CAIXA</span>
+                <span className={`text-[11px] font-black ${bankBalance >= 0 ? "text-emerald-300" : "text-red-400 animate-pulse"}`}>
+                  R$ {bankBalance.toLocaleString('pt-BR')}
+                </span>
+              </div>
+
+              {/* Ciclo Pill */}
+              <span className="px-1.5 py-0.5 rounded-xl bg-zinc-950/90 border border-amber-500/30 text-amber-300 text-[8.5px] sm:text-[9px] font-black uppercase tracking-wider">
+                📅 CICLO {pipelineIndex + 1}/{pipeline.length}
+              </span>
+
+              {/* Ano Pill */}
+              <span className="px-1.5 py-0.5 rounded-xl bg-zinc-950/90 border border-zinc-800 text-zinc-300 text-[8.5px] sm:text-[9px] font-black uppercase tracking-wider">
+                ANO {season}/15
               </span>
             </div>
 
-            {/* Ciclo Pill */}
-            <span className="px-2 py-0.5 rounded-xl bg-zinc-950/90 border border-amber-500/30 text-amber-300 text-[9px] font-black uppercase tracking-wider">
-              📅 CICLO {pipelineIndex + 1}/{pipeline.length}
-            </span>
-
-            {/* Ano Pill */}
-            <span className="px-2 py-0.5 rounded-xl bg-zinc-950/90 border border-zinc-800 text-zinc-300 text-[9px] font-black uppercase tracking-wider">
-              ANO {season}/15
-            </span>
-
-            {/* Utility Action Buttons */}
-            <div className="flex items-center gap-1 ml-auto sm:ml-0">
+            {/* Right Action Buttons (Som, Guia, Save, Compact Reiniciar, Collapse) */}
+            <div className="flex items-center gap-1 ml-auto">
               <button
                 onClick={() => setSoundEnabled(!soundEnabled)}
                 className="p-1 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white cursor-pointer"
@@ -3447,6 +3438,17 @@ export default function App() {
                 <Download className="w-3.5 h-3.5 text-emerald-400" />
                 <span className="hidden md:inline">Save</span>
               </button>
+
+              {/* Compact Reiniciar Button on Bottom Row */}
+              <button
+                onClick={() => setShowResetConfirm(true)}
+                className="p-1 px-1.5 rounded-lg bg-red-950/80 border border-red-500/50 hover:bg-red-900 text-red-300 transition-colors flex items-center gap-1 text-[8.5px] sm:text-[9px] font-black uppercase cursor-pointer shrink-0"
+                title="Reiniciar Jogo e Escolher Outra Torcida"
+              >
+                <RotateCcw className="w-3 h-3 text-red-400 shrink-0" />
+                <span>Reset</span>
+              </button>
+
               <button
                 onClick={() => setIsAttributesCollapsed(!isAttributesCollapsed)}
                 className="p-1 px-1.5 rounded-lg bg-zinc-950 border border-zinc-800 hover:border-amber-500 text-zinc-400 hover:text-amber-400 transition-colors flex items-center gap-1 text-[9px] font-bold cursor-pointer"
