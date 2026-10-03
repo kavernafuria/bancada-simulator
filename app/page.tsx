@@ -284,6 +284,7 @@ export default function App() {
   const [seasonObjectives, setSeasonObjectives] = useState<SeasonObjective[]>([]);
   const [seasonStartSnapshot, setSeasonStartSnapshot] = useState<SeasonStartSnapshot | null>(null);
   const [careerStartSnapshot, setCareerStartSnapshot] = useState<SeasonStartSnapshot | null>(null);
+  const [pendingSeasonEndEvaluation, setPendingSeasonEndEvaluation] = useState<boolean>(false);
   const [seasonEndReport, setSeasonEndReport] = useState<{
     completedCount: number;
     totalCashBonus: number;
@@ -2003,6 +2004,15 @@ export default function App() {
         }
       }
     } else {
+      if (activeMatchResult) {
+        setPendingSeasonEndEvaluation(true);
+      } else {
+        executeSeasonEndEvaluation();
+      }
+    }
+  };
+
+  const executeSeasonEndEvaluation = () => {
       // Record Season History Evolution
       if (currentTorcida) {
         const ranking = simulateNationalRanking(currentTorcida, stats, stateTrackers, season);
@@ -2298,7 +2308,6 @@ export default function App() {
           }
         }
       }
-    }
   };
 
   const handleAcceptAllianceProposal = () => {
@@ -5310,7 +5319,10 @@ export default function App() {
             <button
               onClick={() => {
                 setActiveMatchResult(null);
-                if (pendingSocialMediaLeak) {
+                if (pendingSeasonEndEvaluation) {
+                  setPendingSeasonEndEvaluation(false);
+                  executeSeasonEndEvaluation();
+                } else if (pendingSocialMediaLeak) {
                   setActiveSocialMediaLeak(pendingSocialMediaLeak);
                   setPendingSocialMediaLeak(null);
                 }

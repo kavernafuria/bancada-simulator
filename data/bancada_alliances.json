@@ -69,6 +69,18 @@
         "Gaviões da Fiel",
         "Fúria Jovem do Botafogo"
       ]
+    },
+    "INDEPENDENTE": {
+      "name": "Bloco Independente & Alianças Regionais",
+      "symbol": "🛡️",
+      "description": "Agremiações de postura autônoma/independente, sem vinculação cega a eixos nacionais, focadas na identidade regional e em pactos de pista locais.",
+      "members": [
+        "Esquadrão Alvinegro",
+        "Comando Azul",
+        "Leões da Fabulosa",
+        "Fúria Andreense",
+        "Guerreiros do Tigre"
+      ]
     }
   },
   "geopolitica_nordeste": {

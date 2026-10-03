@@ -106,7 +106,8 @@ export function generateEtapa10CaravanChoices(
     if (clubTorcidas.length === 0) return null;
     if (clubTorcidas.length === 1) return clubTorcidas[0];
 
-    const targetTier = playerRank <= 3 ? "S" : playerRank <= 10 ? "A" : playerRank <= 20 ? "B" : "C";
+    const playerTier = (currentTorcida.tier || "B").toUpperCase();
+    const targetTier = playerTier.startsWith("C") ? "C" : playerTier.startsWith("B") ? "B" : playerTier.startsWith("A") ? "A" : "S";
     const exactMatch = clubTorcidas.find((t) => (t.tier || "B").toUpperCase().startsWith(targetTier));
     return exactMatch || clubTorcidas[0];
   };
@@ -123,7 +124,9 @@ export function generateEtapa10CaravanChoices(
     derbyTeam = getBestTorcidaForClub(currentTorcida.rival_secundario);
   }
   if (!derbyTeam) {
-    derbyTeam = availableTeams.find((t) => t.estado === currentTorcida.estado && (t.tier === "S" || t.tier === "A"));
+    const playerTier = (currentTorcida.tier || "B").toUpperCase();
+    derbyTeam = availableTeams.find((t) => t.estado === currentTorcida.estado && (t.tier || "B").toUpperCase() === playerTier) ||
+      availableTeams.find((t) => t.estado === currentTorcida.estado);
   }
   if (!derbyTeam && availableTeams.length > 0) {
     derbyTeam = availableTeams[0];

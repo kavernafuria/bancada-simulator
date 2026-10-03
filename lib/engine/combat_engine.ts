@@ -21,10 +21,12 @@ export function calculateScoutIntel(
     ? Math.round(basePlayerMembers * 1.3)
     : Math.round(basePlayerMembers * (isInterior ? 0.9 : 1.1));
 
+  const rivalTier = (derby.teamData?.tier || "B").toUpperCase();
+  const rivalTierMult = rivalTier.startsWith("S") ? 1.12 : rivalTier.startsWith("A") ? 1.05 : rivalTier.startsWith("B") ? 0.95 : 0.85;
   const baseRivalMembers = derby.isAllyGame
-    ? Math.round(stats.contingente * 40)
-    : Math.round(stats.poder_pista * 40 * (derby.isHome ? 0.8 : 1.2));
-  const rivalMembersWaiting = Math.max(800, Math.round(baseRivalMembers));
+    ? Math.round(basePlayerMembers * 0.85)
+    : Math.round(basePlayerMembers * (derby.isHome ? 0.9 : 1.05) * rivalTierMult);
+  const rivalMembersWaiting = Math.max(350, Math.round(baseRivalMembers));
 
   let policePresence: "SEVERA" | "PACIFICA" | "REFORCADA" | "OPERACAO_PADRAO" = "OPERACAO_PADRAO";
   if (derby.isAllyGame) {

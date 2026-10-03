@@ -66,6 +66,7 @@ export interface DerbyMatchInfo {
   isAllyGame: boolean;
   importanceDescription: string;
   competition?: string;
+  teamData?: any;
 }
 
 export interface PoliceMeetingChoice {
