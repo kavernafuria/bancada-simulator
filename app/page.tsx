@@ -478,6 +478,7 @@ export default function App() {
     title: string;
     logText: string;
     deltas: FormattedDelta[];
+    shouldAdvancePipeline?: boolean;
   } | null>(null);
 
   // BATTLE ANIMATION & HISTORY TRACKING
@@ -585,6 +586,7 @@ export default function App() {
           title: "INSPETORIA DE SEDE RECOMPENSADA!",
           logText: bonusMsg,
           deltas: [],
+          shouldAdvancePipeline: false,
         });
       }
     }
@@ -1263,12 +1265,16 @@ export default function App() {
       title: "DESFECHO DA DECISÃO",
       logText: choice.log,
       deltas: choice.formattedDeltas,
+      shouldAdvancePipeline: true,
     });
   };
 
   const handleConfirmFeedback = () => {
+    const shouldAdvance = actionFeedback?.shouldAdvancePipeline ?? false;
     setActionFeedback(null);
-    advancePipeline();
+    if (shouldAdvance) {
+      advancePipeline();
+    }
   };
 
   const handleSelectEtapa10CaravanChoice = (choice: Etapa10CaravanChoice) => {
@@ -2658,6 +2664,7 @@ export default function App() {
       title: action.title,
       logText: action.logText,
       deltas: action.deltas,
+      shouldAdvancePipeline: false,
     });
   };
 
@@ -2741,6 +2748,7 @@ export default function App() {
       title: isBrigaInterna ? "💥 VÁRZEA CONVOCADA (COM BRIGA INTERNA!)" : action.title,
       logText: finalLog,
       deltas: finalDeltas,
+      shouldAdvancePipeline: false,
     });
   };
 
