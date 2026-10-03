@@ -3457,10 +3457,11 @@ export default function App() {
               </button>
               <button
                 onClick={() => setShowResetConfirm(true)}
-                className="p-1 px-1.5 rounded-lg bg-zinc-950 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-amber-400 transition-colors flex items-center gap-1 text-[9px] font-bold cursor-pointer"
-                title="Reiniciar"
+                className="p-1 px-2 rounded-lg bg-red-950/90 border border-red-500/60 hover:bg-red-900 text-red-300 transition-colors flex items-center gap-1 text-[9px] font-black uppercase cursor-pointer shrink-0 shadow-sm"
+                title="Reiniciar Jogo"
               >
-                <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
+                <RotateCcw className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                <span>Reiniciar</span>
               </button>
               <button
                 onClick={() => setIsAttributesCollapsed(!isAttributesCollapsed)}
