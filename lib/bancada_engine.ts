@@ -729,25 +729,9 @@ export function applyTierElectionCrisis(t: OfficialTorcida): OfficialTorcida {
   };
 }
 
-// Diminishing Returns Curve Math - strictly progressive, fair & anti-inflation
+// Direct Stat Increment Math (exact deltas clamped to [0, 100])
 export function applyDiminishingReturns(currentVal: number, delta: number): number {
-  if (delta <= 0) return Math.max(0, currentVal + delta);
-  if (currentVal >= 100) return 100;
-
-  let factor = 0.85;
-  if (currentVal >= 90) {
-    factor = 0.08;
-  } else if (currentVal >= 75) {
-    factor = 0.15;
-  } else if (currentVal >= 60) {
-    factor = 0.30;
-  } else if (currentVal >= 40) {
-    factor = 0.50;
-  }
-
-  // Garantia: Qualquer escolha com delta positivo (> 0) gera pelo menos +1 de aumento real
-  const gain = Math.max(1, Math.round(delta * factor));
-  return Math.min(100, currentVal + gain);
+  return Math.min(100, Math.max(0, currentVal + delta));
 }
 
 // Create Custom Torcida with Archetype & Colors
