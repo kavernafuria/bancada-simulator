@@ -729,9 +729,17 @@ export function applyTierElectionCrisis(t: OfficialTorcida): OfficialTorcida {
   };
 }
 
-// Direct Stat Increment Math (exact deltas clamped to [0, 100])
+// Stat Increment Math (100% gain < 90, 50% gain >= 90)
 export function applyDiminishingReturns(currentVal: number, delta: number): number {
-  return Math.min(100, Math.max(0, currentVal + delta));
+  if (delta <= 0) return Math.max(0, currentVal + delta);
+  if (currentVal >= 100) return 100;
+
+  let gain = delta;
+  if (currentVal >= 90) {
+    gain = Math.max(1, Math.round(delta * 0.50));
+  }
+
+  return Math.min(100, currentVal + gain);
 }
 
 // Create Custom Torcida with Archetype & Colors
