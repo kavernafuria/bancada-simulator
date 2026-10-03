@@ -2183,27 +2183,7 @@ export default function App() {
           if (soundEnabled) playStadiumSound("cash");
         }
 
-        // MÓDULO 1: Torcida Única Season Decrement & Revocation Check (3 temporadas de vigência, travado para nunca mais repetir)
-        if (torcidaUnicaState.isTorcidaUnica) {
-          const updatedCounter = torcidaUnicaState.torcidaUnicaCounter - 1;
-          if (updatedCounter <= 0) {
-            setTorcidaUnicaState((prev) => ({
-              ...prev,
-              isTorcidaUnica: false,
-              torcidaUnicaCounter: 0,
-              permanentCostMult: 1.20,
-              hasPendingRevocationNews: true,
-              hasAlreadyServedTorcidaUnica: true,
-            }));
-            setActiveTorcidaUnicaModalMode("REVOCATION_NEWS");
-          } else {
-            setTorcidaUnicaState((prev) => ({
-              ...prev,
-              torcidaUnicaCounter: updatedCounter,
-              hasAlreadyServedTorcidaUnica: true,
-            }));
-          }
-        }
+        // MÓDULO 1: Torcida Única Vigência por 6 Confrontos (decrementado estritamente por confronto disputado)
 
         // MÓDULO 2: Dynamic Press Conference Selection (Rotaciona entre 12 tipos)
         const availablePressCandidates =
