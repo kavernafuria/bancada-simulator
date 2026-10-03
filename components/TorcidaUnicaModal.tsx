@@ -10,6 +10,7 @@ interface TorcidaUnicaModalProps {
   rivalTorcidaName?: string;
   stadiumName?: string;
   userBalance: number;
+  torcidaUnicaCounter?: number;
   onDismissNews: () => void;
   onSelectAction: (result: TorcidaUnicaActionResult) => void;
 }
@@ -20,6 +21,7 @@ export function TorcidaUnicaModal({
   rivalTorcidaName = "Rival Principal",
   stadiumName = "Estádio",
   userBalance,
+  torcidaUnicaCounter = 6,
   onDismissNews,
   onSelectAction,
 }: TorcidaUnicaModalProps) {
@@ -73,7 +75,7 @@ export function TorcidaUnicaModal({
           </div>
 
           <div className="rounded-lg bg-red-950/40 p-3 text-xs text-red-300 border border-red-900/30">
-            <strong>Efeito do Decreto:</strong> Pelas próximas 3 temporadas, a sua torcida estará banida dos clássicos fora de casa e os clássicos em casa não terão visitantes. O menu de Matchday mudou para a Gestão de Crise de Torcida Única.
+            <strong>Efeito do Decreto:</strong> Pelos próximos {torcidaUnicaCounter} confrontos diretos de clássicos, a sua torcida estará banida dos jogos fora de casa e os jogos em casa não terão visitantes. O menu de Matchday mudou para a Gestão de Crise de Torcida Única.
           </div>
 
           <button
@@ -107,7 +109,7 @@ export function TorcidaUnicaModal({
               🗞️ A VIOLÊNCIA SÓ MUDOU DE ENDEREÇO. ESTADO LIBERA VISITANTES!
             </h2>
             <p className="text-sm leading-relaxed text-zinc-300 italic">
-              &quot;O Ministério Público revogou a exigência de torcida única nos clássicos após 3 temporadas. Os setores visitantes foram liberados novamente com escolta reforçada da PM, porém os ingressos e a logística terão um acréscimo permanente de +20% no valor.&quot;
+              &quot;O Ministério Público revogou a exigência de torcida única nos clássicos após 6 confrontos diretos. Os setores visitantes foram liberados novamente com escolta reforçada da PM, porém os ingressos e a logística terão um acréscimo permanente de +20% no valor.&quot;
             </p>
           </div>
 
@@ -198,7 +200,7 @@ export function TorcidaUnicaModal({
             </div>
             <div>
               <span className="rounded bg-red-950 px-2 py-0.5 text-[10px] font-bold text-red-400 border border-red-800 uppercase">
-                VIGÊNCIA DE TORCIDA ÚNICA (MP)
+                VIGÊNCIA DE TORCIDA ÚNICA ({torcidaUnicaCounter} CONFRONTOS RESTANTES)
               </span>
               <h2 className="text-lg font-black uppercase text-zinc-100">
                 {scenario === "VISITANTE"

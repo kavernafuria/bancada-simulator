@@ -459,7 +459,7 @@ export default function App() {
         setTorcidaUnicaState((prev) => ({
           ...prev,
           isTorcidaUnica: true,
-          torcidaUnicaCounter: 3,
+          torcidaUnicaCounter: 6,
           permanentCostMult: 1.0,
           hasPendingActivationNews: true,
           hasAlreadyServedTorcidaUnica: true,
@@ -1239,7 +1239,13 @@ export default function App() {
         const updated = { ...prev };
         Object.entries(choice.stateEffects).forEach(([key, val]) => {
           const k = key as keyof StateTrackers;
-          if (val !== undefined) updated[k] = Math.min(100, Math.max(0, updated[k] + val));
+          if (val !== undefined) {
+            if (k === "risco_mp") {
+              updated.risco_mp = Math.min(100, Math.max(0, updated.risco_mp + val));
+            } else {
+              updated[k] = applyDiminishingReturns(updated[k], val);
+            }
+          }
         });
         if (updated.risco_mp >= 100) {
           setIsBannedByMP(true);
@@ -6167,19 +6173,19 @@ export default function App() {
           onSelectAction={(res: TorcidaUnicaActionResult) => {
             if (res.statEffects) {
               setStats((prev) => ({
-                contingente: Math.min(100, Math.max(0, prev.contingente + (res.statEffects?.contingente || 0))),
-                pressao_bancada: Math.min(100, Math.max(0, prev.pressao_bancada + (res.statEffects?.pressao_bancada || 0))),
-                poder_pista: Math.min(100, Math.max(0, prev.poder_pista + (res.statEffects?.poder_pista || 0))),
-                caravana: Math.min(100, Math.max(0, prev.caravana + (res.statEffects?.caravana || 0))),
-                autonomia_financeira: Math.min(100, Math.max(0, prev.autonomia_financeira + (res.statEffects?.autonomia_financeira || 0))),
+                contingente: applyDiminishingReturns(prev.contingente, res.statEffects?.contingente || 0),
+                pressao_bancada: applyDiminishingReturns(prev.pressao_bancada, res.statEffects?.pressao_bancada || 0),
+                poder_pista: applyDiminishingReturns(prev.poder_pista, res.statEffects?.poder_pista || 0),
+                caravana: applyDiminishingReturns(prev.caravana, res.statEffects?.caravana || 0),
+                autonomia_financeira: applyDiminishingReturns(prev.autonomia_financeira, res.statEffects?.autonomia_financeira || 0),
               }));
             }
             if (res.stateEffects) {
               setStateTrackers((prev) => ({
-                moral: Math.min(100, Math.max(0, prev.moral + (res.stateEffects?.moral || 0))),
+                moral: applyDiminishingReturns(prev.moral, res.stateEffects?.moral || 0),
                 risco_mp: Math.min(100, Math.max(0, prev.risco_mp + (res.stateEffects?.risco_mp || 0))),
-                relacao_clube: Math.min(100, Math.max(0, prev.relacao_clube + (res.stateEffects?.relacao_clube || 0))),
-                respeito_nacional: Math.min(100, Math.max(0, prev.respeito_nacional + (res.stateEffects?.respeito_nacional || 0))),
+                relacao_clube: applyDiminishingReturns(prev.relacao_clube, res.stateEffects?.relacao_clube || 0),
+                respeito_nacional: applyDiminishingReturns(prev.respeito_nacional, res.stateEffects?.respeito_nacional || 0),
               }));
             }
             if (res.cashChange !== undefined && res.cashChange !== 0) {
@@ -6187,7 +6193,31 @@ export default function App() {
             }
             setHistoryLog((prev) => [`[Torcida Única] ${res.log}`, ...prev]);
             setTorcidaUnicaActionAppliedForStep(pipelineIndex);
-            setActiveTorcidaUnicaModalMode(null);
+
+            // Decremento de confrontos sob Torcida Única (6 confrontos diretos)
+            if (torcidaUnicaState.isTorcidaUnica) {
+              const updatedCounter = torcidaUnicaState.torcidaUnicaCounter - 1;
+              if (updatedCounter <= 0) {
+                setTorcidaUnicaState((prev) => ({
+                  ...prev,
+                  isTorcidaUnica: false,
+                  torcidaUnicaCounter: 0,
+                  permanentCostMult: 1.20,
+                  hasPendingRevocationNews: true,
+                  hasAlreadyServedTorcidaUnica: true,
+                }));
+                setActiveTorcidaUnicaModalMode("REVOCATION_NEWS");
+              } else {
+                setTorcidaUnicaState((prev) => ({
+                  ...prev,
+                  torcidaUnicaCounter: updatedCounter,
+                  hasAlreadyServedTorcidaUnica: true,
+                }));
+                setActiveTorcidaUnicaModalMode(null);
+              }
+            } else {
+              setActiveTorcidaUnicaModalMode(null);
+            }
 
             if (res.id === "MAIOR_FESTA_ANO" || res.id === "FESTA_CALDEIRAO_CAMPINHO") {
               setActiveSelectedTactic({
@@ -6273,11 +6303,11 @@ export default function App() {
           onSelectChoice={(choice: PressConferenceChoice) => {
             if (choice.statEffects) {
               setStats((prev) => ({
-                contingente: Math.min(100, Math.max(0, prev.contingente + (choice.statEffects?.contingente || 0))),
-                pressao_bancada: Math.min(100, Math.max(0, prev.pressao_bancada + (choice.statEffects?.pressao_bancada || 0))),
-                poder_pista: Math.min(100, Math.max(0, prev.poder_pista + (choice.statEffects?.poder_pista || 0))),
-                caravana: Math.min(100, Math.max(0, prev.caravana + (choice.statEffects?.caravana || 0))),
-                autonomia_financeira: Math.min(100, Math.max(0, prev.autonomia_financeira + (choice.statEffects?.autonomia_financeira || 0))),
+                contingente: applyDiminishingReturns(prev.contingente, choice.statEffects?.contingente || 0),
+                pressao_bancada: applyDiminishingReturns(prev.pressao_bancada, choice.statEffects?.pressao_bancada || 0),
+                poder_pista: applyDiminishingReturns(prev.poder_pista, choice.statEffects?.poder_pista || 0),
+                caravana: applyDiminishingReturns(prev.caravana, choice.statEffects?.caravana || 0),
+                autonomia_financeira: applyDiminishingReturns(prev.autonomia_financeira, choice.statEffects?.autonomia_financeira || 0),
               }));
             }
             if (choice.stateEffects) {
@@ -6294,10 +6324,10 @@ export default function App() {
                 triggerMPRiskFlow(newMP, deltaMP);
 
                 return {
-                  moral: Math.min(100, Math.max(0, prev.moral + (choice.stateEffects?.moral || 0))),
+                  moral: applyDiminishingReturns(prev.moral, choice.stateEffects?.moral || 0),
                   risco_mp: newMP,
-                  relacao_clube: Math.min(100, Math.max(0, prev.relacao_clube + (choice.stateEffects?.relacao_clube || 0))),
-                  respeito_nacional: Math.min(100, Math.max(0, prev.respeito_nacional + (choice.stateEffects?.respeito_nacional || 0))),
+                  relacao_clube: applyDiminishingReturns(prev.relacao_clube, choice.stateEffects?.relacao_clube || 0),
+                  respeito_nacional: applyDiminishingReturns(prev.respeito_nacional, choice.stateEffects?.respeito_nacional || 0),
                 };
               });
             }
