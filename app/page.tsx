@@ -3365,32 +3365,44 @@ export default function App() {
         />
 
         {/* Single Integrated Compact Header Bar */}
-        <div className="flex items-center justify-between gap-2 flex-wrap pb-1 border-b border-zinc-800/60 mb-2">
-          {/* Left: Logo & Torcida Crest / Name */}
-          <div className="flex items-center gap-2 min-w-0">
-            <img
-              src="/bancada_logo.png"
-              alt="Bancada Simulator"
-              className="h-6 sm:h-7 w-auto object-contain filter drop-shadow-[0_2px_8px_rgba(220,38,38,0.4)] shrink-0"
-            />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pb-1 border-b border-zinc-800/60 mb-2">
+          {/* Top Row / Left: Logo, Torcida Name & Prominent Mobile Reset Button */}
+          <div className="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto min-w-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <img
+                src="/bancada_logo.png"
+                alt="Bancada Simulator"
+                className="h-6 sm:h-7 w-auto object-contain filter drop-shadow-[0_2px_8px_rgba(220,38,38,0.4)] shrink-0"
+              />
 
-            <div className="flex items-center gap-1.5 min-w-0 bg-zinc-950/80 px-2 py-0.5 rounded-xl border border-zinc-800">
-              <div className="relative shrink-0 flex items-center justify-center w-4 h-4 rounded-md overflow-hidden border border-white/20" style={{ backgroundColor: themePrimary }}>
-                <div className="w-full h-1/2 bottom-0 absolute" style={{ backgroundColor: themeSecondary }} />
-                <Shield className="w-2.5 h-2.5 text-white relative z-10" />
+              <div className="flex items-center gap-1.5 min-w-0 bg-zinc-950/80 px-2 py-0.5 rounded-xl border border-zinc-800">
+                <div className="relative shrink-0 flex items-center justify-center w-4 h-4 rounded-md overflow-hidden border border-white/20" style={{ backgroundColor: themePrimary }}>
+                  <div className="w-full h-1/2 bottom-0 absolute" style={{ backgroundColor: themeSecondary }} />
+                  <Shield className="w-2.5 h-2.5 text-white relative z-10" />
+                </div>
+                <span className="text-xs font-black text-amber-400 uppercase tracking-wide truncate">
+                  {currentTorcida?.torcida}
+                </span>
+                <span className="text-amber-300 text-xs shrink-0">👑</span>
+                <span className="text-[9px] font-bold text-zinc-400 uppercase truncate hidden sm:inline">
+                  ({currentTorcida?.clube})
+                </span>
               </div>
-              <span className="text-xs font-black text-amber-400 uppercase tracking-wide truncate">
-                {currentTorcida?.torcida}
-              </span>
-              <span className="text-amber-300 text-xs shrink-0">👑</span>
-              <span className="text-[9px] font-bold text-zinc-400 uppercase truncate hidden sm:inline">
-                ({currentTorcida?.clube})
-              </span>
             </div>
+
+            {/* Prominent Reset Button - Always visible top right on Mobile */}
+            <button
+              onClick={() => setShowResetConfirm(true)}
+              className="py-1 px-2.5 rounded-xl bg-red-950/90 border border-red-500/70 hover:bg-red-900 text-red-300 transition-all flex items-center gap-1.5 text-[10px] font-black uppercase cursor-pointer shrink-0 shadow-md active:scale-95"
+              title="Reiniciar Jogo e Escolher Outra Torcida"
+            >
+              <RotateCcw className="w-3.5 h-3.5 text-red-400 shrink-0" />
+              <span>Reiniciar</span>
+            </button>
           </div>
 
-          {/* Center/Right: Caixa, Ciclo, Temporada & Actions */}
-          <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
+          {/* Row 2 / Right: Caixa, Ciclo, Temporada & Actions */}
+          <div className="flex items-center justify-between sm:justify-end gap-1.5 shrink-0 flex-wrap w-full sm:w-auto pt-1 sm:pt-0 border-t border-zinc-800/40 sm:border-t-0">
             {/* Caixa Pill */}
             <div className="px-2.5 py-0.5 rounded-full bg-emerald-950/90 border border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.15)] flex items-center gap-1">
               <span className="text-[10px]">💰</span>
@@ -3410,8 +3422,8 @@ export default function App() {
               ANO {season}/15
             </span>
 
-            {/* Compact Action Buttons */}
-            <div className="flex items-center gap-1">
+            {/* Utility Action Buttons */}
+            <div className="flex items-center gap-1 ml-auto sm:ml-0">
               <button
                 onClick={() => setSoundEnabled(!soundEnabled)}
                 className="p-1 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white cursor-pointer"
@@ -3434,14 +3446,6 @@ export default function App() {
               >
                 <Download className="w-3.5 h-3.5 text-emerald-400" />
                 <span className="hidden md:inline">Save</span>
-              </button>
-              <button
-                onClick={() => setShowResetConfirm(true)}
-                className="p-1 px-2 rounded-lg bg-red-950/90 border border-red-500/60 hover:bg-red-900 text-red-300 transition-colors flex items-center gap-1 text-[9px] font-black uppercase cursor-pointer shrink-0 shadow-sm"
-                title="Reiniciar Jogo"
-              >
-                <RotateCcw className="w-3.5 h-3.5 text-red-400 shrink-0" />
-                <span>Reiniciar</span>
               </button>
               <button
                 onClick={() => setIsAttributesCollapsed(!isAttributesCollapsed)}
