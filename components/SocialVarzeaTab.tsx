@@ -53,7 +53,7 @@ export function SocialVarzeaTab({
           </div>
           <div>
             <h2 className="text-xs font-black uppercase text-white tracking-wide">
-              Engajamento Comunitário, Social & Várzea
+              Engajamento Comunitário & Ações Sociais
             </h2>
             <p className="text-[10px] text-zinc-400">
               Ações nos bairros, patrocínios do comércio local e mobilização das quebradas.

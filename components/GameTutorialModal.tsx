@@ -215,9 +215,9 @@ const TUTORIAL_STEPS = [
           </div>
 
           <div className="bg-zinc-950 p-2.5 rounded-xl border border-amber-500/40">
-            <strong className="text-amber-400 font-black block text-[11px] mb-0.5">🏟️ Relações com o Clube & 🚩 Social e Várzea:</strong>
+            <strong className="text-amber-400 font-black block text-[11px] mb-0.5">🏟️ Relações com o Clube & 🚩 Ações Sociais:</strong>
             <p className="text-[10.5px] text-zinc-400">
-              Na aba <strong className="text-indigo-400">Clube</strong> (relação estabilizada em 50 pts), negocie cotas de ingressos, apoio de ônibus e conciliação política. Na aba <strong className="text-amber-400">Várzea</strong>, atraia patrocinadores locais e convoque times de bairro para encher a bancada.
+              Na aba <strong className="text-indigo-400">Clube</strong> (relação estabilizada em 50 pts), negocie cotas de ingressos, apoio de ônibus e conciliação política. Na aba <strong className="text-amber-400">Social</strong>, atraia patrocinadores locais e convoque times de bairro para encher a bancada.
             </p>
           </div>
         </div>

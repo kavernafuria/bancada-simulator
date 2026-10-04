@@ -573,7 +573,7 @@ export default function App() {
         playStadiumSound("whistle");
       } else if (tab === "varzea") {
         setStateTrackers((prev) => ({ ...prev, moral: Math.min(100, prev.moral + 1) }));
-        bonusMsg = "🏆 INSPETORIA DE SEDE (VÁRZEA): +1 de Moral da Comunidade por inspecionar os trabalhos sociais!";
+        bonusMsg = "🏆 INSPETORIA DE SEDE (SOCIAL): +1 de Moral da Comunidade por inspecionar os trabalhos sociais!";
         playStadiumSound("drum");
       } else if (tab === "alliances") {
         setStateTrackers((prev) => ({ ...prev, respeito_nacional: Math.min(100, prev.respeito_nacional + 1) }));
@@ -625,8 +625,8 @@ export default function App() {
         badge: "ALERTA MP",
         badgeColor: "bg-rose-500/20 text-rose-400 border border-rose-500/30",
         title: "⚖️ Risco de Torcida Única / Proibição!",
-        message: `O Risco do MP está em ${stateTrackers.risco_mp}%. Visite a Aba Várzea para organizar Ações Sociais e reduzir a pressão judicial.`,
-        buttonText: "Ir para Várzea 🏘️",
+        message: `O Risco do MP está em ${stateTrackers.risco_mp}%. Visite a Aba Social para organizar Ações Sociais e reduzir a pressão judicial.`,
+        buttonText: "Ir para Social 🏘️",
       };
     }
 
@@ -654,15 +654,15 @@ export default function App() {
       };
     }
 
-    // Check Várzea / Projetos
+    // Check Social / Projetos
     if (organizacaoPoints >= 60) {
       return {
         tab: "varzea" as const,
         badge: "ORGANIZAÇÃO",
         badgeColor: "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30",
         title: "🏘️ Projetos de Comunidade & Patrocínios",
-        message: `Você acumulou ${organizacaoPoints} Pontos de Organização! Visite a Aba Várzea para ativar patrocínios locais e reforçar o caixa.`,
-        buttonText: "Ir para Várzea 🏘️",
+        message: `Você acumulou ${organizacaoPoints} Pontos de Organização! Visite a Aba Social para ativar patrocínios locais e reforçar o caixa.`,
+        buttonText: "Ir para Social 🏘️",
       };
     }
 
@@ -673,7 +673,7 @@ export default function App() {
         badge: "INSPETORIA",
         badgeColor: "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30",
         title: "🔍 Inspetoria de Sede da Temporada",
-        message: `Você ainda não vistoriou todas as abas nesta temporada! Visite a Loja, Clube, Várzea e Alianças para resgatar bônus exclusivos.`,
+        message: `Você ainda não vistoriou todas as abas nesta temporada! Visite a Loja, Clube, Social e Alianças para resgatar bônus exclusivos.`,
         buttonText: "Explorar Sede 🏛️",
       };
     }
@@ -3545,7 +3545,7 @@ export default function App() {
 
       {/* Navigation Menu Bar (Mobile-First Responsive 2-Row Layout: 4 Menus Top, 5 Menus Bottom) */}
       <div className="bg-zinc-950 border border-zinc-800/80 rounded-2xl p-1 sm:p-1.5 shadow-xl mb-2.5 relative z-10 max-w-full overflow-hidden">
-        {/* Row 1: 4 Menus (CICLO, CLUBE, VÁRZEA, RANKING) */}
+        {/* Row 1: 4 Menus (CICLO, CLUBE, SOCIAL, RANKING) */}
         <div className="grid grid-cols-4 divide-x divide-zinc-800/60 mb-1">
           <button
             onClick={() => handleTabChange("pipeline")}
@@ -3583,7 +3583,7 @@ export default function App() {
             }`}
           >
             <HeartHandshake className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400 shrink-0" />
-            <span className="truncate">VÁRZEA</span>
+            <span className="truncate">SOCIAL</span>
             {organizacaoPoints >= 50 && (
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 absolute top-0.5 right-0.5 sm:top-1 sm:right-1 animate-pulse" />
             )}
@@ -4533,7 +4533,7 @@ export default function App() {
         />
       )}
 
-      {/* TAB 9: VÁRZEA & ENGAJAMENTO COMUNITÁRIO */}
+      {/* TAB 9: SOCIAL & ENGAJAMENTO COMUNITÁRIO */}
       {activeTab === "varzea" && (
         <SocialVarzeaTab
           organizacaoPoints={organizacaoPoints}
