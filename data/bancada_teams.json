@@ -1292,7 +1292,7 @@
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Coritiba (Império Alviverde)",
     "rival_secundario": "São Paulo (Torcida Tricolor Indep.)",
-    "torcida_aliada": "São Paulo (Torcida Tricolor Indep.)",
+    "torcida_aliada": "Grêmio (Geral do Grêmio)",
     "primaryColor": "#dc2626",
     "secondaryColor": "#09090b"
   },
@@ -2168,5 +2168,41 @@
     "rival_secundario": "Corinthians (Gaviões da Fiel)",
     "primaryColor": "#09090b",
     "secondaryColor": "#f4f4f5"
+  },
+  {
+    "estado": "BA",
+    "clube": "Bahia de Feira",
+    "torcida": "Falange Tricolor",
+    "tier": "D",
+    "contingente": 45,
+    "pressao_bancada": 60,
+    "poder_pista": 45,
+    "caravana": 40,
+    "autonomia_financeira": 40,
+    "perfil_predominante": "Vibração Tricolor Baiana & Eixo PC",
+    "eixo_alianca": "PUNHO_COLADO",
+    "rival_principal": "Fluminense de Feira (Torcida Uniformizada)",
+    "rival_secundario": "Vitória (Os Imbatíveis)",
+    "torcida_aliada": "Fluminense (Young Flu)",
+    "primaryColor": "#dc2626",
+    "secondaryColor": "#2563eb"
+  },
+  {
+    "estado": "RS",
+    "clube": "Pelotas",
+    "torcida": "Pavilhão 6",
+    "tier": "D",
+    "contingente": 50,
+    "pressao_bancada": 65,
+    "poder_pista": 50,
+    "caravana": 45,
+    "autonomia_financeira": 45,
+    "perfil_predominante": "Cultura Azul e Ouro & Eixo PC",
+    "eixo_alianca": "PUNHO_COLADO",
+    "rival_principal": "Brasil de Pelotas (Xavante de Pista)",
+    "rival_secundario": "Grêmio (Geral do Grêmio)",
+    "torcida_aliada": "Fluminense (Young Flu)",
+    "primaryColor": "#2563eb",
+    "secondaryColor": "#eab308"
   }
 ]
