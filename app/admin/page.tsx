@@ -45,15 +45,13 @@ export interface TeamAdminItem {
 }
 
 const ALLIANCE_AXES = [
-  { id: "INDEPENDENTE", label: "INDEPENDENTE (Sem Eixo Fixo)" },
-  { id: "ALIANCA_ALVINEGRA", label: "ALIANÇA ALVINEGRA (Gaviões, Ceará, etc.)" },
-  { id: "DPA", label: "DPA (Mancha, Força Jovem, Galoucura, etc.)" },
-  { id: "PUNHO_CRUZADO", label: "PUNHO CRUZADO (Independente SP, Jovem Fla, Mafiosa, etc.)" },
-  { id: "PUNHO_COLADO", label: "PUNHO COLADO (Young Flu, Fúria Ind., Raça Tricolor, Fúria Marcilista)" },
-  { id: "PC", label: "PUNHO COLADO (PC - Alias)" },
-  { id: "IRMANDADE", label: "IRMANDADE (Jovem Ponte, etc.)" },
-  { id: "UPS", label: "UPS (União Paulista de Torcidas)" },
-  { id: "PUNHO_SEGURO", label: "PUNHO SEGURO (Sub-Sedes / Linha de Frente)" },
+  { id: "PUNHO_COLADO", label: "👊 PUNHO COLADO (Young Flu, Fúria Ind. PR, Fúria Marcilista, Raça Tricolor, etc.)", shortLabel: "👊 Punho Colado" },
+  { id: "PUNHO_CRUZADO", label: "🙅‍♂️ PUNHO CRUZADO (Independente SP, Jovem Fla, Máfia Azul, Raça, etc.)", shortLabel: "🙅‍♂️ Punho Cruzado" },
+  { id: "DPA", label: "👆 DPA - Dedo pro Alto (Mancha, Força Jovem, Galoucura, Bamor, etc.)", shortLabel: "👆 DPA" },
+  { id: "ALIANCA_ALVINEGRA", label: "🦅 ALIANÇA ALVINEGRA (Gaviões, Fúria Botafogo)", shortLabel: "🦅 Aliança Alvinegra" },
+  { id: "LADO_A", label: "☀️ NORDESTE LADO A (Leões da TUF, JGT, Máfia Vermelha)", shortLabel: "☀️ Nordeste Lado A" },
+  { id: "LADO_B", label: "⚡ NORDESTE LADO B (Cearamor)", shortLabel: "⚡ Nordeste Lado B" },
+  { id: "INDEPENDENTE", label: "🛡️ BLOCOS INDEPENDENTES / NEUTROS (Os Fanáticos, Bravo 52, Jovem Santos)", shortLabel: "🛡️ Independente / Neutras" },
 ];
 
 const TIERS = ["S", "S-", "A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-"];
@@ -321,16 +319,47 @@ export default function AdminPage() {
           <select
             value={selectedAlliance}
             onChange={(e) => setSelectedAlliance(e.target.value)}
-            className="bg-zinc-950 border border-zinc-800 text-white rounded-xl px-2.5 py-2 text-xs font-bold focus:outline-none focus:border-amber-500/60"
+            className="bg-zinc-950 border border-zinc-800 text-white rounded-xl px-2.5 py-2 text-xs font-bold focus:outline-none focus:border-amber-500/60 max-w-[220px] sm:max-w-[300px] truncate"
           >
             <option value="ALL">Todos os Eixos / Alianças</option>
             {ALLIANCE_AXES.map((ax) => (
               <option key={ax.id} value={ax.id}>
-                {ax.id}
+                {ax.label}
               </option>
             ))}
           </select>
         </div>
+      </div>
+
+      {/* Alliance Quick Filter Chips */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 pt-0.5 scrollbar-thin">
+        <span className="text-[10px] font-black uppercase text-zinc-500 shrink-0 mr-1">Filtrar Eixo:</span>
+        <button
+          onClick={() => setSelectedAlliance("ALL")}
+          className={`px-2.5 py-1 rounded-xl text-[10.5px] font-bold tracking-wide transition-all shrink-0 cursor-pointer ${
+            selectedAlliance === "ALL"
+              ? "bg-amber-500 text-black shadow-md font-black"
+              : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800"
+          }`}
+        >
+          🌐 Todas
+        </button>
+        {ALLIANCE_AXES.map((ax) => {
+          const isSelected = selectedAlliance === ax.id;
+          return (
+            <button
+              key={ax.id}
+              onClick={() => setSelectedAlliance(isSelected ? "ALL" : ax.id)}
+              className={`px-2.5 py-1 rounded-xl text-[10.5px] font-bold tracking-wide transition-all shrink-0 cursor-pointer ${
+                isSelected
+                  ? "bg-amber-500 text-black shadow-md font-black"
+                  : "bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800"
+              }`}
+            >
+              {ax.shortLabel}
+            </button>
+          );
+        })}
       </div>
 
       {/* Global Datalist for Autocomplete of Torcidas */}

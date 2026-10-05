@@ -850,7 +850,7 @@
     "caravana": 70,
     "autonomia_financeira": 68,
     "perfil_predominante": "Barra Brava Tricolor & Tirantes com Fumaça",
-    "eixo_alianca": "PUNHO_COLADO",
+    "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Flamengo (Torcida Urubuzada)",
     "rival_secundario": "Botafogo (Loucos pelo Botafogo)",
     "torcida_aliada": "Paraná Clube (Fúria Independente Paraná)",
@@ -1292,7 +1292,7 @@
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Coritiba (Império Alviverde)",
     "rival_secundario": "São Paulo (Torcida Tricolor Indep.)",
-    "torcida_aliada": "Grêmio (Geral do Grêmio)",
+    "torcida_aliada": "Vitória (Os Imbatíveis)",
     "primaryColor": "#dc2626",
     "secondaryColor": "#09090b"
   },
