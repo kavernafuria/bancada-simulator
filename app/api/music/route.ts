@@ -18,10 +18,13 @@ function formatTrackTitle(filename: string): string {
     tema: "Tema Oficial do Jogo",
     musicabarra: "Música de Barra & Arquibancada",
     funktorcidas: "Funk das Torcidas Organizadas",
+    funkpaulista: "Funk Paulista de Torcida",
     rap: "Rap da Torcida",
     reggae: "Reggae da Arquibancada",
+    reggaedavitoria: "Reggae da Vitória",
     rock: "Rock de Pista & Galera",
     sambatorcida: "Samba de Torcida",
+    eletro: "Eletro de Arquibancada",
   };
 
   if (knownTitles[nameWithoutExt.toLowerCase()]) {
