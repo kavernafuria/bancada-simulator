@@ -70,9 +70,9 @@ export function getPoliceMeetingChoices(isHome: boolean, isAllyGame: boolean): P
         description: "Acordo com o Comando da Polícia para escolta festiva e entrada conjunta com a torcida aliada.",
         cost: 500,
         mpRiskMod: -15,
-        bancadaBonus: 10,
+        bancadaBonus: 4,
         pistaMod: 0,
-        moralMod: 8,
+        moralMod: 4,
         meetingLog: "Alinhamento com o Comando Militar garantindo festa pacífica e comboio livre.",
         formattedDeltas: [
           { label: "Clima no Entorno", value: "Festa & União", isPositive: true },
@@ -130,14 +130,14 @@ export function getTacticalBattleChoices(
         title: "🎉 Cortejo Unificado & Mosaico Conjunto",
         description: "Recepção com churrasco, sinalizadores e cantos unificados com a torcida aliada.",
         pistaMod: 0,
-        moralMod: 12,
+        moralMod: 5,
         mpPenalty: 0,
         costRisk: 500,
         injuryRisk: 0,
         tacticalLog: "Grande espetáculo de confraternização registrado pelas duas agremiações.",
         formattedDeltas: [
           { label: "Festa de Irmandade", value: "100% União", isPositive: true },
-          { label: "Moral", value: "+12 Moral", isPositive: true },
+          { label: "Moral", value: "+5 Moral", isPositive: true },
         ],
       },
     ];
@@ -202,7 +202,7 @@ export function executeMatchWorkflow(
 
   const extraExpenses = transport.fixedCost + (police ? police.cost : 0) + tactic.costRisk;
   const mpAdded = Math.max(0, transport.mpRisk + (police ? police.mpRiskMod : 0) + tactic.mpPenalty);
-  const moralChange = isVictoryPista ? 12 : -8;
+  const moralChange = derby.isAllyGame ? 5 : isVictoryPista ? 12 : -8;
 
   const statusTitle = derby.isAllyGame
     ? `FESTA HISTÓRICA DE UNIÃO EM ${derby.stadium.toUpperCase()}`

@@ -146,14 +146,48 @@ export function calculatePowerScore(stats: TorcidaStats, state: StateTrackers): 
   return Math.round(statSum + stateSum);
 }
 
+export function getRivalDerbyModifiers(season: number): Record<string, number> {
+  const modifiers: Record<string, number> = {};
+  const derbyPairs: [string, string][] = [
+    ["gaviões da fiel", "mancha verde"],
+    ["torcida jovem do flamengo", "força jovem do vasco"],
+    ["young flu", "raça rubro-negra"],
+    ["galoucura", "máfia azul"],
+    ["os fanáticos", "império alviverde"],
+    ["leões da tuf", "cearamor"],
+    ["geral do grêmio", "guarda popular"],
+    ["independente", "mancha verde"],
+    ["ira jovem do vasco", "urubuzada"],
+    ["bateria da furia", "bravo 52"],
+    ["mofi", "jgt"],
+    ["fúria jovem", "raça rubro-negra"],
+  ];
+
+  derbyPairs.forEach(([t1, t2], idx) => {
+    const seed = (season * 37 + idx * 97 + 19) % 100;
+    const isT1Winner = seed > 47;
+    const diff = Math.floor((seed % 18) + 16);
+
+    const key1 = t1.toLowerCase().trim();
+    const key2 = t2.toLowerCase().trim();
+
+    modifiers[key1] = (modifiers[key1] || 0) + (isT1Winner ? diff : -diff);
+    modifiers[key2] = (modifiers[key2] || 0) + (isT1Winner ? -diff : diff);
+  });
+
+  return modifiers;
+}
+
 export function simulateNationalRanking(
   currentTorcida: OfficialTorcida,
   stats: TorcidaStats,
   state: StateTrackers,
-  season: number
+  season: number,
+  defeatedRivalsMap?: Record<string, number>
 ): NationalRankEntry[] {
   const playerPower = calculatePowerScore(stats, state);
   let playerIncluded = false;
+  const derbyMods = getRivalDerbyModifiers(season);
 
   const entries: NationalRankEntry[] = (teamsData as any[]).map((t) => {
     const isPlayer = t.torcida.toLowerCase() === currentTorcida.torcida.toLowerCase();
@@ -171,13 +205,24 @@ export function simulateNationalRanking(
       };
     }
 
-    const tierMult = t.tier === "S" ? 1.3 : t.tier === "A" ? 1.1 : t.tier === "B" ? 0.9 : 0.7;
+    const tierMult = t.tier === "S" ? 1.25 : t.tier === "A" ? 1.10 : t.tier === "B" ? 0.95 : 0.80;
     const basePower = Math.round(
       (t.contingente * 2.5 + t.pressao_bancada * 2.0 + t.poder_pista * 1.8 + t.caravana * 1.5 + t.autonomia_financeira * 1.2) * tierMult
     );
 
-    const noise = Math.sin((season + t.contingente) * 3) * 25;
-    const simulatedPower = Math.max(100, Math.round(basePower + noise));
+    const seasonGrowth = (season - 1) * (t.tier === "S" ? 18 : t.tier === "A" ? 12 : t.tier === "B" ? 6 : 3);
+    const noise = Math.sin((season + t.contingente) * 3) * 15;
+
+    const normName = t.torcida.toLowerCase().trim();
+    const normClub = t.clube.toLowerCase().trim();
+    const derbyMod = (derbyMods[normName] || 0) + (derbyMods[normClub] || 0);
+
+    let defeatedPenalty = 0;
+    if (defeatedRivalsMap && (defeatedRivalsMap[normName] || defeatedRivalsMap[normClub])) {
+      defeatedPenalty = 45;
+    }
+
+    const simulatedPower = Math.max(100, Math.round(basePower + seasonGrowth + noise + derbyMod - defeatedPenalty));
 
     return {
       rank: 0,

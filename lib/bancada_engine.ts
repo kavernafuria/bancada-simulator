@@ -3631,14 +3631,48 @@ export interface RankingEntry {
   officialRef: OfficialTorcida;
 }
 
+export function getRivalDerbyModifiers(season: number): Record<string, number> {
+  const modifiers: Record<string, number> = {};
+  const derbyPairs: [string, string][] = [
+    ["gaviões da fiel", "mancha verde"],
+    ["torcida jovem do flamengo", "força jovem do vasco"],
+    ["young flu", "raça rubro-negra"],
+    ["galoucura", "máfia azul"],
+    ["os fanáticos", "império alviverde"],
+    ["leões da tuf", "cearamor"],
+    ["geral do grêmio", "guarda popular"],
+    ["independente", "mancha verde"],
+    ["ira jovem do vasco", "urubuzada"],
+    ["bateria da furia", "bravo 52"],
+    ["mofi", "jgt"],
+    ["fúria jovem", "raça rubro-negra"],
+  ];
+
+  derbyPairs.forEach(([t1, t2], idx) => {
+    const seed = (season * 37 + idx * 97 + 19) % 100;
+    const isT1Winner = seed > 47;
+    const diff = Math.floor((seed % 18) + 16);
+
+    const key1 = t1.toLowerCase().trim();
+    const key2 = t2.toLowerCase().trim();
+
+    modifiers[key1] = (modifiers[key1] || 0) + (isT1Winner ? diff : -diff);
+    modifiers[key2] = (modifiers[key2] || 0) + (isT1Winner ? -diff : diff);
+  });
+
+  return modifiers;
+}
+
 export function simulateNationalRanking(
   playerTorcida: OfficialTorcida,
   playerStats: TorcidaStats,
   stateTrackers: StateTrackers,
-  season: number
+  season: number,
+  defeatedRivalsMap?: Record<string, number>
 ): RankingEntry[] {
   const allTorcidas = teamsData as OfficialTorcida[];
   const list: { torcida: OfficialTorcida; rawScore: number; isPlayer: boolean }[] = [];
+  const derbyMods = getRivalDerbyModifiers(season);
 
   let playerIncluded = false;
 
@@ -3656,30 +3690,47 @@ export function simulateNationalRanking(
         playerStats.autonomia_financeira * 0.25 +
         stateTrackers.respeito_nacional * 1.15;
 
-      // Logarithmic resistance at top ranks (> 580 points)
-      if (score > 580) {
-        const excess = score - 580;
-        score = 580 + Math.round(excess * 0.60);
+      // Logarithmic resistance at top ranks (> 600 points)
+      if (score > 600) {
+        const excess = score - 600;
+        score = 600 + Math.round(excess * 0.55);
       }
 
-      list.push({ torcida: playerTorcida, rawScore: score, isPlayer: true });
+      list.push({ torcida: playerTorcida, rawScore: Math.round(score), isPlayer: true });
     } else {
+      const tierMult = t.tier === "S" ? 1.25 : t.tier === "A" ? 1.10 : t.tier === "B" ? 0.95 : 0.80;
       const base =
-        t.contingente * 1.45 +
+        (t.contingente * 1.45 +
         t.pressao_bancada * 1.35 +
         t.poder_pista * 1.35 +
         t.caravana * 1.25 +
-        t.autonomia_financeira * 0.25 +
-        60;
+        t.autonomia_financeira * 0.25) * tierMult + 60;
 
+      // Seasonal growth: Tier S (+12/yr), Tier A (+8/yr), Tier B (+4/yr)
+      const seasonGrowth = (season - 1) * (t.tier === "S" ? 12 : t.tier === "A" ? 8 : t.tier === "B" ? 4 : 2);
+
+      // Fluctuation from seed & tier
       let seed = (season * 17 + (t.torcida.charCodeAt(0) || 65) * 31 + (t.torcida.charCodeAt(1) || 66) * 13) % 100;
-      let fluctuation = (seed - 50) * 0.4;
+      let fluctuation = (seed - 50) * 0.3;
 
-      if (t.tier === "S") fluctuation += 40;
-      else if (t.tier === "A") fluctuation += 20;
+      if (t.tier === "S") fluctuation += 35;
+      else if (t.tier === "A") fluctuation += 18;
       else if (t.tier === "B") fluctuation += 5;
 
-      score = Math.max(80, Math.round(base + fluctuation));
+      // Head-to-head derby modifier between AI torcidas
+      const normName = t.torcida.toLowerCase().trim();
+      const normClub = t.clube.toLowerCase().trim();
+      const derbyMod = (derbyMods[normName] || 0) + (derbyMods[normClub] || 0);
+
+      // Defeated by player attrition penalty
+      let defeatedPenalty = 0;
+      if (defeatedRivalsMap) {
+        if (defeatedRivalsMap[normName] || defeatedRivalsMap[normClub]) {
+          defeatedPenalty = 45;
+        }
+      }
+
+      score = Math.max(80, Math.round(base + seasonGrowth + fluctuation + derbyMod - defeatedPenalty));
       list.push({ torcida: t, rawScore: score, isPlayer: false });
     }
   });
@@ -3693,11 +3744,11 @@ export function simulateNationalRanking(
       playerStats.autonomia_financeira * 0.25 +
       stateTrackers.respeito_nacional * 1.15;
 
-    if (score > 580) {
-      const excess = score - 580;
-      score = 580 + Math.round(excess * 0.60);
+    if (score > 600) {
+      const excess = score - 600;
+      score = 600 + Math.round(excess * 0.55);
     }
-    list.push({ torcida: playerTorcida, rawScore: score, isPlayer: true });
+    list.push({ torcida: playerTorcida, rawScore: Math.round(score), isPlayer: true });
   }
 
   list.sort((a, b) => b.rawScore - a.rawScore);

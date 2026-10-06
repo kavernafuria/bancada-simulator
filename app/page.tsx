@@ -313,6 +313,7 @@ export default function App() {
   });
 
   const [isBannedByMP, setIsBannedByMP] = useState<boolean>(false);
+  const [defeatedRivalsMap, setDefeatedRivalsMap] = useState<Record<string, number>>({});
   const [debtYears, setDebtYears] = useState<number>(0);
   const [pipelineIndex, setPipelineIndex] = useState<number>(0);
   const [retryUsedCurrentMatch, setRetryUsedCurrentMatch] = useState<boolean>(false);
@@ -332,7 +333,7 @@ export default function App() {
   const handleOpenStoryCard = (cardType: "MATCH_VICTORY" | "SEASON_CLOSING" | "TORCIDA_PROFILE" = "TORCIDA_PROFILE") => {
     if (!currentTorcida) return;
 
-    const ranking = simulateNationalRanking(currentTorcida, stats, stateTrackers, season);
+    const ranking = simulateNationalRanking(currentTorcida, stats, stateTrackers, season, defeatedRivalsMap);
     const playerRankEntry = ranking.find((r) => r.isPlayer);
 
     let chronicle = "";
@@ -1773,9 +1774,25 @@ export default function App() {
       const newMP = Math.min(100, Math.max(0, stateTrackers.risco_mp + result.mpAdded));
       if (newMP >= 100) setIsBannedByMP(true);
 
+      const isAllyMatch = activeMatchDerby?.isAllyGame ?? false;
+      let respeitoDelta = 0;
+      if (isAllyMatch) {
+        respeitoDelta = 3;
+      } else if (result.isVictoryPista) {
+        respeitoDelta = result.bannerCaptured ? 8 : 4;
+        if (activeMatchDerby?.rivalTorcida) {
+          const rName = activeMatchDerby.rivalTorcida.toLowerCase().trim();
+          const rClub = (activeMatchDerby.isHome ? activeMatchDerby.awayClub : activeMatchDerby.homeClub).toLowerCase().trim();
+          setDefeatedRivalsMap((prev) => ({ ...prev, [rName]: season, [rClub]: season }));
+        }
+      } else {
+        respeitoDelta = result.bannerLost ? -10 : (activeMatchDerby?.isHome ? -6 : -4);
+      }
+
       setStateTrackers((prev) => ({
         ...prev,
         moral: Math.min(100, Math.max(0, prev.moral + result.moralChange)),
+        respeito_nacional: Math.min(100, Math.max(0, prev.respeito_nacional + respeitoDelta)),
         risco_mp: newMP,
       }));
 
@@ -1863,11 +1880,13 @@ export default function App() {
         } else if (result.isVictoryPista) {
           newPoderPista = applyDiminishingReturns(prev.poder_pista, Math.max(1, 3 + tactic.pistaMod));
         } else {
-          newPoderPista = Math.max(10, prev.poder_pista - 4);
+          newPoderPista = Math.max(10, prev.poder_pista - 5);
         }
 
         // 4. NOVO VALOR DE BANCADA
-        const newPressaoBancada = totalBancadaGain > 0
+        const newPressaoBancada = !isAlly && !result.isVictoryPista
+          ? Math.max(10, prev.pressao_bancada - 2)
+          : totalBancadaGain > 0
           ? applyDiminishingReturns(prev.pressao_bancada, totalBancadaGain)
           : prev.pressao_bancada;
 
@@ -2008,7 +2027,7 @@ export default function App() {
       const nextStep = pipeline[nextIdx];
       if (nextStep && (nextStep.stepIndex === 10 || nextIdx === 9)) {
         if (currentTorcida) {
-          const ranking = simulateNationalRanking(currentTorcida, stats, stateTrackers, season);
+          const ranking = simulateNationalRanking(currentTorcida, stats, stateTrackers, season, defeatedRivalsMap);
           const pRank = ranking.find((r) => r.isPlayer)?.rank || 1;
           const choices = generateEtapa10CaravanChoices(currentTorcida, facedOpponentsHistory, pRank);
           setEtapa10Choices(choices);
@@ -2027,7 +2046,7 @@ export default function App() {
   const executeSeasonEndEvaluation = () => {
       // Record Season History Evolution
       if (currentTorcida) {
-        const ranking = simulateNationalRanking(currentTorcida, stats, stateTrackers, season);
+        const ranking = simulateNationalRanking(currentTorcida, stats, stateTrackers, season, defeatedRivalsMap);
         const playerRankEntry = ranking.find((r) => r.isPlayer);
         setSeasonHistory((prev) => [
           ...prev,
@@ -4009,7 +4028,7 @@ export default function App() {
               </h3>
             </div>
             {(() => {
-              const ranking = simulateNationalRanking(currentTorcida, stats, stateTrackers, season);
+              const ranking = simulateNationalRanking(currentTorcida, stats, stateTrackers, season, defeatedRivalsMap);
               const playerEntry = ranking.find((r) => r.isPlayer);
               return (
                 <div className="bg-amber-500/20 text-amber-400 border border-amber-500/40 px-3 py-1 rounded-2xl text-center">
@@ -4031,7 +4050,7 @@ export default function App() {
           </div>
 
           <div className="max-h-96 overflow-y-auto space-y-1.5 pr-1">
-            {simulateNationalRanking(currentTorcida, stats, stateTrackers, season).map((entry) => (
+            {simulateNationalRanking(currentTorcida, stats, stateTrackers, season, defeatedRivalsMap).map((entry) => (
               <button
                 key={entry.rank}
                 type="button"
@@ -5528,7 +5547,7 @@ export default function App() {
             <button
               onClick={() => {
                 if (currentTorcida) {
-                  const nextSeasonRank = simulateNationalRanking(currentTorcida, stats, stateTrackers, season).find((r) => r.isPlayer)?.rank || 1;
+                  const nextSeasonRank = simulateNationalRanking(currentTorcida, stats, stateTrackers, season, defeatedRivalsMap).find((r) => r.isPlayer)?.rank || 1;
                   setSeasonStartSnapshot({
                     contingente: stats.contingente,
                     pressao_bancada: stats.pressao_bancada,
