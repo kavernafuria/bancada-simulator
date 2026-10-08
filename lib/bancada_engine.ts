@@ -156,9 +156,9 @@ export function triggerRandomUnforeseenExpense(season: number): UnforeseenExpens
 }
 
 export const GAME_BALANCE = {
-  CAREER_MAX_SEASONS: 10,
-  PRESIDENT_ELECTIONS_SEASONS: [1, 4, 7, 10],
-  MILESTONE_SEASONS: [3, 6, 9, 10],
+  CAREER_MAX_SEASONS: 15,
+  PRESIDENT_ELECTIONS_SEASONS: [1, 4, 7, 10, 13],
+  MILESTONE_SEASONS: [3, 6, 9, 12, 15],
   ANNUAL_STEPS_COUNT: 10,
 
   // Várzea & Comunitário
@@ -1216,10 +1216,6 @@ export function resolveTorcidaRivalries(currentTorcida: OfficialTorcida): {
       break;
     case "america rj":
       mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("olaria")) || rivalsOnly.find((t) => t.clube.toLowerCase().includes("bangu")) || rivalsOnly[0];
-      break;
-    case "noroeste":
-      mainRival = rivalsOnly.find((t) => t.clube.toLowerCase().includes("comercial-rp")) || rivalsOnly.find((t) => t.clube.toLowerCase().includes("marília")) || rivalsOnly[0];
-      secondRival = rivalsOnly.find((t) => t.clube.toLowerCase() === "ferroviária");
       break;
     case "america mg":
     case "tupi (jf)":

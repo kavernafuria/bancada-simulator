@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { generateSeasonObjectives, evaluateSeasonEndObjectives } from "../lib/bancada_engine";
-import { OfficialTorcida, TorcidaStats, StateTrackers } from "../lib/engine/types";
+import { generateSeasonObjectives, evaluateSeasonEndObjectives, OfficialTorcida } from "../lib/bancada_engine";
+import { TorcidaStats, StateTrackers } from "../lib/engine/types";
 
 describe("Diversificação de Metas Anuais (Season Objectives)", () => {
   const dummyTorcida: OfficialTorcida = {
@@ -8,6 +8,7 @@ describe("Diversificação de Metas Anuais (Season Objectives)", () => {
     torcida: "Raça Rubro-Negra",
     sigla: "RRN",
     tier: "S",
+    estado: "RJ",
     contingente: 90,
     pressao_bancada: 85,
     poder_pista: 85,

@@ -1,8 +1,51 @@
 import { NextResponse } from "next/server";
 
+// Rate limit em memória (best-effort por instância serverless): 20 req/min por IP.
+const RATE_WINDOW_MS = 60_000;
+const RATE_MAX = 20;
+const hits = new Map<string, { count: number; start: number }>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = hits.get(ip);
+  if (!entry || now - entry.start > RATE_WINDOW_MS) {
+    hits.set(ip, { count: 1, start: now });
+    if (hits.size > 5000) {
+      hits.forEach((v, k) => {
+        if (now - v.start > RATE_WINDOW_MS) hits.delete(k);
+      });
+    }
+    return false;
+  }
+  entry.count += 1;
+  return entry.count > RATE_MAX;
+}
+
+function clean(value: unknown, max = 120): string {
+  return typeof value === "string" ? value.replace(/[\r\n]+/g, " ").slice(0, max) : "";
+}
+
 export async function POST(req: Request) {
   try {
-    const payload = await req.json();
+    const ip = (req.headers.get("x-forwarded-for") || "unknown").split(",")[0].trim();
+    if (isRateLimited(ip)) {
+      return NextResponse.json({ error: "Muitas requisições. Aguarde um instante." }, { status: 429 });
+    }
+
+    const contentLength = Number(req.headers.get("content-length") || 0);
+    if (contentLength > 20_000) {
+      return NextResponse.json({ error: "Payload muito grande." }, { status: 413 });
+    }
+
+    const rawPayload = await req.json();
+    // Sanitiza campos de texto que entram no prompt do Gemini (evita prompt injection/abuso).
+    const payload = { ...rawPayload };
+    for (const key of [
+      "torcida", "clube", "rivalTorcida", "rivalClub", "stadium", "cityState",
+      "tacticTitle", "policeStance", "statusTitle", "competition", "score",
+    ]) {
+      if (key in payload) payload[key] = clean(payload[key]);
+    }
 
     const {
       season = 1,

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { Heart } from "lucide-react";
 
 export function BrandFooter() {
@@ -22,6 +23,15 @@ export function BrandFooter() {
         </p>
         <p className="text-[10px] text-zinc-400 dark:text-zinc-600 tracking-wider font-mono pt-1">
           © {new Date().getFullYear()} Kavers Games • Todos os direitos reservados.
+        </p>
+        <p className="text-[9.5px] text-zinc-500 leading-snug">
+          Jogo de ficção e paródia, +18. Sem vínculo oficial com clubes ou torcidas citados.
+          Não incentiva violência.
+        </p>
+        <p className="text-[10px] font-bold">
+          <Link href="/termos" className="text-amber-500 hover:underline">Termos de Uso</Link>
+          {" • "}
+          <Link href="/privacidade" className="text-amber-500 hover:underline">Privacidade</Link>
         </p>
       </div>
     </footer>

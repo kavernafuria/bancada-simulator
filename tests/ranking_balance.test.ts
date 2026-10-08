@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { simulateNationalRanking, getRivalDerbyModifiers } from "../lib/bancada_engine";
+import { simulateNationalRanking, getRivalDerbyModifiers, OfficialTorcida } from "../lib/bancada_engine";
 import { getPoliceMeetingChoices } from "../lib/engine/combat_engine";
-import { OfficialTorcida, TorcidaStats, StateTrackers } from "../lib/engine/types";
+import { TorcidaStats, StateTrackers } from "../lib/engine/types";
 
 describe("Reequilíbrio do Ranking e Jogos de Aliados", () => {
   const dummyTorcida: OfficialTorcida = {
@@ -9,6 +9,7 @@ describe("Reequilíbrio do Ranking e Jogos de Aliados", () => {
     torcida: "Mancha Verde",
     sigla: "MV",
     tier: "S",
+    estado: "SP",
     contingente: 95,
     pressao_bancada: 90,
     poder_pista: 90,

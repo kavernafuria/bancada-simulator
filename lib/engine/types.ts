@@ -197,6 +197,7 @@ export interface OfficialTorcida {
   caravana: number;
   autonomia_financeira: number;
   perfil_predominante: string;
+  estado?: string;
   eixo_alianca: string;
   rival_principal: string;
   rival_secundario: string;

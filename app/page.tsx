@@ -4085,7 +4085,7 @@ export default function App() {
             <div className="flex items-center gap-2">
               <span className="text-base">💡</span>
               <span className="text-amber-300 font-medium text-[11px] leading-snug">
-                <strong>Central Diplomática:</strong> Clique em qualquer uma das <strong>58 torcidas</strong> abaixo para ver seu perfil completo, retrospecto histórico e abrir negociações diplomáticas (Pacto de Paz, Treta, Resgate de Faixa, etc.).
+                <strong>Central Diplomática:</strong> Clique em qualquer uma das <strong>{simulateNationalRanking(currentTorcida, stats, stateTrackers, season, defeatedRivalsMap).length} torcidas</strong> abaixo para ver seu perfil completo, retrospecto histórico e abrir negociações diplomáticas (Pacto de Paz, Treta, Resgate de Faixa, etc.).
               </span>
             </div>
           </div>
