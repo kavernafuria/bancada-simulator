@@ -314,6 +314,14 @@ export default function App() {
 
   const [isBannedByMP, setIsBannedByMP] = useState<boolean>(false);
   const [defeatedRivalsMap, setDefeatedRivalsMap] = useState<Record<string, number>>({});
+  const [lastMatchChronicleSummary, setLastMatchChronicleSummary] = useState<{
+    title: string;
+    chronicle: string;
+    isVictory: boolean;
+    rival: string;
+    stadium: string;
+    isAllyGame: boolean;
+  } | null>(null);
   const [debtYears, setDebtYears] = useState<number>(0);
   const [pipelineIndex, setPipelineIndex] = useState<number>(0);
   const [retryUsedCurrentMatch, setRetryUsedCurrentMatch] = useState<boolean>(false);
@@ -1749,6 +1757,15 @@ export default function App() {
       });
       result.chronicleText = chronicle;
       setIsGeneratingChronicle(false);
+
+      setLastMatchChronicleSummary({
+        title: result.statusTitle,
+        chronicle: chronicle,
+        isVictory: result.isVictoryPista,
+        rival: activeMatchDerby?.rivalTorcida || "Rival",
+        stadium: activeMatchDerby?.stadium || "Estádio",
+        isAllyGame: activeMatchDerby?.isAllyGame ?? false,
+      });
 
       setActiveMatchResult(result);
 
@@ -3771,6 +3788,30 @@ export default function App() {
                       {obj.icon}
                     </span>
                   ))}
+                </div>
+              </div>
+            )}
+            {/* DYNAMIC RITMO DE TORCIDA FEEDBACK CARD BASED ON PREVIOUS MATCH CHRONICLE */}
+            {lastMatchChronicleSummary && (
+              <div className="mb-3 p-3 rounded-2xl bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border border-amber-500/40 shadow-lg text-left space-y-1">
+                <div className="flex items-center justify-between gap-1 text-[10px] font-black text-amber-400 uppercase tracking-wide">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <Drum className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span className="truncate">Ritmo de Torcida & Repercussão da Última Crônica</span>
+                  </div>
+                  <span className={`text-[8.5px] px-1.5 py-0.5 rounded font-extrabold shrink-0 ${lastMatchChronicleSummary.isVictory ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-red-500/20 text-red-400 border border-red-500/30"}`}>
+                    {lastMatchChronicleSummary.isAllyGame ? "🤝 Amistoso / Confraternização" : lastMatchChronicleSummary.isVictory ? "🔥 Moral de Vitória em Alta" : "⚠️ Repercussão de Revés / Tensão"}
+                  </span>
+                </div>
+                <div className="text-xs font-black text-white leading-tight">
+                  {lastMatchChronicleSummary.title}
+                </div>
+                <p className="text-[10px] text-zinc-300 font-medium italic leading-relaxed line-clamp-2 border-l-2 border-amber-500/50 pl-2">
+                  "{lastMatchChronicleSummary.chronicle.slice(0, 190)}..."
+                </p>
+                <div className="text-[9px] text-amber-300 font-semibold flex items-center justify-between pt-0.5">
+                  <span className="truncate">🏟️ {lastMatchChronicleSummary.stadium} • vs {lastMatchChronicleSummary.rival}</span>
+                  <span className="text-zinc-400 font-normal shrink-0">Echo do Último Confronto</span>
                 </div>
               </div>
             )}

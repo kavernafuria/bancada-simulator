@@ -478,7 +478,19 @@ export function isHighwayTrip(clubA: string, clubB: string): boolean {
 }
 
 // SEASON OBJECTIVES
-export type ObjectiveCategory = "PISTA" | "BANCADA" | "FINANCAS" | "MASSA" | "DISCIPLINA_MP" | "CARAVANA" | "MOSAICO";
+export type ObjectiveCategory =
+  | "PISTA"
+  | "BANCADA"
+  | "FINANCAS"
+  | "MASSA"
+  | "DISCIPLINA_MP"
+  | "CARAVANA"
+  | "MOSAICO"
+  | "AGASALHO_LOJA"
+  | "VARZEA_COMUNIDADE"
+  | "CONFRONTO_ESTADO"
+  | "BATERIA_QUADRA"
+  | "PATRIMONIO_BANDEIRAO";
 
 export interface SeasonObjective {
   id: string;
@@ -3224,14 +3236,38 @@ export function generateSeasonObjectives(
   const isInterior = isInteriorSP(torcida);
   const objectives: SeasonObjective[] = [];
 
-  // Objective 1: Bancada & Mosaico / Espetáculo
-  if (season % 2 === 1) {
+  const targetStates = ["RJ", "MG", "RS", "PR", "PE", "CE", "BA", "SC"];
+  const targetState = targetStates[(season + (torcida.torcida.charCodeAt(0) || 65)) % targetStates.length];
+
+  // -------------------------------------------------------------
+  // SLOT 1: LOJA / PATRIMÔNIO / BATERIA / MOSAICO
+  // -------------------------------------------------------------
+  const slot1Type = (season * 7 + (torcida.torcida.charCodeAt(1) || 66)) % 4;
+
+  if (slot1Type === 0) {
+    objectives.push({
+      id: `obj_agasalho_s${season}`,
+      category: "AGASALHO_LOJA",
+      icon: "🧥",
+      title: "Fazer Agasalho na Loja Oficial",
+      description: "Lançar e encomendar a nova coleção de agasalhos e corta-ventos oficiais da agremiação na loja social.",
+      targetValue: 1,
+      currentValue: 0,
+      targetUnit: "coleção",
+      isCompleted: false,
+      isFailed: false,
+      rewardText: "+R$ 3.500 no Caixa da Loja e +10 Autonomia Financeira",
+      rewardCash: 3500,
+      rewardMoral: 10,
+      rewardRespeito: 8,
+    });
+  } else if (slot1Type === 1) {
     objectives.push({
       id: `obj_mosaico_s${season}`,
       category: "MOSAICO",
       icon: "🎨",
-      title: "Espetáculo de Mosaico & Pirotecnia",
-      description: "Realizar pelo menos 1 grande festa de Mosaico 3D ou show pirotécnico em um dos confrontos clássicos.",
+      title: "Espetáculo de Mosaico 3D & Pirotecnia",
+      description: "Realizar pelo menos 1 grande festa de Mosaico 3D ou show pirotécnico em um dos confrontos da temporada.",
       targetValue: 1,
       currentValue: 0,
       targetUnit: "festa",
@@ -3242,17 +3278,34 @@ export function generateSeasonObjectives(
       rewardMoral: 15,
       rewardRespeito: 12,
     });
+  } else if (slot1Type === 2) {
+    objectives.push({
+      id: `obj_bandeirao_s${season}`,
+      category: "PATRIMONIO_BANDEIRAO",
+      icon: "🚩",
+      title: "Confecção de Trapo Gigante & Bandeirão",
+      description: "Financiar a pintura e costura de novo bandeirão oficial para os setores visitante e de quadra.",
+      targetValue: 1,
+      currentValue: 0,
+      targetUnit: "bandeirão",
+      isCompleted: false,
+      isFailed: false,
+      rewardText: "+12 Respeito Nacional e +10 Moral",
+      rewardCash: 0,
+      rewardMoral: 10,
+      rewardRespeito: 12,
+    });
   } else {
     objectives.push({
-      id: `obj_bancada_s${season}`,
-      category: "BANCADA",
+      id: `obj_bateria_s${season}`,
+      category: "BATERIA_QUADRA",
       icon: "🥁",
-      title: "Caldeirão Absoluto na Bancada",
-      description: "Alcançar ou manter o atributo de Pressão de Bancada em 82 pontos ou mais.",
-      targetValue: 82,
+      title: "Ensaio Geral da Bateria na Sede",
+      description: "Alcançar ou manter a Pressão de Bancada em 80 pontos ou mais com grandes ensaios na quadra.",
+      targetValue: 80,
       currentValue: torcida.pressao_bancada,
       targetUnit: "pts",
-      isCompleted: torcida.pressao_bancada >= 82,
+      isCompleted: torcida.pressao_bancada >= 80,
       isFailed: false,
       rewardText: "+R$ 2.500 no Caixa da Loja e +10 Moral",
       rewardCash: 2500,
@@ -3261,25 +3314,87 @@ export function generateSeasonObjectives(
     });
   }
 
-  // Objective 2: Pista & Caravana
-  if (isInterior) {
+  // -------------------------------------------------------------
+  // SLOT 2: VÁRZEA / COMUNIDADE / MASSA / CARAVANA
+  // -------------------------------------------------------------
+  const slot2Type = (season * 13 + (torcida.clube.charCodeAt(0) || 67)) % 3;
+
+  if (slot2Type === 0) {
     objectives.push({
-      id: `obj_pista_s${season}`,
-      category: "PISTA",
-      icon: "🥊",
-      title: "Respeito nas Rodovias Regionais",
-      description: "Vencer pelo menos 2 confrontos ou deslocamentos no ano sem perder faixas.",
-      targetValue: 2,
+      id: `obj_varzea_s${season}`,
+      category: "VARZEA_COMUNIDADE",
+      icon: "👥",
+      title: "Chamar Torcidas de Várzea pros Jogos",
+      description: "Mobilizar os bondes de bairro e ligas de várzea da comunidade local para reforçar o setor da torcida.",
+      targetValue: 1,
       currentValue: 0,
-      targetUnit: "vitórias",
+      targetUnit: "convocação",
       isCompleted: false,
       isFailed: false,
-      rewardText: "+14 Poder de Pista e +10 Respeito Nacional",
+      rewardText: "+10 Contingente/Massa e +12 Moral da Tropa",
       rewardCash: 0,
       rewardMoral: 12,
       rewardRespeito: 10,
     });
+  } else if (slot2Type === 1) {
+    objectives.push({
+      id: `obj_massa_s${season}`,
+      category: "MASSA",
+      icon: "👥",
+      title: "Campanha de Expansão do Quadro Social",
+      description: `Elevar o Contingente ativo para atingir pelo menos ${Math.min(95, torcida.contingente + 5)} pontos.`,
+      targetValue: Math.min(95, torcida.contingente + 5),
+      currentValue: torcida.contingente,
+      targetUnit: "pts",
+      isCompleted: torcida.contingente >= Math.min(95, torcida.contingente + 5),
+      isFailed: false,
+      rewardText: "+R$ 2.500 em mensalidades e +10 Moral",
+      rewardCash: 2500,
+      rewardMoral: 10,
+      rewardRespeito: 6,
+    });
   } else {
+    objectives.push({
+      id: `obj_caravana_s${season}`,
+      category: "CARAVANA",
+      icon: "🚌",
+      title: "Invasão Rodoviária de Caravana",
+      description: "Organizar comitiva rodoviária completa para jogo fora de casa sem atritos perigosos.",
+      targetValue: 1,
+      currentValue: 0,
+      targetUnit: "invasão",
+      isCompleted: false,
+      isFailed: false,
+      rewardText: "+14 Respeito Nacional e +10 Moral de Rua",
+      rewardCash: 0,
+      rewardMoral: 10,
+      rewardRespeito: 14,
+    });
+  }
+
+  // -------------------------------------------------------------
+  // SLOT 3: CONFRONTO POR ESTADO / PISTA / DISCIPLINA MP / FINANÇAS
+  // -------------------------------------------------------------
+  const slot3Type = (season * 19 + (torcida.torcida.length * 3)) % 4;
+
+  if (slot3Type === 0) {
+    objectives.push({
+      id: `obj_confronto_estado_s${season}`,
+      category: "CONFRONTO_ESTADO",
+      icon: "🗺️",
+      title: `Desafio Interestadual: Torcidas do ${targetState}`,
+      description: `Agendar confronto ou comboio vitorioso contra agremiação rival do estado do ${targetState}.`,
+      targetValue: 1,
+      currentValue: 0,
+      targetUnit: "vitória",
+      isCompleted: false,
+      isFailed: false,
+      rewardText: "+15 Respeito Nacional e +12 Moral",
+      rewardCash: 0,
+      rewardMoral: 12,
+      rewardRespeito: 15,
+    });
+  } else if (slot3Type === 1) {
     objectives.push({
       id: `obj_pista_s${season}`,
       category: "PISTA",
@@ -3296,61 +3411,40 @@ export function generateSeasonObjectives(
       rewardMoral: 10,
       rewardRespeito: 15,
     });
-  }
-
-  // Objective 3: Finanças, Massa ou Ministério Público
-  const randType = (season + torcida.contingente) % 3;
-  if (randType === 0) {
+  } else if (slot3Type === 2) {
     objectives.push({
       id: `obj_mp_s${season}`,
       category: "DISCIPLINA_MP",
       icon: "⚖️",
       title: "Ficha Limpa com o Ministério Público",
-      description: "Fechar a temporada com o Risco MP abaixo de 45% sem sofrer suspensão de faixas ou bateria.",
+      description: "Fechar a temporada com o Risco MP abaixo de 45% sem sofrer suspensão institucional.",
       targetValue: 45,
       currentValue: 10,
       targetUnit: "% max",
       isCompleted: false,
       isFailed: false,
-      rewardText: "+R$ 3.000 em patrocínios da sede e tranquilidade institucional",
+      rewardText: "+R$ 3.000 em patrocínios da sede e tranquilidade de pista",
       rewardCash: 3000,
       rewardMoral: 8,
       rewardRespeito: 8,
     });
-  } else if (randType === 1) {
-    const targetCash = isInterior ? 15000 : 25000;
+  } else {
+    const targetCash = isInterior ? 18000 : 30000;
     objectives.push({
       id: `obj_fin_s${season}`,
       category: "FINANCAS",
       icon: "💰",
       title: "Superávit e Caixa Forte na Sede",
-      description: `Acumular saldo em caixa superior a R$ ${targetCash.toLocaleString()} ao final do 13º ciclo.`,
+      description: `Acumular saldo em caixa superior a R$ ${targetCash.toLocaleString()} ao final da temporada.`,
       targetValue: targetCash,
       currentValue: torcida.autonomia_financeira * 500,
       targetUnit: "R$",
       isCompleted: false,
       isFailed: false,
-      rewardText: "+10 Autonomia Financeira, +R$ 2.500 no Caixa e +12 Moral",
-      rewardCash: 2500,
+      rewardText: "+R$ 3.000 de bônus no Caixa e +12 Moral",
+      rewardCash: 3000,
       rewardMoral: 12,
       rewardRespeito: 8,
-    });
-  } else {
-    objectives.push({
-      id: `obj_massa_s${season}`,
-      category: "MASSA",
-      icon: "👥",
-      title: "Campanha de Expansão do Contingente",
-      description: `Elevar a Massa / Contingente para atingir pelo menos ${Math.min(95, torcida.contingente + 6)} pontos.`,
-      targetValue: Math.min(95, torcida.contingente + 6),
-      currentValue: torcida.contingente,
-      targetUnit: "pts",
-      isCompleted: false,
-      isFailed: false,
-      rewardText: "+R$ 2.000 em mensalidades de sócios e +10 Moral",
-      rewardCash: 2000,
-      rewardMoral: 10,
-      rewardRespeito: 6,
     });
   }
 
@@ -3380,19 +3474,27 @@ export function evaluateSeasonEndObjectives(
   const updatedObjectives = objectives.map((obj) => {
     let completed = obj.isCompleted;
 
-    if (obj.category === "BANCADA") {
-      completed = stats.pressao_bancada >= obj.targetValue;
-      obj.currentValue = stats.pressao_bancada;
+    if (obj.category === "BANCADA" || obj.category === "BATERIA_QUADRA") {
+      completed = stats.pressao_bancada >= obj.targetValue || obj.currentValue >= 1;
+      obj.currentValue = Math.max(obj.currentValue, stats.pressao_bancada);
     } else if (obj.category === "MASSA") {
-      completed = stats.contingente >= obj.targetValue;
-      obj.currentValue = stats.contingente;
+      completed = stats.contingente >= obj.targetValue || obj.currentValue >= 1;
+      obj.currentValue = Math.max(obj.currentValue, stats.contingente);
     } else if (obj.category === "FINANCAS") {
       completed = bankBalance >= obj.targetValue;
       obj.currentValue = bankBalance;
     } else if (obj.category === "DISCIPLINA_MP") {
       completed = !isBannedByMP && state.risco_mp <= obj.targetValue;
       obj.currentValue = state.risco_mp;
-    } else if (obj.category === "PISTA" || obj.category === "MOSAICO" || obj.category === "CARAVANA") {
+    } else if (
+      obj.category === "PISTA" ||
+      obj.category === "MOSAICO" ||
+      obj.category === "CARAVANA" ||
+      obj.category === "AGASALHO_LOJA" ||
+      obj.category === "VARZEA_COMUNIDADE" ||
+      obj.category === "CONFRONTO_ESTADO" ||
+      obj.category === "PATRIMONIO_BANDEIRAO"
+    ) {
       completed = obj.currentValue >= obj.targetValue;
     }
 
