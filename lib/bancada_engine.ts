@@ -1273,6 +1273,33 @@ export function resolveTorcidaRivalries(currentTorcida: OfficialTorcida): {
   };
 }
 
+export function getStateChampionshipName(estado?: string): string {
+  switch (estado?.toUpperCase()) {
+    case "SP": return "🏆 Paulistão";
+    case "RJ": return "🏆 Campeonato Carioca";
+    case "MG": return "🏆 Campeonato Mineiro";
+    case "RS": return "🏆 Gauchão";
+    case "PR": return "🏆 Campeonato Paranaense";
+    case "SC": return "🏆 Campeonato Catarinense";
+    case "BA": return "🏆 Campeonato Baiano";
+    case "PE": return "🏆 Campeonato Pernambucano";
+    case "CE": return "🏆 Campeonato Cearense";
+    case "GO": return "🏆 Campeonato Goiano";
+    case "PA": return "🏆 Parazão";
+    case "RN": return "🏆 Campeonato Potiguar";
+    case "AL": return "🏆 Campeonato Alagoano";
+    case "MA": return "🏆 Campeonato Maranhense";
+    case "PB": return "🏆 Campeonato Paraibano";
+    case "SE": return "🏆 Campeonato Sergipano";
+    case "DF": return "🏆 Candangão";
+    case "MT": return "🏆 Campeonato Mato-Grossense";
+    case "MS": return "🏆 Campeonato Sul-Mato-Grossense";
+    case "AM": return "🏆 Barezão";
+    case "AC": return "🏆 Campeonato Acriano";
+    default: return "🏆 Campeonato Estadual";
+  }
+}
+
 // REAL BRAZILIAN DERBIES & CLASSICOS MAPPING
 export function getDerbyForMatch(
   currentTorcida: OfficialTorcida,
@@ -1293,21 +1320,105 @@ export function getDerbyForMatch(
       case "santos": return { stadium: "Vila Belmiro", cityState: "Santos - SP" };
       case "portuguesa": return { stadium: "Canindé", cityState: "São Paulo - SP" };
       case "flamengo": return { stadium: "Maracanã", cityState: "Rio de Janeiro - RJ" };
-      case "vasco da gama": return { stadium: "São Januário", cityState: "Rio de Janeiro - RJ" };
+      case "vasco da gama":
+      case "vasco": return { stadium: "São Januário", cityState: "Rio de Janeiro - RJ" };
       case "fluminense": return { stadium: "Maracanã", cityState: "Rio de Janeiro - RJ" };
       case "botafogo": return { stadium: "Nilton Santos (Engenhão)", cityState: "Rio de Janeiro - RJ" };
+      case "olaria": return { stadium: "Rua Bariri", cityState: "Rio de Janeiro - RJ" };
+      case "bangu": return { stadium: "Moça Bonita", cityState: "Rio de Janeiro - RJ" };
+      case "america rj":
+      case "américa rj": return { stadium: "Giulite Coutinho", cityState: "Mesquita - RJ" };
+      case "atlético mg":
+      case "atletico mg":
       case "atlético-mg": return { stadium: "Arena MRV", cityState: "Belo Horizonte - MG" };
       case "cruzeiro": return { stadium: "Mineirão", cityState: "Belo Horizonte - MG" };
-      case "grêmio": return { stadium: "Arena do Grêmio", cityState: "Porto Alegre - RS" };
+      case "america mg":
+      case "américa mg":
+      case "américa-mg": return { stadium: "Arena Independência", cityState: "Belo Horizonte - MG" };
+      case "urt (patos)": return { stadium: "Zama Maciel", cityState: "Patos de Minas - MG" };
+      case "tupi (jf)": return { stadium: "Radialista Mário Helênio", cityState: "Juiz de Fora - MG" };
+      case "mamoré (patos)": return { stadium: "Bernardo Rubinger de Queiroz", cityState: "Patos de Minas - MG" };
+      case "caldense": return { stadium: "Ronaldão", cityState: "Poços de Caldas - MG" };
+      case "grêmio":
+      case "gremio": return { stadium: "Arena do Grêmio", cityState: "Porto Alegre - RS" };
       case "internacional": return { stadium: "Beira-Rio", cityState: "Porto Alegre - RS" };
-      case "bahia": return { stadium: "Arena Fonte Nova", cityState: "Salvador - BA" };
-      case "vitória": return { stadium: "Barradão", cityState: "Salvador - BA" };
-      case "sport": return { stadium: "Ilha do Retiro", cityState: "Recife - PE" };
-      case "santa cruz": return { stadium: "Arruda", cityState: "Recife - PE" };
-      case "fortaleza": return { stadium: "Arena Castelão", cityState: "Fortaleza - CE" };
-      case "ceará": return { stadium: "Arena Castelão", cityState: "Fortaleza - CE" };
+      case "juventude": return { stadium: "Alfredo Jaconi", cityState: "Caxias do Sul - RS" };
+      case "caxias": return { stadium: "Centenário", cityState: "Caxias do Sul - RS" };
+      case "brasil de pelotas": return { stadium: "Bento Freitas", cityState: "Pelotas - RS" };
+      case "pelotas": return { stadium: "Boca do Lobo", cityState: "Pelotas - RS" };
+      case "athletico-pr":
+      case "athletico pr":
+      case "atlético pr": return { stadium: "Ligga Arena", cityState: "Curitiba - PR" };
       case "coritiba": return { stadium: "Couto Pereira", cityState: "Curitiba - PR" };
-      case "athletico-pr": return { stadium: "Ligga Arena", cityState: "Curitiba - PR" };
+      case "paraná clube":
+      case "paraná":
+      case "parana": return { stadium: "Durival Britto (Vila Capanema)", cityState: "Curitiba - PR" };
+      case "londrina": return { stadium: "Estádio do Café", cityState: "Londrina - PR" };
+      case "operário pr":
+      case "operário-pr":
+      case "operario pr": return { stadium: "Germano Krüger", cityState: "Ponta Grossa - PR" };
+      case "maringá fc":
+      case "maringá":
+      case "maringa": return { stadium: "Willie Davids", cityState: "Maringá - PR" };
+      case "avaí":
+      case "avai": return { stadium: "Ressacada", cityState: "Florianópolis - SC" };
+      case "figueirense": return { stadium: "Orlando Scarpelli", cityState: "Florianópolis - SC" };
+      case "criciúma":
+      case "criciuma": return { stadium: "Heriberto Hülse", cityState: "Criciúma - SC" };
+      case "chapecoense": return { stadium: "Arena Condá", cityState: "Chapecó - SC" };
+      case "joinville": return { stadium: "Arena Joinville", cityState: "Joinville - SC" };
+      case "marcílio dias":
+      case "marcilio dias": return { stadium: "Estádio Dr. Hercílio Luz (Gigantão)", cityState: "Itajaí - SC" };
+      case "bahia": return { stadium: "Arena Fonte Nova", cityState: "Salvador - BA" };
+      case "vitória":
+      case "vitoria": return { stadium: "Barradão", cityState: "Salvador - BA" };
+      case "bahia de feira": return { stadium: "Arena Cajueiro", cityState: "Feira de Santana - BA" };
+      case "sport":
+      case "sport recife": return { stadium: "Ilha do Retiro", cityState: "Recife - PE" };
+      case "santa cruz": return { stadium: "Arruda", cityState: "Recife - PE" };
+      case "náutico":
+      case "nautico": return { stadium: "Estádio dos Aflitos", cityState: "Recife - PE" };
+      case "ceará":
+      case "ceara": return { stadium: "Arena Castelão", cityState: "Fortaleza - CE" };
+      case "fortaleza": return { stadium: "Arena Castelão", cityState: "Fortaleza - CE" };
+      case "abc de natal":
+      case "abc": return { stadium: "Frasqueirão", cityState: "Natal - RN" };
+      case "américa rn":
+      case "america rn": return { stadium: "Arena das Dunas", cityState: "Natal - RN" };
+      case "crb": return { stadium: "Rei Pelé (Trapichão)", cityState: "Maceió - AL" };
+      case "csa": return { stadium: "Rei Pelé (Trapichão)", cityState: "Maceió - AL" };
+      case "sampaio corrêa":
+      case "sampaio correa": return { stadium: "Castelão", cityState: "São Luís - MA" };
+      case "moto club": return { stadium: "Castelão", cityState: "São Luís - MA" };
+      case "botafogo-pb":
+      case "botafogo pb": return { stadium: "Almeidão", cityState: "João Pessoa - PB" };
+      case "treze":
+      case "campinense": return { stadium: "Amigão", cityState: "Campina Grande - PB" };
+      case "confiança":
+      case "confianca":
+      case "sergipe": return { stadium: "Arena Batistão", cityState: "Aracaju - SE" };
+      case "goiás":
+      case "goias": return { stadium: "Estádio da Serrinha", cityState: "Goiânia - GO" };
+      case "vila nova": return { stadium: "OBA (Onésio Brasileiro Alvarenga)", cityState: "Goiânia - GO" };
+      case "atlético-go":
+      case "atlético go":
+      case "atletico go": return { stadium: "Antônio Accioly", cityState: "Goiânia - GO" };
+      case "anápolis":
+      case "anapolis": return { stadium: "Jonas Duarte", cityState: "Anápolis - GO" };
+      case "brasiliense": return { stadium: "Boca do Jacaré (Serejão)", cityState: "Taguatinga - DF" };
+      case "gama": return { stadium: "Bezerrão", cityState: "Gama - DF" };
+      case "cuiabá":
+      case "cuiaba":
+      case "mixto": return { stadium: "Arena Pantanal", cityState: "Cuiabá - MT" };
+      case "operário-ms":
+      case "operario-ms":
+      case "comercial-ms": return { stadium: "Morenão", cityState: "Campo Grande - MS" };
+      case "paysandu": return { stadium: "Curuzu", cityState: "Belém - PA" };
+      case "remo": return { stadium: "Baenão", cityState: "Belém - PA" };
+      case "nacional-am":
+      case "amazonas fc": return { stadium: "Arena da Amazônia", cityState: "Manaus - AM" };
+      case "são raimundo-am": return { stadium: "Estádio da Colina", cityState: "Manaus - AM" };
+      case "rio branco-ac": return { stadium: "Arena da Floresta", cityState: "Rio Branco - AC" };
       case "ponte preta": return { stadium: "Moisés Lucarelli (Majestoso)", cityState: "Campinas - SP" };
       case "guarani": return { stadium: "Brinco de Ouro da Princesa", cityState: "Campinas - SP" };
       case "botafogo-sp": return { stadium: "Santa Cruz (Arena Nicnet)", cityState: "Ribeirão Preto - SP" };
@@ -1316,7 +1427,9 @@ export function getDerbyForMatch(
       case "taubaté": return { stadium: "Joaquim de Morais Filho (Joaquinzão)", cityState: "Taubaté - SP" };
       case "santo andré": return { stadium: "Bruno José Daniel", cityState: "Santo André - SP" };
       case "são caetano": return { stadium: "Anacleto Campanella", cityState: "São Caetano do Sul - SP" };
-      case "são bernardo": return { stadium: "Primeiro de Maio", cityState: "São Bernardo do Campo - SP" };
+      case "são bernardo":
+      case "são bernardo fc":
+      case "ec são bernardo": return { stadium: "Primeiro de Maio", cityState: "São Bernardo do Campo - SP" };
       case "rio branco": return { stadium: "Décio Vitta", cityState: "Americana - SP" };
       case "união barbarense": return { stadium: "Antonio Guimarães", cityState: "Santa Bárbara d'Oeste - SP" };
       case "paulista jundiaí": return { stadium: "Jayme Cintra", cityState: "Jundiaí - SP" };
@@ -1337,12 +1450,7 @@ export function getDerbyForMatch(
       case "sertaozinho": return { stadium: "Frederico Dalmaso (Fredericão)", cityState: "Sertãozinho - SP" };
       case "mogi mirim": return { stadium: "Vail Chaves", cityState: "Mogi Mirim - SP" };
       case "itapirense": return { stadium: "Chico Vieira", cityState: "Itapira - SP" };
-      case "marcílio dias":
-      case "marcilio dias": return { stadium: "Estádio Dr. Hercílio Luz (Gigantão das Avenidas)", cityState: "Itajaí - SC" };
-      case "paraná clube":
-      case "paraná":
-      case "parana": return { stadium: "Estádio Durival Britto e Silva (Vila Capanema)", cityState: "Curitiba - PR" };
-      default: return { stadium: `Estádio Municipal de ${club}`, cityState: "Interior de SP" };
+      default: return { stadium: `Estádio Municipal de ${club}`, cityState: "Brasil" };
     }
   };
 
@@ -1364,7 +1472,7 @@ export function getDerbyForMatch(
         isHome: true,
         isLongDistance: false,
         isAllyGame: false,
-        competition: "🚫 Torcida Única (Estadual Mandante)",
+        competition: `🚫 Torcida Única (${getStateChampionshipName(currentTorcida.estado)} - Mandante)`,
         importanceDescription: `O rival estadual (${mainRival.clube}) está proibido de entrar no seu estádio por decreto judicial. Foco no recebimento da equipe com Corredor de Fogo ou Barreira nos Portões.`,
       };
     } else if (gameIndex === 2) {
@@ -1382,7 +1490,7 @@ export function getDerbyForMatch(
         isHome: false,
         isLongDistance: false,
         isAllyGame: false,
-        competition: "🚫 Torcida Única (Estadual Visitante)",
+        competition: `🚫 Torcida Única (${getStateChampionshipName(currentTorcida.estado)} - Visitante)`,
         importanceDescription: `Sua torcida está proibida de entrar no estádio do rival (${mainRival.clube}). Escolhas de rua: Cortejo no CT, Emboscada Rodoviária, Telão na Sede (Lucro de Caixa) ou Marcha na Barreira da PM.`,
       };
     } else if (gameIndex === 3) {
@@ -1459,7 +1567,7 @@ export function getDerbyForMatch(
       isHome: isHomeGame,
       isLongDistance: !isHomeGame && isHighway,
       isAllyGame: false,
-      competition: "🏆 Paulistão / Campeonato Estadual",
+      competition: getStateChampionshipName(currentTorcida.estado),
       importanceDescription: isHomeGame
         ? `Recepção de alta pressão no nosso estádio (${homeStadiumInfo.stadium}) para defender o nosso caldeirão de arquibancada contra a torcida rival do ${mainRival.clube}.`
         : `Deslocamento e invasão ao setor visitante do estádio ${rivalStadiumInfo.stadium} em ${rivalStadiumInfo.cityState} para apoiar o ${currentTorcida.clube}.`,

@@ -176,7 +176,7 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
       const mi = allyMiddles[Math.floor(Math.random() * allyMiddles.length)];
       const cl = allyClosings[Math.floor(Math.random() * allyClosings.length)];
 
-      return NextResponse.json({ chronicle: `[Ano ${season} - ${competition || "Campeonato"}] ${op} ${mi} ${cl}` });
+      return NextResponse.json({ chronicle: `${op} ${mi} ${cl}` });
     }
 
     // Standard Derby Matches (Victory or Defeat Narratives)
@@ -208,8 +208,8 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
         return NextResponse.json({ chronicle: `${op} ${mi} ${cl}` });
       } else {
         const standDefeatOpenings = [
-          `[Ano ${season} - ${competition || "Campeonato"}] Jornada desafiadora nas bancadas para a ${torcida} ${homeStr} diante do ${rivalClub} (${rivalTorcida}).`,
-          `[Ano ${season} - ${competition || "Campeonato"}] O embate de cantos no estádio ${stadium} exigiu dedicação extra da ${torcida} no confronto contra o ${rivalClub} (${rivalTorcida}).`,
+          `Jornada desafiadora nas bancadas para a ${torcida} ${homeStr} diante do ${rivalClub} (${rivalTorcida}).`,
+          `O embate de cantos no estádio ${stadium} exigiu dedicação extra da ${torcida} no confronto contra o ${rivalClub} (${rivalTorcida}).`,
         ];
         const standDefeatMiddles = [
           `Apesar do apoio incondicional da bateria e da presença dos associados, o volume de cantos esbarrou na resposta da torcida rival.`,
@@ -228,14 +228,14 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
 
     if (isVictoryPista) {
       const vicOpenings = [
-        `[Ano ${season} - ${competition || "Campeonato"}] Dia de afirmação categórica para a ${torcida} ${homeStr} contra o ${rivalClub} (${rivalTorcida}).`,
-        `[Ano ${season} - ${competition || "Campeonato"}] A atmosfera de decisão tomou conta do ${stadium} quando a ${torcida} impôs sua força ${homeStr} diante da torcida do ${rivalClub} (${rivalTorcida}).`,
-        `[Ano ${season} - ${competition || "Campeonato"}] Com casa cheia e pulsando forte, a ${torcida} viveu uma jornada memorável ${homeStr} enfrentando a torcida do ${rivalClub} (${rivalTorcida}).`,
-        `[Ano ${season} - ${competition || "Campeonato"}] O cerco fechou no estádio ${stadium} e a resposta da ${torcida} foi avassaladora ${homeStr} contra os rivais do ${rivalClub} (${rivalTorcida}).`,
-        `[Ano ${season} - ${competition || "Campeonato"}] Vitória maiúscula da ${torcida} ${homeStr}, mostrando quem manda na região no duelo contra o ${rivalClub} (${rivalTorcida}).`,
-        `[Ano ${season} - ${competition || "Campeonato"}] A força da massa falou mais alto no ${stadium} com a ${torcida} dominando todas as ações ${homeStr} contra o ${rivalClub} (${rivalTorcida}).`,
-        `[Ano ${season} - ${competition || "Campeonato"}] Noite de gala e imposição de respeito para a ${torcida} ${homeStr} no clássico diante do ${rivalClub} (${rivalTorcida}).`,
-        `[Ano ${season} - ${competition || "Campeonato"}] A linha de frente e a bancada da ${torcida} deram um show de postura ${homeStr} contra a torcida oponente do ${rivalClub} (${rivalTorcida}).`,
+        `Dia de afirmação categórica para a ${torcida} ${homeStr} contra o ${rivalClub} (${rivalTorcida}).`,
+        `A atmosfera de decisão tomou conta do ${stadium} quando a ${torcida} impôs sua força ${homeStr} diante da torcida do ${rivalClub} (${rivalTorcida}).`,
+        `Com casa cheia e pulsando forte, a ${torcida} viveu uma jornada memorável ${homeStr} enfrentando a torcida do ${rivalClub} (${rivalTorcida}).`,
+        `O cerco fechou no estádio ${stadium} e a resposta da ${torcida} foi avassaladora ${homeStr} contra os rivais do ${rivalClub} (${rivalTorcida}).`,
+        `Vitória maiúscula da ${torcida} ${homeStr}, mostrando quem manda na região no duelo contra o ${rivalClub} (${rivalTorcida}).`,
+        `A força da massa falou mais alto no ${stadium} com a ${torcida} dominando todas as ações ${homeStr} contra o ${rivalClub} (${rivalTorcida}).`,
+        `Noite de gala e imposição de respeito para a ${torcida} ${homeStr} no clássico diante do ${rivalClub} (${rivalTorcida}).`,
+        `A linha de frente e a bancada da ${torcida} deram um show de postura ${homeStr} contra a torcida oponente do ${rivalClub} (${rivalTorcida}).`,
       ];
 
       const vicMiddles = [
@@ -270,8 +270,8 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
 
       if (isPoliceDetention) {
         const policeOpenings = [
-          `[Ano ${season} - ${competition || "Campeonato"}] Operação de cerco policial ostensivo interceptou o deslocamento da ${torcida} ${homeStr} rumo ao estádio ${stadium}.`,
-          `[Ano ${season} - ${competition || "Campeonato"}] Tarde de forte tensão com as forças de segurança em ${cityState}: parte do bonde da ${torcida} foi detida na aproximação ao ${stadium}.`,
+          `Operação de cerco policial ostensivo interceptou o deslocamento da ${torcida} ${homeStr} rumo ao estádio ${stadium}.`,
+          `Tarde de forte tensão com as forças de segurança em ${cityState}: parte do bonde da ${torcida} foi detida na aproximação ao ${stadium}.`,
         ];
         const policeMiddles = [
           `Com dezenas de associados conduzidos à 2ª Delegacia de Polícia, a diretoria precisou desembolsar R$ 3.000 em fianças e advogados de emergência para liberar os torcedores.`,
@@ -288,14 +288,14 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
       }
 
       const defOpenings = [
-        `[Ano ${season} - ${competition || "Campeonato"}] Jornada de altíssima exigência e clima pesado para a ${torcida} ${homeStr} diante do ${rivalClub} (${rivalTorcida}).`,
-        `[Ano ${season} - ${competition || "Campeonato"}] O teste de fogo no estádio ${stadium} impôs severas provações para a ${torcida} no confronto contra o ${rivalClub} (${rivalTorcida}).`,
-        `[Ano ${season} - ${competition || "Campeonato"}] Sob intensa vigilância policial e forte pressão nas ruas de ${cityState}, a ${torcida} encarou um duro embate ${homeStr} com a torcida do ${rivalClub} (${rivalTorcida}).`,
-        `[Ano ${season} - ${competition || "Campeonato"}] Tensão máxima no entorno do ${stadium} em uma partida de elevado risco para a ${torcida} contra o ${rivalClub} (${rivalTorcida}).`,
-        `[Ano ${season} - ${competition || "Campeonato"}] O cenário adverso no estádio ${stadium} exigiu sacrifício extremo da ${torcida} no embate ${homeStr} contra a ${rivalTorcida}.`,
-        `[Ano ${season} - ${competition || "Campeonato"}] Embate espinhoso em ${cityState}: a ${torcida} teve de medir forças ${homeStr} enfrentando a bem estruturada torcida do ${rivalClub} (${rivalTorcida}).`,
-        `[Ano ${season} - ${competition || "Campeonato"}] Tarde de superação e contenção de danos para a ${torcida} ${homeStr} na disputa amarga contra o ${rivalClub} (${rivalTorcida}).`,
-        `[Ano ${season} - ${competition || "Campeonato"}] A pressão das ruas e os imprevistos de logística complicaram a ação da ${torcida} ${homeStr} frente ao ${rivalClub} (${rivalTorcida}).`,
+        `Jornada de altíssima exigência e clima pesado para a ${torcida} ${homeStr} diante do ${rivalClub} (${rivalTorcida}).`,
+        `O teste de fogo no estádio ${stadium} impôs severas provações para a ${torcida} no confronto contra o ${rivalClub} (${rivalTorcida}).`,
+        `Sob intensa vigilância policial e forte pressão nas ruas de ${cityState}, a ${torcida} encarou um duro embate ${homeStr} com a torcida do ${rivalClub} (${rivalTorcida}).`,
+        `Tensão máxima no entorno do ${stadium} em uma partida de elevado risco para a ${torcida} contra o ${rivalClub} (${rivalTorcida}).`,
+        `O cenário adverso no estádio ${stadium} exigiu sacrifício extremo da ${torcida} no embate ${homeStr} contra a ${rivalTorcida}.`,
+        `Embate espinhoso em ${cityState}: a ${torcida} teve de medir forças ${homeStr} enfrentando a bem estruturada torcida do ${rivalClub} (${rivalTorcida}).`,
+        `Tarde de superação e contenção de danos para a ${torcida} ${homeStr} na disputa amarga contra o ${rivalClub} (${rivalTorcida}).`,
+        `A pressão das ruas e os imprevistos de logística complicaram a ação da ${torcida} ${homeStr} frente ao ${rivalClub} (${rivalTorcida}).`,
       ];
 
       const defMiddles = [

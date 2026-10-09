@@ -321,6 +321,8 @@ export default function App() {
     rival: string;
     stadium: string;
     isAllyGame: boolean;
+    torcidaReaction?: string;
+    competition?: string;
   } | null>(null);
   const [debtYears, setDebtYears] = useState<number>(0);
   const [pipelineIndex, setPipelineIndex] = useState<number>(0);
@@ -1758,13 +1760,36 @@ export default function App() {
       result.chronicleText = chronicle;
       setIsGeneratingChronicle(false);
 
+      const cleanChronicle = chronicle.replace(/^\[[^\]]+\]\s*/, "").trim();
+
+      let torcidaReaction = "";
+      if (activeMatchDerby?.isAllyGame) {
+        torcidaReaction = `A quadra e a sede social amanheceram em clima de pura irmandade com a torcida ${activeMatchDerby.rivalTorcida}. O churrasco de aliança e a união das baterias reforçaram os laços históricos do nosso eixo pelo país.`;
+      } else if (result.isVictoryPista) {
+        if (result.bannerCaptured) {
+          torcidaReaction = `Apoteose total na sede com a faixa rival capturada exposta no alambrado! O bonde fez história no clássico contra a ${activeMatchDerby?.rivalTorcida} e a moral da tropa explodiu nas alturas.`;
+        } else {
+          torcidaReaction = `A quadra amanheceu fervendo em festa após a grande vitória contra a ${activeMatchDerby?.rivalTorcida}. A bateria puxou os cantos da vitória e a liderança parabenizou cada guerreiro pela imposição em ${activeMatchDerby?.stadium}.`;
+        }
+      } else {
+        if ((result.statusTitle || "").toLowerCase().includes("polícia") || (result.statusTitle || "").toLowerCase().includes("detenção")) {
+          torcidaReaction = `O departamento jurídico e as lideranças estão de plantão na delegacia para liberar os irmãos retidos na operação policial. A massa fecha junto contra a repressão e mantém a união de bancada.`;
+        } else if (result.bannerLost) {
+          torcidaReaction = `Reunião emergencial a portas fechadas na diretoria. O clima é de cobrança pesadíssima e reestruturação imediata da linha de frente para resgatar a honra da nossa camisa.`;
+        } else {
+          torcidaReaction = `Clima de cobrança e conversa séria entre as lideranças das sub-sedes após o revés contra a ${activeMatchDerby?.rivalTorcida}. O foco agora é fechar o bonde, ajustar a postura e dar a resposta no próximo jogo.`;
+        }
+      }
+
       setLastMatchChronicleSummary({
         title: result.statusTitle,
-        chronicle: chronicle,
+        chronicle: cleanChronicle,
         isVictory: result.isVictoryPista,
         rival: activeMatchDerby?.rivalTorcida || "Rival",
         stadium: activeMatchDerby?.stadium || "Estádio",
         isAllyGame: activeMatchDerby?.isAllyGame ?? false,
+        torcidaReaction,
+        competition: activeMatchDerby?.competition || "Clássico",
       });
 
       setActiveMatchResult(result);
@@ -3793,25 +3818,57 @@ export default function App() {
             )}
             {/* DYNAMIC RITMO DE TORCIDA FEEDBACK CARD BASED ON PREVIOUS MATCH CHRONICLE */}
             {lastMatchChronicleSummary && (
-              <div className="mb-3 p-3 rounded-2xl bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border border-amber-500/40 shadow-lg text-left space-y-1">
+              <div className="mb-3 p-3.5 rounded-2xl bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 border border-amber-500/40 shadow-xl text-left space-y-2">
                 <div className="flex items-center justify-between gap-1 text-[10px] font-black text-amber-400 uppercase tracking-wide">
                   <div className="flex items-center gap-1.5 min-w-0">
                     <Drum className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                    <span className="truncate">Ritmo de Torcida & Repercussão da Última Crônica</span>
+                    <span className="truncate">Ritmo de Torcida & Repercussão da Sede</span>
                   </div>
-                  <span className={`text-[8.5px] px-1.5 py-0.5 rounded font-extrabold shrink-0 ${lastMatchChronicleSummary.isVictory ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-red-500/20 text-red-400 border border-red-500/30"}`}>
-                    {lastMatchChronicleSummary.isAllyGame ? "🤝 Amistoso / Confraternização" : lastMatchChronicleSummary.isVictory ? "🔥 Moral de Vitória em Alta" : "⚠️ Repercussão de Revés / Tensão"}
+                  <span className={`text-[8.5px] px-2 py-0.5 rounded-full font-extrabold shrink-0 ${
+                    lastMatchChronicleSummary.isAllyGame
+                      ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                      : lastMatchChronicleSummary.isVictory
+                      ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                      : "bg-red-500/20 text-red-400 border border-red-500/30"
+                  }`}>
+                    {lastMatchChronicleSummary.isAllyGame
+                      ? "🤝 Aliança & Fraternidade"
+                      : lastMatchChronicleSummary.isVictory
+                      ? "🔥 Moral de Vitória em Alta"
+                      : "⚠️ Repercussão de Revés / Tensão"}
                   </span>
                 </div>
-                <div className="text-xs font-black text-white leading-tight">
-                  {lastMatchChronicleSummary.title}
+
+                <div className="text-xs font-black text-zinc-100 leading-tight flex items-center gap-1.5">
+                  <span className="text-amber-400">⚔️</span>
+                  <span>{lastMatchChronicleSummary.title}</span>
                 </div>
-                <p className="text-[10px] text-zinc-300 font-medium italic leading-relaxed line-clamp-2 border-l-2 border-amber-500/50 pl-2">
-                  "{lastMatchChronicleSummary.chronicle.slice(0, 190)}..."
-                </p>
-                <div className="text-[9px] text-amber-300 font-semibold flex items-center justify-between pt-0.5">
-                  <span className="truncate">🏟️ {lastMatchChronicleSummary.stadium} • vs {lastMatchChronicleSummary.rival}</span>
-                  <span className="text-zinc-400 font-normal shrink-0">Echo do Último Confronto</span>
+
+                {/* Sede / Torcida Mood Quote */}
+                <div className="p-2.5 rounded-xl bg-zinc-950/70 border border-zinc-800/80 space-y-1">
+                  <div className="text-[9.5px] font-bold text-amber-300 flex items-center gap-1">
+                    <span>💬 Voz da Quadra & Sub-Sedes:</span>
+                  </div>
+                  <p className="text-xs text-zinc-100 font-medium italic leading-relaxed">
+                    "{lastMatchChronicleSummary.torcidaReaction || lastMatchChronicleSummary.chronicle.replace(/^\[[^\]]+\]\s*/, "")}"
+                  </p>
+                </div>
+
+                {/* Clean Excerpt of the Match Chronicle */}
+                <div className="text-[10px] text-zinc-400 leading-relaxed border-l-2 border-amber-500/50 pl-2">
+                  <span className="font-bold text-zinc-300 block mb-0.5">
+                    📰 Resenha Pós-Jogo:
+                  </span>
+                  <p className="italic line-clamp-3">
+                    "{lastMatchChronicleSummary.chronicle.replace(/^\[[^\]]+\]\s*/, "")}"
+                  </p>
+                </div>
+
+                <div className="text-[9px] text-zinc-400 font-semibold flex items-center justify-between pt-1 border-t border-zinc-800/60">
+                  <span className="truncate text-amber-300/90 font-bold">
+                    🏟️ {lastMatchChronicleSummary.stadium} • vs {lastMatchChronicleSummary.rival} {lastMatchChronicleSummary.competition ? `• ${lastMatchChronicleSummary.competition}` : ""}
+                  </span>
+                  <span className="text-zinc-400 font-medium shrink-0">Eco do Último Confronto</span>
                 </div>
               </div>
             )}
