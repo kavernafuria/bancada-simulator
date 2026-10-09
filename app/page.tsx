@@ -2095,11 +2095,7 @@ export default function App() {
         }
       }
     } else {
-      if (activeMatchResult) {
-        setPendingSeasonEndEvaluation(true);
-      } else {
-        executeSeasonEndEvaluation();
-      }
+      setPendingSeasonEndEvaluation(true);
     }
   };
 
@@ -2380,6 +2376,40 @@ export default function App() {
         }
       }
   };
+
+  const handleDismissMatchResult = () => {
+    setActiveMatchResult(null);
+    if (pendingSocialMediaLeak) {
+      setActiveSocialMediaLeak(pendingSocialMediaLeak);
+      setPendingSocialMediaLeak(null);
+    } else if (pendingSeasonEndEvaluation) {
+      setPendingSeasonEndEvaluation(false);
+      executeSeasonEndEvaluation();
+    }
+  };
+
+  useEffect(() => {
+    if (
+      pendingSeasonEndEvaluation &&
+      !activeMatchResult &&
+      !pendingSocialMediaLeak &&
+      !activeSocialMediaLeak &&
+      !activePressConference &&
+      !activeInquiryTrigger &&
+      matchModalPhase === "CLOSED"
+    ) {
+      setPendingSeasonEndEvaluation(false);
+      executeSeasonEndEvaluation();
+    }
+  }, [
+    pendingSeasonEndEvaluation,
+    activeMatchResult,
+    pendingSocialMediaLeak,
+    activeSocialMediaLeak,
+    activePressConference,
+    activeInquiryTrigger,
+    matchModalPhase,
+  ]);
 
   const handleAcceptAllianceProposal = () => {
     if (!allianceProposalInvite) return;
@@ -5375,7 +5405,7 @@ export default function App() {
             )}
 
             <button
-              onClick={() => setActiveMatchResult(null)}
+              onClick={handleDismissMatchResult}
               className="absolute top-4 right-4 text-zinc-400 hover:text-white p-1 rounded-full bg-zinc-800/80 backdrop-blur z-10 cursor-pointer"
             >
               <X className="w-4 h-4" />
@@ -5453,16 +5483,7 @@ export default function App() {
             )}
 
             <button
-              onClick={() => {
-                setActiveMatchResult(null);
-                if (pendingSeasonEndEvaluation) {
-                  setPendingSeasonEndEvaluation(false);
-                  executeSeasonEndEvaluation();
-                } else if (pendingSocialMediaLeak) {
-                  setActiveSocialMediaLeak(pendingSocialMediaLeak);
-                  setPendingSocialMediaLeak(null);
-                }
-              }}
+              onClick={handleDismissMatchResult}
               className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider shadow-lg active:scale-95 transition-all cursor-pointer"
             >
               Continuar Carreira
@@ -6412,13 +6433,19 @@ export default function App() {
               onDismiss={() => {
                 // A coletiva sobre isso deve aparecer apenas em metade das ocasiões que a mensagem dos perfis aparecer (50% de chance)
                 const shouldTriggerColetiva = Math.random() < 0.50;
+                let triggeredConf = false;
                 if (shouldTriggerColetiva && activeSocialMediaLeak.pressConferenceId) {
                   const conf = getPressConference(activeSocialMediaLeak.pressConferenceId);
                   if (conf) {
                     setActivePressConference(conf);
+                    triggeredConf = true;
                   }
                 }
                 setActiveSocialMediaLeak(null);
+                if (!triggeredConf && pendingSeasonEndEvaluation) {
+                  setPendingSeasonEndEvaluation(false);
+                  executeSeasonEndEvaluation();
+                }
               }}
             />
           </div>
@@ -6469,6 +6496,10 @@ export default function App() {
             }
             setHistoryLog((prev) => [`[Coletiva de Imprensa] ${choice.log}`, ...prev]);
             setActivePressConference(null);
+            if (pendingSeasonEndEvaluation) {
+              setPendingSeasonEndEvaluation(false);
+              executeSeasonEndEvaluation();
+            }
           }}
         />
       )}

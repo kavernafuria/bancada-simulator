@@ -15,8 +15,8 @@ export interface WeaponUpgrade {
 }
 
 export const WEAPON_LEVELS: WeaponUpgrade[] = [
-  { level: 1, name: "Rojão Padrão 🚀", fireRate: 240, projectileCount: 1, damage: 8, color: "#f59e0b", icon: "🚀" },
-  { level: 2, name: "Cangalha de Morteiro 🎆", fireRate: 140, projectileCount: 3, damage: 16, color: "#38bdf8", icon: "🎆" },
+  { level: 1, name: "Rojão Simples 🚀", fireRate: 260, projectileCount: 1, damage: 7, color: "#f59e0b", icon: "🚀" },
+  { level: 2, name: "Cangalha de Morteiro 🎆", fireRate: 150, projectileCount: 3, damage: 13, color: "#38bdf8", icon: "🎆" },
 ];
 
 export interface RojonShooterProps {
@@ -327,17 +327,18 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
         destroyed: false,
       });
 
-      // Right: Yellow 3D Vertical Gate (+CANGALHA DE MORTEIRO BOOST 2s)
-      const wLvl = 2;
-      const wInfo = WEAPON_LEVELS[1];
+      // Right: Alternating Weapon Gate (Morteiro 2s vs Rojão Simples)
+      const isMortar = i % 2 === 1;
+      const wLvl = isMortar ? 2 : 1;
+      const wInfo = WEAPON_LEVELS[wLvl - 1];
       s.gates.push({
-        id: `gate_yellow_${i}`,
+        id: `gate_weapon_${i}`,
         x: 0.65,
         z: gateZ,
         type: "weapon",
         val: wLvl,
         weaponLevel: wLvl,
-        label: `${wInfo.name} (2s)`,
+        label: isMortar ? "MORTEIRO 🎆 (2s)" : "ROJÃO SIMPLES 🚀",
         passed: false,
       });
 
@@ -729,11 +730,17 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
                 setCrowdCount(s.crowdCount);
                 addFloatingText(`+${added} MEMBROS!`, s.playerX, 32, s.trackZ, "#22c55e");
               } else if (g.type === "weapon" && g.weaponLevel) {
-                s.weaponLevel = 2;
-                s.weaponTimer = 2.0; // 2 Segundos de duração!
-                setWeaponLevel(2);
-                const wName = WEAPON_LEVELS[1].name;
-                addFloatingText(`⚡ BOOST 2s: ${wName}!`, s.playerX, 36, s.trackZ, "#facc15");
+                if (g.weaponLevel === 2) {
+                  s.weaponLevel = 2;
+                  s.weaponTimer = 2.0; // 2 Segundos de duração!
+                  setWeaponLevel(2);
+                  addFloatingText("⚡ MORTEIRO POTENTE (2s)!", s.playerX, 36, s.trackZ, "#38bdf8");
+                } else {
+                  s.weaponLevel = 1;
+                  s.weaponTimer = 0; // Reseta boost de morteiro
+                  setWeaponLevel(1);
+                  addFloatingText("🚀 ROJÃO SIMPLES!", s.playerX, 36, s.trackZ, "#f59e0b");
+                }
               }
             }
           });
@@ -884,12 +891,29 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
             ctx.save();
             ctx.translate(pGate.x, pGate.y);
 
+            // Gate colors: Green (Membros) vs Cyan (Morteiro Lvl 2) vs Amber (Rojão Lvl 1)
+            let panelColor = "rgba(34, 197, 94, 0.35)";
+            let strokeColor = "#22c55e";
+            let iconColor = "#86efac";
+
+            if (!isGreen) {
+              if (g.weaponLevel === 2) {
+                panelColor = "rgba(56, 189, 248, 0.40)";
+                strokeColor = "#38bdf8";
+                iconColor = "#7dd3fc";
+              } else {
+                panelColor = "rgba(245, 158, 11, 0.35)";
+                strokeColor = "#f59e0b";
+                iconColor = "#fde68a";
+              }
+            }
+
             // Vertical Glass Panel
-            ctx.fillStyle = isGreen ? "rgba(34, 197, 94, 0.35)" : "rgba(234, 179, 8, 0.35)";
+            ctx.fillStyle = panelColor;
             ctx.fillRect(-gateW / 2, -gateH / 2, gateW, gateH);
 
             // Neon Glowing Pillars on Left & Right of Gate
-            ctx.strokeStyle = isGreen ? "#22c55e" : "#eab308";
+            ctx.strokeStyle = strokeColor;
             ctx.lineWidth = Math.max(2, 4 * pGate.scale);
             ctx.strokeRect(-gateW / 2, -gateH / 2, gateW, gateH);
 
@@ -902,13 +926,13 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
 
             // Icon inside glass panel
             if (isGreen) {
-              ctx.fillStyle = "#86efac";
+              ctx.fillStyle = iconColor;
               ctx.beginPath();
               ctx.arc(-8 * pGate.scale, 0, 6 * pGate.scale, 0, Math.PI * 2);
               ctx.arc(8 * pGate.scale, 0, 6 * pGate.scale, 0, Math.PI * 2);
               ctx.fill();
             } else {
-              ctx.fillStyle = "#fef08a";
+              ctx.fillStyle = iconColor;
               ctx.beginPath();
               ctx.arc(0, 0, 7 * pGate.scale, 0, Math.PI * 2);
               ctx.fill();
