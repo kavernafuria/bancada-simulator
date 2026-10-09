@@ -173,6 +173,7 @@ import {
   PRESS_CONFERENCES,
   SocialMediaLeak,
   getRandomPostBrawlLeak,
+  generateDynamicMatchLeak,
 } from "@/lib/bancada_engine";
 import { SocialMediaLeakCard } from "@/components/SocialMediaLeakCard";
 import { isInteriorSP } from "@/lib/season_events";
@@ -2009,32 +2010,49 @@ export default function App() {
       }
 
       // MÓDULO 4: Gatilho de Vídeo Vazado nas Redes Sociais (@ritmodetorcida & @ettorcida.oficiall)
-      // Agendado para surgir APÓS o jogador fechar o quadro de detalhes do jogo (ao clicar em Continuar Carreira).
-      // Frequência: 25% em briga de pista padrão / 50% se for briga em Torcida Única.
+      // Surge APÓS o confronto refletindo fielmente os acontecimentos do jogo anterior!
       const tid = (tactic.id || "").toUpperCase();
-      const isPistaFightMatch = result.isPistaFight || result.bannerCaptured || tid.includes("MAO_LIMPA") || tid.includes("PISTA_BRAWL") || tid.includes("BRIGA") || tid.includes("SOCO") || tid.includes("DISPOSICAO") || tid.includes("CONFRONTO") || tid.includes("PERIMETRO") || tid.includes("PORTAO") || tid.includes("BARRA_FERRO") || tid.includes("FRONTAL");
+      const isPistaFightMatch = result.isPistaFight || result.bannerCaptured || result.bannerLost || tid.includes("MAO_LIMPA") || tid.includes("PISTA_BRAWL") || tid.includes("BRIGA") || tid.includes("SOCO") || tid.includes("DISPOSICAO") || tid.includes("CONFRONTO") || tid.includes("PERIMETRO") || tid.includes("PORTAO") || tid.includes("BARRA_FERRO") || tid.includes("FRONTAL");
 
-      if (!activeMatchDerby?.isAllyGame && isPistaFightMatch) {
+      let shouldTriggerLeak = false;
+      if (result.bannerCaptured || result.bannerLost) {
+        shouldTriggerLeak = true; // Sempre vaza se tomou ou perdeu faixa!
+      } else if (result.membersLost > 0 || (result.statusTitle || "").toLowerCase().includes("polícia")) {
+        shouldTriggerLeak = Math.random() < 0.70; // 70% se teve prisões ou cerco policial
+      } else if (activeMatchDerby?.isAllyGame) {
+        shouldTriggerLeak = Math.random() < 0.50; // 50% de registrar cortejo unificado em jogo de aliada
+      } else if (isPistaFightMatch) {
         const isTorcidaUnicaFight = torcidaUnicaState.isTorcidaUnica || activeTorcidaUnicaModalMode !== null;
-        const leakChance = isTorcidaUnicaFight ? 0.50 : 0.25;
+        shouldTriggerLeak = isTorcidaUnicaFight ? Math.random() < 0.65 : Math.random() < 0.50;
+      } else {
+        shouldTriggerLeak = Math.random() < 0.30;
+      }
 
-        if (Math.random() < leakChance) {
-          const leak = getRandomPostBrawlLeak();
-          if (leak) {
-            setPendingSocialMediaLeak(leak);
-            if (leak.impactDeltas) {
-              if (leak.impactDeltas.moral) {
-                setStateTrackers((st) => ({ ...st, moral: Math.min(100, st.moral + leak.impactDeltas.moral!) }));
-              }
-              if (leak.impactDeltas.risco_mp) {
-                setStateTrackers((st) => ({ ...st, risco_mp: Math.min(100, st.risco_mp + leak.impactDeltas.risco_mp!) }));
-              }
-              if (leak.impactDeltas.poder_pista) {
-                setStats((st) => ({ ...st, poder_pista: Math.min(100, st.poder_pista + leak.impactDeltas.poder_pista!) }));
-              }
-              if (leak.impactDeltas.pressao_bancada) {
-                setStats((st) => ({ ...st, pressao_bancada: Math.min(100, st.pressao_bancada + leak.impactDeltas.pressao_bancada!) }));
-              }
+      if (shouldTriggerLeak) {
+        const leak = generateDynamicMatchLeak({
+          currentTorcida,
+          derby: activeMatchDerby,
+          result,
+          tactic,
+          police,
+          season,
+          chronicle,
+        });
+
+        if (leak) {
+          setPendingSocialMediaLeak(leak);
+          if (leak.impactDeltas) {
+            if (leak.impactDeltas.moral) {
+              setStateTrackers((st) => ({ ...st, moral: Math.max(0, Math.min(100, st.moral + leak.impactDeltas.moral!)) }));
+            }
+            if (leak.impactDeltas.risco_mp) {
+              setStateTrackers((st) => ({ ...st, risco_mp: Math.max(0, Math.min(100, st.risco_mp + leak.impactDeltas.risco_mp!)) }));
+            }
+            if (leak.impactDeltas.poder_pista) {
+              setStats((st) => ({ ...st, poder_pista: Math.max(0, Math.min(100, st.poder_pista + leak.impactDeltas.poder_pista!)) }));
+            }
+            if (leak.impactDeltas.pressao_bancada) {
+              setStats((st) => ({ ...st, pressao_bancada: Math.max(0, Math.min(100, st.pressao_bancada + leak.impactDeltas.pressao_bancada!)) }));
             }
           }
         }

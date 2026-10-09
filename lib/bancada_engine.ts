@@ -5016,6 +5016,206 @@ export function getRandomPostBrawlLeak(): SocialMediaLeak | null {
   return POST_BRAWL_LEAKS[keys[randomIndex]];
 }
 
+export function generateDynamicMatchLeak(params: {
+  currentTorcida: OfficialTorcida;
+  derby: DerbyMatchInfo;
+  result: any;
+  tactic?: TacticalBattleChoice | null;
+  police?: PoliceMeetingChoice | null;
+  season?: number;
+  chronicle?: string;
+}): SocialMediaLeak {
+  const { currentTorcida, derby, result, tactic, police } = params;
+  const torcidaName = currentTorcida.torcida;
+  const rivalName = derby.rivalTorcida || "rival";
+  const stadiumName = derby.stadium || "estádio";
+  const cityState = derby.cityState || "cidade";
+  const isVictory = result.isVictoryPista ?? result.isVictory;
+  const isAlly = derby.isAllyGame ?? false;
+  const bannerCaptured = result.bannerCaptured ?? false;
+  const bannerLost = result.bannerLost ?? false;
+  const statusTitle = (result.statusTitle || "").toLowerCase();
+  const isPoliceDetention = statusTitle.includes("polícia") || 
+                           statusTitle.includes("policia") || 
+                           statusTitle.includes("detenção") || 
+                           statusTitle.includes("detencao") || 
+                           (police?.stance === "COMBATIVA" && (result.mpAdded || 0) > 8);
+
+  const tacticStr = (tactic?.title || "").toLowerCase();
+  const isMaoLimpa = tacticStr.includes("mão limpa") || tacticStr.includes("disposição") || tacticStr.includes("soco");
+  const isRojoes = tacticStr.includes("rojões") || tacticStr.includes("morteiro") || tacticStr.includes("pirotecnia");
+  const isEmboscada = tacticStr.includes("emboscada") || tacticStr.includes("surpresa") || tacticStr.includes("flanqueamento");
+
+  const views = `${Math.floor(Math.random() * 450 + 520)}K`;
+  const likes = `${Math.floor(Math.random() * 40 + 38)}K`;
+  const shares = `${Math.floor(Math.random() * 15 + 9)}K`;
+  const mins = `${Math.floor(Math.random() * 25 + 5)} min`;
+
+  // 1. FAIXA CAPTURADA
+  if (bannerCaptured) {
+    const isET = Math.random() < 0.5;
+    return {
+      id: `LEAK_BANNER_CAPTURED_${Date.now()}`,
+      handle: isET ? "@ettorcida.oficiall" : "@ritmodetorcida",
+      profileName: isET ? "E.T Torcida Oficial" : "Ritmo de Torcida",
+      verified: true,
+      avatarColor: isET ? "bg-purple-600" : "bg-red-600",
+      headline: `🏴‍☠️ HISTÓRICO: VÍDEO MOSTRA FAIXA DA ${rivalName.toUpperCase()} CAPTURADA PELA ${torcidaName.toUpperCase()}!`,
+      snippetText: `Vídeo vazado de grupos do WhatsApp mostra integrantes da ${torcidaName} exibindo de cabeça para baixo a faixa tomada da ${rivalName} após o confronto no entorno do ${stadiumName}. O material já causa rebuliço nacional nos gabinetes do MP!`,
+      viewsCount: "1.2M",
+      likesCount: "95K",
+      sharesCount: "42K",
+      postedAgo: `Há ${mins}`,
+      impactDeltas: { moral: 12, poder_pista: 10, risco_mp: 12, pressao_bancada: 8 },
+      pressConferenceId: "ENTREVISTA_BRIGA_PISTA",
+    };
+  }
+
+  // 2. FAIXA / BANDEIRÃO PERDIDO
+  if (bannerLost) {
+    return {
+      id: `LEAK_BANNER_LOST_${Date.now()}`,
+      handle: "@ettorcida.oficiall",
+      profileName: "E.T Torcida Oficial",
+      verified: true,
+      avatarColor: "bg-purple-600",
+      headline: `🚨 URGENTE: ÁUDIO VAZADO REVELA CRISE NA ${torcidaName.toUpperCase()} APÓS PERDA DE MATERIAL!`,
+      snippetText: `Gravações de lideranças da ${torcidaName} vazadas nas redes mostram cobrança violenta contra o bonde de contenção após o entrevero contra a ${rivalName} em ${cityState}. A diretoria convocou reunião geral de emergência.`,
+      viewsCount: "980K",
+      likesCount: "64K",
+      sharesCount: "25K",
+      postedAgo: `Há ${mins}`,
+      impactDeltas: { moral: -10, poder_pista: -8, risco_mp: 8, pressao_bancada: -6 },
+      pressConferenceId: "ENTREVISTA_BRIGA_PISTA",
+    };
+  }
+
+  // 3. JOGO DE ALIANÇA / CONFRATERNIZAÇÃO
+  if (isAlly) {
+    return {
+      id: `LEAK_ALLY_${Date.now()}`,
+      handle: "@ritmodetorcida",
+      profileName: "Ritmo de Torcida",
+      verified: true,
+      avatarColor: "bg-emerald-600",
+      headline: `🤝 IMAGENS EXCLUSIVAS: CORTEJO UNIFICADO ENTRE ${torcidaName.toUpperCase()} E ${rivalName.toUpperCase()}!`,
+      snippetText: `Drone flagrou a celebração épica com churrasco farto na sede e as baterias da ${torcidaName} e da ${rivalName} tocando juntas pelas avenidas rumo ao ${stadiumName}. O vídeo ultrapassou centenas de milhares de visualizações!`,
+      viewsCount: views,
+      likesCount: likes,
+      sharesCount: shares,
+      postedAgo: `Há ${mins}`,
+      impactDeltas: { pressao_bancada: 8, moral: 6, risco_mp: -5 },
+      pressConferenceId: "ENTREVISTA_BRIGA_PISTA",
+    };
+  }
+
+  // 4. CERCO POLICIAL & PRISÕES
+  if (isPoliceDetention) {
+    return {
+      id: `LEAK_POLICE_${Date.now()}`,
+      handle: "@ettorcida.oficiall",
+      profileName: "E.T Torcida Oficial",
+      verified: true,
+      avatarColor: "bg-red-600",
+      headline: `🚨 CENAS LAMENTÁVEIS: VÍDEO MOSTRA CERCO DA PM AO COMBOIO DA ${torcidaName.toUpperCase()}!`,
+      snippetText: `Imagens gravadas por moradores registram o momento exato em que a tropa de Choque encurralou as vans da ${torcidaName} no acesso ao ${stadiumName}. Dezenas de torcedores foram levados à delegacia e advogados já estão no plantão.`,
+      viewsCount: views,
+      likesCount: likes,
+      sharesCount: shares,
+      postedAgo: `Há ${mins}`,
+      impactDeltas: { risco_mp: 12, moral: -4, pressao_bancada: 6 },
+      pressConferenceId: "ENTREVISTA_BRIGA_PISTA",
+    };
+  }
+
+  // 5. VITÓRIA EM CONFRONTO CONTRA RIVAL
+  if (isVictory) {
+    if (isMaoLimpa) {
+      return {
+        id: `LEAK_MAO_LIMPA_${Date.now()}`,
+        handle: "@ritmodetorcida",
+        profileName: "Ritmo de Torcida",
+        verified: true,
+        avatarColor: "bg-amber-600",
+        headline: `🥊 NA MÃO LIMPA! A ${torcidaName.toUpperCase()} ATROPELOU A ${rivalName.toUpperCase()} NO ${stadiumName.toUpperCase()}`,
+        snippetText: `Gravação de celular feita do alto flagrou o choque direto entre os bondes no perímetro do ${stadiumName}. A linha de frente da ${torcidaName} impôs disposição física na mão limpa e botou os rivais pra recuar!`,
+        viewsCount: views,
+        likesCount: likes,
+        sharesCount: shares,
+        postedAgo: `Há ${mins}`,
+        impactDeltas: { poder_pista: 8, moral: 8, risco_mp: 8 },
+        pressConferenceId: "ENTREVISTA_BRIGA_PISTA",
+      };
+    } else if (isRojoes) {
+      return {
+        id: `LEAK_ROJOES_${Date.now()}`,
+        handle: "@ritmodetorcida",
+        profileName: "Ritmo de Torcida",
+        verified: true,
+        avatarColor: "bg-red-600",
+        headline: `💥 GUERRA DE ROJÕES: A ${torcidaName.toUpperCase()} ILUMINOU AS AVENIDAS CONTRA A ${rivalName.toUpperCase()}!`,
+        snippetText: `Cenas impressionantes do confronto pirotécnico em ${cityState}. A ${torcidaName} acionou morteiros pesados para quebrar a linha da ${rivalName} e tomar as vias de acesso ao ${stadiumName}!`,
+        viewsCount: views,
+        likesCount: likes,
+        sharesCount: shares,
+        postedAgo: `Há ${mins}`,
+        impactDeltas: { poder_pista: 8, moral: 6, risco_mp: 10 },
+        pressConferenceId: "ENTREVISTA_BRIGA_PISTA",
+      };
+    } else if (isEmboscada) {
+      return {
+        id: `LEAK_EMBOSCADA_${Date.now()}`,
+        handle: "@ettorcida.oficiall",
+        profileName: "E.T Torcida Oficial",
+        verified: true,
+        avatarColor: "bg-purple-600",
+        headline: `🎯 VAZOU: CÂMERAS MOSTRAM EMBOSCADA DA ${torcidaName.toUpperCase()} CONTRA A ${rivalName.toUpperCase()}!`,
+        snippetText: `Vídeo das câmeras de monitoramento urbano flagra o momento em que batedores da ${torcidaName} surpreenderam o comboio da ${rivalName} pelas travessas próximas ao ${stadiumName}. Domínio territorial consumado!`,
+        viewsCount: views,
+        likesCount: likes,
+        sharesCount: shares,
+        postedAgo: `Há ${mins}`,
+        impactDeltas: { poder_pista: 8, moral: 6, risco_mp: 8 },
+        pressConferenceId: "ENTREVISTA_BRIGA_PISTA",
+      };
+    } else {
+      const isET = Math.random() < 0.5;
+      return {
+        id: `LEAK_DOMINIO_${Date.now()}`,
+        handle: isET ? "@ettorcida.oficiall" : "@ritmodetorcida",
+        profileName: isET ? "E.T Torcida Oficial" : "Ritmo de Torcida",
+        verified: true,
+        avatarColor: isET ? "bg-purple-600" : "bg-red-600",
+        headline: `🔥 DOMÍNIO DA MASSA: A ${torcidaName.toUpperCase()} TOMOU AS RUAS CONTRA A ${rivalName.toUpperCase()}!`,
+        snippetText: `Vídeos que circulam no TikTok e Instagram mostram a chegada triunfal da ${torcidaName} ao ${stadiumName}, com sinalizadores acesos, fumaça e a ${rivalName} recuando nos acessos. Repercussão máxima!`,
+        viewsCount: views,
+        likesCount: likes,
+        sharesCount: shares,
+        postedAgo: `Há ${mins}`,
+        impactDeltas: { poder_pista: 8, moral: 6, risco_mp: 6, pressao_bancada: 6 },
+        pressConferenceId: "ENTREVISTA_BRIGA_PISTA",
+      };
+    }
+  }
+
+  // 6. DERROTA OU RECUO EM CLÁSSICO
+  return {
+    id: `LEAK_DEFEAT_${Date.now()}`,
+    handle: "@ettorcida.oficiall",
+    profileName: "E.T Torcida Oficial",
+    verified: true,
+    avatarColor: "bg-purple-600",
+    headline: `⚠️ EXCLUSIVO: COBRANÇA INTERNA NA ${torcidaName.toUpperCase()} APÓS CLÁSSICO COM A ${rivalName.toUpperCase()}`,
+    snippetText: `Vídeo vazado de um dos bondes da ${torcidaName} mostra clima de cobrança e bate-boca interno na saída do ${stadiumName} após o embate complicado diante da ${rivalName}. A oposição da torcida já pede explicações à diretoria!`,
+    viewsCount: views,
+    likesCount: likes,
+    sharesCount: shares,
+    postedAgo: `Há ${mins}`,
+    impactDeltas: { moral: -6, poder_pista: -4, risco_mp: 6, pressao_bancada: -4 },
+    pressConferenceId: "ENTREVISTA_BRIGA_PISTA",
+  };
+}
+
 export const PRESS_CONFERENCES: Record<string, PressConference> = {
   ENTREVISTA_INICIAL_RACHA: {
     id: "ENTREVISTA_INICIAL_RACHA",
