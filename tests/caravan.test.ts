@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { generateEtapa10CaravanChoices } from "@/lib/engine/economy_engine";
+import { generateEtapa10CaravanChoices } from "@/lib/bancada_engine";
 
 describe("Etapa 10 Caravan Engine Unit Tests", () => {
   const currentTorcida = {
@@ -30,5 +30,20 @@ describe("Etapa 10 Caravan Engine Unit Tests", () => {
     const selectedTorcidaNames = choices.map((c) => c.rivalTorcida);
     expect(selectedTorcidaNames).not.toContain("Mancha Alvi-Verde");
     expect(selectedTorcidaNames).not.toContain("Torcida Tricolor Indep.");
+  });
+
+  it("should attach ally reinforcement details and costs to high-stakes Etapa 10 caravans", () => {
+    const choices = generateEtapa10CaravanChoices(currentTorcida, [], 1);
+    const derbyChoice = choices.find((c) => c.category === "DERBY");
+    expect(derbyChoice).toBeDefined();
+    if (derbyChoice) {
+      expect(derbyChoice.allyTorcidaName).toBeDefined();
+      expect(derbyChoice.allyExtraMembers).toBeGreaterThan(0);
+      expect(derbyChoice.allyPistaBonus).toBeGreaterThan(0);
+      expect(derbyChoice.allyCost).toBe(2500);
+
+      const allyImpact = derbyChoice.impacts.find((imp) => imp.label.includes("Reforço Aliado"));
+      expect(allyImpact).toBeDefined();
+    }
   });
 });

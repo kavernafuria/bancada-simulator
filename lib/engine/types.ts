@@ -67,6 +67,9 @@ export interface DerbyMatchInfo {
   importanceDescription: string;
   competition?: string;
   teamData?: any;
+  allyTorcida?: string;
+  allyExtraMembers?: number;
+  allyPistaBonus?: number;
 }
 
 export interface PoliceMeetingChoice {

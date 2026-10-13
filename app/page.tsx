@@ -112,7 +112,8 @@ import { InquiryModal, InquiryResultPayload } from "@/components/InquiryModal";
 import { GameTutorialModal } from "@/components/GameTutorialModal";
 import { StoryCardModal, StoryCardData } from "@/components/StoryCardModal";
 import { Etapa10CaravanModal } from "@/components/Etapa10CaravanModal";
-import { generateEtapa10CaravanChoices, Etapa10CaravanChoice } from "@/lib/bancada_engine";
+import { HomeAllySupportModal } from "@/components/HomeAllySupportModal";
+import { generateEtapa10CaravanChoices, Etapa10CaravanChoice, findAllyForTorcida, calculateAllySupportNumbers } from "@/lib/bancada_engine";
 import alliancesData from "@/data/bancada_alliances.json";
 import {
   GAME_BALANCE,
@@ -446,6 +447,15 @@ export default function App() {
   const [pistaHistoryRecord, setPistaHistoryRecord] = useState<Record<string, { win: number; loss: number; bannersCaptured: number; bannersLost: number }>>({});
   const [etapa10Choices, setEtapa10Choices] = useState<Etapa10CaravanChoice[]>([]);
   const [showEtapa10Modal, setShowEtapa10Modal] = useState<boolean>(false);
+  const [activeHomeAllyOffer, setActiveHomeAllyOffer] = useState<{
+    step: any;
+    allyTorcida: string;
+    allyClub: string;
+    rivalTorcida: string;
+    extraMembers: number;
+    pistaBonus: number;
+    cost: number;
+  } | null>(null);
 
   // MÓDULO 1: Gatilho em 2 Estágios (1º Aviso MP/TAC -> 2º Decreto Definitivo de Torcida Única)
   const triggerMPRiskFlow = (newMP: number, mpDelta: number) => {
@@ -1307,7 +1317,29 @@ export default function App() {
       isLongDistance: choice.category === "CAPITAL",
       matchTitle: `RODADA FINAL • INVASÃO AO ESTÁDIO DO ${choice.clube.toUpperCase()}`,
       competition: "Campeonato Nacional",
+      allyTorcida: choice.allyTorcidaName,
+      allyExtraMembers: choice.allyExtraMembers,
+      allyPistaBonus: choice.allyPistaBonus,
     };
+
+    if (choice.allyCost && choice.allyCost > 0) {
+      setBankBalance((b) => Math.max(0, b - choice.allyCost!));
+    }
+    if (choice.allyExtraMembers) {
+      setAllyBonusMembers(choice.allyExtraMembers);
+    }
+    if (choice.allyPistaBonus) {
+      setStats((s) => ({
+        ...s,
+        poder_pista: Math.min(100, s.poder_pista + (choice.allyPistaBonus || 0)),
+      }));
+    }
+    if (choice.allyTorcidaName && choice.allyExtraMembers) {
+      setHistoryLog((prev) => [
+        `[Etapa 10 - Caravana Aliada] Convocado apoio da aliada ${choice.allyTorcidaName} com +${choice.allyExtraMembers!.toLocaleString()} integrantes no comboio visitante! (Custo logístico: R$ ${(choice.allyCost || 0).toLocaleString("pt-BR")})`,
+        ...prev,
+      ]);
+    }
 
     const currentStep = pipeline[pipelineIndex] as any;
     if (currentStep) {
@@ -1329,6 +1361,80 @@ export default function App() {
     setActiveScoutIntel(null);
     setRetryUsedCurrentMatch(false); // RESETA A SEGUNDA CHANCE PARA CADA NOVO DUELO!
     setIsRetryWithAdAttempt(false);
+
+    // GATILHO DE REFORÇO ALIADO EM JOGO EM CASA:
+    // Apenas após 2 derrotas para o mesmo rival
+    const isHome = Boolean(step?.derby?.isHome ?? step?.isHomeGame);
+    const rivalName = step?.derby?.rivalTorcida || "";
+    const lossesAgainstRival = Math.max(
+      rivalryRecords[rivalName]?.derrotasPista || 0,
+      pistaHistoryRecord[rivalName]?.loss || 0
+    );
+
+    if (
+      isHome &&
+      lossesAgainstRival >= 2 &&
+      !step?.derby?.isAllyGame &&
+      !step?.derby?.allyTorcida &&
+      currentTorcida
+    ) {
+      const ally = findAllyForTorcida(currentTorcida);
+      if (ally) {
+        const allySupport = calculateAllySupportNumbers(ally);
+        setActiveHomeAllyOffer({
+          step,
+          allyTorcida: ally.torcida,
+          allyClub: ally.clube,
+          rivalTorcida: rivalName,
+          extraMembers: allySupport.extraMembers,
+          pistaBonus: allySupport.pistaBonus,
+          cost: 2000,
+        });
+        return;
+      }
+    }
+
+    setMatchModalPhase("POLICE_MEETING");
+  };
+
+  const handleAcceptHomeAllyOffer = () => {
+    if (!activeHomeAllyOffer) return;
+    const { step, allyTorcida, rivalTorcida, extraMembers, pistaBonus, cost } = activeHomeAllyOffer;
+
+    // Custear acolhimento e alimentação dos aliados na sede
+    setBankBalance((b) => Math.max(0, b - cost));
+
+    // Regra: Na presença da torcida aliada em jogo em casa devemos ganhar MASSA (+Contingente) e PODER DE PISTA
+    // Pressão de bancada, moral e respeito nacional NÃO ganham bônus!
+    setStats((prev) => ({
+      ...prev,
+      poder_pista: Math.min(100, prev.poder_pista + pistaBonus),
+    }));
+    setAllyBonusMembers(extraMembers);
+
+    if (step && step.derby) {
+      step.derby.allyTorcida = allyTorcida;
+      step.derby.allyExtraMembers = extraMembers;
+      step.derby.allyPistaBonus = pistaBonus;
+      setActiveMatchDerby({
+        ...step.derby,
+        allyTorcida,
+        allyExtraMembers: extraMembers,
+        allyPistaBonus: pistaBonus,
+      });
+    }
+
+    setHistoryLog((prev) => [
+      `[Clássico em Casa - Reforço Aliado] A torcida aliada ${allyTorcida} somou com +${extraMembers.toLocaleString()} integrantes na sede para recuperar a soberania contra a ${rivalTorcida}! (+${pistaBonus} Poder de Pista, -R$ ${cost.toLocaleString("pt-BR")})`,
+      ...prev,
+    ]);
+
+    setActiveHomeAllyOffer(null);
+    setMatchModalPhase("POLICE_MEETING");
+  };
+
+  const handleDeclineHomeAllyOffer = () => {
+    setActiveHomeAllyOffer(null);
     setMatchModalPhase("POLICE_MEETING");
   };
 
@@ -1346,6 +1452,12 @@ export default function App() {
     if (activeMatchDerby) {
       const isInterior = isInteriorSP(currentTorcida);
       let intel = calculateScoutIntel(stats, transport, activeMatchDerby, isInterior);
+      if (!activeMatchDerby.allyExtraMembers && allyBonusMembers > 0) {
+        intel = {
+          ...intel,
+          playerMembersPresent: intel.playerMembersPresent + allyBonusMembers,
+        };
+      }
       if (isRetryWithAdAttempt) {
         // DOBRA O CONTINGENTE DA TORCIDA SE FOR TENTATIVA DE SEGUNDA CHANCE (REWARDED AD)
         intel = {
@@ -2063,6 +2175,9 @@ export default function App() {
   };
 
   const advancePipeline = () => {
+    // Reseta reforço aliado pontual para o próximo ciclo
+    setAllyBonusMembers(0);
+
     // Recarrega Pontos de Organização (+20 a cada Etapa)
     setOrganizacaoPoints((prev) => Math.min(GAME_BALANCE.ORGANIZACAO_MAX_POINTS, prev + GAME_BALANCE.ORGANIZACAO_REFILL_PER_ETAPA));
 
@@ -6574,6 +6689,20 @@ export default function App() {
         isOpen={showEtapa10Modal}
         choices={etapa10Choices}
         onSelectChoice={handleSelectEtapa10CaravanChoice}
+      />
+
+      {/* HOME ALLY SUPPORT MODAL (APÓS 2 DERROTAS EM JOGO EM CASA) */}
+      <HomeAllySupportModal
+        isOpen={activeHomeAllyOffer !== null}
+        allyTorcida={activeHomeAllyOffer?.allyTorcida || ""}
+        allyClub={activeHomeAllyOffer?.allyClub || ""}
+        rivalTorcida={activeHomeAllyOffer?.rivalTorcida || ""}
+        extraMembers={activeHomeAllyOffer?.extraMembers || 0}
+        pistaBonus={activeHomeAllyOffer?.pistaBonus || 0}
+        cost={activeHomeAllyOffer?.cost || 2000}
+        currentBalance={bankBalance}
+        onAccept={handleAcceptHomeAllyOffer}
+        onDecline={handleDeclineHomeAllyOffer}
       />
     </div>
   );

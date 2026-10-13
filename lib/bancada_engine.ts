@@ -551,6 +551,9 @@ export interface DerbyMatchInfo {
   importanceDescription: string;
   competition?: string;
   teamData?: any;
+  allyTorcida?: string;
+  allyExtraMembers?: number;
+  allyPistaBonus?: number;
 }
 
 export interface PoliceMeetingChoice {
@@ -1960,7 +1963,7 @@ export function calculateScoutIntel(
   const caravanaMult = isInterior ? 6 : 12;
   const minAttendance = isInterior ? 60 : 150;
   const baseCount = Math.round((stats.contingente * multiplier + stats.caravana * caravanaMult) * transport.capacityMultiplier);
-  const playerMembers = Math.max(minAttendance, baseCount + Math.floor((Math.random() - 0.5) * (isInterior ? 50 : 100)));
+  const playerMembers = Math.max(minAttendance, baseCount + Math.floor((Math.random() - 0.5) * (isInterior ? 50 : 100))) + (derby.allyExtraMembers || 0);
 
   // Rival attendance waiting
   const rivalBase = Math.round(derby.isHome ? playerMembers * 0.45 : playerMembers * 1.25);
@@ -2048,7 +2051,9 @@ export function calculateScoutIntel(
     playerMembersPresent: playerMembers,
     rivalMembersWaiting: rivalMembers,
     policePresence: police,
-    scoutIntelLog: `Relatório dos Antenas: Nosso bonde conta com aproximadamente ${playerMembers.toLocaleString()} integrantes na pista. A torcida rival (${derby.rivalTorcida}) tem cerca de ${rivalMembers.toLocaleString()} pessoas nas imediações. Nível do Choque: ${police}.`,
+    scoutIntelLog: derby.allyTorcida && derby.allyExtraMembers
+      ? `Relatório dos Antenas: Nosso bonde conta com cerca de ${playerMembers.toLocaleString()} guerreiros na pista (incluindo reforço de ${derby.allyExtraMembers.toLocaleString()} irmãos da torcida aliada ${derby.allyTorcida}). A torcida rival (${derby.rivalTorcida}) tem cerca de ${rivalMembers.toLocaleString()} pessoas nas imediações. Nível do Choque: ${police}.`
+      : `Relatório dos Antenas: Nosso bonde conta com aproximadamente ${playerMembers.toLocaleString()} integrantes na pista. A torcida rival (${derby.rivalTorcida}) tem cerca de ${rivalMembers.toLocaleString()} pessoas nas imediações. Nível do Choque: ${police}.`,
     twistTitle: chosenTwist.title,
     twistDescription: chosenTwist.desc,
   };
@@ -6349,6 +6354,56 @@ export interface Etapa10CaravanChoice {
   description: string;
   impacts: { label: string; value: string; isPositive: boolean }[];
   teamData: any;
+  allyTorcidaName?: string;
+  allyClub?: string;
+  allyCost?: number;
+  allyExtraMembers?: number;
+  allyPistaBonus?: number;
+}
+
+export function calculateAllySupportNumbers(allyTorcida: any): { extraMembers: number; pistaBonus: number } {
+  if (!allyTorcida) return { extraMembers: 150, pistaBonus: 12 };
+  const tier = (allyTorcida.tier || "B").toUpperCase();
+  const contingente = allyTorcida.contingente || 50;
+
+  // Proporcional ao tamanho e tier no momento
+  let mult = 3.2;
+  if (tier.startsWith("S")) mult = 6.5; // ~580 a 620 membros
+  else if (tier.startsWith("A")) mult = 4.8; // ~360 a 400 membros
+  else if (tier.startsWith("B")) mult = 3.2; // ~160 a 200 membros
+  else mult = 2.2; // ~80 a 100 membros
+
+  const extraMembers = Math.round(contingente * mult);
+  const pistaBonus = Math.max(10, Math.round((allyTorcida.poder_pista || 50) * 0.25));
+  return { extraMembers, pistaBonus };
+}
+
+export function findAllyForTorcida(currentTorcida: any): any | null {
+  if (!currentTorcida) return null;
+  const allTeams = teamsData as any[];
+  if (currentTorcida.torcida_aliada) {
+    const directAlly = allTeams.find(
+      (t) =>
+        t.torcida.toLowerCase() === currentTorcida.torcida_aliada.toLowerCase() ||
+        t.clube.toLowerCase().includes(currentTorcida.torcida_aliada.toLowerCase()) ||
+        currentTorcida.torcida_aliada.toLowerCase().includes(t.torcida.toLowerCase())
+    );
+    if (directAlly && directAlly.torcida !== currentTorcida.torcida) return directAlly;
+  }
+  if (currentTorcida.eixo_alianca && currentTorcida.eixo_alianca !== "INDEPENDENTE") {
+    const axisAlly = allTeams.find(
+      (t) => t.eixo_alianca === currentTorcida.eixo_alianca && t.torcida !== currentTorcida.torcida
+    );
+    if (axisAlly) return axisAlly;
+  }
+  const friendly = allTeams.find(
+    (t) =>
+      t.torcida !== currentTorcida.torcida &&
+      t.clube !== currentTorcida.clube &&
+      t.rival_principal !== currentTorcida.clube &&
+      t.rival_secundario !== currentTorcida.clube
+  );
+  return friendly || null;
 }
 
 export function generateEtapa10CaravanChoices(
@@ -6357,6 +6412,10 @@ export function generateEtapa10CaravanChoices(
   playerRank: number = 1
 ): Etapa10CaravanChoice[] {
   if (!currentTorcida) return [];
+
+  const allyObj = findAllyForTorcida(currentTorcida);
+  const allySupport = allyObj ? calculateAllySupportNumbers(allyObj) : null;
+  const allyCost = 2500;
 
   // Filter out faced torcidas and current torcida itself
   const availableTeams = (teamsData as any[]).filter(
@@ -6397,6 +6456,25 @@ export function generateEtapa10CaravanChoices(
 
   if (derbyTeam) {
     selectedTorcidaNames.add(derbyTeam.torcida);
+    const impacts = [
+      { label: "Moral da Torcida", value: "+++ Moral Máxima", isPositive: true },
+      { label: "Respeito Nacional", value: "+15 Respeito", isPositive: true },
+      { label: "Risco Policial", value: "⚠️ Risco Elevado", isPositive: false },
+      { label: "Custo Rodoviário", value: "R$ 4.500", isPositive: false },
+    ];
+    if (allyObj && allySupport) {
+      impacts.push({
+        label: "🤝 Reforço Aliado",
+        value: `+${allySupport.extraMembers} membros (${allyObj.torcida})`,
+        isPositive: true,
+      });
+      impacts.push({
+        label: "💰 Gastos Apoio Aliado",
+        value: `-R$ ${allyCost.toLocaleString("pt-BR")}`,
+        isPositive: false,
+      });
+    }
+
     selectedChoices.push({
       id: "DERBY_TENSAO",
       category: "DERBY",
@@ -6409,13 +6487,13 @@ export function generateEtapa10CaravanChoices(
       stadium: derbyTeam.stadium || `Estádio do ${derbyTeam.clube}`,
       cityState: `${derbyTeam.clube} - ${derbyTeam.estado}`,
       description: `Confronto de altíssima rivalidade contra a ${derbyTeam.torcida}. Exige esquema de segurança máximo e transporte blindado.`,
-      impacts: [
-        { label: "Moral da Torcida", value: "+++ Moral Máxima", isPositive: true },
-        { label: "Respeito Nacional", value: "+15 Respeito", isPositive: true },
-        { label: "Risco Policial", value: "⚠️ Risco Elevado", isPositive: false },
-        { label: "Custo Rodoviário", value: "R$ 4.500", isPositive: false },
-      ],
+      impacts,
       teamData: derbyTeam,
+      allyTorcidaName: allyObj?.torcida,
+      allyClub: allyObj?.clube,
+      allyCost: allyObj ? allyCost : undefined,
+      allyExtraMembers: allySupport?.extraMembers,
+      allyPistaBonus: allySupport?.pistaBonus,
     });
   }
 
@@ -6506,6 +6584,25 @@ export function generateEtapa10CaravanChoices(
 
   if (capitalTeam) {
     selectedTorcidaNames.add(capitalTeam.torcida);
+    const impacts = [
+      { label: "Engajamento Social", value: "+12 Contingente", isPositive: true },
+      { label: "Projeção na Mídia", value: "+10 Respeito", isPositive: true },
+      { label: "Logística Completa", value: "R$ 5.000", isPositive: false },
+      { label: "Desgaste da Tropa", value: "Viagem Longa", isPositive: false },
+    ];
+    if (allyObj && allySupport) {
+      impacts.push({
+        label: "🤝 Reforço Aliado",
+        value: `+${allySupport.extraMembers} membros (${allyObj.torcida})`,
+        isPositive: true,
+      });
+      impacts.push({
+        label: "💰 Gastos Apoio Aliado",
+        value: `-R$ ${allyCost.toLocaleString("pt-BR")}`,
+        isPositive: false,
+      });
+    }
+
     selectedChoices.push({
       id: "CAPITAL_DISTANTE",
       category: "CAPITAL",
@@ -6518,13 +6615,13 @@ export function generateEtapa10CaravanChoices(
       stadium: capitalTeam.stadium || `Estádio do ${capitalTeam.clube}`,
       cityState: `${capitalTeam.clube} - ${capitalTeam.estado}`,
       description: `Excursão interestadual de longa distância para uma grande capital. Mídia nacional e grande contingente nas ruas.`,
-      impacts: [
-        { label: "Engajamento Social", value: "+12 Contingente", isPositive: true },
-        { label: "Projeção na Mídia", value: "+10 Respeito", isPositive: true },
-        { label: "Logística Completa", value: "R$ 5.000", isPositive: false },
-        { label: "Desgaste da Tropa", value: "Viagem Longa", isPositive: false },
-      ],
+      impacts,
       teamData: capitalTeam,
+      allyTorcidaName: allyObj?.torcida,
+      allyClub: allyObj?.clube,
+      allyCost: allyObj ? allyCost : undefined,
+      allyExtraMembers: allySupport?.extraMembers,
+      allyPistaBonus: allySupport?.pistaBonus,
     });
   }
 

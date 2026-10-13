@@ -90,6 +90,20 @@ export function Etapa10CaravanModal({
                   <p className="text-xs text-zinc-400 leading-relaxed mb-3">
                     {choice.description}
                   </p>
+
+                  {choice.allyTorcidaName && (
+                    <div className="mb-3 p-2.5 rounded-xl bg-amber-950/40 border border-amber-500/40 text-xs">
+                      <div className="flex items-center justify-between text-amber-400 font-black text-[11px] uppercase">
+                        <span className="flex items-center gap-1.5">
+                          <Users className="w-3.5 h-3.5" /> REFORÇO ALIADO: {choice.allyTorcidaName}
+                        </span>
+                        <span className="text-emerald-400 font-mono">+{choice.allyExtraMembers} membros</span>
+                      </div>
+                      <p className="text-[10px] text-zinc-300 mt-1 leading-snug">
+                        A <strong className="text-white">{choice.allyTorcidaName}</strong> confirmou presença e somará no nosso comboio (+{choice.allyPistaBonus} Poder de Pista). Gastos logísticos de R$ {choice.allyCost?.toLocaleString("pt-BR")} embutidos na viagem.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div>
