@@ -2814,7 +2814,7 @@ export default function App() {
   };
 
   const handleShareHistory = () => {
-    const text = `🥁 Minha torcida "${currentTorcida?.torcida}" concluiu os 10 Anos no Bancada: Simulador de Torcida!\n\nTítulo Honorário: ${getHonoraryTitle()}\nContingente: ${stats.contingente}/100 | Pista: ${stats.poder_pista}/100 | Bancada: ${stats.pressao_bancada}/100\nCaixa: R$ ${bankBalance.toLocaleString()}`;
+    const text = `🥁 Minha torcida "${currentTorcida?.torcida}" concluiu os 15 Anos no Bancada: Simulador de Torcida!\n\nTítulo Honorário: ${getHonoraryTitle()}\nContingente: ${stats.contingente}/100 | Pista: ${stats.poder_pista}/100 | Bancada: ${stats.pressao_bancada}/100\nCaixa: R$ ${bankBalance.toLocaleString()}`;
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -4204,7 +4204,7 @@ export default function App() {
           <div className="flex items-center justify-between">
             <div>
               <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest block">
-                PODER NACIONAL DE ARQUIBANCADA (58 TORCIDAS)
+                PODER NACIONAL DE ARQUIBANCADA ({officialList.length} TORCIDAS)
               </span>
               <h3 className="text-base font-black text-white uppercase flex items-center gap-1.5">
                 <Crown className="w-4 h-4 text-amber-400" /> Ranking Nacional de Torcidas

@@ -1,4 +1,4 @@
-# 🏟️ Simulador de Bancada & Cultura de Arquibancada (30 Anos de Carreira)
+# 🏟️ Simulador de Bancada & Cultura de Arquibancada (15 Temporadas de Carreira)
 
 > **Plataforma de Simulação de Torcidas Organizadas & Geopolítica de Arquibancada do Futebol Brasileiro.**
 
@@ -10,11 +10,11 @@
 
 ## ⚽ Visão Geral do Jogo
 
-O **Simulador de Bancada** coloca você no comando de uma das **58 Torcidas Organizadas do Brasil** em uma jornada épica de 30 anos de carreira. Equilibre os **5 Atributos Vitais Primários**, gerencie o caixa da torcida, dispute o **Ranking Nacional de Torcidas**, acompanhe o desempenho do seu clube no campeonato e tome decisões táticas cruciais em caravanas, emboscadas e clássicos de alto risco.
+O **Simulador de Bancada** coloca você no comando de uma das **mais de 125 Torcidas Organizadas do Brasil** em uma jornada épica de 15 temporadas de carreira. Equilibre os **5 Atributos Vitais Primários**, gerencie o caixa da torcida, dispute o **Ranking Nacional de Torcidas**, acompanhe o desempenho do seu clube no campeonato e tome decisões táticas cruciais em caravanas, emboscadas e clássicos de alto risco.
 
 ### 🌟 Principais Mecânicas & Funcionalidades:
 
-1. **🏆 Ranking Nacional de Torcidas (58 Torcidas Mapeadas):**
+1. **🏆 Ranking Nacional de Torcidas (125+ Torcidas Mapeadas):**
    - Pontuação dinâmica baseada em *Massa (Contingente)*, *Pressão de Bancada*, *Poder de Pista*, *Caravanas* e *Respeito Nacional*.
    - Flutuações procedurais orgânicas a cada temporada e resistência logarítmica para subir no Top 5.
 
