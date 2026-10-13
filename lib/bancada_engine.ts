@@ -1450,6 +1450,18 @@ export function getDerbyForMatch(
       case "sertaozinho": return { stadium: "Frederico Dalmaso (Fredericão)", cityState: "Sertãozinho - SP" };
       case "mogi mirim": return { stadium: "Vail Chaves", cityState: "Mogi Mirim - SP" };
       case "itapirense": return { stadium: "Chico Vieira", cityState: "Itapira - SP" };
+      case "capivariano": return { stadium: "Arena Capivari", cityState: "Capivari - SP" };
+      case "velo clube": return { stadium: "Benitão (Augusto Schmidt Filho)", cityState: "Rio Claro - SP" };
+      case "rio claro": return { stadium: "Augusto Schmidt Filho (Benitão)", cityState: "Rio Claro - SP" };
+      case "primavera": return { stadium: "Ítalo Mário Limongi (Gigante da Vila)", cityState: "Indaiatuba - SP" };
+      case "juventus": return { stadium: "Rua Javari (Conde Rodolfo Crespi)", cityState: "São Paulo - SP" };
+      case "linense": return { stadium: "Gilbertão (Gilberto Siqueira Lopes)", cityState: "Lins - SP" };
+      case "monte azul": return { stadium: "Otacília Patrício Arroyo", cityState: "Monte Azul Paulista - SP" };
+      case "votuporanguense": return { stadium: "Arena Plínio Marin", cityState: "Votuporanga - SP" };
+      case "penapolense": return { stadium: "Tenentão (Tenente Carriço)", cityState: "Penápolis - SP" };
+      case "são carlos fc":
+      case "são carlos": return { stadium: "Luisão (Prof. Luís Augusto de Oliveira)", cityState: "São Carlos - SP" };
+      case "flamengo de guarulhos": return { stadium: "Ninho do Corvo (Antônio Soares de Oliveira)", cityState: "Guarulhos - SP" };
       default: return { stadium: `Estádio Municipal de ${club}`, cityState: "Brasil" };
     }
   };

@@ -116,7 +116,9 @@
         "Dragões Alvi Azul",
         "Sangue Rubro",
         "Força Rubro Verde",
-        "Malucos do Tigre"
+        "Malucos do Tigre",
+        "Raça Grená",
+        "Sancaloucos"
       ]
     },
     "PUNHO_SEGURO": {
@@ -127,7 +129,8 @@
         "Guerreiros do Tigre",
         "Esquadrão XV",
         "Sangue Barbarense",
-        "Torcida Interror"
+        "Torcida Interror",
+        "Comando Rubro Negro"
       ]
     },
     "IRMANDADE": {
@@ -135,6 +138,7 @@
       "symbol": "🤝",
       "members": [
         "Torcida Jovem Ponte",
+        "Serponte",
         "Torcida Mancha Azul",
         "Mancha Alvinegra",
         "Torcida Afeganistão"
