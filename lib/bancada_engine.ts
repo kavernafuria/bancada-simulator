@@ -4111,27 +4111,27 @@ export function getPresidentOptions(): PresidentOption[] {
   return [
     {
       id: "LINHA_FRENTE",
-      title: "1. Perfil Linha de Frente / Pista",
-      bonus: "+15% no PEC de Combate e maior respeito em confrontos de rua.",
-      penalty: "+10% de Risco MP passivo e maior rigor da PM nas revistas.",
+      title: "1. Linha de Frente / Pista",
+      bonus: "+15% PEC de Combate e respeito na rua.",
+      penalty: "+10% Risco MP e mais rigor da PM.",
       icon: "🥊",
-      description: "Liderança marcial e cascuda vinda das pistas e caravanas. Impõe respeito em qualquer território, mas atrai os holofotes do Ministério Público."
+      description: "Impõe respeito na pista, mas atrai o MP."
     },
     {
       id: "GESTOR",
-      title: "2. Perfil Gestor / Comercial",
-      bonus: "+20% de Faturamento na Loja Oficial, eventos da quadra e anuidade.",
-      penalty: "-5 de Moral se a torcida recuar de confrontos ou adotar postura pacífica.",
+      title: "2. Gestor / Comercial",
+      bonus: "+20% de faturamento (loja, eventos, anuidade).",
+      penalty: "-5 Moral se a torcida adotar postura pacífica.",
       icon: "💼",
-      description: "Administração executiva focada em superávit, licenciamento e expansão da sede social. Alavanca o caixa, mas sofre cobrança por postura militar."
+      description: "Alavanca o caixa, mas sofre cobrança por postura militar."
     },
     {
       id: "MESTRE_BATERIA",
-      title: "3. Perfil Mestre de Bateria / Barra Brava",
-      bonus: "+15 de Pressão de Bancada e taxa acelerada de atração de sócios locais.",
-      penalty: "Menor investimento na escolta de pista; vulnerabilidade em caravanas sem apoio.",
+      title: "3. Mestre de Bateria / Barra Brava",
+      bonus: "+15 Pressão de Bancada e mais sócios locais.",
+      penalty: "Menos escolta; vulnerável em caravanas.",
       icon: "🥁",
-      description: "Liderança vinda das arquibancadas e da percussão. Transforma o estádio em um inferno sonoro, mas prioriza a festa em detrimento da escolta armada."
+      description: "Estádio vira inferno sonoro, mas a festa vem antes da escolta."
     }
   ];
 }

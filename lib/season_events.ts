@@ -35,7 +35,7 @@ const PERIOD_1_EVENTS: EventTemplate[] = [
   {
     category: "CONFECÇÃO & IDENTIDADE VISUAL",
     title: "Lançamento da Coleção Oficial de Fardamento",
-    contextNarrative: "A diretoria de patrimônio precisa definir a linha têxtil oficial (regatas, bermudas, agasalhos corta-vento) para abastecer a loja da sede e fardar a massa.",
+    contextNarrative: "Defina a linha de fardamento oficial da temporada para vestir a massa.",
     choices: [
       {
         id: "FARDAMENTO_PREMIUM",
@@ -98,7 +98,7 @@ const PERIOD_1_EVENTS: EventTemplate[] = [
   {
     category: "CARNAVAL & ESCOLA DE SAMBA DE TORCIDA",
     title: "Temporada de Carnaval & Ensaio Geral da Bateria",
-    contextNarrative: "A quadra social vira o epicentro do samba. A bateria nota 10 precisa afinar os surdos e definir os investimentos no desfile de rua ou passarela oficial.",
+    contextNarrative: "Defina os investimentos da bateria e da ala do samba para o Carnaval.",
     choices: [
       {
         id: "MEGA_CARRO_ALEGORICO",
@@ -158,7 +158,7 @@ const PERIOD_1_EVENTS: EventTemplate[] = [
   {
     category: "GESTÃO DE QUADRA & QUADRO SOCIAL",
     title: "Campanha de Sócios & Recadastramento de Quadra",
-    contextNarrative: "Início do recadastramento anual de associados, emissão de carteirinhas de quadra e arrecadação de anuidades.",
+    contextNarrative: "Abra o recadastramento de associados e arrecadação de anuidades da quadra.",
     choices: [
       {
         id: "CADASTRO_BIOMETRICO",
@@ -222,7 +222,7 @@ const PERIOD_2_EVENTS: EventTemplate[] = [
   {
     category: "SEGURANÇA PÚBLICA & ROTAS DE COMBOIO",
     title: "Alinhamento com Batalhão de Choque e Trânsito",
-    contextNarrative: "Reunião no batalhão com o comando da PM e órgãos de trânsito para definir escolta e liberação de mastros.",
+    contextNarrative: "Alinhe com a PM e o trânsito a escolta e a liberação de mastros no setor.",
     choices: [
       {
         id: "ACORDO_ESCOLTA_TOTAL",
@@ -282,7 +282,7 @@ const PERIOD_2_EVENTS: EventTemplate[] = [
   {
     category: "EXPANSÃO TERRITORIAL & SUBSEDES",
     title: "Inauguração de Nova Subsede Regional",
-    contextNarrative: "Bonde de sócios do interior/litoral solicita oficialização de uma nova subsede com faixa oficial e ponto de concentração.",
+    contextNarrative: "Avalie a oficialização de nova subsede regional e faixa oficial.",
     choices: [
       {
         id: "COMPRA_IMOVEL_SUBSEDE",
@@ -343,7 +343,7 @@ const PERIOD_2_EVENTS: EventTemplate[] = [
   {
     category: "PREPARAÇÃO MARCIAL & ACADEMIA",
     title: "Estruturação da Academia de Lutas na Sede",
-    contextNarrative: "Para garantir que os bondes mantenham disciplina e condicionamento, a diretoria debate a criação de um centro de treinamento de artes marciais na sede.",
+    contextNarrative: "Estruture o centro de artes marciais para condicionar a tropa na sede.",
     choices: [
       {
         id: "TATAME_COMPLETO_BOXE",
@@ -407,7 +407,7 @@ const PERIOD_3_EVENTS: EventTemplate[] = [
   {
     category: "MOSAICO 3D & PIROTECNIA",
     title: "Espetáculo de Mosaico 3D & Corredor de Fogo",
-    contextNarrative: "Aproximação de jogos decisivos exige uma recepção histórica nas arquibancadas com mosaicos de alta complexidade e fumaça oficial.",
+    contextNarrative: "Prepare a recepção da bancada nos jogos decisivos com mosaicos e fumaça.",
     choices: [
       {
         id: "MOSAICO_3D_PLASTIFICADO",
@@ -468,7 +468,7 @@ const PERIOD_3_EVENTS: EventTemplate[] = [
   {
     category: "PATRIMÔNIO & BANDEIRÕES",
     title: "Confecção de Novo Bandeirão Monumental de Setor",
-    contextNarrative: "O ateliê de pintura da torcida está pronto para confeccionar a maior bandeira do estado cobrindo todo o anel de arquibancada.",
+    contextNarrative: "Defina a confecção do novo bandeirão monumental cobrindo o estádio.",
     choices: [
       {
         id: "BANDEIRAO_GIGANTE_COSTURA",
@@ -532,7 +532,7 @@ const PERIOD_4_EVENTS: EventTemplate[] = [
   {
     category: "POLÍTICA DE CLUBE & COBRANÇA",
     title: "Intervenção Política & Posicionamento no Clube",
-    contextNarrative: "Momento decisivo da temporada. A diretoria da torcida é convocada a agir frente aos bastidores políticos do clube e ao desempenho em campo.",
+    contextNarrative: "Posicione a torcida perante a diretoria do clube e a reta final do time.",
     choices: [
       {
         id: "COBRANCA_OLHO_NO_OLHO",
@@ -592,7 +592,7 @@ const PERIOD_4_EVENTS: EventTemplate[] = [
   {
     category: "DIPLOMACIA & EIXO NACIONAL",
     title: "Reunião de Cúpula com as Torcidas Aliadas & Gestão de Crise",
-    contextNarrative: "Delegações do eixo interestadual chegam para traçar estratégias. Um atrito entre duas torcidas aliadas exige mediação diplomática da nossa diretoria.",
+    contextNarrative: "Medie os atritos diplomáticos e fortaleça os laços com torcidas aliadas.",
     choices: [
       {
         id: "CHURRASCO_PACIFICACAO",
@@ -655,7 +655,7 @@ const PERIOD_5_EVENTS: EventTemplate[] = [
   {
     category: "ASSEMBLEIA GERAL & PRESTAÇÃO DE CONTAS",
     title: "Assembleia Geral de Encerramento & Planejamento",
-    contextNarrative: "Assembleia geral de prestação de contas na quadra social com votação dos associados e definição das diretrizes orçamentárias do próximo ano.",
+    contextNarrative: "Apresente a prestação de contas e aprove o orçamento da próxima temporada.",
     choices: [
       {
         id: "FUNDO_RESERVA_IMOVEIS",
@@ -744,7 +744,7 @@ const PERIOD_1_INTERIOR: EventTemplate[] = [
   {
     category: "RIFAS, FEIJÃO & FINANÇAS DO INTERIOR",
     title: "Rifa de Camisa Oficial & Costelão Fogo de Chão na Sede",
-    contextNarrative: "Para levantar o caixa inicial do ano e custear a reforma do galpão da torcida, a diretoria organiza um almoço na sede e rifas pela cidade.",
+    contextNarrative: "Organize almoços e rifas populares para levantar o caixa inicial da sede.",
     choices: [
       {
         id: "COSTELAO_FOGO_CHAO",
@@ -805,7 +805,7 @@ const PERIOD_1_INTERIOR: EventTemplate[] = [
   {
     category: "FARDAMENTO DA GERAL & IDENTIDADE CAIPIRA",
     title: "Confecção de Regatas e Bonés Tradicionais da Torcida",
-    contextNarrative: "A diretoria encomenda o lote de regatas e bonés bordados para fardar o setor atrás do gol no estádio municipal.",
+    contextNarrative: "Encomende regatas e bonés para fardar a torcida no estádio municipal.",
     choices: [
       {
         id: "REGATAS_BORDADAS_LOTE",
@@ -869,7 +869,7 @@ const PERIOD_2_INTERIOR: EventTemplate[] = [
   {
     category: "RODOVIAS ESTADUAIS & ACORDO REGIONAL",
     title: "Alinhamento com a Polícia Rodoviária & Praças de Pedágio",
-    contextNarrative: "Para transitar pelas rodovias (Anhanguera, Washington Luís, Dutra, Castelo Branco), a torcida alinha rotas para evitar retenções nas praças de pedágio.",
+    contextNarrative: "Alinhe rotas de rodovias e pedágios rápidos para agilizar as caravanas.",
     choices: [
       {
         id: "ROTA_PAGAMENTO_PEDAGIO_RAPIDO",
@@ -928,7 +928,7 @@ const PERIOD_2_INTERIOR: EventTemplate[] = [
   {
     category: "AÇÃO SOCIAL NO MUNICÍPIO",
     title: "Campanha Comunitária nas Vilas & Quebradas da Cidade",
-    contextNarrative: "Ação beneficente nos bairros periféricos do município com doação de cestas básicas e apoio às escolinhas de futebol de várzea.",
+    contextNarrative: "Realize ações comunitárias e apoio à várzea nas quebradas da cidade.",
     choices: [
       {
         id: "CESTAS_BASICAS_VILAS",
@@ -991,7 +991,7 @@ const PERIOD_3_INTERIOR: EventTemplate[] = [
   {
     category: "FESTA VISUAL NA GERAL DO INTERIOR",
     title: "Pirotecnia na Rotatória & Fumaça no Estádio Municipal",
-    contextNarrative: "Para os jogos decisivos em casa, a torcida prepara uma recepção calorosa na rotatória de entrada do estádio com fumaça e sinalizadores.",
+    contextNarrative: "Organize o corredor de fogo e sinalizadores na recepção do time ao estádio.",
     choices: [
       {
         id: "FUMACA_COLORIDA_ROTATORIA",
@@ -1051,7 +1051,7 @@ const PERIOD_3_INTERIOR: EventTemplate[] = [
   {
     category: "INSTRUMENTOS & BATERIA CAIPIRA",
     title: "Reforma dos Surdos de Marcação & Repiques Rápidos",
-    contextNarrative: "A bateria precisa afinar os instrumentos e adquirir peles resistentes para aguentar 90 minutos de chuva e calor na geral.",
+    contextNarrative: "Afine os instrumentos e troque as peles da bateria para incendiar a geral.",
     choices: [
       {
         id: "REFORMAS_PELES_LEVES",
@@ -1114,7 +1114,7 @@ const PERIOD_4_INTERIOR: EventTemplate[] = [
   {
     category: "CLUBE, ELENCO & COBRANÇA NA CIDADE",
     title: "Conversa no Alambrado com Atletas da Base e Comissão Técnica",
-    contextNarrative: "Momento decisivo da temporada no interior. A torcida se posiciona para cobrar entrega máxima aos pratas da casa e jogadores contratados.",
+    contextNarrative: "Defina a postura de cobrança ao elenco e diretoria na reta final.",
     choices: [
       {
         id: "CONVERSA_FRANCA_ALAMBRADO",
@@ -1173,7 +1173,7 @@ const PERIOD_4_INTERIOR: EventTemplate[] = [
   {
     category: "INVASÃO DA CAPITAL & CARAVANA DO INTERIOR",
     title: "A Grande Invasão da Capital nos Templos do Futebol",
-    contextNarrative: "O jogo do ano na capital! A torcida organiza uma caravana histórica de vans e ônibus para desafiar os gigantes nos grandes estádios da capital paulista.",
+    contextNarrative: "Organize a grande caravana de vans e ônibus para a invasão da capital.",
     choices: [
       {
         id: "COMBOIO_COMPLETO_CAPITAL",
@@ -1237,7 +1237,7 @@ const PERIOD_5_INTERIOR: EventTemplate[] = [
   {
     category: "PRESTAÇÃO DE CONTAS & CHURRASCO NA CALÇADA",
     title: "Churrasco de Encerramento & Prestação de Contas na Calçada",
-    contextNarrative: "Fechamento do ano com prestação de contas na sede, chopp artesanal na calçada e planejamento das viagens do próximo ano.",
+    contextNarrative: "Feche as contas do ano na calçada da sede e planeje as caravanas futuras.",
     choices: [
       {
         id: "FUNDO_VANS_PROXIMO_ANO",
@@ -1332,7 +1332,7 @@ function generateProceduralEventPool(): EventTemplate[] {
     templates.push({
       category: `${cat.icon} ${cat.name}`,
       title: `Projeto Estratégico #${i}: ${item}`,
-      contextNarrative: `A diretoria reuniu as lideranças da bancada e conselho para deliberar sobre o plano de ação nº ${i} focado em "${item}".`,
+      contextNarrative: `Defina a estratégia para "${item}".`,
       choices: [
         {
           id: `PROC_CHOICE_A_${i}`,

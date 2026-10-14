@@ -3985,10 +3985,10 @@ export default function App() {
             </div>
 
             <h3 className="text-sm font-black text-white uppercase mb-1">
-              {currentStep.title}
+              {currentStep.title.replace(/^Etapa\s*\d+\s*[-–•]\s*/i, "")}
             </h3>
 
-            <p className="text-xs text-zinc-300 font-medium leading-relaxed mb-3">
+            <p className="text-xs text-zinc-400 font-medium leading-snug mb-3">
               {currentStep.description}
             </p>
           </div>
@@ -3998,7 +3998,7 @@ export default function App() {
             <div className="space-y-2 mt-auto max-w-full overflow-hidden min-w-0">
               <div className="text-[10px] font-black text-amber-400 uppercase tracking-wider mb-1 flex items-center gap-1">
                 <Sparkles className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">Escolha a Postura da Diretoria (Com Prós e Contras):</span>
+                <span className="truncate">Escolha a Postura da Diretoria:</span>
               </div>
               {activeActionEvent.choices.map((choice, idx) => (
                 <button
@@ -4012,39 +4012,42 @@ export default function App() {
                     </span>
                     <div className="flex-1 min-w-0 overflow-hidden">
                       <div className="text-[11px] sm:text-xs font-black text-white leading-tight group-hover:text-amber-300 transition-colors break-words">
-                        {choice.text}
+                        {choice.text.replace(/\s*\([+-]?R\$\s*[\d\.\,]+\)\s*$/i, "").trim()}
                       </div>
                       <div className="flex flex-wrap items-center gap-1 mt-1.5 min-w-0 max-w-full overflow-hidden">
                         {choice.cost > 0 && (
                           <span className="text-[8px] sm:text-[8.5px] font-black px-1.5 py-0.5 rounded-md bg-red-500/10 text-red-400 border border-red-500/20 flex items-center gap-0.5 shrink-0">
-                            -R$ {choice.cost.toLocaleString()}
+                            -R$ {choice.cost.toLocaleString("pt-BR")}
                           </span>
                         )}
-                        {choice.formattedDeltas.slice(0, 4).map((d, i) => {
-                          let labelText = d.label;
-                          if (labelText.includes("Bancada")) labelText = "Bancada";
-                          else if (labelText.includes("Finan") || labelText.includes("Caixa") || labelText.includes("Autonomia")) labelText = "Caixa";
-                          else if (labelText.includes("Massa") || labelText.includes("Contingente")) labelText = "Massa";
-                          else if (labelText.includes("Pista")) labelText = "Pista";
-                          else if (labelText.includes("Caravana")) labelText = "Caravana";
-                          else if (labelText.includes("MP") || labelText.includes("Promotoria")) labelText = "MP";
-                          else if (labelText.includes("Moral")) labelText = "Moral";
-                          else if (labelText.includes("Clube")) labelText = "Clube";
-                          else if (labelText.includes("Respeito")) labelText = "Respeito";
+                        {choice.formattedDeltas
+                          .filter((d) => !(d.label.toLowerCase().includes("caixa") && d.value.includes("R$")))
+                          .slice(0, 4)
+                          .map((d, i) => {
+                            let labelText = d.label;
+                            if (labelText.includes("Bancada")) labelText = "Bancada";
+                            else if (labelText.includes("Finan") || labelText.includes("Caixa") || labelText.includes("Autonomia")) labelText = "Autonomia";
+                            else if (labelText.includes("Massa") || labelText.includes("Contingente")) labelText = "Massa";
+                            else if (labelText.includes("Pista")) labelText = "Pista";
+                            else if (labelText.includes("Caravana")) labelText = "Caravana";
+                            else if (labelText.includes("MP") || labelText.includes("Promotoria")) labelText = "MP";
+                            else if (labelText.includes("Moral")) labelText = "Moral";
+                            else if (labelText.includes("Clube")) labelText = "Clube";
+                            else if (labelText.includes("Respeito")) labelText = "Respeito";
 
-                          return (
-                            <span
-                              key={i}
-                              className={`text-[8px] sm:text-[8.5px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shrink-0 ${
-                                d.isPositive
-                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                  : "bg-red-500/10 text-red-400 border border-red-500/20"
-                              }`}
-                            >
-                              {labelText}: {d.value}
-                            </span>
-                          );
-                        })}
+                            return (
+                              <span
+                                key={i}
+                                className={`text-[8px] sm:text-[8.5px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shrink-0 ${
+                                  d.isPositive
+                                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                    : "bg-red-500/10 text-red-400 border border-red-500/20"
+                                }`}
+                              >
+                                {labelText}: {d.value}
+                              </span>
+                            );
+                          })}
                       </div>
                     </div>
                   </div>
@@ -6251,14 +6254,10 @@ export default function App() {
                   Eleições da Diretoria — Temporada {season}
                 </h3>
                 <p className="text-xs text-amber-400 font-semibold">
-                  Assembleia Geral dos Associados • Escolha o Perfil de Liderança (Mandato de 3 Anos)
+                  Mandato de 3 anos • Escolha o perfil do presidente
                 </p>
               </div>
             </div>
-
-            <p className="text-xs text-zinc-300 leading-relaxed">
-              A cada 3 temporadas, a massa e os conselheiros se reúnem na quadra social para eleger o Presidente da Torcida. A escolha determina os bônus e penalidades operacionais da diretoria:
-            </p>
 
             <div className="space-y-3">
               {getPresidentOptions().map((option) => (
@@ -6278,9 +6277,7 @@ export default function App() {
                     <span className="flex items-center gap-2">
                       <span className="text-xl">{option.icon}</span> {option.title}
                     </span>
-                    <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">
-                      Eleger Presidente
-                    </span>
+                    <ChevronRight className="w-4 h-4 text-amber-400 shrink-0" />
                   </div>
                   <p className="text-xs text-zinc-400 mt-1">{option.description}</p>
                   <div className="grid grid-cols-2 gap-2 mt-3 pt-2 border-t border-zinc-900 text-[11px]">
