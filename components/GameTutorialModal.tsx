@@ -59,6 +59,10 @@ const TUTORIAL_STEPS = [
             <span className="font-black text-blue-400 block text-[11px] mb-0.5">🚌 CAPACIDADE CARAVANA</span>
             <p className="text-[10.5px] text-zinc-400">Logística de frota de ônibus para invasões interestaduais e viagens longas.</p>
           </div>
+          <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800 sm:col-span-2">
+            <span className="font-black text-emerald-400 block text-[11px] mb-0.5">💵 AUTONOMIA FINANCEIRA & CAIXA</span>
+            <p className="text-[10.5px] text-zinc-400">Capacidade de gerar receita e manter independência financeira, além do <strong className="text-emerald-400">Caixa Operacional (R$)</strong> para custear ações imediatas.</p>
+          </div>
         </div>
 
         <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-2.5 text-[10.5px] text-amber-300">
@@ -85,7 +89,7 @@ const TUTORIAL_STEPS = [
             <span className="bg-amber-500/20 text-amber-400 font-black px-2 py-0.5 rounded text-[9.5px] shrink-0 mt-0.5">AÇÕES</span>
             <div>
               <strong className="text-white block font-bold">Ações de Sede & Preparativos</strong>
-              <span className="text-[10.5px] text-zinc-400">Decisões administrativas, como confecção de faixas, compra de sinalizadores, ensaios da bateria e churrascos de integração.</span>
+              <span className="text-[10.5px] text-zinc-400">Decisões administrativas objetivas com 4 opções de postura, custos em R$ e prós/contras equilibrados nos atributos da torcida.</span>
             </div>
           </div>
 
@@ -93,14 +97,19 @@ const TUTORIAL_STEPS = [
             <span className="bg-red-500/20 text-red-400 font-black px-2 py-0.5 rounded text-[9.5px] shrink-0 mt-0.5">DERBIES</span>
             <div>
               <strong className="text-white block font-bold">Os 4 Grandes Confrontos da Temporada</strong>
-              <span className="text-[10.5px] text-zinc-400">Jogos decisivos com 4 fases: Reunião com a PM/Segurança, Escolha de Transporte, Espionagem de Pista e Batalha Tática/Minigames.</span>
+              <span className="text-[10.5px] text-zinc-400">Jogos decisivos (Etapas 3, 5, 7 e 10) com 4 fases: Reunião com a PM/Segurança, Escolha de Transporte, Espionagem de Pista e Batalha Tática/Minigames.</span>
             </div>
           </div>
         </div>
 
         <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800 text-[10.5px] text-zinc-400">
           <strong className="text-emerald-400 font-black block mb-0.5">🎮 Minigames de Pista & Caldeirão:</strong>
-          Durante os Derbies, você jogará minigames de ação e ritmo (Avanço 3D, Combate de Pista, Bateria de Rojões, Agito de Bandeirão, Mosaico de Cores e Caldeirão Pitch) usando as cores oficiais da sua torcida!
+          Durante os Derbies, você jogará minigames de ação e ritmo (Avanço 3D, Combate de Pista, Bateria de Rojões com portais alternados, Agito de Bandeirão, Mosaico de Cores e Caldeirão Pitch) usando as cores oficiais da sua torcida!
+        </div>
+
+        <div className="bg-zinc-950 p-2.5 rounded-xl border border-amber-500/30 text-[10.5px] text-zinc-400">
+          <strong className="text-amber-400 font-black block mb-0.5">📱 Repercussão Viral em Momentos-Chave:</strong>
+          Após grandes clássicos e confrontos de pista, acompanhe a repercussão viral nas redes sociais (@ettorcida.oficiall / @ritmodetorcida) com notícias dinâmicas de faixas tomadas, vitórias e ocorrências policiais.
         </div>
       </div>
     ),
@@ -121,7 +130,7 @@ const TUTORIAL_STEPS = [
           <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">
             <span className="font-bold text-amber-400 block text-[11px] mb-0.5">🎯 Tipos de Metas da Temporada:</span>
             <p className="text-[10.5px] text-zinc-400">
-              Metas de <strong className="text-white">Massa</strong> (crescimento de membros), <strong className="text-red-400">Pista</strong> (vitórias em derbies), <strong className="text-emerald-400">Finanças</strong> (investimentos de vestuário na Loja) e <strong className="text-purple-400">Respeito</strong> (controle de Risco MP).
+              Metas dinâmicas e diversificadas: <strong className="text-white">Agasalhos na Loja</strong>, <strong className="text-emerald-400">Apoio da Várzea</strong>, <strong className="text-purple-400">Desafios Interestaduais</strong> por estado, <strong className="text-orange-400">Ensaios da Bateria</strong> e <strong className="text-red-400">Confecção de Bandeirões</strong>.
             </p>
           </div>
 
@@ -133,9 +142,9 @@ const TUTORIAL_STEPS = [
           </div>
 
           <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">
-            <span className="font-bold text-indigo-400 block text-[11px] mb-0.5">🏛️ Eleições a cada 3 Anos:</span>
+            <span className="font-bold text-indigo-400 block text-[11px] mb-0.5">🏛️ Eleições da Diretoria a cada 3 Anos:</span>
             <p className="text-[10.5px] text-zinc-400">
-              O cumprimento constante das metas consolida seu prestígio na quadra social, garantindo reeleições tranquilas e bônus da diretoria.
+              Nas temporadas 1, 4, 7, 10 e 13, escolha o perfil do presidente da torcida: <strong className="text-amber-400">Linha de Frente / Pista</strong> (+15% PEC), <strong className="text-emerald-400">Gestor / Comercial</strong> (+20% Faturamento) ou <strong className="text-orange-400">Mestre de Bateria / Barra Brava</strong> (+15 Pressão de Bancada), cada um com seus bônus e penalidades operacionais para o mandato.
             </p>
           </div>
         </div>
@@ -196,14 +205,21 @@ const TUTORIAL_STEPS = [
           <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">
             <strong className="text-amber-400 font-black block text-[11px] mb-0.5">🤝 Diplomacia & Eixos Nacionais:</strong>
             <p className="text-[10.5px] text-zinc-400">
-              Abra a aba <strong className="text-white">Alianças</strong> para consultar os Eixos Nacionais (Punho Cruzado, DPA, PC, Aliança Alvinegra, Nordeste Lado A/B) e agendar reuniões diplomáticas (+10 Moral, +10 Respeito).
+              Mais de <strong className="text-amber-400">138 Torcidas Organizadas</strong> mapeadas! Abra a aba <strong className="text-white">Alianças</strong> para consultar os Eixos Nacionais (Punho Cruzado, DPA, PC, Aliança Alvinegra, União Punho Colado, Nordeste Lado A/B, Independentes) e agendar reuniões diplomáticas (+10 Moral, +10 Respeito).
             </p>
           </div>
 
           <div className="bg-zinc-950 p-2.5 rounded-xl border border-amber-500/50">
-            <strong className="text-amber-400 font-black block text-[11px] mb-0.5">🚌 A Grande Invasão do Ano (Etapa 10):</strong>
+            <strong className="text-amber-400 font-black block text-[11px] mb-0.5">🚌 A Grande Invasão (Etapa 10) & Apoio de Aliadas:</strong>
             <p className="text-[10.5px] text-zinc-400">
-              Ao avançar para a Etapa 10, o Presidente escolhe entre 4 opções de viagens (Dérbi de Tensão, Caravana da Irmandade, Alçapão do Interior ou Capital Distante) com ineditismo de torcidas! No pré-jogo, consulte o <strong className="text-emerald-400">Histórico Retrospectivo de Pista</strong>.
+              Na Etapa 10, escolha entre 4 opções de viagens com ineditismo de rivais e histórico retrospectivo de pista! Em caravanas de alto risco, conte com <strong className="text-emerald-400">Apoio de Torcida Aliada</strong> (reforço de contingente irmão proporcional ao tamanho da aliada com custos embutidos).
+            </p>
+          </div>
+
+          <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">
+            <strong className="text-indigo-400 font-black block text-[11px] mb-0.5">🏠 Reforço Aliado em Jogos em Casa:</strong>
+            <p className="text-[10.5px] text-zinc-400">
+              Caso sofra 2 derrotas seguidas para um mesmo rival no seu estádio, a torcida aliada avisa que vai marcar presença na quadra e no setor, somando forças na <strong className="text-amber-400">Massa</strong> e no <strong className="text-red-400">Poder de Pista</strong> para garantir a soberania local!
             </p>
           </div>
 
@@ -217,7 +233,7 @@ const TUTORIAL_STEPS = [
           <div className="bg-zinc-950 p-2.5 rounded-xl border border-amber-500/40">
             <strong className="text-amber-400 font-black block text-[11px] mb-0.5">🏟️ Relações com o Clube & 🚩 Ações Sociais:</strong>
             <p className="text-[10.5px] text-zinc-400">
-              Na aba <strong className="text-indigo-400">Clube</strong> (relação estabilizada em 50 pts), negocie cotas de ingressos, apoio de ônibus e conciliação política. Na aba <strong className="text-amber-400">Social</strong>, atraia patrocinadores locais e convoque times de bairro para encher a bancada.
+              Na aba <strong className="text-indigo-400">Clube</strong>, negocie cotas de ingressos, apoio de ônibus e conciliação política. Na aba <strong className="text-amber-400">Social</strong>, atraia patrocinadores locais e convoque times de bairro para encher a bancada.
             </p>
           </div>
         </div>

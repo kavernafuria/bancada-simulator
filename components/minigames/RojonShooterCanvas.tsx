@@ -1211,6 +1211,9 @@ export const RojonShooterCanvas: React.FC<RojonShooterProps> = ({
           <li>
             <span className="text-amber-400 font-bold">Visão de Cima</span>: Projeção corrigida para visibilidade perfeita de toda a pista.
           </li>
+          <li>
+            <span className="text-cyan-400 font-bold">🎆 Portais da Pista</span>: Alternam entre Morteiro Potente (Cyan) e Rojão Simples (Âmbar).
+          </li>
         </ul>
 
         <div className="bg-zinc-900 border border-zinc-800 p-2.5 rounded-xl text-[10px] font-mono text-amber-400 w-full text-left">
