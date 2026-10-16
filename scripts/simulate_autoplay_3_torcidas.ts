@@ -213,20 +213,20 @@ function runAutoplaySimulation(targetName: string, tierLabel: string): TorcidaAu
         }
 
         // REGULAR MATCH PREPARATION (POLICE, TRANSPORT, TACTICS) WITH BOT UTILITY EVALUATION
-        const policeChoices = getPoliceMeetingChoices(derby);
+        const policeChoices = getPoliceMeetingChoices(derby, isInterior);
         const policeOptions: OptionEffect[] = policeChoices.map((p) => ({
           text: p.title,
           cost: p.cost,
-          stateEffects: { risco_mp: p.mpRiskBonus, relacao_clube: p.policeReputation },
+          stateEffects: { risco_mp: p.mpRiskMod, moral: p.moralMod },
         }));
         const policeIdx = AvaliarMelhorOpcao(currentState, policeOptions);
         const police = policeChoices[policeIdx - 1] || policeChoices[0];
 
-        const transportChoices = getTransportOptions(derby);
+        const transportChoices = getTransportOptions(derby.isLongDistance, isInterior, derby.isHome);
         const transportOptions: OptionEffect[] = transportChoices.map((t) => ({
-          text: t.title,
-          cost: t.costPerBus,
-          statEffects: { caravana: t.capacityMult > 1 ? 5 : 0 },
+          text: t.name,
+          cost: t.fixedCost,
+          statEffects: { poder_pista: t.pistaBonus },
           stateEffects: { risco_mp: t.mpRisk },
         }));
         const transportIdx = AvaliarMelhorOpcao(currentState, transportOptions);
@@ -234,17 +234,17 @@ function runAutoplaySimulation(targetName: string, tierLabel: string): TorcidaAu
 
         const intel = calculateScoutIntel(stats, transport, derby, false);
 
-        const tacticalChoices = getTacticalBattleChoices(derby, stats);
+        const tacticalChoices = getTacticalBattleChoices(intel, derby, police);
         const tacticalOptions: OptionEffect[] = tacticalChoices.map((t) => ({
           text: t.title,
-          statEffects: { poder_pista: t.victoryOdds > 50 ? 4 : -2 },
-          stateEffects: { risco_mp: t.mpPenalty, moral: t.moraleBonus },
+          statEffects: { poder_pista: t.pistaMod },
+          stateEffects: { risco_mp: t.mpPenalty, moral: t.moralMod },
         }));
         const tacticalIdx = AvaliarMelhorOpcao(currentState, tacticalOptions);
         const tactic = tacticalChoices[tacticalIdx - 1] || tacticalChoices[0];
 
         decisionsSummary.push(
-          `Jogo ${sMatchesPlayed} vs ${opponentClub}: Polícia="${police.title}", Transporte="${transport.title}", Tática="${tactic.title}"`
+          `Jogo ${sMatchesPlayed} vs ${opponentClub}: Polícia="${police.title}", Transporte="${transport.name}", Tática="${tactic.title}"`
         );
 
         const matchResult = executeCompleteMatch(
@@ -298,18 +298,10 @@ function runAutoplaySimulation(targetName: string, tierLabel: string): TorcidaAu
 
     // OBJECTIVES EVALUATION
     const evaluation = evaluateSeasonEndObjectives(seasonObjectives, stats, stateTrackers, bankBalance, isBannedByMP);
-    let sObjReward = 0;
-    let completedCount = 0;
-    let failedCount = 0;
+    const sObjReward = evaluation.totalCashBonus;
+    const completedCount = evaluation.completedCount;
+    const failedCount = evaluation.updatedObjectives.length - completedCount;
 
-    evaluation.updatedObjectives.forEach((obj) => {
-      if (obj.completed) {
-        completedCount++;
-        if (obj.rewardCash) sObjReward += obj.rewardCash;
-      } else {
-        failedCount++;
-      }
-    });
     bankBalance += sObjReward;
     totalRevenueObjectives += sObjReward;
 

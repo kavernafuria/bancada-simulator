@@ -297,6 +297,8 @@ export default function App() {
     endSnapshot?: SeasonStartSnapshot;
     playerRankEntry?: RankingEntry;
     totalTorcidasCount?: number;
+    completedSeason?: number;
+    isCareerEnd?: boolean;
   } | null>(null);
 
   const [stats, setStats] = useState<TorcidaStats>({
@@ -2305,6 +2307,9 @@ export default function App() {
             rank: Math.min(35, endRank + 4),
           });
 
+      const completedSeasonNum = season;
+      const isCareerFinished = completedSeasonNum >= GAME_BALANCE.CAREER_MAX_SEASONS;
+
       setSeasonEndReport({
         completedCount: evaluation.completedCount,
         totalCashBonus: evaluation.totalCashBonus,
@@ -2315,20 +2320,21 @@ export default function App() {
         endSnapshot: endSnapshot,
         playerRankEntry: endRankEntry,
         totalTorcidasCount: totalTorcidasCount,
+        completedSeason: completedSeasonNum,
+        isCareerEnd: isCareerFinished,
       });
 
       if (evaluation.completedCount > 0 && soundEnabled) {
         playStadiumSound("cash");
       }
 
-      const statuses: ClubStatus[] = ["DISPUTANDO_TITULO", "MEIO_TABELA", "CRISE_REBAIXAMENTO", "LUTANDO_ACESSO"];
-      const nextStatus = statuses[Math.floor(Math.random() * statuses.length)];
-      setClubStatus(nextStatus);
-
-      if (season >= GAME_BALANCE.CAREER_MAX_SEASONS) {
-        setIsGameOver(true);
+      if (isCareerFinished) {
+        // Legado concluído: celebra com confetes e deixa o jogador visualizar o balanço final da Temporada 15
         confetti({ particleCount: 150, spread: 85, origin: { y: 0.5 } });
       } else {
+        const statuses: ClubStatus[] = ["DISPUTANDO_TITULO", "MEIO_TABELA", "CRISE_REBAIXAMENTO", "LUTANDO_ACESSO"];
+        const nextStatus = statuses[Math.floor(Math.random() * statuses.length)];
+        setClubStatus(nextStatus);
         const nextSeason = season + 1;
         setSeason(nextSeason);
         setPipelineIndex(0);
@@ -5546,7 +5552,9 @@ export default function App() {
               <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/30 to-transparent" />
               <div className="absolute bottom-2.5 left-4 text-left">
                 <span className="text-[9.5px] font-black text-amber-400 uppercase tracking-widest bg-amber-950/90 px-2.5 py-0.5 rounded border border-amber-800/60 shadow">
-                  {season >= 15 ? "👑 BALANÇO FINAL DE 15 TEMPORADAS DE MANDATO" : `👑 FECHAMENTO DA TEMPORADA ${season - 1}`}
+                  {seasonEndReport.isCareerEnd
+                    ? "👑 BALANÇO FINAL DE 15 TEMPORADAS DE MANDATO"
+                    : `👑 FECHAMENTO DA TEMPORADA ${seasonEndReport.completedSeason ?? (season - 1)}`}
                 </span>
               </div>
             </div>
@@ -5556,7 +5564,7 @@ export default function App() {
                 <Award className="w-6 h-6" />
               </div>
               <h3 className="text-lg font-black text-white uppercase tracking-tight">
-                {season >= 15 ? "Consagração do Legado de 15 Anos" : "Balanço de Desempenho & Metas"}
+                {seasonEndReport.isCareerEnd ? "Consagração do Legado de 15 Anos" : "Balanço de Desempenho & Metas"}
               </h3>
             </div>
 
@@ -5611,7 +5619,7 @@ export default function App() {
             {seasonEndReport.startSnapshot && seasonEndReport.endSnapshot && (
               <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 text-left space-y-2">
                 <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider block border-b border-zinc-800 pb-1.5">
-                  {season >= 15
+                  {seasonEndReport.isCareerEnd
                     ? "📊 Comparativo do Mandato: Como Assumiu (Ano 1) vs Como Ficou no Final (Ano 15)"
                     : "📊 Comparativo de Evolução do Ano (Início vs Final)"}
                 </span>
@@ -5716,33 +5724,46 @@ export default function App() {
 
             {/* Kavers Games Social Sharing Block */}
             {renderSocialShareSection(
-              `TEMPORADA ${season - 1}`,
-              `🏆 [BANCADA SIMULATOR • KAVERS GAMES]\nFechamento da Temporada ${season - 1} com a ${currentTorcida?.torcida} (${currentTorcida?.clube})!\n\n👑 Posição no Ranking: ${seasonEndReport.endSnapshot?.rank || 1}º LUGAR NACIONAL\nMetas Cumpridas: ${seasonEndReport.completedCount}\nMassa: ${stats.contingente}/100 | Bancada: ${stats.pressao_bancada}/100 | Pista: ${stats.poder_pista}/100\nCaixa Acumulado: R$ ${bankBalance.toLocaleString()}\n\n🎮 Monte sua torcida no Simulador Oficial Kavers Games:\n👉 https://kaversgames.com.br\n#BancadaSimulator #KaversGames #Futebol`,
+              `TEMPORADA ${seasonEndReport.completedSeason ?? (season - 1)}`,
+              `🏆 [BANCADA SIMULATOR • KAVERS GAMES]\nFechamento da Temporada ${seasonEndReport.completedSeason ?? (season - 1)} com a ${currentTorcida?.torcida} (${currentTorcida?.clube})!\n\n👑 Posição no Ranking: ${seasonEndReport.endSnapshot?.rank || 1}º LUGAR NACIONAL\nMetas Cumpridas: ${seasonEndReport.completedCount}\nMassa: ${stats.contingente}/100 | Bancada: ${stats.pressao_bancada}/100 | Pista: ${stats.poder_pista}/100\nCaixa Acumulado: R$ ${bankBalance.toLocaleString()}\n\n🎮 Monte sua torcida no Simulador Oficial Kavers Games:\n👉 https://kaversgames.com.br\n#BancadaSimulator #KaversGames #Futebol`,
               "SEASON_CLOSING"
             )}
 
-            <button
-              onClick={() => {
-                if (currentTorcida) {
-                  const nextSeasonRank = simulateNationalRanking(currentTorcida, stats, stateTrackers, season, defeatedRivalsMap).find((r) => r.isPlayer)?.rank || 1;
-                  setSeasonStartSnapshot({
-                    contingente: stats.contingente,
-                    pressao_bancada: stats.pressao_bancada,
-                    poder_pista: stats.poder_pista,
-                    caravana: stats.caravana,
-                    bankBalance: bankBalance,
-                    moral: stateTrackers.moral,
-                    risco_mp: stateTrackers.risco_mp,
-                    respeito_nacional: stateTrackers.respeito_nacional,
-                    rank: nextSeasonRank,
-                  });
-                }
-                setSeasonEndReport(null);
-              }}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-black text-xs uppercase tracking-wider shadow-lg active:scale-95 transition-all cursor-pointer"
-            >
-              Iniciar Temporada {season}
-            </button>
+            {seasonEndReport.isCareerEnd ? (
+              <button
+                onClick={() => {
+                  setSeasonEndReport(null);
+                  setIsGameOver(true);
+                  confetti({ particleCount: 150, spread: 85, origin: { y: 0.5 } });
+                }}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-black text-xs uppercase tracking-wider shadow-lg active:scale-95 transition-all cursor-pointer"
+              >
+                🏆 Ver Hall da Fama & Legado de 15 Anos
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  if (currentTorcida) {
+                    const nextSeasonRank = simulateNationalRanking(currentTorcida, stats, stateTrackers, season, defeatedRivalsMap).find((r) => r.isPlayer)?.rank || 1;
+                    setSeasonStartSnapshot({
+                      contingente: stats.contingente,
+                      pressao_bancada: stats.pressao_bancada,
+                      poder_pista: stats.poder_pista,
+                      caravana: stats.caravana,
+                      bankBalance: bankBalance,
+                      moral: stateTrackers.moral,
+                      risco_mp: stateTrackers.risco_mp,
+                      respeito_nacional: stateTrackers.respeito_nacional,
+                      rank: nextSeasonRank,
+                    });
+                  }
+                  setSeasonEndReport(null);
+                }}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-black text-xs uppercase tracking-wider shadow-lg active:scale-95 transition-all cursor-pointer"
+              >
+                Iniciar Temporada {season}
+              </button>
+            )}
           </div>
         </div>
       )}
