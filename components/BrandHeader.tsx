@@ -20,8 +20,15 @@ export function BrandHeader() {
             KAVERS GAMES <ExternalLink className="w-2.5 h-2.5 opacity-80" />
           </a>
           <span className="text-zinc-400 dark:text-zinc-600 font-bold">|</span>
-          <span className="text-zinc-800 dark:text-zinc-100 font-extrabold flex items-center gap-1">
-            Simulador de Torcida ⚽
+          <span className="text-zinc-800 dark:text-zinc-100 font-extrabold flex items-center gap-1.5">
+            <span>Simulador de Torcida ⚽</span>
+            <span
+              className="px-1.5 py-0.5 rounded-md bg-amber-500/15 text-amber-500 dark:text-amber-400 border border-amber-500/40 text-[9px] font-black uppercase tracking-widest inline-flex items-center gap-1 shadow-sm"
+              title="Versão Beta • Atualizações constantes"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+              BETA
+            </span>
           </span>
         </div>
 

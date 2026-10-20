@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { generateSeasonObjectives, evaluateSeasonEndObjectives, OfficialTorcida } from "../lib/bancada_engine";
+import { generateSeasonObjectives, evaluateSeasonEndObjectives, generateSeasonNarrativeVerdict, OfficialTorcida } from "../lib/bancada_engine";
 import { TorcidaStats, StateTrackers } from "../lib/engine/types";
 
 describe("Diversificação de Metas Anuais (Season Objectives)", () => {
@@ -71,5 +71,74 @@ describe("Diversificação de Metas Anuais (Season Objectives)", () => {
 
     const evalResult = evaluateSeasonEndObjectives(objs, dummyStats, dummyState, 50000, false);
     expect(evalResult.completedCount).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe("Parecer Dinâmico de Fim de Temporada (generateSeasonNarrativeVerdict)", () => {
+  const baseSnap = {
+    contingente: 70,
+    pressao_bancada: 60,
+    poder_pista: 70,
+    caravana: 65,
+    bankBalance: 20000,
+    moral: 65,
+    risco_mp: 20,
+    respeito_nacional: 60,
+    rank: 15,
+  };
+
+  it("identifica cenário de Risco MP alto com crescimento de Massa (ALERTA_MP)", () => {
+    const res = generateSeasonNarrativeVerdict({
+      season: 2,
+      startSnapshot: baseSnap,
+      endSnapshot: {
+        ...baseSnap,
+        contingente: 85, // +15 massa
+        risco_mp: 75,    // alto risco MP
+      },
+      completedObjectivesCount: 2,
+    });
+
+    expect(res.sentiment).toBe("ALERTA_MP");
+    expect(res.text.length).toBeGreaterThan(30);
+  });
+
+  it("identifica satisfação alta com evolução em Pista e necessidade de melhorar Bancada", () => {
+    const res = generateSeasonNarrativeVerdict({
+      season: 4,
+      startSnapshot: baseSnap,
+      endSnapshot: {
+        ...baseSnap,
+        poder_pista: 88,     // evoluiu muito em pista
+        pressao_bancada: 52, // caiu em bancada (<65)
+        moral: 85,           // sócios felizes
+        rank: 10,
+      },
+      completedObjectivesCount: 3,
+    });
+
+    expect(res.sentiment).toBe("POSITIVO");
+    expect(res.text.toLowerCase()).toMatch(/bancada|arquibancada|bateria|canto/);
+  });
+
+  it("gera mensagens variadas ao longo de 15 temporadas sem repetição monótona", () => {
+    const uniqueTexts = new Set<string>();
+    for (let s = 1; s <= 15; s++) {
+      const verdict = generateSeasonNarrativeVerdict({
+        season: s,
+        startSnapshot: baseSnap,
+        endSnapshot: {
+          ...baseSnap,
+          contingente: 70 + (s % 5) * 3,
+          poder_pista: 70 + ((s + 2) % 4) * 3,
+          pressao_bancada: 60 + ((s + 1) % 3) * 4,
+          moral: 55 + (s % 4) * 10,
+        },
+        completedObjectivesCount: s % 3,
+      });
+      uniqueTexts.add(verdict.text);
+    }
+
+    expect(uniqueTexts.size).toBeGreaterThanOrEqual(10);
   });
 });

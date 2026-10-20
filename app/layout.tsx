@@ -4,7 +4,6 @@ import { ThemeScript } from "@/components/ThemeScript";
 import { BrandHeader } from "@/components/BrandHeader";
 import { AdTickerBanner } from "@/components/AdTickerBanner";
 import { BrandFooter } from "@/components/BrandFooter";
-import { FloatingDock } from "@/components/FloatingDock";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://kaversgames.com.br"),
@@ -48,7 +47,6 @@ export default function RootLayout({
         <AdTickerBanner />
         {children}
         <BrandFooter />
-        <FloatingDock />
       </body>
     </html>
   );

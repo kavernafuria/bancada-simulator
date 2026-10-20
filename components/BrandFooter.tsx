@@ -6,7 +6,7 @@ import { Heart } from "lucide-react";
 
 export function BrandFooter() {
   return (
-    <footer className="w-full py-8 px-4 text-center mt-auto mb-24 relative z-20">
+    <footer className="w-full py-8 px-4 text-center mt-auto mb-6 relative z-20">
       <div className="max-w-xl mx-auto rounded-2xl bg-zinc-900/90 dark:bg-zinc-900/90 border border-zinc-700/80 dark:border-zinc-700/80 shadow-2xl backdrop-blur-md p-5 space-y-3">
         <p className="font-extrabold text-sm text-zinc-100 dark:text-zinc-100 flex items-center justify-center gap-2 flex-wrap">
           <span>Um jogo original do universo</span>

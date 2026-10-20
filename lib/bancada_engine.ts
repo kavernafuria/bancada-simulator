@@ -1951,6 +1951,33 @@ export function getTransportOptions(
   ];
 }
 
+// HELPER TO RESOLVE RIVAL TORCIDA OBJECT FROM DATABASE
+export function findRivalTorcidaInDatabase(
+  rivalTorcidaName?: string,
+  rivalClubName?: string
+): OfficialTorcida | undefined {
+  const allTorcidas = teamsData as OfficialTorcida[];
+  const tName = (rivalTorcidaName || "").toLowerCase().trim();
+  const cName = (rivalClubName || "").toLowerCase().trim();
+
+  if (tName) {
+    const exact = allTorcidas.find((t) => t.torcida.toLowerCase().trim() === tName);
+    if (exact) return exact;
+    const partial = allTorcidas.find(
+      (t) =>
+        t.torcida.toLowerCase().includes(tName) ||
+        tName.includes(t.torcida.toLowerCase())
+    );
+    if (partial) return partial;
+  }
+
+  if (cName) {
+    return allTorcidas.find((t) => t.clube.toLowerCase().trim() === cName);
+  }
+
+  return undefined;
+}
+
 // CALCULATE SCOUT INTEL BASED ON TRANSPORT & STATS
 export function calculateScoutIntel(
   stats: TorcidaStats,
@@ -1966,7 +1993,32 @@ export function calculateScoutIntel(
   const playerMembers = Math.max(minAttendance, baseCount + Math.floor((Math.random() - 0.5) * (isInterior ? 50 : 100))) + (derby.allyExtraMembers || 0);
 
   // Rival attendance waiting
-  const rivalBase = Math.round(derby.isHome ? playerMembers * 0.45 : playerMembers * 1.25);
+  const rivalClubName = derby.isHome ? derby.awayClub : derby.homeClub;
+  const rivalObj = findRivalTorcidaInDatabase(derby.rivalTorcida, rivalClubName);
+  const rivalIsInterior = rivalObj ? isInteriorSP(rivalObj) : isInterior;
+  const rivalContingente = rivalObj ? rivalObj.contingente : (derby.isHome ? 55 : 68);
+  const rivalCaravana = rivalObj ? rivalObj.caravana : (derby.isHome ? 50 : 65);
+  const rivalTier = (rivalObj?.tier || "B").toUpperCase().trim();
+
+  let rivalBase: number;
+  if (derby.isHome) {
+    // Player is at HOME, Rival is VISITING (depends on rival's real caravana & contingente)
+    const rMult = rivalIsInterior ? 5 : 10;
+    const rCaravanaMult = rivalIsInterior ? 6 : 12;
+    const distFactor = derby.isLongDistance ? 0.78 : 0.95;
+    rivalBase = Math.round((rivalContingente * rMult + rivalCaravana * rCaravanaMult) * distFactor);
+  } else {
+    // Player is AWAY, Rival is AT HOME in its own stadium/territory
+    const rHomeMult = rivalIsInterior ? 11 : 19;
+    const rHomeSupport = rivalIsInterior ? 5 : 8;
+    const tierHomeMobilization =
+      rivalTier === "S" || rivalTier === "S-"
+        ? 1.22
+        : rivalTier.startsWith("A")
+        ? 1.08
+        : 1.0;
+    rivalBase = Math.round((rivalContingente * rHomeMult + rivalCaravana * rHomeSupport) * tierHomeMobilization);
+  }
   const rivalMembers = Math.max(isInterior ? 50 : 120, rivalBase + Math.floor((Math.random() - 0.5) * (isInterior ? 60 : 120)));
 
   let police: MatchScoutReport["policePresence"] = "MODERADA";
@@ -2812,9 +2864,16 @@ export function getTacticalBattleChoices(
 
 export function getTierMultiplier(tier?: string): number {
   const t = (tier || "B").toUpperCase().trim();
-  if (t === "S" || t === "S-") return 3.0;
-  if (t === "A+" || t === "A" || t === "A-") return 2.0;
-  if (t === "B+" || t === "B" || t === "B-") return 1.2;
+  if (t === "S") return 3.0;
+  if (t === "S-") return 2.6;
+  if (t === "A+") return 2.2;
+  if (t === "A") return 1.9;
+  if (t === "A-") return 1.5;
+  if (t === "B+") return 1.25;
+  if (t === "B") return 1.1;
+  if (t === "B-") return 0.95;
+
+
   return 0.6; // Tier C+, C, Locais
 }
 
@@ -3068,8 +3127,10 @@ export function executeCompleteMatch(
   );
 
   const playerTier = currentTorcida?.tier || "B";
-  const rivalTier = rivalTorcidaObj ? rivalTorcidaObj.tier : "B";
-  const rivalPoderPista = rivalTorcidaObj ? rivalTorcidaObj.poder_pista : (derby.isHome ? 45 : 75);
+
+  const resolvedRivalObj = rivalTorcidaObj || findRivalTorcidaInDatabase(derby.rivalTorcida, derby.isHome ? derby.awayClub : derby.homeClub);
+  const rivalTier = resolvedRivalObj ? resolvedRivalObj.tier : "B";
+  const rivalPoderPista = resolvedRivalObj ? resolvedRivalObj.poder_pista : (derby.isHome ? 45 : 75);
 
   const coefTierPlayer = getTierMultiplier(playerTier);
   const coefTierRival = getTierMultiplier(rivalTier);
@@ -3165,8 +3226,62 @@ export function executeCompleteMatch(
   const rngPlayer = Math.random() * 10 - 5;
   const rngRival = Math.random() * 10 - 5;
 
-  let playerForce = Math.max(5, Math.round(fuerzaBasePlayer * (1 + modTotalPlayer) + rngPlayer));
-  let rivalForce = Math.max(5, Math.round(fuerzaBaseRival * (1 + modTotalRival) + rngRival));
+  // ------------------------------------------------------------------------
+  // 1.C. CONTEXTO DE TERRITÓRIO (ONDE FOI O JOGO), FRAGMENTAÇÃO DE TRANSPORTE & MINIGAME
+  // ------------------------------------------------------------------------
+  const isRivalInterior = resolvedRivalObj ? isInteriorSP(resolvedRivalObj) : false;
+
+  // 1. Mando de Campo / Alçapão:
+  // Jogando em casa, a torcida domina os acessos (+25%). Fora de casa, o rival mandante tem bônus de reduto/alçapão (+25% a +35%).
+  const territoryMultPlayer = derby.isHome ? 1.25 : 1.0;
+  const territoryMultRival = !derby.isHome ? (isRivalInterior ? 1.35 : 1.25) : 1.0;
+
+  // 2. Fragmentação de Transporte / Rompimento de Escolta:
+  // Se a torcida maior viaja com transporte espalhado (Vans/Rateio, Kombis, Entrada Isolada) ou rompe escolta com grupo reduzido,
+  // o bonde se divide e uma torcida menor em bloco fechado consegue isolar o confronto!
+  const trId = (transport.id || "").toUpperCase();
+  const isFragmentedTransport =
+    trId.includes("VANS_CARROS_RATEIO") ||
+    trId.includes("KOMBI_CARROS_VICINAIS") ||
+    trId.includes("ENTRADA_ISOLADA") ||
+    trId.includes("CONCENTRACAO_PORTAO_GERAL") ||
+    tid.includes("PERIMETRO") ||
+    tid.includes("COMBATE_LINHA_FRENTE_PORTAO");
+  const isUnifiedBlockTransport =
+    trId.includes("ARRANCADA") ||
+    trId.includes("TREM_METRO") ||
+    trId.includes("POPULAR_LOTAÇÃO") ||
+    trId.includes("CONCENTRACAO_SEDE_BAR") ||
+    trId.includes("COMBOIO_RODOVIA_CAPITAL");
+
+  const cohesionMultPlayer = isFragmentedTransport ? 0.62 : isUnifiedBlockTransport ? 1.08 : 1.0;
+
+  // 3. Multiplicador Proporcional de Execução do Minigame (substitui a derrota 100% cega):
+  let minigameExecMult = 1.0;
+  if (tactic.pistaMod >= 12) {
+    minigameExecMult = 1.28;
+  } else if (tactic.pistaMod >= 4) {
+    minigameExecMult = 1.12;
+  } else if (tactic.pistaMod < 0) {
+    // Falha no minigame reduz severamente a força efetiva (0.48x a 0.78x), abrindo brecha para zebra em contexto adverso!
+    minigameExecMult = Math.max(0.48, 1 + tactic.pistaMod * 0.038);
+  }
+
+  // Contra-ataque mortal de torcida menor em casa / emboscada quando o visitante falha no minigame ou divide o bonde:
+  const isContextualUpsetWindow =
+    !derby.isHome &&
+    tactic.pistaMod < 0 &&
+    (isFragmentedTransport || intel.twistTitle.includes("Emboscada") || intel.twistTitle.includes("Hostil"));
+  const upsetCounterMultRival = isContextualUpsetWindow ? 1.28 : 1.0;
+
+  let playerForce = Math.max(
+    5,
+    Math.round(fuerzaBasePlayer * (1 + modTotalPlayer) * territoryMultPlayer * cohesionMultPlayer * minigameExecMult + rngPlayer)
+  );
+  let rivalForce = Math.max(
+    5,
+    Math.round(fuerzaBaseRival * (1 + modTotalRival) * territoryMultRival * upsetCounterMultRival + rngRival)
+  );
 
   if (tactic.id === "ATAQUE_FRONTAL_RUNNER_3D" && tactic.pistaMod >= 10) {
     playerForce = Math.max(playerForce, Math.round(rivalForce * 1.35 + 15));
@@ -3186,7 +3301,8 @@ export function executeCompleteMatch(
   }
 
   // ⚠️ TRAVA DEFINITIVA DE MINIGAME: Se o minigame foi perdido (tactic.pistaMod < 0), a vitória de pista é NULA (Derrota Garantida)
-  if (tactic.pistaMod < 0) {
+  // Em falha crítica no minigame fora de casa, em transporte fragmentado ou contra rival de mesmo porte/superior, a derrota se consuma:
+  if (tactic.pistaMod < 0 && (playerForce < rivalForce || isContextualUpsetWindow || (tactic.pistaMod <= -10 && coefTierRival >= coefTierPlayer * 0.85))) {
     isVictoryPista = false;
   }
 
@@ -4729,7 +4845,7 @@ export function resolveTorcidaUnicaAction(
           title: "🚐 Caçada Clandestina (Bonde de Bairro)",
           scenario: "VISITANTE",
           log: "Bonde descaracterizado pegou o comboio rival no ponto cego da polícia. Vitória total de pista!",
-          statEffects: { poder_pista: 12 },
+          statEffects: { poder_pista: 3 },
           stateEffects: { moral: 10 },
           cashChange: 0,
           rngOutcome: "SUCCESS",
@@ -5083,7 +5199,7 @@ export function generateDynamicMatchLeak(params: {
       likesCount: "95K",
       sharesCount: "42K",
       postedAgo: `Há ${mins}`,
-      impactDeltas: { moral: 12, poder_pista: 10, risco_mp: 12, pressao_bancada: 8 },
+      impactDeltas: { moral: 6, poder_pista: 5, risco_mp: 12, pressao_bancada: 4 },
       pressConferenceId: "ENTREVISTA_BRIGA_PISTA",
     };
   }
@@ -5121,12 +5237,33 @@ export function generateDynamicMatchLeak(params: {
       likesCount: likes,
       sharesCount: shares,
       postedAgo: `Há ${mins}`,
-      impactDeltas: { pressao_bancada: 8, moral: 6, risco_mp: -5 },
+      impactDeltas: { pressao_bancada: 3, moral: 3, risco_mp: -4 },
+      // Coletiva avaliada no onDismiss do card
       pressConferenceId: "ENTREVISTA_BRIGA_PISTA",
     };
   }
 
-  // 4. CERCO POLICIAL & PRISÕES
+  // 4. DERROTA OU RECUO EM CLÁSSICO (AVALIADO ANTES DE POLÍCIA PARA NUNCA DAR BÔNUS EM DERROTA!)
+  if (!isVictory) {
+    const isET = Math.random() < 0.5;
+    return {
+      id: `LEAK_DEFEAT_${Date.now()}`,
+      handle: isET ? "@ettorcida.oficiall" : "@ritmodetorcida",
+      profileName: isET ? "E.T Torcida Oficial" : "Ritmo de Torcida",
+      verified: true,
+      avatarColor: "bg-purple-600",
+      headline: `⚠️ VAZOU NAS REDES: RECUO E COBRANÇA INTERNA NA ${torcidaName.toUpperCase()} CONTRA A ${rivalName.toUpperCase()}`,
+      snippetText: `Vídeos espalhados nos grupos mostram o bonde da ${torcidaName} levando atraso e precisando recuar nas imediações do ${stadiumName} diante da ${rivalName}. Áudios de cobrança da oposição na sede já viralizaram e o MP monitora o caso!`,
+      viewsCount: views,
+      likesCount: likes,
+      sharesCount: shares,
+      postedAgo: `Há ${mins}`,
+      impactDeltas: { moral: -6, poder_pista: -4, risco_mp: 6, pressao_bancada: -3 },
+      pressConferenceId: "ENTREVISTA_BRIGA_PISTA_DERROTA",
+    };
+  }
+
+  // 5. CERCO POLICIAL & PRISÕES (APENAS QUANDO NÃO HOUVE DERROTA PARA O RIVAL)
   if (isPoliceDetention) {
     return {
       id: `LEAK_POLICE_${Date.now()}`,
@@ -5140,7 +5277,7 @@ export function generateDynamicMatchLeak(params: {
       likesCount: likes,
       sharesCount: shares,
       postedAgo: `Há ${mins}`,
-      impactDeltas: { risco_mp: 12, moral: -4, pressao_bancada: 6 },
+      impactDeltas: { risco_mp: 10, moral: -2, poder_pista: 2 },
       pressConferenceId: "ENTREVISTA_BRIGA_PISTA",
     };
   }
@@ -5160,7 +5297,7 @@ export function generateDynamicMatchLeak(params: {
         likesCount: likes,
         sharesCount: shares,
         postedAgo: `Há ${mins}`,
-        impactDeltas: { poder_pista: 8, moral: 8, risco_mp: 8 },
+        impactDeltas: { poder_pista: 3, moral: 3, risco_mp: 8 },
         pressConferenceId: "ENTREVISTA_BRIGA_PISTA",
       };
     } else if (isRojoes) {
@@ -5176,7 +5313,7 @@ export function generateDynamicMatchLeak(params: {
         likesCount: likes,
         sharesCount: shares,
         postedAgo: `Há ${mins}`,
-        impactDeltas: { poder_pista: 8, moral: 6, risco_mp: 10 },
+        impactDeltas: { poder_pista: 3, moral: 3, risco_mp: 10 },
         pressConferenceId: "ENTREVISTA_BRIGA_PISTA",
       };
     } else if (isEmboscada) {
@@ -5192,7 +5329,7 @@ export function generateDynamicMatchLeak(params: {
         likesCount: likes,
         sharesCount: shares,
         postedAgo: `Há ${mins}`,
-        impactDeltas: { poder_pista: 8, moral: 6, risco_mp: 8 },
+        impactDeltas: { poder_pista: 3, moral: 3, risco_mp: 8 },
         pressConferenceId: "ENTREVISTA_BRIGA_PISTA",
       };
     } else {
@@ -5209,7 +5346,7 @@ export function generateDynamicMatchLeak(params: {
         likesCount: likes,
         sharesCount: shares,
         postedAgo: `Há ${mins}`,
-        impactDeltas: { poder_pista: 8, moral: 6, risco_mp: 6, pressao_bancada: 6 },
+        impactDeltas: { poder_pista: 3, moral: 3, risco_mp: 6, pressao_bancada: 2 },
         pressConferenceId: "ENTREVISTA_BRIGA_PISTA",
       };
     }
@@ -5572,6 +5709,65 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
     ]
   },
 
+  ENTREVISTA_BRIGA_PISTA_DERROTA: {
+    id: "ENTREVISTA_BRIGA_PISTA_DERROTA",
+    triggerEvent: "Repercussão de Recuo / Derrota na Pista nas Redes Sociais",
+    title: "🎙️ COLETIVA DE CRISE: RECUO NA PISTA & COBRANÇA INTERNA",
+    journalist: "Cesar Tralli / Jornal da Cidade",
+    outlet: "Noticiário Policial & TV",
+    question: "Vídeos viralizados nos perfis @ritmodetorcida e @ettorcida.oficiall mostram o bonde da sua torcida levando atraso e precisando recuar na pista, gerando forte cobrança da oposição na sede e inquérito do MP. Como a diretoria responde a esse revés?",
+    choices: [
+      {
+        id: "RESP_DERROTA_INSTITUCIONAL",
+        type: "INSTITUCIONAL",
+        label: "🏛️ Resposta Institucional (Culpar Falha de Escolta da PM)",
+        badgeText: "CONTENÇÃO JURÍDICA & PEDIDO DE PAZ",
+        answerText: "Nossos ônibus foram jogados em uma emboscada sem escolta policial adequada. Pedimos investigação oficial e repudiaremos retaliações.",
+        statEffects: { poder_pista: -2 },
+        stateEffects: { risco_mp: -5, moral: -3 },
+        log: "Culpou a falha de escolta e acalmou o MP (-5% Risco MP), mas a linha de frente se sentiu humilhada pela postura passiva (-3 Moral, -2 Pista).",
+        formattedDeltas: [
+          { label: "Risco MP", value: "-5%", isPositive: true },
+          { label: "Moral", value: "-3", isPositive: false },
+          { label: "Poder de Pista", value: "-2", isPositive: false }
+        ]
+      },
+      {
+        id: "RESP_DERROTA_RADICAL",
+        type: "RADICAL",
+        label: "🥊 Resposta Radical (Cobrar Linha de Frente & Prometer Troco)",
+        badgeText: "COBRANÇA INTERNA & PROMESSA DE REVANCHE",
+        answerText: "Quem correu não farda mais na nossa linha de frente! Vamos reorganizar o bonde na sede e no próximo encontro a resposta será dada na rua!",
+        statEffects: { pressao_bancada: -2 },
+        stateEffects: { moral: -1, risco_mp: 8 },
+        cashDelta: -1500,
+        log: "Cobrou duramente o bonde e prometeu revanche. Estancou a queda de pista, mas gerou atrito na bancada (-2 Bancada, -1 Moral) e subiu o Risco MP (+8%).",
+        formattedDeltas: [
+          { label: "Poder de Pista", value: "0 (Estancado)", isPositive: true },
+          { label: "Pressão de Bancada", value: "-2", isPositive: false },
+          { label: "Moral", value: "-1", isPositive: false },
+          { label: "Risco MP", value: "+8%", isPositive: false },
+          { label: "Custas Jurídicas", value: "-R$ 1.500", isPositive: false }
+        ]
+      },
+      {
+        id: "RESP_DERROTA_GESTORA",
+        type: "GESTORA",
+        label: "💼 Resposta Gestora (Assistência Hospitalar e Blindagem)",
+        badgeText: "SOCORRO AOS FERIDOS & BLINDAGEM INTERNA",
+        answerText: "A prioridade da diretoria é prestar assistência médica e jurídica aos associados feridos na emboscada e resolver os erros internamente na quadra.",
+        stateEffects: { risco_mp: -2 },
+        cashDelta: -2500,
+        log: "Bancou os custos hospitalares e jurídicos (-R$ 2.500), estancando novas quedas de Moral e de Pista após o revés.",
+        formattedDeltas: [
+          { label: "Risco MP", value: "-2%", isPositive: true },
+          { label: "Moral & Pista", value: "0 (Crise Contida)", isPositive: true },
+          { label: "Caixa (Hospital/Advogados)", value: "-R$ 2.500", isPositive: false }
+        ]
+      }
+    ]
+  },
+
   ENTREVISTA_BRIGA_PISTA: {
     id: "ENTREVISTA_BRIGA_PISTA",
     triggerEvent: "Repercussão de Confronto em Rodovia / Pista",
@@ -5586,6 +5782,19 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🏛️ Resposta Institucional (Desvinculação)",
         badgeText: "REPÚDIO À VIOLÊNCIA DE RODOVIA",
         answerText: "Repudiamos veementemente a violência. Foram torcedores isolados agindo por conta própria fora do perímetro do estádio.",
+        statEffects: {},
+        stateEffects: { risco_mp: -6, moral: -2 },
+        log: "Desvinculou a diretoria da briga. Reduziu o Risco MP (-6%), mas desagradou a linha de frente (-2 Moral).",
+        formattedDeltas: [
+          { label: "Risco MP", value: "-6%", isPositive: true },
+          { label: "Moral", value: "-2", isPositive: false }
+        ]
+      },
+      /*
+        formattedDeltas: [
+          { label: "Risco MP", value: "-6%", isPositive: true },
+          { label: "Moral", value: "-2", isPositive: false }
+        ]
         statEffects: { contingente: 2, pressao_bancada: 2 },
         stateEffects: { risco_mp: -6 },
         log: "Desvinculou a diretoria da briga. Reduziu o Risco MP (-6%) e expandiu o contingente (+2 Massa, +2 Bancada).",
@@ -5629,6 +5838,8 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
           { label: "Caixa", value: "+R$ 2.000", isPositive: true }
         ]
       },
+      {
+      */
       {
         id: "RESP_RADICAL_BRIGA",
         type: "RADICAL",
@@ -5691,8 +5902,9 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🥊 Resposta Radical (Devassa nos Cartolas)",
         badgeText: "AUDITORIA POPULAR & PRESSÃO",
         answerText: "Exigimos auditoria imediata nas contas do clube. Se houver desvio de dinheiro dos cartolas, a cobrança será pessoal!",
-        statEffects: { poder_pista: 8 },
-        stateEffects: { moral: 8, risco_mp: 8 },
+        statEffects: { poder_pista: 3 },
+        stateEffects: { moral: 3, risco_mp: 8 },
+
         log: "Pressionou os dirigentes corruptos. Aumentou o poder de pista (+8), mas irritou conselheiros do clube.",
         formattedDeltas: [
           { label: "Poder de Pista", value: "+8", isPositive: true },
@@ -5706,7 +5918,7 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "💼 Resposta Gestora (Gestão de Ingressos/Loja)",
         badgeText: "PARCERIA COMERCIAL COM O CLUBE",
         answerText: "Oferecemos gerenciar a bilheteria dos setores populares e a loja oficial para repassar lucros ao futebol do clube.",
-        statEffects: { autonomia_financeira: 12 },
+        statEffects: { autonomia_financeira: 3 },
         cashDelta: 5000,
         log: "Assumiu operações comerciais estratégicas. Aumentou a autonomia financeira (+12) e arrecadou R$ 5.000.",
         formattedDeltas: [
@@ -5731,7 +5943,7 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🏛️ Resposta Institucional (Apoio Condicionado)",
         badgeText: "APOIO TOTAL EM CAMPO",
         answerText: "Problema extracampo cabe à polícia. Em campo, ele veste as nossas cores e terá o nosso apoio incondicional!",
-        statEffects: { contingente: 6, pressao_bancada: 8 },
+        statEffects: { contingente: 2, pressao_bancada: 3 },
         log: "Apoiou o jogador em campo. Aumentou o contingente e a pressão de bancada.",
         formattedDeltas: [
           { label: "Contingente", value: "+6", isPositive: true },
@@ -5744,7 +5956,7 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🥊 Resposta Radical (Aviso no Vestiário)",
         badgeText: "VIGILÂNCIA DE BALADA & DISCIPLINA",
         answerText: "Se vier para fazer corpo mole ou ir pra balada, o bonde vai cobrar pessoalmente na porta da boate!",
-        statEffects: { poder_pista: 10 },
+        statEffects: { poder_pista: 3 },
         stateEffects: { moral: 8, risco_mp: 10 },
         log: "Prometeu cobrança pesada em caso de indisciplina. Aumentou o poder de pista (+10), mas atraiu holofotes negativos.",
         formattedDeltas: [
@@ -5759,7 +5971,7 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "💼 Resposta Gestora (Linha de Produtos do Atleta)",
         badgeText: "COLEÇÃO EXCLUSIVA DA TORCIDA",
         answerText: "Lançaremos em parceria com a agremiação a linha de agasalhos e bonés com a marca do novo camisa 10.",
-        statEffects: { autonomia_financeira: 10 },
+        statEffects: { autonomia_financeira: 3 },
         cashDelta: 4000,
         log: "Monetizou a imagem do novo reforço. Gerou R$ 4.000 extras para o caixa da torcida.",
         formattedDeltas: [
@@ -5784,7 +5996,7 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🏛️ Resposta Institucional (Foco Social)",
         badgeText: "PROJETOS SOCIAIS & FAMÍLIA NA ARQUIBANCADA",
         answerText: "Nossa meta é transformar a torcida num centro comunitário: escolinhas de futebol, doações de alimento e paz nos estádios.",
-        statEffects: { contingente: 10 },
+        statEffects: { contingente: 3 },
         stateEffects: { risco_mp: -15, respeito_nacional: 8 },
         log: "Priorizou projetos comunitários. Reduziu drasticamente o Risco MP (-15%) e expandiu o contingente (+10).",
         formattedDeltas: [
@@ -5799,7 +6011,7 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🥊 Resposta Radical (Hegemonia de Pista)",
         badgeText: "RESGATE DO RESPEITO NAS RODOVIAS",
         answerText: "Viemos para resgatar o respeito da nossa torcida. Nenhuma agremiação rival vai dominar o nosso território!",
-        statEffects: { poder_pista: 12 },
+        statEffects: { poder_pista: 3 },
         stateEffects: { moral: 10, risco_mp: 12 },
         log: "Focou na liderança de pista. Inflou a moral e o poder de pista (+12), com aumento do Risco MP.",
         formattedDeltas: [
@@ -5814,7 +6026,7 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "💼 Resposta Gestora (Modernização do Caixa)",
         badgeText: "DIGITALIZAÇÃO & FUTEBOL PROFISSIONAL",
         answerText: "Modernizaremos a quadra, lançaremos o programa de sócio-torcedor digital e triplicaremos o faturamento da loja.",
-        statEffects: { autonomia_financeira: 15 },
+        statEffects: { autonomia_financeira: 3 },
         cashDelta: 6000,
         log: "Focou na profissionalização financeira. Gerou R$ 6.000 e aumentou a autonomia da agremiação.",
         formattedDeltas: [
@@ -5853,7 +6065,7 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🥊 Resposta Radical (Defesa da Festa Raiz)",
         badgeText: "RESISTÊNCIA AO FUTEBOL MODERNO",
         answerText: "Sinalizador é a alma do futebol sul-americano! Não aceitaremos a 'gourmetização' da nossa arquibancada!",
-        statEffects: { pressao_bancada: 10 },
+        statEffects: { pressao_bancada: 3 },
         stateEffects: { moral: 8, risco_mp: 15 },
         log: "Defendeu a cultura tradicional do fogo na bancada. Inflou a moral (+8) e a pressão (+10), aumentando o Risco MP (+15%).",
         formattedDeltas: [
@@ -5893,7 +6105,7 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🏛️ Resposta Institucional (Orgulho de Viajar)",
         badgeText: "EXÉRCITO DE FIDELIDADE",
         answerText: "Demonstramos que a nossa paixão não tem fronteiras. Foram mil quilômetros cantando sem nenhum incidente violento!",
-        statEffects: { caravana: 12 },
+        statEffects: { caravana: 4 },
         stateEffects: { respeito_nacional: 10 },
         log: "Exaltou o comportamento pacífico da caravana. Ganhou enorme respeito nacional (+10) e poder de caravana (+12).",
         formattedDeltas: [
@@ -5907,7 +6119,7 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🥊 Resposta Radical (Fechamento de Rodovia)",
         badgeText: "DOMÍNIO DE RODOVIA",
         answerText: "Paramos os pedágios e mostramos quem comanda a pista fora do nosso estado. Ninguém peita o nosso bonde!",
-        statEffects: { poder_pista: 10, caravana: 8 },
+        statEffects: { poder_pista: 3, caravana: 3 },
         stateEffects: { moral: 10, risco_mp: 14 },
         log: "Provocou as torcidas locais do outro estado. Inflou o poder de pista (+10) e moral (+10), com alta no Risco MP.",
         formattedDeltas: [
@@ -5922,7 +6134,7 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "💼 Resposta Gestora (Frota Própria e Subsídio)",
         badgeText: "LUCRO COM PASSAGENS E INGRESSOS",
         answerText: "Fretamos a frota inteira com desconto direto e vendemos pacotes completos com ingresso e lanche, gerando alto lucro.",
-        statEffects: { autonomia_financeira: 10, caravana: 10 },
+        statEffects: { autonomia_financeira: 3, caravana: 3 },
         cashDelta: 4500,
         log: "Faturou alto com a venda de pacotes de caravana. Rendeu R$ 4.500 extras para a agremiação.",
         formattedDeltas: [
@@ -5947,7 +6159,7 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🏛️ Resposta Institucional (Guardiões do Escudo)",
         badgeText: "EXIGÊNCIA DE TRAVAS NO ESTATUTO",
         answerText: "Exigimos travas estatutárias contra a mudança de nome, cores, escudo ou endereço do clube. As tradições são inegociáveis!",
-        statEffects: { pressao_bancada: 8 },
+        statEffects: { pressao_bancada: 3 },
         stateEffects: { respeito_nacional: 8, risco_mp: -5 },
         log: "Exigiu garantias estatutárias da SAF. Ganhou respeito nacional e preservou as tradições do clube.",
         formattedDeltas: [
@@ -5962,7 +6174,7 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🥊 Resposta Radical (Resistência Popular)",
         badgeText: "PROTESTOS NA SEDE & CT",
         answerText: "O clube é do povo, não de bilionários de fora! Protestaremos nas ruas contra a privatização do nosso futebol!",
-        statEffects: { poder_pista: 10 },
+        statEffects: { poder_pista: 3 },
         stateEffects: { moral: 10, risco_mp: 12 },
         log: "Liderou protestos populares contra a privatização. Inflou a moral interna (+10) e a pista (+10).",
         formattedDeltas: [
@@ -5977,7 +6189,7 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "💼 Resposta Gestora (Contrato Comercial de Espaço)",
         badgeText: "ACORDO COM OS NOVOS DONOS",
         answerText: "Negociaremos a concessão do setor popular atrás do gol e a exclusividade nas vendas de souvenirs dentro do novo estádio.",
-        statEffects: { autonomia_financeira: 15 },
+        statEffects: { autonomia_financeira: 3 },
         cashDelta: 8000,
         log: "Fechou acordo comercial vantajoso com os novos investidores da SAF. Aporte de R$ 8.000 para a torcida.",
         formattedDeltas: [
@@ -6002,7 +6214,7 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🏛️ Resposta Institucional (União dos Povos)",
         badgeText: "FRATERNIDADE DE ARQUIBANCADA",
         answerText: "É uma aliança histórica baseada no respeito mútuo. Receberemos a torcida irmã com grande festa e churrasco na nossa sede!",
-        statEffects: { contingente: 8 },
+        statEffects: { contingente: 3 },
         stateEffects: { respeito_nacional: 12, risco_mp: -10 },
         log: "Exaltou o pacto de paz e a fraternidade. Aumentou o respeito nacional (+12) e reduziu o Risco MP (-10%).",
         formattedDeltas: [
@@ -6017,7 +6229,7 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "🥊 Resposta Radical (Eixo do Mal)",
         badgeText: "FORÇA DUPLA NAS RODOVIAS",
         answerText: "Agora formamos o maior e mais pesado eixo de pista do futebol brasileiro. Nenhuma torcida rival ousará pisar no nosso caminho!",
-        statEffects: { poder_pista: 12 },
+        statEffects: { poder_pista: 3 },
         stateEffects: { moral: 10, risco_mp: 10 },
         log: "Focou na dominância violenta do eixo unido. Inflou o poder de pista (+12) e a moral (+10).",
         formattedDeltas: [
@@ -6032,7 +6244,7 @@ export const PRESS_CONFERENCES: Record<string, PressConference> = {
         label: "💼 Resposta Gestora (Intercâmbio Comercial)",
         badgeText: "PRODUTOS CONJUNTOS DE ALIANÇA",
         answerText: "Lançaremos agasalhos e faixas comemorativas unindo as duas marcas para vender nas sedes de ambos os estados.",
-        statEffects: { autonomia_financeira: 10 },
+        statEffects: { autonomia_financeira: 3 },
         cashDelta: 5000,
         log: "Lançou linha comercial conjunta com a torcida aliada. Gerou R$ 5.000 em vendas.",
         formattedDeltas: [
@@ -6409,13 +6621,23 @@ export function findAllyForTorcida(currentTorcida: any): any | null {
 export function generateEtapa10CaravanChoices(
   currentTorcida: any,
   facedOpponents: string[] = [],
-  playerRank: number = 1
+  playerRank: number = 1,
+  lossStreaks: Record<string, number> = {}
 ): Etapa10CaravanChoice[] {
   if (!currentTorcida) return [];
 
   const allyObj = findAllyForTorcida(currentTorcida);
   const allySupport = allyObj ? calculateAllySupportNumbers(allyObj) : null;
   const allyCost = 2500;
+  // Aliada só reforça o comboio se o jogo for na região dela (mesmo estado) e ela não for da torcida/clube adversário
+  const allyAppliesTo = (t: any): boolean => {
+    if (!allyObj || !t) return false;
+    if (allyObj.estado !== t.estado || allyObj.clube === t.clube || allyObj.torcida === t.torcida) return false;
+    // Contra o MAIOR RIVAL a aliada só entra após 2 derrotas CONSECUTIVAS de pista para ele
+    const isMainRival = !!currentTorcida.rival_principal && t.clube.toLowerCase() === currentTorcida.rival_principal.toLowerCase();
+    if (isMainRival) return (lossStreaks[t.torcida] || 0) >= 2;
+    return true;
+  };
 
   // Filter out faced torcidas and current torcida itself
   const availableTeams = (teamsData as any[]).filter(
@@ -6462,7 +6684,7 @@ export function generateEtapa10CaravanChoices(
       { label: "Risco Policial", value: "⚠️ Risco Elevado", isPositive: false },
       { label: "Custo Rodoviário", value: "R$ 4.500", isPositive: false },
     ];
-    if (allyObj && allySupport) {
+    if (allyObj && allySupport && allyAppliesTo(derbyTeam)) {
       impacts.push({
         label: "🤝 Reforço Aliado",
         value: `+${allySupport.extraMembers} membros (${allyObj.torcida})`,
@@ -6489,11 +6711,11 @@ export function generateEtapa10CaravanChoices(
       description: `Confronto de altíssima rivalidade contra a ${derbyTeam.torcida}. Exige esquema de segurança máximo e transporte blindado.`,
       impacts,
       teamData: derbyTeam,
-      allyTorcidaName: allyObj?.torcida,
-      allyClub: allyObj?.clube,
-      allyCost: allyObj ? allyCost : undefined,
-      allyExtraMembers: allySupport?.extraMembers,
-      allyPistaBonus: allySupport?.pistaBonus,
+      allyTorcidaName: allyAppliesTo(derbyTeam) ? allyObj?.torcida : undefined,
+      allyClub: allyAppliesTo(derbyTeam) ? allyObj?.clube : undefined,
+      allyCost: allyAppliesTo(derbyTeam) ? allyCost : undefined,
+      allyExtraMembers: allyAppliesTo(derbyTeam) ? allySupport?.extraMembers : undefined,
+      allyPistaBonus: allyAppliesTo(derbyTeam) ? allySupport?.pistaBonus : undefined,
     });
   }
 
@@ -6590,7 +6812,7 @@ export function generateEtapa10CaravanChoices(
       { label: "Logística Completa", value: "R$ 5.000", isPositive: false },
       { label: "Desgaste da Tropa", value: "Viagem Longa", isPositive: false },
     ];
-    if (allyObj && allySupport) {
+    if (allyObj && allySupport && allyAppliesTo(capitalTeam)) {
       impacts.push({
         label: "🤝 Reforço Aliado",
         value: `+${allySupport.extraMembers} membros (${allyObj.torcida})`,
@@ -6617,11 +6839,11 @@ export function generateEtapa10CaravanChoices(
       description: `Excursão interestadual de longa distância para uma grande capital. Mídia nacional e grande contingente nas ruas.`,
       impacts,
       teamData: capitalTeam,
-      allyTorcidaName: allyObj?.torcida,
-      allyClub: allyObj?.clube,
-      allyCost: allyObj ? allyCost : undefined,
-      allyExtraMembers: allySupport?.extraMembers,
-      allyPistaBonus: allySupport?.pistaBonus,
+      allyTorcidaName: allyAppliesTo(capitalTeam) ? allyObj?.torcida : undefined,
+      allyClub: allyAppliesTo(capitalTeam) ? allyObj?.clube : undefined,
+      allyCost: allyAppliesTo(capitalTeam) ? allyCost : undefined,
+      allyExtraMembers: allyAppliesTo(capitalTeam) ? allySupport?.extraMembers : undefined,
+      allyPistaBonus: allyAppliesTo(capitalTeam) ? allySupport?.pistaBonus : undefined,
     });
   }
 
@@ -6630,3 +6852,320 @@ export function generateEtapa10CaravanChoices(
 
 
 
+
+export interface SeasonVerdictSnapshot {
+  contingente: number;
+  pressao_bancada: number;
+  poder_pista: number;
+  caravana: number;
+  bankBalance: number;
+  moral: number;
+  risco_mp: number;
+  respeito_nacional: number;
+  rank: number;
+}
+
+export interface SeasonNarrativeVerdictInput {
+  season: number;
+  startSnapshot: SeasonVerdictSnapshot;
+  endSnapshot: SeasonVerdictSnapshot;
+  completedObjectivesCount: number;
+  isCareerEnd?: boolean;
+  seasonPistaWins?: number;
+  seasonPistaLosses?: number;
+}
+
+export interface SeasonNarrativeVerdictResult {
+  sentiment: "POSITIVO" | "ALERTA_MP" | "EQUILIBRADO" | "COBRANCA";
+  badgeLabel: string;
+  text: string;
+}
+
+/**
+ * Gera um parecer narrativo dinâmico e variado ao final da temporada (ou mandato de 15 anos),
+ * cruzando evolução de atributos, satisfação dos sócios (moral), risco no MP, caixa e metas.
+ */
+export function generateSeasonNarrativeVerdict(
+  input: SeasonNarrativeVerdictInput
+): SeasonNarrativeVerdictResult {
+  const { season, startSnapshot, endSnapshot, completedObjectivesCount, isCareerEnd, seasonPistaWins = 0, seasonPistaLosses = 0 } = input;
+  const lostMostPistas = seasonPistaLosses >= 2 && seasonPistaLosses > seasonPistaWins;
+
+  const deltaMassa = endSnapshot.contingente - startSnapshot.contingente;
+  const deltaBancada = endSnapshot.pressao_bancada - startSnapshot.pressao_bancada;
+  const deltaPista = endSnapshot.poder_pista - startSnapshot.poder_pista;
+  const deltaCaravana = endSnapshot.caravana - startSnapshot.caravana;
+  const deltaCash = endSnapshot.bankBalance - startSnapshot.bankBalance;
+  const deltaRank = startSnapshot.rank - endSnapshot.rank; // Positivo = subiu posições
+
+  const hasPositiveGrowth =
+    deltaMassa >= 3 || deltaPista >= 3 || deltaBancada >= 3 || deltaRank >= 1 || completedObjectivesCount >= 2;
+  const mpHigh = endSnapshot.risco_mp >= 60;
+  const moralHigh = endSnapshot.moral >= 70;
+  const moralLow = endSnapshot.moral < 45;
+
+  // Semente de rotação para garantir que frases não se repitam entre temporadas seguidas
+  const seed = Math.abs(
+    season * 13 +
+      endSnapshot.contingente * 3 +
+      endSnapshot.poder_pista * 5 +
+      endSnapshot.pressao_bancada * 7 +
+      completedObjectivesCount * 11
+  );
+  const pick = <T,>(arr: T[], offset: number = 0): T => arr[(seed + offset) % arr.length];
+
+  // 1. CAMADA A: CLIMA DOS SÓCIOS / ABERTURA DO PARECER
+  let sentiment: SeasonNarrativeVerdictResult["sentiment"] = "EQUILIBRADO";
+  let badgeLabel = "📊 PARECER DA TEMPORADA";
+  let openingClause = "";
+
+  if (isCareerEnd) {
+    sentiment = moralLow ? "COBRANCA" : "POSITIVO";
+    badgeLabel = "👑 BALANÇO GERAL DO MANDATO (15 ANOS)";
+    const careerOpenings = [
+      "Ao fim das 15 temporadas de mandato, seu nome fica marcado na história da quadra:",
+      "O ciclo histórico de 15 anos na presidência se encerra com forte repercussão entre os sócios:",
+      "Após uma década e meia no comando da agremiação, o veredito da arquibancada é claro:",
+    ];
+    openingClause = pick(careerOpenings, 1);
+  } else if (lostMostPistas) {
+    sentiment = "COBRANCA";
+    badgeLabel = "⚠️ COBRANÇA PESADA NAS PISTAS";
+    const pistaLossOpenings = [
+      `Os associados e a linha de frente fecharam o ano revoltados com as ${seasonPistaLosses} derrotas de pista na temporada:`,
+      "Apesar da movimentação na sede, o clima é de cobrança pesada pelos recuos nos confrontos diretos de rua:",
+      "A velha guarda convocou reunião de emergência na quadra após a torcida levar atraso nas pistas este ano:",
+      "O mandato sofreu forte desgaste de rua! Perder os confrontos diretos deixou a bancada indignada,",
+      "Nas quebradas e subsedes, a cobrança sobre a diretoria é grande pelos reveses sofridos na pista:",
+    ];
+    openingClause = pick(pistaLossOpenings, 1);
+  } else if (mpHigh && hasPositiveGrowth) {
+    sentiment = "ALERTA_MP";
+    badgeLabel = "🚨 SOB MIRA DO MP, MAS EM ALTA";
+    const mpPositiveOpenings = [
+      "Apesar de o MP estar atrás da torcida, o ano foi positivo:",
+      "Mesmo com os promotores na cola da diretoria, o mandato teve saldo favorável:",
+      "A pressão jurídica do Ministério Público apertou nos bastidores, mas nas ruas o ano valeu a pena:",
+      "Apesar do cerco pesado das autoridades sobre a sede, os associados comemoram o ciclo:",
+      "Mesmo sob risco de punição no tribunal, a torcida mostrou força neste ano:",
+      "Os advogados tiveram trabalho com o MP, mas dentro do estádio o balanço foi animador:",
+    ];
+    openingClause = pick(mpPositiveOpenings, 2);
+  } else if (mpHigh && !hasPositiveGrowth) {
+    sentiment = "COBRANCA";
+    badgeLabel = "⚠️ ALERTA JURÍDICO & PRESSÃO";
+    const mpToughOpenings = [
+      "O cerco do MP complicou a rotina da sede e deixou os associados apreensivos:",
+      "Ano tenso nos tribunais e na quadra! Com o Ministério Público na cola da diretoria,",
+      "As investigações do MP travaram o embalo da torcida nesta temporada:",
+      "A mira das autoridades pesou no mandato e gerou cobrança entre as lideranças de bairro:",
+      "Com o risco jurídico nas alturas, o ano exigiu cautela máxima da presidência:",
+    ];
+    openingClause = pick(mpToughOpenings, 3);
+  } else if (moralHigh || deltaRank >= 2) {
+    sentiment = "POSITIVO";
+    badgeLabel = "🔥 SÓCIOS SATISFEITOS";
+    const happyOpenings = [
+      "Os sócios estão felizes com o seu mandato,",
+      "Clima de festa na sede social! Os associados aprovam sua gestão,",
+      "Sua diretoria fechou o ano com moral alta entre as quebradas e lideranças,",
+      "Os integrantes da velha e da nova geração estão empolgados com o rumo da torcida:",
+      "Mandato respeitado! A massa reconhece o trabalho da presidência neste ano,",
+      "A arquibancada abraçou o seu comando nesta temporada,",
+      "Repercussão excelente nos bastidores da quadra: os sócios confiam na sua gestão,",
+    ];
+    openingClause = pick(happyOpenings, 4);
+  } else if (moralLow || deltaRank <= -3) {
+    sentiment = "COBRANCA";
+    badgeLabel = "📢 COBRANÇA NA SEDE";
+    const unhappyOpenings = [
+      "Os associados estão desconfiados e cobram reação rápida da diretoria:",
+      "Ano turbulento nos bastidores! A bancada esperava resultados melhores,",
+      "O clima pesou nas reuniões da sede e parte dos sócios questiona as escolhas do ano:",
+      "Temporada difícil para o mandato: a pressão das lideranças de bairro aumentou,",
+      "A insatisfação apareceu nas redes sociais da torcida após um ciclo instável:",
+      "A diretoria terminou o ano sob olhares críticos dos associados mais antigos:",
+    ];
+    openingClause = pick(unhappyOpenings, 5);
+  } else {
+    sentiment = "EQUILIBRADO";
+    badgeLabel = "⚖️ MANDATO EM EQUILÍBRIO";
+    const balancedOpenings = [
+      "Os associados avaliam a temporada com equilíbrio e veem potencial de evolução:",
+      "O ano fechou estável na sede social, mantendo a base engajada:",
+      "Sua gestão atravessou o calendário com segurança e respaldo moderado dos sócios,",
+      "Temporada de transição na quadra: os associados reconhecem os esforços da diretoria,",
+      "A diretoria manteve a casa organizada ao longo dos confrontos do ano,",
+      "Balanço regular na visão da arquibancada: o mandato cumpriu seu papel básico,",
+    ];
+    openingClause = pick(balancedOpenings, 6);
+  }
+
+  // 2. CAMADA B: PRINCIPAL DESTAQUE / EVOLUÇÃO DO ANO
+  const pillarDeltas = [
+    { key: "PISTA", delta: deltaPista, val: endSnapshot.poder_pista },
+    { key: "MASSA", delta: deltaMassa, val: endSnapshot.contingente },
+    { key: "BANCADA", delta: deltaBancada, val: endSnapshot.pressao_bancada },
+    { key: "CARAVANA", delta: deltaCaravana, val: endSnapshot.caravana },
+  ].sort((a, b) => b.delta - a.delta || b.val - a.val);
+
+  const bestPillar = pillarDeltas[0];
+  let middleClause = "";
+
+  if (bestPillar.delta >= 2) {
+    if (bestPillar.key === "PISTA" && !lostMostPistas) {
+      middleClause = pick(
+        [
+          "a torcida evoluiu em pista e impôs respeito nos confrontos",
+          "o bonde de frente ganhou força bruta e dominou as ruas",
+          "a postura de pista subiu de patamar diante dos principais rivais",
+          "a linha de frente mostrou disposição e elevou o poder de combate",
+          "o respeito conquistado no asfalto colocou a agremiação em evidência",
+        ],
+        7
+      );
+    } else if (bestPillar.key === "MASSA") {
+      middleClause = pick(
+        [
+          "trouxe grande crescimento de massa com novos sócios cadastrados",
+          "o contingente explodiu nos bairros e lotou o setor no estádio",
+          "a campanha de adesão atraiu uma multidão histórica para a torcida",
+          "a expansão da massa associativa impressionou todo o país",
+          "o número de integrantes ativos cresceu forte ao longo dos jogos",
+        ],
+        8
+      );
+    } else if (bestPillar.key === "BANCADA") {
+      middleClause = pick(
+        [
+          "a festa na arquibancada e o ritmo da bateria deram um show à parte",
+          "a pressão de bancada cresceu muito e empurrou o time os 90 minutos",
+          "os bandeirões e o alento ensurdecedor viraram referência nos estádios",
+          "a sintonia da bateria com o setor elevou o nível visual da torcida",
+          "a arquibancada pulsou mais forte do que nunca neste calendário",
+        ],
+        9
+      );
+    } else {
+      middleClause = pick(
+        [
+          "a logística de caravanas cresceu e marcou presença pesada fora de casa",
+          "os comboios rodoviários cruzaram o país com organização de elite",
+          "a força das viagens interestaduais elevou o nome da torcida",
+          "o poder de mobilização nas estradas foi o grande trunfo do ano",
+        ],
+        10
+      );
+    }
+  } else if (deltaCash > 8000) {
+    middleClause = pick(
+      [
+        "o caixa da sede fechou fortalecido com excelente gestão financeira",
+        "as vendas de materiais e a saúde financeira garantiram fôlego importante",
+        "o patrimônio financeiro cresceu e deu estabilidade para a agremiação",
+        "a arrecadação da loja e das mensalidades salvou o balanço do ano",
+      ],
+      11
+    );
+  } else {
+    middleClause = pick(
+      [
+        "a torcida manteve sua tradição firme nos clássicos da temporada",
+        "a agremiação sustentou sua posição mesmo diante de adversários difíceis",
+        "o grupo seguiu unido nas arquibancadas apesar das oscilações do calendário",
+        "a base de associados segurou a bronca nos momentos mais críticos do ano",
+      ],
+      12
+    );
+  }
+
+  // 3. CAMADA C: PONTO DE ATENÇÃO / RESSALVA PARA SATISFAÇÃO COMPLETA
+  const worstPillar = pillarDeltas[pillarDeltas.length - 1];
+  let closingClause = "";
+
+  const isLowestBancada =
+    endSnapshot.pressao_bancada < 65 || (worstPillar.key === "BANCADA" && worstPillar.delta <= 0);
+  const isLowestPista =
+    endSnapshot.poder_pista < 65 || (worstPillar.key === "PISTA" && worstPillar.delta <= 0);
+  const isLowestMassa =
+    endSnapshot.contingente < 60 || (worstPillar.key === "MASSA" && worstPillar.delta <= 0);
+  const isLowCash = endSnapshot.bankBalance < 8000;
+
+  if (lostMostPistas) {
+    closingClause = pick(
+      [
+        "mas precisa reorganizar urgente a linha de frente para parar de perder nas pistas.",
+        "porém os recuos nos confrontos diretos mancharam a reputação de rua e exigem resposta imediata.",
+        "mas a humilhação sofrida nas pistas exige pulso firme e reforço no combate para o próximo ano.",
+        "contudo os sócios exigem que a torcida volte a se impor nas ruas e pare de levar atraso dos rivais.",
+      ],
+      13
+    );
+  } else if (isLowestBancada && bestPillar.key !== "BANCADA") {
+    closingClause = pick(
+      [
+        "mas precisa melhorar na bancada para uma melhor satisfação.",
+        "porém a pressão de arquibancada e a bateria precisam de mais investimento.",
+        "mas os sócios cobram mais festa, bandeirões e volume de canto no estádio.",
+        "faltando apenas elevar o nível da bancada para empolgar toda a massa.",
+        "contudo o alento dentro do estádio ficou abaixo do potencial da torcida.",
+      ],
+      13
+    );
+  } else if (isLowestPista && bestPillar.key !== "PISTA") {
+    closingClause = pick(
+      [
+        "mas precisa reforçar o poder de pista para não perder respeito nos clássicos.",
+        "porém a linha de frente precisa de mais preparo nas escoltas e rodovias.",
+        "mas os integrantes cobram uma postura mais firme na defesa das faixas.",
+        "embora a força de pista precise evoluir para encarar os rivais de igual para igual.",
+        "contudo o desempenho nos confrontos de rua deixou a desejar neste ciclo.",
+      ],
+      14
+    );
+  } else if (isLowestMassa && bestPillar.key !== "MASSA") {
+    closingClause = pick(
+      [
+        "mas precisa atrair mais massa e novos associados para encher o setor.",
+        "porém o contingente precisa crescer para dar mais peso às caravanas.",
+        "mas a diretoria precisa focar em campanhas para aumentar o quadro de sócios.",
+        "faltando ampliar o número de membros ativos nas sub-sedes e bairros.",
+      ],
+      15
+    );
+  } else if (isLowCash) {
+    closingClause = pick(
+      [
+        "mas o caixa curto exige atenção urgente nas finanças e na loja para o próximo ano.",
+        "porém as contas apertadas pedem cuidado redobrado antes de bancar grandes viagens.",
+        "mas é fundamental reforçar o caixa da sede para não passar sufoco na nova temporada.",
+      ],
+      16
+    );
+  } else if (completedObjectivesCount === 0) {
+    closingClause = pick(
+      [
+        "mas o não cumprimento das metas anuais impediu um salto maior no ranking.",
+        "porém bater as metas da diretoria no próximo ano será decisivo para ganhar bônus.",
+        "mas faltou concluir os objetivos estratégicos para coroar a temporada.",
+      ],
+      17
+    );
+  } else {
+    closingClause = pick(
+      [
+        "consolidando um ciclo forte que coloca a torcida em ótimo patamar nacional!",
+        "fechando a temporada em alta tanto nas ruas quanto no cimento do estádio!",
+        "deixando a torcida pronta e fortalecida para buscar o topo do Ranking Nacional!",
+        "mostrando que a gestão encontrou a fórmula certa entre bancada, pista e sede!",
+      ],
+      18
+    );
+  }
+
+  return {
+    sentiment,
+    badgeLabel,
+    text: `${openingClause} ${middleClause}, ${closingClause}`,
+  };
+}

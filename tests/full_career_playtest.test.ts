@@ -5,14 +5,11 @@ import {
   evaluateSeasonEndObjectives,
   getSeasonalMilestoneEvent,
   GAME_BALANCE,
-  isInteriorSP,
+  simulateNationalRanking,
+  createCustomTorcidaWithArchetype,
   OfficialTorcida,
   SeasonObjective,
 } from "../lib/bancada_engine";
-import {
-  simulateNationalRanking,
-  createCustomTorcidaWithArchetype,
-} from "../lib/engine/ranking_engine";
 import { TorcidaStats, StateTrackers } from "../lib/engine/types";
 
 describe("Full 15-Season Automated Playtest & Code Audit (End-to-End)", () => {
@@ -65,7 +62,7 @@ describe("Full 15-Season Automated Playtest & Code Audit (End-to-End)", () => {
 
       let bankBalance = torcida.autonomia_financeira * 200;
       let isBannedByMP = false;
-      const defeatedRivalsMap: Record<string, boolean> = {};
+      const defeatedRivalsMap: Record<string, number> = {};
 
       let milestonesEvaluatedCount = 0;
       let electionsEvaluatedCount = 0;
@@ -143,11 +140,11 @@ describe("Full 15-Season Automated Playtest & Code Audit (End-to-End)", () => {
   });
 
   it("simulates a full 15-season career for a Custom Torcida created via Archetype", () => {
-    const { torcida, stateTrackers: initialState } = createCustomTorcidaWithArchetype(
+    const { torcida, state: initialState } = createCustomTorcidaWithArchetype(
       "Guerreiros do Asfalto",
       "GDA",
       "Corinthians",
-      "MASSA_COMBATIVA"
+      "BONDE_PISTA"
     );
 
     let stats: TorcidaStats = {

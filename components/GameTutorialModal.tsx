@@ -277,17 +277,26 @@ const TUTORIAL_STEPS = [
   },
   {
     step: 7,
-    title: "Backup & Proteção da sua Carreira",
-    subtitle: "Como Exportar e Importar Save JSON",
+    title: "Aba Perfil, Central Beta & Backup do Jogo",
+    subtitle: "Como Pedir Torcidas, Relatar Bugs e Proteger seu Save JSON",
     icon: <Download className="w-5 h-5 text-emerald-400" />,
-    badge: "SAVE & BACKUP",
+    badge: "PERFIL & BETA",
     content: (
       <div className="space-y-3 text-xs leading-relaxed text-zinc-300">
+        <div className="bg-amber-500/10 border border-amber-500/40 rounded-xl p-2.5 space-y-1">
+          <strong className="text-amber-400 font-black block text-[11px] uppercase">
+            🧪 Versão Beta • Pedir Torcidas, Sugestões e Bugs:
+          </strong>
+          <p className="text-[10.5px] text-zinc-300">
+            Estamos com <strong className="text-amber-300">atualizações constantes</strong>! Clique na aba <strong className="text-blue-400">PERFIL</strong> (sinalizada com a bolinha de aviso no menu) para encontrar o painel em destaque onde você pode <strong className="text-white">pedir a inclusão de novas torcidas</strong>, <strong className="text-white">sugerir mudanças</strong> ou <strong className="text-white">informar qualquer bug</strong>.
+          </p>
+        </div>
+
         <p>
-          Para que você nunca perca o progresso da sua agremiação ao trocar de navegador ou celular, o jogo possui backup em <strong className="text-emerald-400">Save JSON</strong>:
+          Na mesma aba <strong className="text-blue-400">PERFIL</strong>, você também protege o progresso da sua agremiação usando o backup em <strong className="text-emerald-400">Save JSON</strong>:
         </p>
 
-        <div className="space-y-2 pt-1">
+        <div className="space-y-2 pt-0.5">
           <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800 flex items-center justify-between">
             <div>
               <strong className="text-emerald-400 font-bold block text-[11px]">📥 Exportar Save JSON</strong>

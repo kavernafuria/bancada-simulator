@@ -32,18 +32,28 @@ describe("Etapa 10 Caravan Engine Unit Tests", () => {
     expect(selectedTorcidaNames).not.toContain("Torcida Tricolor Indep.");
   });
 
-  it("should attach ally reinforcement details and costs to high-stakes Etapa 10 caravans", () => {
+  it("should NOT attach ally reinforcement to a derby outside the ally's region (Palmeiras/SP vs aliada do RJ)", () => {
     const choices = generateEtapa10CaravanChoices(currentTorcida, [], 1);
     const derbyChoice = choices.find((c) => c.category === "DERBY");
     expect(derbyChoice).toBeDefined();
     if (derbyChoice) {
-      expect(derbyChoice.allyTorcidaName).toBeDefined();
-      expect(derbyChoice.allyExtraMembers).toBeGreaterThan(0);
-      expect(derbyChoice.allyPistaBonus).toBeGreaterThan(0);
-      expect(derbyChoice.allyCost).toBe(2500);
-
+      expect(derbyChoice.allyTorcidaName).toBeUndefined();
+      expect(derbyChoice.allyCost).toBeUndefined();
       const allyImpact = derbyChoice.impacts.find((imp) => imp.label.includes("Reforço Aliado"));
-      expect(allyImpact).toBeDefined();
+      expect(allyImpact).toBeUndefined();
     }
+  });
+
+  it("should only attach ally reinforcement (with cost) to caravans played in the ally's own state", () => {
+    const choices = generateEtapa10CaravanChoices(currentTorcida, [], 1);
+    choices
+      .filter((c) => c.allyTorcidaName)
+      .forEach((c) => {
+        expect(c.estado).toBe("RJ");
+        expect(c.allyExtraMembers).toBeGreaterThan(0);
+        expect(c.allyPistaBonus).toBeGreaterThan(0);
+        expect(c.allyCost).toBe(2500);
+        expect(c.impacts.some((imp) => imp.label.includes("Reforço Aliado"))).toBe(true);
+      });
   });
 });

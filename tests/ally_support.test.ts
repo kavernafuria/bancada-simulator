@@ -1,4 +1,4 @@
-﻿import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "vitest";
 import {
   calculateAllySupportNumbers,
   findAllyForTorcida,
@@ -38,7 +38,29 @@ describe("Ally Support Dynamics Unit Tests", () => {
     expect(ally).toBeDefined();
   });
 
-  it("should attach ally contingent and logistics cost in Etapa 10 caravan choices", () => {
+  it("should block ally support against the main rival without 2 consecutive pista defeats", () => {
+    // Torcida fictícia SP com aliada também em SP para isolar a regra do maior rival
+    const currentTorcida = {
+      torcida: "Torcida Teste SP",
+      clube: "Clube Teste",
+      estado: "SP",
+      rival_principal: "Palmeiras",
+      torcida_aliada: "Gaviões da Fiel",
+    };
+    const noStreak = generateEtapa10CaravanChoices(currentTorcida, [], 1, {});
+    const derbyNoStreak = noStreak.find((c) => c.category === "DERBY");
+    expect(derbyNoStreak?.clube).toBe("Palmeiras");
+    expect(derbyNoStreak?.allyTorcidaName).toBeUndefined();
+
+    const withStreak = generateEtapa10CaravanChoices(currentTorcida, [], 1, {
+      [derbyNoStreak!.rivalTorcida]: 2,
+    });
+    const derbyWithStreak = withStreak.find((c) => c.category === "DERBY");
+    expect(derbyWithStreak?.allyTorcidaName).toBeDefined();
+    expect(derbyWithStreak?.allyCost).toBe(2500);
+  });
+
+  it("should attach ally contingent and logistics cost only in the ally's region", () => {
     const currentTorcida = {
       torcida: "Gaviões da Fiel",
       clube: "Corinthians",
@@ -50,10 +72,16 @@ describe("Ally Support Dynamics Unit Tests", () => {
     };
     const choices = generateEtapa10CaravanChoices(currentTorcida, [], 1);
     const derbyChoice = choices.find((c) => c.category === "DERBY");
-    expect(derbyChoice?.allyTorcidaName).toBeDefined();
-    expect(derbyChoice?.allyCost).toBe(2500);
-    expect(derbyChoice?.allyExtraMembers).toBeGreaterThan(0);
-    expect(derbyChoice?.allyPistaBonus).toBeGreaterThan(0);
+    // Dérbi em SP com aliada do RJ: sem reforço
+    expect(derbyChoice?.allyTorcidaName).toBeUndefined();
+    choices
+      .filter((c) => c.allyTorcidaName)
+      .forEach((c) => {
+        expect(c.estado).toBe("RJ");
+        expect(c.allyCost).toBe(2500);
+        expect(c.allyExtraMembers).toBeGreaterThan(0);
+        expect(c.allyPistaBonus).toBeGreaterThan(0);
+      });
   });
 
   it("should enforce that home ally boost applies strictly to Massa and Poder de Pista without altering moral, bancada, or respeito", () => {

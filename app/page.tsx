@@ -113,7 +113,8 @@ import { GameTutorialModal } from "@/components/GameTutorialModal";
 import { StoryCardModal, StoryCardData } from "@/components/StoryCardModal";
 import { Etapa10CaravanModal } from "@/components/Etapa10CaravanModal";
 import { HomeAllySupportModal } from "@/components/HomeAllySupportModal";
-import { generateEtapa10CaravanChoices, Etapa10CaravanChoice, findAllyForTorcida, calculateAllySupportNumbers } from "@/lib/bancada_engine";
+import { BetaFeedbackModal } from "@/components/BetaFeedbackModal";
+import { generateEtapa10CaravanChoices, Etapa10CaravanChoice, findAllyForTorcida, calculateAllySupportNumbers, generateSeasonNarrativeVerdict, findRivalTorcidaInDatabase, getTierMultiplier } from "@/lib/bancada_engine";
 import alliancesData from "@/data/bancada_alliances.json";
 import {
   GAME_BALANCE,
@@ -287,6 +288,8 @@ export default function App() {
   const [seasonStartSnapshot, setSeasonStartSnapshot] = useState<SeasonStartSnapshot | null>(null);
   const [careerStartSnapshot, setCareerStartSnapshot] = useState<SeasonStartSnapshot | null>(null);
   const [pendingSeasonEndEvaluation, setPendingSeasonEndEvaluation] = useState<boolean>(false);
+  const [seasonPistaWins, setSeasonPistaWins] = useState<number>(0);
+  const [seasonPistaLosses, setSeasonPistaLosses] = useState<number>(0);
   const [seasonEndReport, setSeasonEndReport] = useState<{
     completedCount: number;
     totalCashBonus: number;
@@ -297,11 +300,13 @@ export default function App() {
     endSnapshot?: SeasonStartSnapshot;
     playerRankEntry?: RankingEntry;
     totalTorcidasCount?: number;
+    seasonPistaWins?: number;
+    seasonPistaLosses?: number;
     completedSeason?: number;
     isCareerEnd?: boolean;
   } | null>(null);
 
-  const [stats, setStats] = useState<TorcidaStats>({
+  const [stats, setStatsRaw] = useState<TorcidaStats>({
     contingente: 75,
     pressao_bancada: 75,
     poder_pista: 75,
@@ -309,12 +314,72 @@ export default function App() {
     autonomia_financeira: 75,
   });
 
-  const [stateTrackers, setStateTrackers] = useState<StateTrackers>({
+  const [stateTrackers, setStateTrackersRaw] = useState<StateTrackers>({
     moral: 70,
     risco_mp: 10,
     relacao_clube: 50,
     respeito_nacional: 50,
   });
+
+  // ==== BALANCEAMENTO GLOBAL DE GANHOS ====
+  // (1) Retornos decrescentes acima de 50 e (2) TETO DE GANHO POR TEMPORADA por atributo
+  // (medido a partir do valor no início da temporada, então perdas "liberam" espaço para recuperar).
+  const SEASON_GAIN_BUDGET: Record<string, number> = {
+    contingente: 12,
+    pressao_bancada: 14,
+    poder_pista: 14,
+    caravana: 14,
+    autonomia_financeira: 14,
+    moral: 16,
+    respeito_nacional: 12,
+    relacao_clube: 15,
+  };
+  const statsLive = useRef<any>(null);
+  const stateTrackersLive = useRef<any>(null);
+  statsLive.current = stats;
+  stateTrackersLive.current = stateTrackers;
+  const seasonBaseRef = useRef<{ season: number; vals: Record<string, number> } | null>(null);
+  const softCapGain = (key: string, prev: number, next: number, base: number): number => {
+    const delta = next - prev;
+    if (delta <= 0) return next;
+    let gain = delta;
+    if (prev > 50) gain = delta * Math.max(0.08, 1 - (prev - 50) / 50);
+    const ceiling = Math.max(prev, base + (SEASON_GAIN_BUDGET[key] ?? 14));
+    return Math.min(100, ceiling, prev + gain);
+  };
+  const ensureSeasonBase = (snapshot: Record<string, number>) => {
+    if (!seasonBaseRef.current || seasonBaseRef.current.season !== season) {
+      seasonBaseRef.current = { season, vals: { ...snapshot } };
+    }
+    return seasonBaseRef.current.vals;
+  };
+  const setStats: typeof setStatsRaw = (updater: any) => {
+    if (typeof updater !== "function") return setStatsRaw(updater);
+    setStatsRaw((prev) => {
+      const base = ensureSeasonBase({ ...(stateTrackersLive.current as any), ...(prev as any) });
+      const next = updater(prev) as TorcidaStats;
+      const out: any = { ...next };
+      (Object.keys(next) as (keyof TorcidaStats)[]).forEach((k) => {
+        if (typeof next[k] === "number" && typeof prev[k] === "number")
+          out[k] = Math.round(softCapGain(k as string, prev[k] as number, next[k] as number, base[k as string] ?? (prev[k] as number)));
+      });
+      return out;
+    });
+  };
+  const GAIN_TRACKERS = ["moral", "relacao_clube", "respeito_nacional"];
+  const setStateTrackers: typeof setStateTrackersRaw = (updater: any) => {
+    if (typeof updater !== "function") return setStateTrackersRaw(updater);
+    setStateTrackersRaw((prev) => {
+      const base = ensureSeasonBase({ ...(statsLive.current as any), ...(prev as any) });
+      const next = updater(prev) as StateTrackers;
+      const out: any = { ...next };
+      GAIN_TRACKERS.forEach((k) => {
+        const p = (prev as any)[k], n = (next as any)[k];
+        if (typeof p === "number" && typeof n === "number") out[k] = Math.round(softCapGain(k, p, n, base[k] ?? p));
+      });
+      return out;
+    });
+  };
 
   const [isBannedByMP, setIsBannedByMP] = useState<boolean>(false);
   const [defeatedRivalsMap, setDefeatedRivalsMap] = useState<Record<string, number>>({});
@@ -436,7 +501,7 @@ export default function App() {
   const [activeMatchResult, setActiveMatchResult] = useState<MatchExecutionResult | null>(null);
   const [isGeneratingChronicle, setIsGeneratingChronicle] = useState<boolean>(false);
   const [facedOpponentsHistory, setFacedOpponentsHistory] = useState<string[]>([]);
-  const [pistaHistoryRecord, setPistaHistoryRecord] = useState<Record<string, { win: number; loss: number; bannersCaptured: number; bannersLost: number }>>({});
+  const [pistaHistoryRecord, setPistaHistoryRecord] = useState<Record<string, { win: number; loss: number; bannersCaptured: number; bannersLost: number; lossStreak?: number }>>({});
   const [etapa10Choices, setEtapa10Choices] = useState<Etapa10CaravanChoice[]>([]);
   const [showEtapa10Modal, setShowEtapa10Modal] = useState<boolean>(false);
   const [activeHomeAllyOffer, setActiveHomeAllyOffer] = useState<{
@@ -518,6 +583,7 @@ export default function App() {
   const [organizacaoPoints, setOrganizacaoPoints] = useState<number>(100);
   const [localSponsorsCount, setLocalSponsorsCount] = useState<number>(0);
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
+  const [showBetaFeedbackModal, setShowBetaFeedbackModal] = useState<boolean>(false);
 
   const handleExportSave = () => {
     const saved = localStorage.getItem("bancada_ultra_v2_save");
@@ -833,7 +899,7 @@ export default function App() {
         if (parsed.isStarted && parsed.currentTorcida) {
           setIsStarted(true);
           setCurrentTorcida(parsed.currentTorcida);
-          setSeason(parsed.season || 1);
+          setSeason(parsed.season || 1);          seasonBaseRef.current = null;
           setBankBalance(parsed.bankBalance ?? 30000);
           setClubStatus(parsed.clubStatus || "LUTANDO_ACESSO");
           setStats(parsed.stats || { contingente: 70, pressao_bancada: 70, poder_pista: 70, caravana: 70, autonomia_financeira: 70 });
@@ -1082,7 +1148,7 @@ export default function App() {
       setBankBalance(torcidaWithColors.autonomia_financeira * 200);
       setIsBannedByMP(false);
       setDebtYears(0);
-      setSeason(1);
+      setSeason(1);      seasonBaseRef.current = null;
       setPipelineIndex(0);
       const objectives = generateSeasonObjectives(1, torcidaWithColors, "LUTANDO_ACESSO");
       setSeasonObjectives(objectives);
@@ -1163,7 +1229,7 @@ export default function App() {
     setBankBalance(torcidaWithCrisis.autonomia_financeira * 150);
     setIsBannedByMP(false);
     setDebtYears(0);
-    setSeason(1);
+    setSeason(1);    seasonBaseRef.current = null;
     setPipelineIndex(0);
     const objectives = generateSeasonObjectives(1, torcidaWithCrisis, "LUTANDO_ACESSO");
     setSeasonObjectives(objectives);
@@ -1358,10 +1424,7 @@ export default function App() {
     // Apenas após 2 derrotas para o mesmo rival
     const isHome = Boolean(step?.derby?.isHome ?? step?.isHomeGame);
     const rivalName = step?.derby?.rivalTorcida || "";
-    const lossesAgainstRival = Math.max(
-      rivalryRecords[rivalName]?.derrotasPista || 0,
-      pistaHistoryRecord[rivalName]?.loss || 0
-    );
+    const lossesAgainstRival = pistaHistoryRecord[rivalName]?.lossStreak || 0; // derrotas CONSECUTIVAS
 
     if (
       isHome &&
@@ -1553,7 +1616,23 @@ export default function App() {
       }
     }
 
-    const opponentTier: MatchContext['opponentTier'] = activeScoutIntel.rivalMembersWaiting > 3000 ? 'S' : activeScoutIntel.rivalMembersWaiting > 1500 ? 'A' : 'B';
+    const resolvedRivalForMinigame = findRivalTorcidaInDatabase(
+      activeMatchDerby.rivalTorcida,
+      activeMatchDerby.isHome ? activeMatchDerby.awayClub : activeMatchDerby.homeClub
+    );
+    const rawRivalTier = (resolvedRivalForMinigame?.tier || "").toUpperCase().trim();
+    const opponentTier: MatchContext['opponentTier'] =
+      rawRivalTier === "S" || rawRivalTier === "S-"
+        ? "S"
+        : rawRivalTier.startsWith("A")
+        ? "A"
+        : rawRivalTier
+        ? "B"
+        : activeScoutIntel.rivalMembersWaiting > 2800
+        ? "S"
+        : activeScoutIntel.rivalMembersWaiting > 1500
+        ? "A"
+        : "B";
 
     // Se a tática for Rompimento de Escolta no Perímetro, a fração rebelde participa com 55% do contingente e 75% do poder de pista,
     // pois a maioria do bonde estava desarmada e escoltada. Quando falta à reunião da PM, 100% do contingente marcha preparado.
@@ -1898,6 +1977,7 @@ export default function App() {
             [rName]: {
               win: result.isVictoryPista ? cur.win + 1 : cur.win,
               loss: !result.isVictoryPista ? cur.loss + 1 : cur.loss,
+              lossStreak: result.isVictoryPista ? 0 : (cur.lossStreak || 0) + 1,
               bannersCaptured: result.bannerCaptured ? cur.bannersCaptured + 1 : cur.bannersCaptured,
               bannersLost: result.bannerLost ? cur.bannersLost + 1 : cur.bannersLost,
             },
@@ -1911,6 +1991,22 @@ export default function App() {
       if (newMP >= 100) setIsBannedByMP(true);
 
       const isAllyMatch = activeMatchDerby?.isAllyGame ?? false;
+      if (!isAllyMatch) {
+        if (result.isVictoryPista) {
+          setSeasonPistaWins((w) => w + 1);
+        } else {
+          setSeasonPistaLosses((l) => l + 1);
+        }
+      }
+      const rivalObjForPenalty = findRivalTorcidaInDatabase(
+        activeMatchDerby?.rivalTorcida,
+        activeMatchDerby?.isHome ? activeMatchDerby?.awayClub : activeMatchDerby?.homeClub
+      );
+      const isUpsetDefeatAgainstWeaker =
+        !isAllyMatch &&
+        !result.isVictoryPista &&
+        getTierMultiplier(currentTorcida?.tier) > getTierMultiplier(rivalObjForPenalty?.tier);
+      const extraUpsetPenalty = isUpsetDefeatAgainstWeaker ? 2 : 0;
       let respeitoDelta = 0;
       if (isAllyMatch) {
         respeitoDelta = 3;
@@ -1922,12 +2018,12 @@ export default function App() {
           setDefeatedRivalsMap((prev) => ({ ...prev, [rName]: season, [rClub]: season }));
         }
       } else {
-        respeitoDelta = result.bannerLost ? -10 : (activeMatchDerby?.isHome ? -6 : -4);
+        respeitoDelta = (result.bannerLost ? -10 : (activeMatchDerby?.isHome ? -6 : -4)) - extraUpsetPenalty * 2;
       }
 
       setStateTrackers((prev) => ({
         ...prev,
-        moral: Math.min(100, Math.max(0, prev.moral + result.moralChange)),
+        moral: Math.min(100, Math.max(0, prev.moral + result.moralChange - extraUpsetPenalty * 2)),
         respeito_nacional: Math.min(100, Math.max(0, prev.respeito_nacional + respeitoDelta)),
         risco_mp: newMP,
       }));
@@ -2005,7 +2101,16 @@ export default function App() {
           }
         }
 
-        const membersLost = isAlly ? 0 : Math.floor(result.membersLost / 10);
+        if (!isAlly && !result.isVictoryPista) {
+          // Derrota na pista NUNCA concede ganho de Massa ou Pressão de Bancada naquela rodada!
+          baseContingenteGain = 0;
+          totalBancadaGain = 0;
+        }
+        const membersLost = isAlly
+          ? 0
+          : !result.isVictoryPista
+          ? Math.max(2, Math.floor(result.membersLost / 7)) + (extraUpsetPenalty > 0 ? 1 : 0)
+          : Math.floor(result.membersLost / 10);
 
         // 3. PODER DE PISTA
         let newPoderPista: number;
@@ -2016,12 +2121,12 @@ export default function App() {
         } else if (result.isVictoryPista) {
           newPoderPista = applyDiminishingReturns(prev.poder_pista, Math.max(1, 3 + tactic.pistaMod));
         } else {
-          newPoderPista = Math.max(10, prev.poder_pista - 5);
+          newPoderPista = Math.max(10, prev.poder_pista - (6 + extraUpsetPenalty));
         }
 
         // 4. NOVO VALOR DE BANCADA
         const newPressaoBancada = !isAlly && !result.isVictoryPista
-          ? Math.max(10, prev.pressao_bancada - 2)
+          ? Math.max(10, prev.pressao_bancada - (3 + (extraUpsetPenalty > 0 ? 1 : 0)))
           : totalBancadaGain > 0
           ? applyDiminishingReturns(prev.pressao_bancada, totalBancadaGain)
           : prev.pressao_bancada;
@@ -2111,14 +2216,14 @@ export default function App() {
       if (result.bannerCaptured || result.bannerLost) {
         shouldTriggerLeak = true; // Sempre vaza se tomou ou perdeu faixa!
       } else if (result.membersLost > 0 || (result.statusTitle || "").toLowerCase().includes("polícia")) {
-        shouldTriggerLeak = Math.random() < 0.70; // 70% se teve prisões ou cerco policial
+        shouldTriggerLeak = Math.random() < 0.40; // 40% se teve confronto/baixas ou cerco policial
       } else if (activeMatchDerby?.isAllyGame) {
         shouldTriggerLeak = Math.random() < 0.50; // 50% de registrar cortejo unificado em jogo de aliada
       } else if (isPistaFightMatch) {
         const isTorcidaUnicaFight = torcidaUnicaState.isTorcidaUnica || activeTorcidaUnicaModalMode !== null;
         shouldTriggerLeak = isTorcidaUnicaFight ? Math.random() < 0.65 : Math.random() < 0.50;
       } else {
-        shouldTriggerLeak = Math.random() < 0.30;
+        shouldTriggerLeak = Math.random() < 0.15;
       }
 
       if (shouldTriggerLeak) {
@@ -2185,7 +2290,7 @@ export default function App() {
         if (currentTorcida) {
           const ranking = simulateNationalRanking(currentTorcida, stats, stateTrackers, season, defeatedRivalsMap);
           const pRank = ranking.find((r) => r.isPlayer)?.rank || 1;
-          const choices = generateEtapa10CaravanChoices(currentTorcida, facedOpponentsHistory, pRank);
+          const choices = generateEtapa10CaravanChoices(currentTorcida, facedOpponentsHistory, pRank, Object.fromEntries(Object.entries(pistaHistoryRecord).map(([k, v]) => [k, v.lossStreak || 0])));
           setEtapa10Choices(choices);
           setShowEtapa10Modal(true);
         }
@@ -2321,6 +2426,8 @@ export default function App() {
         playerRankEntry: endRankEntry,
         totalTorcidasCount: totalTorcidasCount,
         completedSeason: completedSeasonNum,
+        seasonPistaWins,
+        seasonPistaLosses,
         isCareerEnd: isCareerFinished,
       });
 
@@ -2337,10 +2444,17 @@ export default function App() {
         setClubStatus(nextStatus);
         const nextSeason = season + 1;
         setSeason(nextSeason);
+
+
+
+
+        seasonBaseRef.current = null;
         setPipelineIndex(0);
         setVisitedTabsSeason([]);
         setTorcidaUnicaActionAppliedForStep(null);
         setChallengedRivalTorcida(null);
+        setSeasonPistaWins(0);
+        setSeasonPistaLosses(0);
 
         // MÓDULO 3: Payout Matured Merchandise Orders (Lucro Dobrado 2x após 1 Ano/Temporada)
         const maturedMerch = merchandiseOrders.filter((ord) => ord.maturitySeason <= nextSeason);
@@ -2768,7 +2882,7 @@ export default function App() {
     setIsGameOver(false);
     setRetryUsedCurrentMatch(false);
     setIsRetryWithAdAttempt(false);
-    setSeason(1);
+    setSeason(1);    seasonBaseRef.current = null;
     setPipelineIndex(0);
     setTorcidaUnicaActionAppliedForStep(null);
     setDebtYears(0);
@@ -3048,6 +3162,10 @@ export default function App() {
           <div>
             <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block">
               SIMULADOR DE ARQUIBANCADA • 15 TEMPORADAS
+            </span>
+            <span className="mt-1 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-300 text-[9.5px] font-black uppercase tracking-wider">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+              🧪 VERSÃO BETA ABERTA • ATUALIZAÇÕES CONSTANTES
             </span>
             <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
               Defina as cores da sua agremiação, cumpra objetivos sazonais (mosaicos, pistas e caravanas) e comande 15 temporadas de história de torcida.
@@ -3852,7 +3970,12 @@ export default function App() {
             }`}
           >
             <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-400 shrink-0" />
-            <span className="truncate">PERFIL</span>
+            <span className="truncate inline-flex items-center gap-1">
+              <span>PERFIL</span>
+              {!visitedTabsSeason.includes("profile") && (
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
+              )}
+            </span>
           </button>
 
           <button
@@ -4388,6 +4511,31 @@ export default function App() {
       {/* TAB 3: PROFILE & CHRONICLES INTEGRATED */}
       {activeTab === "profile" && currentTorcida && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 shadow-xl space-y-3 relative z-10">
+          <div>
+          {/* CENTRAL BETA & FEEDBACK DO JOGADOR (DESTAQUE NA ABA PERFIL) */}
+          <div className="bg-gradient-to-r from-amber-950/70 via-zinc-950 to-purple-950/60 p-3.5 rounded-2xl border border-amber-500/50 shadow-lg space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[9.5px] font-black text-amber-400 uppercase tracking-widest flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                🧪 VERSÃO BETA • ATUALIZAÇÕES CONSTANTES
+              </span>
+              <span className="text-[9px] font-black text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-500/40">
+                CANAL ABERTO
+              </span>
+            </div>
+            <p className="text-[11px] text-zinc-300 leading-relaxed">
+              Sentiu falta de alguma torcida organizada, teve uma ideia de melhoria ou encontrou algum bug? Envie diretamente para nossa equipe:
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowBetaFeedbackModal(true)}
+              className="w-full py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all cursor-pointer"
+            >
+              <span>📣 Pedir Torcida, Sugerir Mudança ou Informar Bug</span>
+            </button>
+          </div>
+          </div>
+
           <div>
             <span className="text-[9px] font-black text-amber-400 uppercase block">CADASTRO DA TORCIDA</span>
             <h3 className="text-base font-black text-white uppercase">
@@ -5568,6 +5716,51 @@ export default function App() {
               </h3>
             </div>
 
+            {/* 📋 PARECER DINÂMICO DO MANDATO & SÓCIOS */}
+            {seasonEndReport.startSnapshot && seasonEndReport.endSnapshot && (() => {
+              const verdict = generateSeasonNarrativeVerdict({
+                season: seasonEndReport.completedSeason ?? (season - 1),
+                startSnapshot: seasonEndReport.startSnapshot,
+                endSnapshot: seasonEndReport.endSnapshot,
+                completedObjectivesCount: seasonEndReport.completedCount,
+                isCareerEnd: seasonEndReport.isCareerEnd,
+                seasonPistaWins: seasonEndReport.seasonPistaWins,
+                seasonPistaLosses: seasonEndReport.seasonPistaLosses,
+              });
+              const borderStyle =
+                verdict.sentiment === "POSITIVO"
+                  ? "border-emerald-500/40 bg-emerald-950/30"
+                  : verdict.sentiment === "ALERTA_MP"
+                  ? "border-amber-500/50 bg-amber-950/30"
+                  : verdict.sentiment === "COBRANCA"
+                  ? "border-red-500/40 bg-red-950/30"
+                  : "border-zinc-700 bg-zinc-950";
+              const badgeStyle =
+                verdict.sentiment === "POSITIVO"
+                  ? "text-emerald-300 bg-emerald-500/20 border-emerald-500/40"
+                  : verdict.sentiment === "ALERTA_MP"
+                  ? "text-amber-300 bg-amber-500/20 border-amber-500/40"
+                  : verdict.sentiment === "COBRANCA"
+                  ? "text-red-300 bg-red-500/20 border-red-500/40"
+                  : "text-zinc-300 bg-zinc-800 border-zinc-700";
+
+              return (
+                <div className={`p-3.5 rounded-2xl border text-left space-y-1.5 shadow-md ${borderStyle}`}>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded border ${badgeStyle}`}>
+                      {verdict.badgeLabel}
+                    </span>
+                    <span className="text-[9px] font-bold text-zinc-400">
+                      Análise dos Associados
+                    </span>
+                  </div>
+                  <p className="text-xs font-semibold text-zinc-100 leading-relaxed">
+                    &ldquo;{verdict.text}&rdquo;
+                  </p>
+                </div>
+              );
+            })()}
+
             {/* 🏆 RANKING NACIONAL DE TORCIDAS BOX */}
             {seasonEndReport.endSnapshot && (
               <div className="bg-gradient-to-r from-amber-950/70 via-zinc-950 to-purple-950/70 p-3.5 rounded-2xl border border-amber-500/40 text-left space-y-2 relative overflow-hidden shadow-xl">
@@ -6490,7 +6683,12 @@ export default function App() {
                 const shouldTriggerColetiva = Math.random() < 0.50;
                 let triggeredConf = false;
                 if (shouldTriggerColetiva && activeSocialMediaLeak.pressConferenceId) {
-                  const conf = getPressConference(activeSocialMediaLeak.pressConferenceId);
+                  const targetConfId = activeSocialMediaLeak.id.startsWith("LEAK_ALLY_")
+                    ? undefined
+                    : activeSocialMediaLeak.id.startsWith("LEAK_BANNER_LOST_") || activeSocialMediaLeak.id.startsWith("LEAK_DEFEAT_")
+                      ? "ENTREVISTA_BRIGA_PISTA_DERROTA"
+                      : activeSocialMediaLeak.pressConferenceId;
+                  const conf = targetConfId ? getPressConference(targetConfId) : null;
                   if (conf) {
                     setActivePressConference(conf);
                     triggeredConf = true;
@@ -6615,6 +6813,16 @@ export default function App() {
       <GameTutorialModal
         isOpen={showGameTutorialModal}
         onClose={() => setShowGameTutorialModal(false)}
+      />
+
+      {/* CENTRAL BETA FEEDBACK MODAL */}
+      <BetaFeedbackModal
+        isOpen={showBetaFeedbackModal}
+        onClose={() => setShowBetaFeedbackModal(false)}
+        currentTorcidaName={currentTorcida?.torcida}
+        currentClubName={currentTorcida?.clube}
+        currentSeason={season}
+        currentStepIndex={pipelineIndex + 1}
       />
 
       {/* VISUAL STORY CARD MODAL (9:16 PNG GENERATOR FOR INSTAGRAM & WHATSAPP) */}
