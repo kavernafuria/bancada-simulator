@@ -114,7 +114,7 @@ import { StoryCardModal, StoryCardData } from "@/components/StoryCardModal";
 import { Etapa10CaravanModal } from "@/components/Etapa10CaravanModal";
 import { HomeAllySupportModal } from "@/components/HomeAllySupportModal";
 import { BetaFeedbackModal } from "@/components/BetaFeedbackModal";
-import { generateEtapa10CaravanChoices, Etapa10CaravanChoice, findAllyForTorcida, calculateAllySupportNumbers, generateSeasonNarrativeVerdict, findRivalTorcidaInDatabase, getTierMultiplier } from "@/lib/bancada_engine";
+import { generateEtapa10CaravanChoices, Etapa10CaravanChoice, findAllyForTorcida, calculateAllySupportNumbers, generateSeasonNarrativeVerdict, findRivalTorcidaInDatabase, getTierMultiplier, getAllianceBlockForTorcida, isValidFriendFor, normalizeTorcidaKey } from "@/lib/bancada_engine";
 import alliancesData from "@/data/bancada_alliances.json";
 import {
   GAME_BALANCE,
@@ -831,6 +831,19 @@ export default function App() {
 
   // RIVALRY & DIPLOMACY STATE
   const [rivalryRecords, setRivalryRecords] = useState<Record<string, RivalryRecord>>({});
+  // Torcidas com histórico de pista/treta SEM pacto ativo (nunca podem aparecer como amigas)
+  const getHostileTorcidas = (): string[] =>
+    Object.entries(rivalryRecords)
+      .filter(([, r]: [string, any]) =>
+        !r?.isPeacePactActive &&
+        ((r?.totalConfrontos || 0) > 0 || (r?.vitoriasPista || 0) + (r?.derrotasPista || 0) > 0 || r?.isTretaChallenged)
+      )
+      .map(([k]) => k);
+  // Pactos de amizade selados em reunião diplomática
+  const getPactTorcidas = (): string[] =>
+    Object.entries(rivalryRecords)
+      .filter(([, r]: [string, any]) => r?.isPeacePactActive)
+      .map(([k]) => k);
   const [selectedTorcidaForDiplomacy, setSelectedTorcidaForDiplomacy] = useState<OfficialTorcida | null>(null);
   const [diplomacyFeedback, setDiplomacyFeedback] = useState<string | null>(null);
   const [alliedInvasionInvite, setAlliedInvasionInvite] = useState<{
@@ -1433,7 +1446,7 @@ export default function App() {
       !step?.derby?.allyTorcida &&
       currentTorcida
     ) {
-      const ally = findAllyForTorcida(currentTorcida);
+      const ally = findAllyForTorcida(currentTorcida, getHostileTorcidas(), getPactTorcidas());
       if (ally) {
         const allySupport = calculateAllySupportNumbers(ally);
         setActiveHomeAllyOffer({
@@ -2290,7 +2303,7 @@ export default function App() {
         if (currentTorcida) {
           const ranking = simulateNationalRanking(currentTorcida, stats, stateTrackers, season, defeatedRivalsMap);
           const pRank = ranking.find((r) => r.isPlayer)?.rank || 1;
-          const choices = generateEtapa10CaravanChoices(currentTorcida, facedOpponentsHistory, pRank, Object.fromEntries(Object.entries(pistaHistoryRecord).map(([k, v]) => [k, v.lossStreak || 0])));
+          const choices = generateEtapa10CaravanChoices(currentTorcida, facedOpponentsHistory, pRank, Object.fromEntries(Object.entries(pistaHistoryRecord).map(([k, v]) => [k, v.lossStreak || 0])), getHostileTorcidas(), getPactTorcidas());
           setEtapa10Choices(choices);
           setShowEtapa10Modal(true);
         }
@@ -2548,8 +2561,10 @@ export default function App() {
           if (isIndependentTorcida) {
             // Torcidas without pre-existing alliances MUST FIRST receive a diplomatic proposal meeting!
             if (Math.random() < 0.35) {
+              const hostileNow = getHostileTorcidas();
+              const pactsNow = getPactTorcidas();
               const nonStateCandidates = officialList.filter(
-                (t) => t.clube.toLowerCase() !== currentTorcida.clube.toLowerCase()
+                (t) => isValidFriendFor(currentTorcida, t, hostileNow) && !pactsNow.includes(t.torcida)
               );
               if (nonStateCandidates.length > 0) {
                 const proposalObj = nonStateCandidates[Math.floor(Math.random() * nonStateCandidates.length)];
@@ -2567,7 +2582,7 @@ export default function App() {
               (t) =>
                 t.eixo_alianca !== "INDEPENDENTE" &&
                 t.eixo_alianca === currentTorcida.eixo_alianca &&
-                t.clube.toLowerCase() !== currentTorcida.clube.toLowerCase()
+                isValidFriendFor(currentTorcida, t, getHostileTorcidas())
             );
             const sameStateRivalsList = officialList.filter(
               (t) => t.estado === currentTorcida.estado && t.clube.toLowerCase() !== currentTorcida.clube.toLowerCase()
@@ -4922,20 +4937,35 @@ export default function App() {
 
           {/* PLAYER'S ALLIANCE AXIS CARD */}
           {(() => {
-            const allEixos = alliancesData.eixos_nacionais;
-            const currentEixoKey = currentTorcida.eixo_alianca || "PUNHO_CRUZADO";
-            const currentEixo = (allEixos as any)[currentEixoKey] || allEixos.PUNHO_CRUZADO;
+            const block = getAllianceBlockForTorcida(currentTorcida, getHostileTorcidas());
+            if (!block) return null;
+            const currentEixo = { name: block.name, symbol: block.symbol, description: block.description };
+            const selfKey = normalizeTorcidaKey(currentTorcida.torcida);
+            const pacts = getPactTorcidas();
+            const friendEntries: { name: string; tag: string }[] = [];
+            const pushFriend = (name: string, tag: string) => {
+              if (normalizeTorcidaKey(name) === selfKey) return;
+              if (friendEntries.some((f) => normalizeTorcidaKey(f.name) === normalizeTorcidaKey(name))) return;
+              friendEntries.push({ name, tag });
+            };
+            if (block.directAlly) pushFriend(block.directAlly, "aliada");
+            block.members.forEach((m) => pushFriend(m, "eixo"));
+            pacts.forEach((p) => pushFriend(p, "pacto"));
+            const hasFriends = friendEntries.length > 0;
+            const hostileOnly = getHostileTorcidas().filter(
+              (h) => !block.declaredRivals.some((r) => normalizeTorcidaKey(r) === normalizeTorcidaKey(h))
+            );
 
             return (
               <div className="bg-gradient-to-r from-zinc-950 via-indigo-950/30 to-zinc-950 border-2 border-indigo-500/50 rounded-2xl p-4 sm:p-5 shadow-2xl relative overflow-hidden space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-indigo-500/20 pb-3">
                   <div className="flex items-center gap-3">
                     <span className="text-3xl p-2 rounded-2xl bg-indigo-950/80 border border-indigo-500/30">
-                      {currentEixo.symbol || "🤝"}
+                      {currentEixo.symbol}
                     </span>
                     <div>
                       <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest block">
-                        EIXO OFICIAL DA SUA AGREMIAÇÃO
+                        {block.isIndependent ? "POSTURA DA SUA AGREMIAÇÃO" : "EIXO OFICIAL DA SUA AGREMIAÇÃO"}
                       </span>
                       <h3 className="text-base font-black text-white uppercase">
                         {currentEixo.name}
@@ -4943,47 +4973,78 @@ export default function App() {
                     </div>
                   </div>
 
-                  <span className="text-[10px] font-black text-emerald-400 bg-emerald-950/80 border border-emerald-500/40 px-3 py-1 rounded-full uppercase tracking-wider self-start sm:self-auto">
-                    🟢 ALIANÇA ATIVA & IRMANDADE
-                  </span>
+                  {hasFriends ? (
+                    <span className="text-[10px] font-black text-emerald-400 bg-emerald-950/80 border border-emerald-500/40 px-3 py-1 rounded-full uppercase tracking-wider self-start sm:self-auto">
+                      🟢 ALIANÇA ATIVA &amp; IRMANDADE
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-black text-zinc-300 bg-zinc-900 border border-zinc-700 px-3 py-1 rounded-full uppercase tracking-wider self-start sm:self-auto">
+                      ⚪ SEM IRMANDADE ATIVA
+                    </span>
+                  )}
                 </div>
 
                 <p className="text-xs text-zinc-300 leading-relaxed font-medium">
                   {currentEixo.description}
                 </p>
 
-                {/* MEMBERS GRID */}
+                {/* FRIENDS GRID (rivais e torcidas com pista hostil são excluídas) */}
                 <div>
                   <span className="text-[10px] font-black text-zinc-400 uppercase tracking-wider block mb-2">
-                    TORCIDAS INTEGRANTES DO MESMO EIXO ({currentEixo.members?.length || 0} AGREMIAÇÕES):
+                    TORCIDAS AMIGAS / IRMÃS ({friendEntries.length}):
                   </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {currentEixo.members?.map((mem: string, idx: number) => {
-                      const isSelf = mem.toLowerCase() === currentTorcida.torcida.toLowerCase();
-                      return (
+                  {hasFriends ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className="text-[11px] px-2.5 py-1 rounded-xl border bg-amber-500 text-black border-amber-400 font-black shadow-md">
+                        ⭐ {currentTorcida.torcida} (Sua Torcida)
+                      </span>
+                      {friendEntries.map((f, idx) => (
                         <span
                           key={idx}
-                          className={`text-[11px] font-bold px-2.5 py-1 rounded-xl border ${
-                            isSelf
-                              ? "bg-amber-500 text-black border-amber-400 font-black shadow-md"
-                              : "bg-zinc-950 text-zinc-200 border-zinc-800"
-                          }`}
+                          className="text-[11px] font-bold px-2.5 py-1 rounded-xl border bg-zinc-950 text-zinc-200 border-zinc-800"
                         >
-                          {isSelf ? `⭐ ${mem} (Sua Torcida)` : `🤝 ${mem}`}
+                          🤝 {f.name}
+                          {f.tag === "aliada" ? " (aliada)" : f.tag === "pacto" ? " (pacto selado)" : ""}
                         </span>
-                      );
-                    })}
-                  </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-[11px] text-zinc-500 italic">
+                      Nenhuma torcida amiga no momento. Aceite propostas de reunião diplomática para selar pactos de amizade.
+                    </p>
+                  )}
                 </div>
 
-                {/* DIPLOMATIC ACTION */}
+                {/* RIVALS */}
+                {(block.declaredRivals.length > 0 || hostileOnly.length > 0) && (
+                  <div>
+                    <span className="text-[10px] font-black text-red-400 uppercase tracking-wider block mb-2">
+                      RIVAIS &amp; HISTÓRICO DE PISTA:
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {block.declaredRivals.map((r, idx) => (
+                        <span key={`r-${idx}`} className="text-[11px] font-bold px-2.5 py-1 rounded-xl border bg-red-950/60 text-red-200 border-red-800/60">
+                          ⚔️ {r}{idx === 0 ? " (rival principal)" : " (rival)"}
+                        </span>
+                      ))}
+                      {hostileOnly.map((h, idx) => (
+                        <span key={`h-${idx}`} className="text-[11px] font-bold px-2.5 py-1 rounded-xl border bg-orange-950/50 text-orange-200 border-orange-800/50">
+                          🔥 {h} (já teve pista)
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* DIPLOMATIC ACTION (somente se existir alguma torcida amiga) */}
+                {hasFriends && (
                 <div className="pt-2 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
                   <div className="text-[11px] text-zinc-400">
                     <span className="text-indigo-400 font-black">🤝 AÇÃO DIPLOMÁTICA: </span>
                     Agendar churrasco unificado e recepção diplomática com o conselho das torcidas aliadas.
                   </div>
                   <button
-                    onClick={() => {
+                      onClick={() => {
                       if (bankBalance < 3000) return;
                       setBankBalance((prev) => prev - 3000);
                       setStateTrackers((st) => ({
@@ -5008,6 +5069,7 @@ export default function App() {
                     AGENDAR REUNIÃO DIPLOMÁTICA (R$ 3.000)
                   </button>
                 </div>
+                )}
               </div>
             );
           })()}
@@ -5035,7 +5097,7 @@ export default function App() {
                       </span>
                       {isCurrent && (
                         <span className="text-[9px] font-black text-amber-400 bg-amber-950 border border-amber-500/40 px-2 py-0.5 rounded-md">
-                          SEU EIXO
+                          {key === "INDEPENDENTE" ? "SUA POSTURA" : "SEU EIXO"}
                         </span>
                       )}
                     </div>
@@ -5043,9 +5105,15 @@ export default function App() {
                       {eixo.description}
                     </p>
                     <div className="text-[10px] text-zinc-500">
-                      <strong className="text-zinc-400">Integrantes ({eixo.members?.length}): </strong>
-                      {eixo.members?.slice(0, 5).join(", ")}
-                      {(eixo.members?.length || 0) > 5 ? ` + ${(eixo.members?.length || 0) - 5} torcidas` : ""}
+                      {key === "INDEPENDENTE" ? (
+                        <span className="italic">Torcidas sem eixo nacional. Não são aliadas entre si: cada uma tem seus próprios rivais e pactos.</span>
+                      ) : (
+                        <>
+                          <strong className="text-zinc-400">Integrantes ({eixo.members?.length}): </strong>
+                          {eixo.members?.slice(0, 5).join(", ")}
+                          {(eixo.members?.length || 0) > 5 ? ` + ${(eixo.members?.length || 0) - 5} torcidas` : ""}
+                        </>
+                      )}
                     </div>
                   </div>
                 );

@@ -860,7 +860,11 @@ export function resolveTorcidaRivalries(currentTorcida: OfficialTorcida): {
     (t) => t.estado !== currentTorcida.estado && t.eixo_alianca !== currentTorcida.eixo_alianca
   );
   // Allies (different club, same alliance axis)
-  const allies = rivalsOnly.filter((t) => t.eixo_alianca === currentTorcida.eixo_alianca);
+  // INDEPENDENTE não é eixo: independentes não são aliadas entre si. Rivais declaradas nunca são aliadas.
+  const allies =
+    !currentTorcida.eixo_alianca || currentTorcida.eixo_alianca === "INDEPENDENTE"
+      ? []
+      : rivalsOnly.filter((t) => t.eixo_alianca === currentTorcida.eixo_alianca && !areTorcidasRivals(currentTorcida, t));
 
   // Specific Historical Derby Pairings
   let mainRival: OfficialTorcida | undefined;
@@ -1262,7 +1266,7 @@ export function resolveTorcidaRivalries(currentTorcida: OfficialTorcida): {
   if (!mainRival) mainRival = sameStateRivals[0] || otherStateRivals[0] || rivalsOnly[0];
   if (!secondRival) secondRival = sameStateRivals.find((r) => r.clube !== mainRival!.clube) || otherStateRivals[0] || rivalsOnly[1] || rivalsOnly[0];
   if (!allyTorcida && currentTorcida.eixo_alianca !== "INDEPENDENTE") {
-    allyTorcida = allies.find((a) => a.clube !== mainRival!.clube && a.clube !== secondRival!.clube) || rivalsOnly.find((r) => r.clube !== mainRival!.clube) || rivalsOnly[0];
+    allyTorcida = allies.find((a) => a.clube !== mainRival!.clube && a.clube !== secondRival!.clube) || undefined;
   }
 
   return {
@@ -6590,43 +6594,162 @@ export function calculateAllySupportNumbers(allyTorcida: any): { extraMembers: n
   return { extraMembers, pistaBonus };
 }
 
-export function findAllyForTorcida(currentTorcida: any): any | null {
+// ==========================================
+// AMIZADES x RIVALIDADES (fonte única de verdade)
+// ==========================================
+export const normalizeTorcidaKey = (s?: string): string =>
+  (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+
+/** Separa referências no formato "Clube (Torcida)" usado em rival_principal / rival_secundario / torcida_aliada */
+function parseTorcidaRef(ref?: string): { club: string; torcida: string; raw: string } {
+  const raw = normalizeTorcidaKey(ref);
+  const m = raw.match(/^(.*?)\s*\((.*)\)\s*$/);
+  if (m) return { club: m[1].trim(), torcida: m[2].trim(), raw };
+  return { club: raw, torcida: raw, raw };
+}
+
+/** true se a referência textual aponta para a torcida t (pela torcida ou pelo clube) */
+export function refersToTorcida(ref: string | undefined, t: any): boolean {
+  if (!ref || !t) return false;
+  const p = parseTorcidaRef(ref);
+  const torc = normalizeTorcidaKey(t.torcida);
+  const club = normalizeTorcidaKey(t.clube);
+  return (!!p.torcida && p.torcida === torc) || (!!p.club && p.club === club);
+}
+
+/** Localiza a torcida de uma referência "Clube (Torcida)", priorizando o nome exato da torcida */
+export function findTorcidaByRef(ref: string | undefined, pool?: any[]): any | null {
+  if (!ref) return null;
+  const list = pool || (teamsData as any[]);
+  const p = parseTorcidaRef(ref);
+  return (
+    list.find((t) => normalizeTorcidaKey(t.torcida) === p.torcida) ||
+    list.find((t) => normalizeTorcidaKey(t.clube) === p.club) ||
+    list.find((t) => p.raw.includes(normalizeTorcidaKey(t.torcida)) && normalizeTorcidaKey(t.torcida).length >= 6) ||
+    null
+  );
+}
+
+/** Rivalidade declarada em qualquer direção (A cita B como rival ou B cita A) */
+export function areTorcidasRivals(a: any, b: any): boolean {
+  if (!a || !b) return false;
+  return (
+    refersToTorcida(a.rival_principal, b) ||
+    refersToTorcida(a.rival_secundario, b) ||
+    refersToTorcida(b.rival_principal, a) ||
+    refersToTorcida(b.rival_secundario, a)
+  );
+}
+
+/**
+ * Uma torcida só pode ser amiga/irmã se: não for a própria, não for do mesmo clube,
+ * não for rival declarada (em qualquer direção) e não tiver histórico de pista hostil com o jogador.
+ */
+export function isValidFriendFor(current: any, t: any, hostileTorcidas: string[] = []): boolean {
+  if (!current || !t) return false;
+  if (normalizeTorcidaKey(t.torcida) === normalizeTorcidaKey(current.torcida)) return false;
+  if (normalizeTorcidaKey(t.clube) === normalizeTorcidaKey(current.clube)) return false;
+  if (areTorcidasRivals(current, t)) return false;
+  const tk = normalizeTorcidaKey(t.torcida);
+  if (hostileTorcidas.some((h) => normalizeTorcidaKey(h) === tk)) return false;
+  return true;
+}
+
+export interface AllianceBlockView {
+  key: string;
+  name: string;
+  symbol: string;
+  description: string;
+  isIndependent: boolean;
+  members: string[];
+  directAlly: string | null;
+  declaredRivals: string[];
+}
+
+/** Monta a visão do bloco/eixo do jogador já filtrando rivais e torcidas com pista hostil */
+export function getAllianceBlockForTorcida(current: any, hostileTorcidas: string[] = []): AllianceBlockView | null {
+  if (!current) return null;
+  const all = teamsData as any[];
+  const data = alliancesData as any;
+  const key: string = current.eixo_alianca || "INDEPENDENTE";
+  const isIndependent = key === "INDEPENDENTE";
+  const def =
+    data.eixos_nacionais?.[key] || data.blocos_interior_abc?.[key] || data.geopolitica_nordeste?.[key] || null;
+
+  const declaredRivals = [current.rival_principal, current.rival_secundario]
+    .map((r: string | undefined) => (r ? findTorcidaByRef(r)?.torcida || r : null))
+    .filter((x: string | null): x is string => !!x);
+
+  const directAllyObj = current.torcida_aliada ? findTorcidaByRef(current.torcida_aliada) : null;
+  const directAlly = directAllyObj && isValidFriendFor(current, directAllyObj, hostileTorcidas) ? directAllyObj.torcida : null;
+
+  let members: string[] = [];
+  if (!isIndependent) {
+    const names = new Set<string>([
+      ...((def?.members as string[]) || []),
+      ...all.filter((t) => t.eixo_alianca === key).map((t) => t.torcida),
+    ]);
+    members = Array.from(names).filter((name) => {
+      if (normalizeTorcidaKey(name) === normalizeTorcidaKey(current.torcida)) return true; // a própria aparece destacada
+      const obj = all.find((t) => normalizeTorcidaKey(t.torcida) === normalizeTorcidaKey(name));
+      if (!obj) return true;
+      return obj.eixo_alianca === key && isValidFriendFor(current, obj, hostileTorcidas);
+    });
+  }
+
+  return {
+    key,
+    name: isIndependent ? "Torcida Independente (Sem Eixo)" : def?.name || key,
+    symbol: isIndependent ? "⚪" : def?.symbol || "🤝",
+    description: isIndependent
+      ? "Sua agremiação não pertence a nenhum eixo ou bloco de alianças. Ser independente NÃO cria amizade com outras independentes: amizades só existem por aliada declarada ou pacto selado em reunião diplomática."
+      : def?.description || "Bloco de alianças regionais.",
+    isIndependent,
+    members,
+    directAlly,
+    declaredRivals,
+  };
+}
+
+export function findAllyForTorcida(
+  currentTorcida: any,
+  hostileTorcidas: string[] = [],
+  pactTorcidas: string[] = []
+): any | null {
   if (!currentTorcida) return null;
   const allTeams = teamsData as any[];
+  const ok = (t: any) => isValidFriendFor(currentTorcida, t, hostileTorcidas);
+
+  // 1. Aliada declarada
   if (currentTorcida.torcida_aliada) {
-    const directAlly = allTeams.find(
-      (t) =>
-        t.torcida.toLowerCase() === currentTorcida.torcida_aliada.toLowerCase() ||
-        t.clube.toLowerCase().includes(currentTorcida.torcida_aliada.toLowerCase()) ||
-        currentTorcida.torcida_aliada.toLowerCase().includes(t.torcida.toLowerCase())
-    );
-    if (directAlly && directAlly.torcida !== currentTorcida.torcida) return directAlly;
+    const directAlly = findTorcidaByRef(currentTorcida.torcida_aliada);
+    if (directAlly && ok(directAlly)) return directAlly;
   }
+  // 2. Mesmo eixo/bloco (INDEPENDENTE não é eixo!)
   if (currentTorcida.eixo_alianca && currentTorcida.eixo_alianca !== "INDEPENDENTE") {
-    const axisAlly = allTeams.find(
-      (t) => t.eixo_alianca === currentTorcida.eixo_alianca && t.torcida !== currentTorcida.torcida
-    );
+    const axisAlly = allTeams.find((t) => t.eixo_alianca === currentTorcida.eixo_alianca && ok(t));
     if (axisAlly) return axisAlly;
   }
-  const friendly = allTeams.find(
-    (t) =>
-      t.torcida !== currentTorcida.torcida &&
-      t.clube !== currentTorcida.clube &&
-      t.rival_principal !== currentTorcida.clube &&
-      t.rival_secundario !== currentTorcida.clube
-  );
-  return friendly || null;
+  // 3. Pacto de amizade selado em reunião diplomática
+  for (const name of pactTorcidas) {
+    const pact = allTeams.find((t) => normalizeTorcidaKey(t.torcida) === normalizeTorcidaKey(name));
+    if (pact && ok(pact)) return pact;
+  }
+  // Sem aliada declarada, sem eixo e sem pacto: não há irmã para convocar
+  return null;
 }
 
 export function generateEtapa10CaravanChoices(
   currentTorcida: any,
   facedOpponents: string[] = [],
   playerRank: number = 1,
-  lossStreaks: Record<string, number> = {}
+  lossStreaks: Record<string, number> = {},
+  hostileTorcidas: string[] = [],
+  pactTorcidas: string[] = []
 ): Etapa10CaravanChoice[] {
   if (!currentTorcida) return [];
 
-  const allyObj = findAllyForTorcida(currentTorcida);
+  const allyObj = findAllyForTorcida(currentTorcida, hostileTorcidas, pactTorcidas);
   const allySupport = allyObj ? calculateAllySupportNumbers(allyObj) : null;
   const allyCost = 2500;
   // Aliada só reforça o comboio se o jogo for na região dela (mesmo estado) e ela não for da torcida/clube adversário
@@ -6634,7 +6757,7 @@ export function generateEtapa10CaravanChoices(
     if (!allyObj || !t) return false;
     if (allyObj.estado !== t.estado || allyObj.clube === t.clube || allyObj.torcida === t.torcida) return false;
     // Contra o MAIOR RIVAL a aliada só entra após 2 derrotas CONSECUTIVAS de pista para ele
-    const isMainRival = !!currentTorcida.rival_principal && t.clube.toLowerCase() === currentTorcida.rival_principal.toLowerCase();
+    const isMainRival = refersToTorcida(currentTorcida.rival_principal, t);
     if (isMainRival) return (lossStreaks[t.torcida] || 0) >= 2;
     return true;
   };
@@ -6646,7 +6769,11 @@ export function generateEtapa10CaravanChoices(
 
   // Helper to pick best matching torcida for a given club based on player rank/tier
   const getBestTorcidaForClub = (clubName: string): any => {
-    const clubTorcidas = availableTeams.filter((t) => t.clube.toLowerCase() === clubName.toLowerCase());
+    // Aceita "Clube" ou "Clube (Torcida)"; se a torcida citada estiver disponível, ela é a escolhida
+    const exactRef = findTorcidaByRef(clubName, availableTeams);
+    if (exactRef && parseTorcidaRef(clubName).torcida !== parseTorcidaRef(clubName).club && normalizeTorcidaKey(exactRef.torcida) === parseTorcidaRef(clubName).torcida) return exactRef;
+    const refClub = parseTorcidaRef(clubName).club;
+    const clubTorcidas = availableTeams.filter((t) => normalizeTorcidaKey(t.clube) === refClub);
     if (clubTorcidas.length === 0) return null;
     if (clubTorcidas.length === 1) return clubTorcidas[0];
 
@@ -6720,24 +6847,21 @@ export function generateEtapa10CaravanChoices(
   }
 
   // 2. CARAVANA DA IRMANDADE (Aliada / Eixo ou Amiga Interestadual)
+  // Irmandade NUNCA pode ser rival declarada, do mesmo clube ou torcida com pista hostil
+  const friendOk = (t: any) => !selectedTorcidaNames.has(t.torcida) && isValidFriendFor(currentTorcida, t, hostileTorcidas);
   let allyTeam: any = null;
-  if (currentTorcida.torcida_aliada) {
-    allyTeam = availableTeams.find(
-      (t) => !selectedTorcidaNames.has(t.torcida) && (t.torcida.toLowerCase().includes(currentTorcida.torcida_aliada.toLowerCase()) || currentTorcida.torcida_aliada.toLowerCase().includes(t.torcida.toLowerCase()))
-    );
+  if (allyObj && availableTeams.includes(allyObj) && friendOk(allyObj)) {
+    allyTeam = allyObj;
   }
-  if (!allyTeam && currentTorcida.eixo_alianca) {
-    allyTeam = availableTeams.find(
-      (t) => !selectedTorcidaNames.has(t.torcida) && t.eixo_alianca === currentTorcida.eixo_alianca
-    );
+  if (!allyTeam && currentTorcida.eixo_alianca && currentTorcida.eixo_alianca !== "INDEPENDENTE") {
+    allyTeam = availableTeams.find((t) => friendOk(t) && t.eixo_alianca === currentTorcida.eixo_alianca);
   }
   if (!allyTeam) {
-    allyTeam = availableTeams.find(
-      (t) => !selectedTorcidaNames.has(t.torcida) && t.estado !== currentTorcida.estado && t.rival_principal !== currentTorcida.clube
-    );
+    // Torcida neutra de outro estado (visita de cortesia), sem nenhuma rivalidade
+    allyTeam = availableTeams.find((t) => friendOk(t) && t.estado !== currentTorcida.estado);
   }
-  if (!allyTeam && availableTeams.length > 0) {
-    allyTeam = availableTeams.find((t) => !selectedTorcidaNames.has(t.torcida)) || availableTeams[0];
+  if (!allyTeam) {
+    allyTeam = availableTeams.find((t) => friendOk(t)) || null;
   }
 
   if (allyTeam) {
