@@ -32,7 +32,10 @@ export function BackgroundMusicPlayer() {
       </div>
 
       {/* Current Track Title & Info */}
-      <div className="flex flex-col min-w-0 max-w-[150px] sm:max-w-[200px]">
+      <div
+        className="flex flex-col min-w-0 max-w-[160px] sm:max-w-[230px] cursor-help"
+        title={currentTrack?.fullTitle || currentTrack?.title || "Trilha Sonora Oficial"}
+      >
         <div className="flex items-center gap-1">
           <Music className="w-3 h-3 text-amber-400 shrink-0" />
           <span className="font-extrabold text-[11px] text-white truncate">

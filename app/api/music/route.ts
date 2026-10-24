@@ -6,35 +6,76 @@ export interface AudioTrackInfo {
   url: string;
   filename: string;
   title: string;
+  fullTitle?: string;
   isTheme: boolean;
 }
 
 const AUDIO_EXTENSIONS = [".mp3", ".webm", ".wav", ".ogg", ".m4a"];
 
-function formatTrackTitle(filename: string): string {
-  const nameWithoutExt = path.basename(filename, path.extname(filename));
+interface TrackMetadata {
+  title: string;
+  fullTitle: string;
+}
 
-  const knownTitles: Record<string, string> = {
-    tema: "Tema Oficial do Jogo",
-    musicabarra: "Música de Barra & Arquibancada",
-    funktorcidas: "Funk das Torcidas Organizadas",
-    funkpaulista: "Funk Paulista de Torcida",
-    rap: "Rap da Torcida",
-    reggae: "Reggae da Arquibancada",
-    reggaedavitoria: "Reggae da Vitória",
-    rock: "Rock de Pista & Galera",
-    sambatorcida: "Samba de Torcida",
-    eletro: "Eletro de Arquibancada",
-  };
+const KNOWN_TRACKS: Record<string, TrackMetadata> = {
+  tema: {
+    title: "Tema Oficial",
+    fullTitle: "Tema Oficial — Bancada Simulator (Trilha Sonora Oficial) | Música de Torcida Organizada",
+  },
+  sambatorcida: {
+    title: "Pacto Sagrado (Samba Enredo)",
+    fullTitle: "Pacto Sagrado - Samba enredo de torcida (Bancada Simulator)",
+  },
+  reggaedavitoria: {
+    title: "Chama na Pedrada (Reggae)",
+    fullTitle: "Chama na Pedrada - Reggae (Bancada Simulator)",
+  },
+  reggae: {
+    title: "Positividade e Respeito (Reggae)",
+    fullTitle: "Positividade e Respeito - Reggae (Bancada Simulator)",
+  },
+  funkpaulista: {
+    title: "Funk Paulista de Torcida",
+    fullTitle: "Funk Paulista de Torcida — Bancada Simulator | Clima de Clássico e Caravana",
+  },
+  funktorcidas: {
+    title: "O Terror Chegou (Funk)",
+    fullTitle: "O Terror Chegou - Funk de Torcida Organizada (Bancada Simulator)",
+  },
+  eletro: {
+    title: "Deixa Tremer (Eletro)",
+    fullTitle: "Deixa Tremer - Eletro de Arquibancada (Bancada Simulator)",
+  },
+  rap: {
+    title: "Rap de Torcida",
+    fullTitle: "Rap de Torcida (Bancada Simulator)",
+  },
+  rock: {
+    title: "Não ao Futebol Moderno! (Rock)",
+    fullTitle: "Não ao futebol moderno! Rock de torcida (Bancada Simulator)",
+  },
+  musicabarra: {
+    title: "Barra Brava e Arquibancada",
+    fullTitle: "Barra Brava e Arquibancada (Bancada Simulator)",
+  },
+};
 
-  if (knownTitles[nameWithoutExt.toLowerCase()]) {
-    return knownTitles[nameWithoutExt.toLowerCase()];
+function getTrackMetadata(filename: string): TrackMetadata {
+  const nameWithoutExt = path.basename(filename, path.extname(filename)).toLowerCase();
+
+  if (KNOWN_TRACKS[nameWithoutExt]) {
+    return KNOWN_TRACKS[nameWithoutExt];
   }
 
   // Format generic filenames e.g. "faixa_01" -> "Faixa 01"
-  return nameWithoutExt
+  const formatted = nameWithoutExt
     .replace(/[-_]/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
+
+  return {
+    title: formatted,
+    fullTitle: formatted,
+  };
 }
 
 export async function GET() {
@@ -60,10 +101,12 @@ export async function GET() {
 
     audioFiles.forEach((file) => {
       const nameWithoutExt = path.basename(file, path.extname(file)).toLowerCase();
+      const meta = getTrackMetadata(file);
       const trackInfo: AudioTrackInfo = {
         url: `/music/${file}`,
         filename: file,
-        title: formatTrackTitle(file),
+        title: meta.title,
+        fullTitle: meta.fullTitle,
         isTheme: nameWithoutExt === "tema",
       };
 

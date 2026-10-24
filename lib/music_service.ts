@@ -4,6 +4,7 @@ export interface AudioTrackInfo {
   url: string;
   filename: string;
   title: string;
+  fullTitle?: string;
   isTheme: boolean;
 }
 
@@ -118,16 +119,74 @@ class BackgroundMusicService {
     this.state.themeTrack = {
       url: "/music/tema.webm",
       filename: "tema.webm",
-      title: "Tema Oficial do Jogo",
+      title: "Tema Oficial",
+      fullTitle: "Tema Oficial — Bancada Simulator (Trilha Sonora Oficial) | Música de Torcida Organizada",
       isTheme: true,
     };
     this.state.availableTracks = [
-      { url: "/music/sambatorcida.webm", filename: "sambatorcida.webm", title: "Samba de Torcida", isTheme: false },
-      { url: "/music/musicabarra.webm", filename: "musicabarra.webm", title: "Música de Barra & Arquibancada", isTheme: false },
-      { url: "/music/rap.webm", filename: "rap.webm", title: "Rap da Torcida", isTheme: false },
-      { url: "/music/reggae.webm", filename: "reggae.webm", title: "Reggae da Arquibancada", isTheme: false },
-      { url: "/music/rock.webm", filename: "rock.webm", title: "Rock de Pista", isTheme: false },
-      { url: "/music/funktorcidas.webm", filename: "funktorcidas.webm", title: "Funk das Torcidas", isTheme: false },
+      {
+        url: "/music/sambatorcida.webm",
+        filename: "sambatorcida.webm",
+        title: "Pacto Sagrado (Samba Enredo)",
+        fullTitle: "Pacto Sagrado - Samba enredo de torcida (Bancada Simulator)",
+        isTheme: false,
+      },
+      {
+        url: "/music/reggaedavitoria.webm",
+        filename: "reggaedavitoria.webm",
+        title: "Chama na Pedrada (Reggae)",
+        fullTitle: "Chama na Pedrada - Reggae (Bancada Simulator)",
+        isTheme: false,
+      },
+      {
+        url: "/music/reggae.webm",
+        filename: "reggae.webm",
+        title: "Positividade e Respeito (Reggae)",
+        fullTitle: "Positividade e Respeito - Reggae (Bancada Simulator)",
+        isTheme: false,
+      },
+      {
+        url: "/music/funkpaulista.webm",
+        filename: "funkpaulista.webm",
+        title: "Funk Paulista de Torcida",
+        fullTitle: "Funk Paulista de Torcida — Bancada Simulator | Clima de Clássico e Caravana",
+        isTheme: false,
+      },
+      {
+        url: "/music/funktorcidas.webm",
+        filename: "funktorcidas.webm",
+        title: "O Terror Chegou (Funk)",
+        fullTitle: "O Terror Chegou - Funk de Torcida Organizada (Bancada Simulator)",
+        isTheme: false,
+      },
+      {
+        url: "/music/eletro.webm",
+        filename: "eletro.webm",
+        title: "Deixa Tremer (Eletro)",
+        fullTitle: "Deixa Tremer - Eletro de Arquibancada (Bancada Simulator)",
+        isTheme: false,
+      },
+      {
+        url: "/music/rap.webm",
+        filename: "rap.webm",
+        title: "Rap de Torcida",
+        fullTitle: "Rap de Torcida (Bancada Simulator)",
+        isTheme: false,
+      },
+      {
+        url: "/music/rock.webm",
+        filename: "rock.webm",
+        title: "Não ao Futebol Moderno! (Rock)",
+        fullTitle: "Não ao futebol moderno! Rock de torcida (Bancada Simulator)",
+        isTheme: false,
+      },
+      {
+        url: "/music/musicabarra.webm",
+        filename: "musicabarra.webm",
+        title: "Barra Brava e Arquibancada",
+        fullTitle: "Barra Brava e Arquibancada (Bancada Simulator)",
+        isTheme: false,
+      },
     ];
   }
 
