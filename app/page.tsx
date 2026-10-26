@@ -287,7 +287,9 @@ export default function App() {
   const [seasonObjectives, setSeasonObjectives] = useState<SeasonObjective[]>([]);
   const [seasonStartSnapshot, setSeasonStartSnapshot] = useState<SeasonStartSnapshot | null>(null);
   const [careerStartSnapshot, setCareerStartSnapshot] = useState<SeasonStartSnapshot | null>(null);
+  const [pendingPipelineAdvance, setPendingPipelineAdvance] = useState<boolean>(false);
   const [pendingSeasonEndEvaluation, setPendingSeasonEndEvaluation] = useState<boolean>(false);
+  const lastSelectInteractionRef = useRef<number>(0);
   const [seasonPistaWins, setSeasonPistaWins] = useState<number>(0);
   const [seasonPistaLosses, setSeasonPistaLosses] = useState<number>(0);
   const [seasonEndReport, setSeasonEndReport] = useState<{
@@ -1129,6 +1131,9 @@ export default function App() {
   };
 
   const handleStartCareer = () => {
+    if (Date.now() - lastSelectInteractionRef.current < 450) {
+      return;
+    }
     if (soundEnabled) playStadiumSound("drum");
 
     hasServedTorcidaUnicaRef.current = false;
@@ -1210,7 +1215,6 @@ export default function App() {
       setSeasonStartSnapshot(initialSnapshotHist);
       setCareerStartSnapshot(initialSnapshotHist);
       setIsStarted(true);
-      setShowGameTutorialModal(true);
       return;
     }
 
@@ -1291,7 +1295,6 @@ export default function App() {
     setSeasonStartSnapshot(initialSnapshotCustom);
     setCareerStartSnapshot(initialSnapshotCustom);
     setIsStarted(true);
-    setShowGameTutorialModal(true);
   };
 
   // ACTION CHOICE RESOLUTION
@@ -1561,6 +1564,7 @@ export default function App() {
     // Marca que a segunda chance deste duelo foi usada e ativa o modo 2x contingente
     setRetryUsedCurrentMatch(true);
     setIsRetryWithAdAttempt(true);
+    setPendingPipelineAdvance(false);
     setActiveMatchResult(null);
 
     // Reseta todas as escolhas para o jogador refazer o duelo do início!
@@ -2269,7 +2273,7 @@ export default function App() {
         }
       }
 
-      advancePipeline();
+      setPendingPipelineAdvance(true);
     }, 2200);
   };
 
@@ -2611,20 +2615,47 @@ export default function App() {
     if (pendingSocialMediaLeak) {
       setActiveSocialMediaLeak(pendingSocialMediaLeak);
       setPendingSocialMediaLeak(null);
-    } else if (pendingSeasonEndEvaluation) {
-      setPendingSeasonEndEvaluation(false);
-      executeSeasonEndEvaluation();
     }
   };
 
   useEffect(() => {
     if (
-      pendingSeasonEndEvaluation &&
+      pendingPipelineAdvance &&
       !activeMatchResult &&
       !pendingSocialMediaLeak &&
       !activeSocialMediaLeak &&
       !activePressConference &&
       !activeInquiryTrigger &&
+      !activeTorcidaUnicaModalMode &&
+      !showMockAdModal &&
+      matchModalPhase === "CLOSED"
+    ) {
+      setPendingPipelineAdvance(false);
+      advancePipeline();
+    }
+  }, [
+    pendingPipelineAdvance,
+    activeMatchResult,
+    pendingSocialMediaLeak,
+    activeSocialMediaLeak,
+    activePressConference,
+    activeInquiryTrigger,
+    activeTorcidaUnicaModalMode,
+    showMockAdModal,
+    matchModalPhase,
+  ]);
+
+  useEffect(() => {
+    if (
+      pendingSeasonEndEvaluation &&
+      !pendingPipelineAdvance &&
+      !activeMatchResult &&
+      !pendingSocialMediaLeak &&
+      !activeSocialMediaLeak &&
+      !activePressConference &&
+      !activeInquiryTrigger &&
+      !activeTorcidaUnicaModalMode &&
+      !showMockAdModal &&
       matchModalPhase === "CLOSED"
     ) {
       setPendingSeasonEndEvaluation(false);
@@ -2632,11 +2663,14 @@ export default function App() {
     }
   }, [
     pendingSeasonEndEvaluation,
+    pendingPipelineAdvance,
     activeMatchResult,
     pendingSocialMediaLeak,
     activeSocialMediaLeak,
     activePressConference,
     activeInquiryTrigger,
+    activeTorcidaUnicaModalMode,
+    showMockAdModal,
     matchModalPhase,
   ]);
 
@@ -2902,7 +2936,15 @@ export default function App() {
     setTorcidaUnicaActionAppliedForStep(null);
     setDebtYears(0);
     setIsBannedByMP(false);
+    setPendingPipelineAdvance(false);
+    setPendingSeasonEndEvaluation(false);
     setActiveMatchResult(null);
+    setActivePressConference(null);
+    setActiveSocialMediaLeak(null);
+    setPendingSocialMediaLeak(null);
+    setActiveInquiryTrigger(null);
+    setActiveTorcidaUnicaModalMode(null);
+    setShowEtapa10Modal(false);
     setActionFeedback(null);
     setSeasonEndReport(null);
     setMatchModalPhase("CLOSED");
@@ -3302,7 +3344,14 @@ export default function App() {
                 </label>
                 <select
                   value={selectedFilterClub}
+                  onFocus={() => {
+                    lastSelectInteractionRef.current = Date.now();
+                  }}
+                  onBlur={() => {
+                    lastSelectInteractionRef.current = Date.now();
+                  }}
                   onChange={(e) => {
+                    lastSelectInteractionRef.current = Date.now();
                     const club = e.target.value;
                     setSelectedFilterClub(club);
                     const filtered =
@@ -3338,7 +3387,14 @@ export default function App() {
                 </label>
                 <select
                   value={selectedOfficialTorcidaName}
+                  onFocus={() => {
+                    lastSelectInteractionRef.current = Date.now();
+                  }}
+                  onBlur={() => {
+                    lastSelectInteractionRef.current = Date.now();
+                  }}
                   onChange={(e) => {
+                    lastSelectInteractionRef.current = Date.now();
                     const name = e.target.value;
                     setSelectedOfficialTorcidaName(name);
                     const found = officialList.find((t) => t.torcida === name);
@@ -3410,12 +3466,9 @@ export default function App() {
               })()}
 
               <button
+                type="button"
                 onClick={handleStartCareer}
-                onTouchEnd={(e) => {
-                  e.preventDefault();
-                  handleStartCareer();
-                }}
-                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-2xl active:scale-95 transition-all cursor-pointer touch-manipulation z-30 sticky bottom-2 border-2 border-amber-300"
+                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-2xl active:scale-95 transition-all cursor-pointer touch-manipulation border-2 border-amber-300"
               >
                 <span>Assumir Diretoria e Iniciar</span>
                 <ChevronRight className="w-5 h-5 fill-black" />
@@ -3457,7 +3510,16 @@ export default function App() {
                   </label>
                   <select
                     value={selectedClub}
-                    onChange={(e) => setSelectedClub(e.target.value)}
+                    onFocus={() => {
+                      lastSelectInteractionRef.current = Date.now();
+                    }}
+                    onBlur={() => {
+                      lastSelectInteractionRef.current = Date.now();
+                    }}
+                    onChange={(e) => {
+                      lastSelectInteractionRef.current = Date.now();
+                      setSelectedClub(e.target.value);
+                    }}
                     className="w-full bg-zinc-950 border border-zinc-800 text-white rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none focus:border-amber-500"
                   >
                     {mappedClubsList.map((club, idx) => (
@@ -3518,12 +3580,9 @@ export default function App() {
               </div>
 
               <button
+                type="button"
                 onClick={handleStartCareer}
-                onTouchEnd={(e) => {
-                  e.preventDefault();
-                  handleStartCareer();
-                }}
-                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-2xl active:scale-95 transition-all cursor-pointer touch-manipulation z-30 sticky bottom-2 border-2 border-amber-300"
+                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-2xl active:scale-95 transition-all cursor-pointer touch-manipulation border-2 border-amber-300"
               >
                 <span>Fundar Torcida e Iniciar Carreira</span>
                 <ChevronRight className="w-5 h-5 fill-black" />
@@ -3674,6 +3733,56 @@ export default function App() {
   }
 
   // 3. MAIN GAMEPLAY DASHBOARD
+  const activeModalId: string | null = showResetConfirm
+    ? "RESET_CONFIRM"
+    : showGameTutorialModal
+    ? "GAME_TUTORIAL"
+    : showBetaFeedbackModal
+    ? "BETA_FEEDBACK"
+    : showStoryCardModal
+    ? "STORY_CARD"
+    : showMockAdModal
+    ? "MOCK_AD"
+    : selectedTorcidaForDiplomacy && currentTorcida
+    ? "DIPLOMACY_PROFILE"
+    : isBattleAnimating && activeMatchDerby && activeScoutIntel
+    ? "BATTLE_ANIMATING"
+    : matchModalPhase !== "CLOSED" && activeMatchDerby
+    ? "MATCH_WORKFLOW"
+    : activeHomeAllyOffer !== null
+    ? "HOME_ALLY_OFFER"
+    : actionFeedback
+    ? "ACTION_FEEDBACK"
+    : activeMatchResult
+    ? "MATCH_RESULT"
+    : activeSocialMediaLeak
+    ? "SOCIAL_MEDIA_LEAK"
+    : activeInquiryTrigger
+    ? "INQUIRY"
+    : activeTorcidaUnicaModalMode
+    ? "TORCIDA_UNICA"
+    : seasonEndReport
+    ? "SEASON_END_REPORT"
+    : activeMerchandiseProfitModal
+    ? "MERCHANDISE_PROFIT"
+    : showPresidentElectionModal
+    ? "PRESIDENT_ELECTION"
+    : showElectionCrisisModal && activeElectionCrisis && currentTorcida
+    ? "ELECTION_CRISIS"
+    : activeMilestoneDecision
+    ? "MILESTONE_DECISION"
+    : activePressConference
+    ? "PRESS_CONFERENCE"
+    : activeNewsReel
+    ? "NEWS_REEL"
+    : allianceProposalInvite
+    ? "ALLIANCE_PROPOSAL"
+    : alliedInvasionInvite
+    ? "ALLIED_INVASION"
+    : showEtapa10Modal
+    ? "ETAPA_10"
+    : null;
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 p-2 sm:p-4 flex flex-col w-full max-w-lg mx-auto relative overflow-x-hidden box-border">
       {/* Floating Instagram Share Toast Notification */}
@@ -5128,7 +5237,7 @@ export default function App() {
       {/* ---------------------------------------------------- */}
 
       {/* ANIMATED BATTLE CONFRONTATION MODAL (HEALTH / POWER BARS) */}
-      {isBattleAnimating && activeMatchDerby && activeScoutIntel && (
+      {activeModalId === "BATTLE_ANIMATING" && isBattleAnimating && activeMatchDerby && activeScoutIntel && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 flex items-center justify-center p-4">
           <div className="max-w-md w-full bg-zinc-900 border border-amber-500/50 rounded-3xl p-6 shadow-2xl space-y-5 text-center relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-red-500 to-amber-500 animate-pulse" />
@@ -5193,7 +5302,7 @@ export default function App() {
       )}
 
       {/* 1. ACTION FEEDBACK MODAL */}
-      {actionFeedback && (
+      {activeModalId === "ACTION_FEEDBACK" && actionFeedback && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fade-in">
           <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-sm w-full p-5 text-center shadow-2xl space-y-3 max-h-[85vh] overflow-y-auto pb-10">
             <div className="mx-auto w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
@@ -5232,7 +5341,7 @@ export default function App() {
       )}
 
       {/* 2. KEY GAME STAGE 1: REUNIÃO COM A POLÍCIA & SEGURANÇA */}
-      {matchModalPhase === "POLICE_MEETING" && activeMatchDerby && (
+      {activeModalId === "MATCH_WORKFLOW" && matchModalPhase === "POLICE_MEETING" && activeMatchDerby && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fade-in">
           <div className="bg-zinc-900 border border-blue-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-3 max-h-[85vh] overflow-y-auto pb-12 overflow-hidden relative">
             {/* Header Image Illustration */}
@@ -5314,7 +5423,7 @@ export default function App() {
       )}
 
       {/* 3. KEY GAME STAGE 2: ESCOLHA DE TRANSPORTE & CONDUÇÃO */}
-      {matchModalPhase === "TRANSPORT" && activeMatchDerby && (
+      {activeModalId === "MATCH_WORKFLOW" && matchModalPhase === "TRANSPORT" && activeMatchDerby && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fade-in">
           <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-3 max-h-[85vh] overflow-y-auto pb-12 overflow-hidden relative">
             {/* Header Image Illustration */}
@@ -5389,7 +5498,7 @@ export default function App() {
       )}
 
       {/* 4. KEY GAME STAGE 3: SCOUT INTEL & REVELATION OF TWIST */}
-      {matchModalPhase === "SCOUT_INTEL" && activeMatchDerby && activeScoutIntel && selectedTransport && (
+      {activeModalId === "MATCH_WORKFLOW" && matchModalPhase === "SCOUT_INTEL" && activeMatchDerby && activeScoutIntel && selectedTransport && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fade-in">
           <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto pb-12 text-center">
             <div className="mx-auto w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center animate-pulse">
@@ -5490,7 +5599,7 @@ export default function App() {
       )}
 
       {/* 5. KEY GAME STAGE 4: 5 TACTICAL CHOICES (INCLUDING MOSAIC) */}
-      {matchModalPhase === "TACTICAL" && activeMatchDerby && activeScoutIntel && (
+      {activeModalId === "MATCH_WORKFLOW" && matchModalPhase === "TACTICAL" && activeMatchDerby && activeScoutIntel && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fade-in">
           <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-3 max-h-[85vh] overflow-y-auto pb-16">
             <div className="flex items-center justify-between">
@@ -5557,7 +5666,7 @@ export default function App() {
       )}
 
       {/* 5.B. MINI-GAME RESOLUTION MODAL */}
-      {matchModalPhase === "MINIGAME" && activeMatchMiniGameContext && activeMatchDerby && (
+      {activeModalId === "MATCH_WORKFLOW" && matchModalPhase === "MINIGAME" && activeMatchMiniGameContext && activeMatchDerby && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-[100] animate-fade-in overflow-y-auto">
           <div className={`bg-zinc-900 border border-amber-500/50 rounded-3xl w-full p-3 sm:p-5 shadow-2xl space-y-3 text-center max-h-[92vh] overflow-y-auto ${
             ['runner_3d', 'caldeirao_pitch', 'maze_escape', 'whack'].includes(activeMatchMiniGameContext.tacticalChoice) ? 'max-w-5xl' : 'max-w-md'
@@ -5588,7 +5697,7 @@ export default function App() {
       )}
 
       {/* 6. MATCH RESULT & GEMINI CHRONICLE MODAL */}
-      {activeMatchResult && (
+      {activeModalId === "MATCH_RESULT" && activeMatchResult && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-fade-in">
           <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 text-center shadow-2xl space-y-3 relative max-h-[85vh] overflow-y-auto pb-12 overflow-hidden">
             {/* Header Image Illustration (Dynamic: Faixa Capturada / Linha de Frente Pista / Festa Arquibancada / Derrota) */}
@@ -5755,7 +5864,7 @@ export default function App() {
       )}
 
       {/* 7. SEASON END OBJECTIVES CELEBRATION MODAL */}
-      {seasonEndReport && (
+      {activeModalId === "SEASON_END_REPORT" && seasonEndReport && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 z-[100] animate-fade-in">
           <div className="bg-zinc-900 border border-emerald-500/50 rounded-3xl max-w-lg w-full p-4 sm:p-5 text-center shadow-2xl space-y-3.5 relative max-h-[90vh] overflow-y-auto pb-10 overflow-hidden">
             {/* Header Image Illustration (Fim de Temporada Layout) */}
@@ -6030,7 +6139,7 @@ export default function App() {
       )}
 
       {/* 7.B. SEASONAL MILESTONE DECISION MODAL (SEASONS 3, 6, 9, 12, 15) */}
-      {activeMilestoneDecision && (
+      {activeModalId === "MILESTONE_DECISION" && activeMilestoneDecision && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-[100] animate-fade-in">
           <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-4 text-center max-h-[85vh] overflow-y-auto pb-12 relative overflow-hidden">
             {/* Header Image Illustration */}
@@ -6099,7 +6208,7 @@ export default function App() {
       )}
 
       {/* 8. RESET CONFIRMATION MODAL */}
-      {showResetConfirm && (
+      {activeModalId === "RESET_CONFIRM" && showResetConfirm && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl animate-fade-in text-center">
             <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center mx-auto">
@@ -6135,7 +6244,7 @@ export default function App() {
       )}
 
       {/* 9. ALLIED INVASION INVITE MODAL */}
-      {alliedInvasionInvite && (
+      {activeModalId === "ALLIED_INVASION" && alliedInvasionInvite && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
           <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-4 text-center">
             <div className="mx-auto w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center animate-pulse border border-amber-500/30">
@@ -6180,7 +6289,7 @@ export default function App() {
       )}
 
       {/* MOCK REWARDED AD MODAL (DEV MODE) */}
-      {showMockAdModal && (
+      {activeModalId === "MOCK_AD" && showMockAdModal && (
         <MockAdModal
           onComplete={() => {
             setShowMockAdModal(false);
@@ -6194,7 +6303,7 @@ export default function App() {
       )}
 
       {/* 9.A. STORE PROFIT MATURATION MODAL (1 YEAR AFTER PURCHASE) */}
-      {activeMerchandiseProfitModal && (
+      {activeModalId === "MERCHANDISE_PROFIT" && activeMerchandiseProfitModal && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/85 p-4 backdrop-blur-md animate-fade-in">
           <div className="relative w-full max-w-md rounded-3xl border border-emerald-500/50 bg-zinc-900 p-6 shadow-2xl text-center space-y-4">
             <div className="mx-auto w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/40 animate-pulse">
@@ -6239,7 +6348,7 @@ export default function App() {
       )}
 
       {/* 9.B. ALLIANCE DIPLOMATIC PROPOSAL MODAL */}
-      {allianceProposalInvite && (
+      {activeModalId === "ALLIANCE_PROPOSAL" && allianceProposalInvite && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
           <div className="bg-zinc-900 border border-blue-500/50 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-4 text-center">
             <div className="mx-auto w-12 h-12 rounded-2xl bg-blue-500/20 text-blue-400 flex items-center justify-center border border-blue-500/30">
@@ -6284,7 +6393,7 @@ export default function App() {
       )}
 
       {/* 10. INTERACTIVE TORCIDA PROFILE & DIPLOMACY MODAL */}
-      {selectedTorcidaForDiplomacy && currentTorcida && (
+      {activeModalId === "DIPLOMACY_PROFILE" && selectedTorcidaForDiplomacy && currentTorcida && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
           <div className="bg-zinc-900 border border-zinc-700 rounded-3xl max-w-md w-full p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
@@ -6509,7 +6618,7 @@ export default function App() {
       )}
 
       {/* PRESIDENTIAL ELECTION MODAL */}
-      {showPresidentElectionModal && (
+      {activeModalId === "PRESIDENT_ELECTION" && showPresidentElectionModal && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[100] flex items-center justify-center p-4">
           <div className="bg-zinc-900 border border-amber-500/50 rounded-3xl p-6 max-w-xl w-full shadow-2xl space-y-5 max-h-[85vh] overflow-y-auto pb-12 overflow-hidden relative">
             {/* Header Image Illustration (Widescreen 16:9 Banner Display) */}
@@ -6574,7 +6683,7 @@ export default function App() {
       )}
 
       {/* ULTRAS NEWS REEL MODAL */}
-      {activeNewsReel && (
+      {activeModalId === "NEWS_REEL" && activeNewsReel && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[100] flex items-center justify-center p-4">
           <div className="bg-zinc-900 border border-rose-500/50 rounded-3xl p-6 max-w-lg w-full shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto pb-12 animate-in fade-in zoom-in-95">
             <div className="flex items-center gap-3 border-b border-zinc-800 pb-3">
@@ -6629,7 +6738,7 @@ export default function App() {
       )}
 
       {/* MODAL MÓDULO 1: TORCIDA ÚNICA */}
-      {activeTorcidaUnicaModalMode && (
+      {activeModalId === "TORCIDA_UNICA" && activeTorcidaUnicaModalMode && (
         <TorcidaUnicaModal
           mode={activeTorcidaUnicaModalMode}
           scenario={activeMatchDerby?.isHome === false ? "VISITANTE" : "MANDANTE"}
@@ -6728,20 +6837,21 @@ export default function App() {
               setMatchModalPhase("MINIGAME");
             } else if (res.id === "CACADA_CLANDESTINA") {
               setMatchModalPhase("CLOSED");
+              setPendingPipelineAdvance(true);
               setActiveInquiryTrigger({
                 triggerReason: res.narrative || "Confronto clandestino de rua em dia de Torcida Única",
                 initialConvictionBase: res.rngOutcome === "FAIL_CRITICAL" ? 35 : 20,
               });
             } else {
               setMatchModalPhase("CLOSED");
-              advancePipeline();
+              setPendingPipelineAdvance(true);
             }
           }}
         />
       )}
 
       {/* MODAL REDES SOCIAIS: VAZAMENTO VIRAL PÓS-BRIGA (@ritmodetorcida / @ettorcida.oficiall) */}
-      {activeSocialMediaLeak && (
+      {activeModalId === "SOCIAL_MEDIA_LEAK" && activeSocialMediaLeak && (
         <div className="fixed inset-0 z-[125] flex items-center justify-center bg-black/85 p-4 backdrop-blur-md animate-fade-in">
           <div className="w-full max-w-md">
             <SocialMediaLeakCard
@@ -6749,8 +6859,7 @@ export default function App() {
               onDismiss={() => {
                 // A coletiva sobre isso deve aparecer apenas em metade das ocasiões que a mensagem dos perfis aparecer (50% de chance)
                 const shouldTriggerColetiva = Math.random() < 0.50;
-                let triggeredConf = false;
-                if (shouldTriggerColetiva && activeSocialMediaLeak.pressConferenceId) {
+                if (!activePressConference && shouldTriggerColetiva && activeSocialMediaLeak.pressConferenceId) {
                   const targetConfId = activeSocialMediaLeak.id.startsWith("LEAK_ALLY_")
                     ? undefined
                     : activeSocialMediaLeak.id.startsWith("LEAK_BANNER_LOST_") || activeSocialMediaLeak.id.startsWith("LEAK_DEFEAT_")
@@ -6759,14 +6868,9 @@ export default function App() {
                   const conf = targetConfId ? getPressConference(targetConfId) : null;
                   if (conf) {
                     setActivePressConference(conf);
-                    triggeredConf = true;
                   }
                 }
                 setActiveSocialMediaLeak(null);
-                if (!triggeredConf && pendingSeasonEndEvaluation) {
-                  setPendingSeasonEndEvaluation(false);
-                  executeSeasonEndEvaluation();
-                }
               }}
             />
           </div>
@@ -6774,7 +6878,7 @@ export default function App() {
       )}
 
       {/* MODAL MÓDULO 2: COLETIVA DE IMPRENSA */}
-      {activePressConference && (
+      {activeModalId === "PRESS_CONFERENCE" && activePressConference && (
         <PressConferenceModal
           conference={activePressConference}
           userBalance={bankBalance}
@@ -6817,16 +6921,12 @@ export default function App() {
             }
             setHistoryLog((prev) => [`[Coletiva de Imprensa] ${choice.log}`, ...prev]);
             setActivePressConference(null);
-            if (pendingSeasonEndEvaluation) {
-              setPendingSeasonEndEvaluation(false);
-              executeSeasonEndEvaluation();
-            }
           }}
         />
       )}
 
       {/* ELECTION CRISIS / RACHA INTERNO MODAL */}
-      {showElectionCrisisModal && activeElectionCrisis && currentTorcida && (
+      {activeModalId === "ELECTION_CRISIS" && showElectionCrisisModal && activeElectionCrisis && currentTorcida && (
         <ElectionCrisisModal
           torcida={currentTorcida}
           crisis={activeElectionCrisis}
@@ -6838,7 +6938,7 @@ export default function App() {
       )}
 
       {/* MÓDULO 3: INQUÉRITO EMERGENCIAIS DO MP / DRADE */}
-      {activeInquiryTrigger && (
+      {activeModalId === "INQUIRY" && activeInquiryTrigger && (
         <InquiryModal
           triggerReason={activeInquiryTrigger.triggerReason}
           initialConvictionBase={activeInquiryTrigger.initialConvictionBase}
@@ -6872,20 +6972,20 @@ export default function App() {
             ]);
 
             setActiveInquiryTrigger(null);
-            advancePipeline();
+            setPendingPipelineAdvance(true);
           }}
         />
       )}
 
       {/* GAME TUTORIAL MODAL */}
       <GameTutorialModal
-        isOpen={showGameTutorialModal}
+        isOpen={activeModalId === "GAME_TUTORIAL" && showGameTutorialModal}
         onClose={() => setShowGameTutorialModal(false)}
       />
 
       {/* CENTRAL BETA FEEDBACK MODAL */}
       <BetaFeedbackModal
-        isOpen={showBetaFeedbackModal}
+        isOpen={activeModalId === "BETA_FEEDBACK" && showBetaFeedbackModal}
         onClose={() => setShowBetaFeedbackModal(false)}
         currentTorcidaName={currentTorcida?.torcida}
         currentClubName={currentTorcida?.clube}
@@ -6895,21 +6995,21 @@ export default function App() {
 
       {/* VISUAL STORY CARD MODAL (9:16 PNG GENERATOR FOR INSTAGRAM & WHATSAPP) */}
       <StoryCardModal
-        isOpen={showStoryCardModal}
+        isOpen={activeModalId === "STORY_CARD" && showStoryCardModal}
         onClose={() => setShowStoryCardModal(false)}
         data={activeStoryCardData}
       />
 
       {/* ETAPA 10 CARAVAN SELECTION MODAL */}
       <Etapa10CaravanModal
-        isOpen={showEtapa10Modal}
+        isOpen={activeModalId === "ETAPA_10" && showEtapa10Modal}
         choices={etapa10Choices}
         onSelectChoice={handleSelectEtapa10CaravanChoice}
       />
 
       {/* HOME ALLY SUPPORT MODAL (APÓS 2 DERROTAS EM JOGO EM CASA) */}
       <HomeAllySupportModal
-        isOpen={activeHomeAllyOffer !== null}
+        isOpen={activeModalId === "HOME_ALLY_OFFER" && activeHomeAllyOffer !== null}
         allyTorcida={activeHomeAllyOffer?.allyTorcida || ""}
         allyClub={activeHomeAllyOffer?.allyClub || ""}
         rivalTorcida={activeHomeAllyOffer?.rivalTorcida || ""}
