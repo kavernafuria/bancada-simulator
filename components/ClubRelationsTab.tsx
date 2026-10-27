@@ -20,6 +20,7 @@ export interface ClubRelationsTabProps {
   riscoMp: number; // 0 - 100
   bankBalance: number;
   soundEnabled: boolean;
+  hasUsedActionThisStep?: boolean;
   onApplyAction: (action: {
     id: string;
     title: string;
@@ -36,6 +37,7 @@ export function ClubRelationsTab({
   relacaoClube,
   riscoMp,
   bankBalance,
+  hasUsedActionThisStep = false,
   onApplyAction,
 }: ClubRelationsTabProps) {
   // Compute Reputation Label
@@ -134,6 +136,15 @@ export function ClubRelationsTab({
       </div>
 
       {/* Action Categories */}
+      {hasUsedActionThisStep && (
+        <div className="bg-emerald-500/10 border border-emerald-500/30 p-2.5 rounded-2xl flex items-center gap-2 text-emerald-300 text-[11px] font-bold">
+          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+          <span>
+            <strong>Ação da Etapa Concluída:</strong> A diretoria já realizou 1 tratativa institucional nesta etapa. Avance a etapa para abrir nova pauta com o clube.
+          </span>
+        </div>
+      )}
+
       <div className="space-y-4">
         {/* Category A: Ingressos */}
         <div className="space-y-2">
@@ -165,7 +176,9 @@ export function ClubRelationsTab({
               </div>
 
               <button
+                disabled={hasUsedActionThisStep}
                 onClick={() => {
+                  if (hasUsedActionThisStep) return;
                   if (relacaoClube >= 50) {
                     onApplyAction({
                       id: "COTA_PROMOCIONAL_APROVADA",
@@ -193,7 +206,7 @@ export function ClubRelationsTab({
                     });
                   }
                 }}
-                className={`w-full py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                className={`w-full py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 ${
                   relacaoClube >= 50
                     ? "bg-amber-500 hover:bg-amber-400 text-black shadow-md"
                     : "bg-zinc-800 hover:bg-zinc-700 text-zinc-400"
@@ -234,7 +247,7 @@ export function ClubRelationsTab({
               </div>
 
               <button
-                disabled={bankBalance < 5000}
+                disabled={hasUsedActionThisStep || bankBalance < 5000}
                 onClick={() => {
                   onApplyAction({
                     id: "SUBSIDIAR_INGRESSOS",
@@ -287,7 +300,9 @@ export function ClubRelationsTab({
               </div>
 
               <button
+                disabled={hasUsedActionThisStep}
                 onClick={() => {
+                  if (hasUsedActionThisStep) return;
                   if (relacaoClube >= 60) {
                     onApplyAction({
                       id: "FROTA_CLUBE_CONCEDIDA",
@@ -315,7 +330,7 @@ export function ClubRelationsTab({
                     });
                   }
                 }}
-                className={`w-full py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                className={`w-full py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 ${
                   relacaoClube >= 60
                     ? "bg-blue-600 hover:bg-blue-500 text-white shadow-md"
                     : "bg-zinc-800 hover:bg-zinc-700 text-zinc-400"
@@ -356,7 +371,7 @@ export function ClubRelationsTab({
               </div>
 
               <button
-                disabled={bankBalance < 8000}
+                disabled={hasUsedActionThisStep || bankBalance < 8000}
                 onClick={() => {
                   onApplyAction({
                     id: "BANCAR_VIAGEM_POPULAR",
@@ -413,7 +428,9 @@ export function ClubRelationsTab({
               </div>
 
               <button
+                disabled={hasUsedActionThisStep}
                 onClick={() => {
+                  if (hasUsedActionThisStep) return;
                   onApplyAction({
                     id: "NOTA_REPUDIO_PUBLICADA",
                     title: "Nota de Repúdio Publicada!",
@@ -427,7 +444,7 @@ export function ClubRelationsTab({
                     ],
                   });
                 }}
-                className="w-full py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-wider shadow-md transition-all cursor-pointer flex items-center justify-center gap-1"
+                className="w-full py-2 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-xs uppercase tracking-wider shadow-md transition-all cursor-pointer flex items-center justify-center gap-1"
               >
                 <FileText className="w-3.5 h-3.5" /> Publicar Repúdio (R$ 0)
               </button>
@@ -456,7 +473,7 @@ export function ClubRelationsTab({
               </div>
 
               <button
-                disabled={bankBalance < 3000}
+                disabled={hasUsedActionThisStep || bankBalance < 3000}
                 onClick={() => {
                   onApplyAction({
                     id: "REUNIAO_CONCILIACAO_REALIZADA",

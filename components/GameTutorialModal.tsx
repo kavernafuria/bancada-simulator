@@ -144,7 +144,7 @@ const TUTORIAL_STEPS = [
           <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">
             <span className="font-bold text-indigo-400 block text-[11px] mb-0.5">🏛️ Eleições da Diretoria a cada 3 Anos:</span>
             <p className="text-[10.5px] text-zinc-400">
-              Nas temporadas 1, 4, 7, 10 e 13, escolha o perfil do presidente da torcida: <strong className="text-amber-400">Linha de Frente / Pista</strong> (+15% PEC), <strong className="text-emerald-400">Gestor / Comercial</strong> (+20% Faturamento) ou <strong className="text-orange-400">Mestre de Bateria / Barra Brava</strong> (+15 Pressão de Bancada), cada um com seus bônus e penalidades operacionais para o mandato.
+              Nas temporadas 1, 4, 7, 10 e 13, escolha o perfil do presidente da torcida: <strong className="text-amber-400">Linha de Frente / Pista</strong> (+20% Poder de Pista), <strong className="text-emerald-400">Gestor / Comercial</strong> (+25% Receita de Mensalidades e Loja) ou <strong className="text-orange-400">Mestre de Bateria / Barra Brava</strong> (+20% Pressão de Bancada e -50% Desgaste da Bateria), cada um com seus bônus e penalidades operacionais para o mandato.
             </p>
           </div>
         </div>

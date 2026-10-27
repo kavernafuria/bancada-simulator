@@ -101,7 +101,7 @@ export function InquiryModal({
 
   // Combined result application callback
   const handleFinalize = () => {
-    const totalLawyer = finalVerdict.lawyerCost; // Final lawyer fee from verdict
+    const totalLawyer = finalVerdict.lawyerCost + questionLawyerFees;
     const totalFine = finalVerdict.fineCost;
 
     onFinishInquiry({
@@ -183,7 +183,7 @@ export function InquiryModal({
           <div className="absolute bottom-3 left-6 right-6 flex items-end justify-between">
             <div>
               <h2 className="text-lg font-black uppercase text-amber-400 tracking-tight sm:text-xl drop-shadow">
-                🏛️ INQUÉRITO EMERGENCIAIS DE DEPOIMENTO
+                🏛️ INQUÉRITO EMERGENCIAL DE DEPOIMENTO
               </h2>
               <p className="text-xs text-zinc-300 font-medium drop-shadow">
                 Gabinete do Promotor de Justiça • Crimes de Intolerância Esportiva
@@ -431,7 +431,7 @@ export function InquiryModal({
                 {/* Lawyer Fee (Present in all outcomes) */}
                 <div className="flex items-center justify-between rounded-lg p-2.5 text-xs font-bold bg-amber-950/40 border border-amber-800/40 text-amber-300">
                   <span>⚖️ Honorários de Advogado:</span>
-                  <span className="font-mono">R$ {finalVerdict.lawyerCost.toLocaleString("pt-BR")}</span>
+                  <span className="font-mono">R$ {(finalVerdict.lawyerCost + questionLawyerFees).toLocaleString("pt-BR")}</span>
                 </div>
 
                 {/* Fine (If any) */}

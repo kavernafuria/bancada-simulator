@@ -187,7 +187,7 @@ export function TorcidaUnicaModal({
           <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
           <div className="absolute bottom-3 left-6 flex items-center gap-2">
             <span className="rounded bg-red-600/90 px-2 py-0.5 text-[10px] font-black text-white uppercase tracking-wider">
-              CRISE MP & RESTRITION
+              CRISE MP & RESTRIÇÃO
             </span>
           </div>
         </div>

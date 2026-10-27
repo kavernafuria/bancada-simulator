@@ -1086,7 +1086,7 @@ export const MatchTacticalResolver: React.FC<{
     if (context.tacticalChoice === 'color_memory') setActiveMiniGame('memory');
     if (context.tacticalChoice === 'caravan_escape') setActiveMiniGame('dodge');
     if (context.tacticalChoice === 'flag_waving') setActiveMiniGame('flag_waving');
-    if (context.tacticalChoice === 'rhythm_bateria' || context.tacticalChoice === 'rhythm_mosaic') setActiveMiniGame('rhythm_bateria');
+    if (context.tacticalChoice === 'rhythm_bateria') setActiveMiniGame('rhythm_bateria');
   }, [context, onMatchComplete]);
 
   useEffect(() => {

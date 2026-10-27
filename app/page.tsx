@@ -114,7 +114,7 @@ import { StoryCardModal, StoryCardData } from "@/components/StoryCardModal";
 import { Etapa10CaravanModal } from "@/components/Etapa10CaravanModal";
 import { HomeAllySupportModal } from "@/components/HomeAllySupportModal";
 import { BetaFeedbackModal } from "@/components/BetaFeedbackModal";
-import { generateEtapa10CaravanChoices, Etapa10CaravanChoice, findAllyForTorcida, calculateAllySupportNumbers, generateSeasonNarrativeVerdict, findRivalTorcidaInDatabase, getTierMultiplier, getAllianceBlockForTorcida, isValidFriendFor, normalizeTorcidaKey } from "@/lib/bancada_engine";
+import { generateEtapa10CaravanChoices, Etapa10CaravanChoice, findAllyForTorcida, calculateAllySupportNumbers, generateSeasonNarrativeVerdict, findRivalTorcidaInDatabase, getTierMultiplier, getAllianceBlockForTorcida, isValidFriendFor, areTorcidasRivals, normalizeTorcidaKey } from "@/lib/bancada_engine";
 import alliancesData from "@/data/bancada_alliances.json";
 import {
   GAME_BALANCE,
@@ -582,6 +582,10 @@ export default function App() {
   const [historyLog, setHistoryLog] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<"pipeline" | "objectives" | "ranking" | "standings" | "profile" | "alliances" | "loja" | "clube" | "varzea">("pipeline");
   const [visitedTabsSeason, setVisitedTabsSeason] = useState<string[]>([]);
+  const [usedClubActionStep, setUsedClubActionStep] = useState<string | null>(null);
+  const [usedAllianceMeetingStep, setUsedAllianceMeetingStep] = useState<string | null>(null);
+  const [usedDiplomacyStep, setUsedDiplomacyStep] = useState<string | null>(null);
+  const [usedDiplomacyTorcidaSeason, setUsedDiplomacyTorcidaSeason] = useState<Record<string, boolean>>({});
   const [organizacaoPoints, setOrganizacaoPoints] = useState<number>(100);
   const [localSponsorsCount, setLocalSponsorsCount] = useState<number>(0);
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
@@ -951,7 +955,7 @@ export default function App() {
           } else {
             setSeasonObjectives(generateSeasonObjectives(parsed.season || 1, parsed.currentTorcida, parsed.clubStatus || "LUTANDO_ACESSO"));
           }
-          if (parsed.season >= 15 && parsed.pipelineIndex >= 12) {
+          if (parsed.season >= 15 && parsed.pipelineIndex >= 10) {
             setIsGameOver(true);
           }
         }
@@ -2732,6 +2736,21 @@ export default function App() {
     targetTorcida: OfficialTorcida
   ) => {
     const key = targetTorcida.torcida;
+    const stepKey = `${season}_${pipelineIndex}`;
+    const torcidaSeasonKey = `${season}_${normalizeTorcidaKey(key)}_${actionType}`;
+    const isBannerAction = actionType === "RESGATAR_FAIXA" || actionType === "DEVOLVER_FAIXA";
+
+    if (!isBannerAction) {
+      if (usedDiplomacyTorcidaSeason[torcidaSeasonKey]) {
+        setDiplomacyFeedback(`⏳ Você já realizou esta ação diplomática com a ${targetTorcida.torcida} nesta temporada.`);
+        return;
+      }
+      if (usedDiplomacyStep === stepKey) {
+        setDiplomacyFeedback("⏳ A diretoria já realizou 1 ação diplomática nesta etapa. Avance para a próxima etapa para abrir novas tratativas.");
+        return;
+      }
+    }
+
     const existingRec = rivalryRecords[key] || {
       rivalTorcida: targetTorcida.torcida,
       rivalClub: targetTorcida.clube,
@@ -2743,8 +2762,16 @@ export default function App() {
       faixasPerdidas: 0,
     };
 
+    const markDiplomacyUsed = () => {
+      if (!isBannerAction) {
+        setUsedDiplomacyStep(stepKey);
+        setUsedDiplomacyTorcidaSeason((prev) => ({ ...prev, [torcidaSeasonKey]: true }));
+      }
+    };
+
     switch (actionType) {
       case "MARCAR_TRETA":
+        markDiplomacyUsed();
         setChallengedRivalTorcida(targetTorcida.torcida);
         setRivalryRecords((prev) => ({
           ...prev,
@@ -2768,6 +2795,7 @@ export default function App() {
           setDiplomacyFeedback("❌ Caixa insuficiente! É necessário R$ 3.000 para negociação do Pacto da Paz.");
           return;
         }
+        markDiplomacyUsed();
         setBankBalance((b) => b - 3000);
         setRivalryRecords((prev) => ({
           ...prev,
@@ -2820,14 +2848,15 @@ export default function App() {
           setDiplomacyFeedback("❌ Caixa insuficiente! R$ 2.000 necessários para compra de suprimentos.");
           return;
         }
-        setBankBalance((b) => b + 6000);
+        markDiplomacyUsed();
+        setBankBalance((b) => b + 4000);
         setStats((s) => ({ ...s, contingente: applyDiminishingReturns(s.contingente, 5) }));
         setStateTrackers((st) => ({ ...st, respeito_nacional: Math.min(100, st.respeito_nacional + 5) }));
         setHistoryLog((prev) => [
-          `[Ano ${season} - Diplomacia] Churrasco de recepção na sede com a ${targetTorcida.torcida}. Lucro com cerveja e novos associados!`,
+          `[Ano ${season} - Diplomacia] Churrasco de recepção na sede com a ${targetTorcida.torcida}. Investimento de R$ 2.000 e arrecadação bruta de R$ 6.000 (+R$ 4.000 lucro líquido)!`,
           ...prev,
         ]);
-        setDiplomacyFeedback(`🥩 Churrasco realizado com sucesso! (+R$ 6.000 lucro líquido, +5 Massa, +5 Respeito)`);
+        setDiplomacyFeedback(`🥩 Churrasco realizado com sucesso! (+R$ 4.000 lucro líquido no caixa, +5 Massa, +5 Respeito)`);
         break;
 
       case "REUNIAO_ALIANCA":
@@ -2835,7 +2864,12 @@ export default function App() {
           setDiplomacyFeedback("❌ Caixa insuficiente! R$ 5.000 necessários para banquete diplomático.");
           return;
         }
+        markDiplomacyUsed();
         setBankBalance((b) => b - 5000);
+        setRivalryRecords((prev) => ({
+          ...prev,
+          [key]: { ...existingRec, isPeacePactActive: true, jogosDaPaz: existingRec.jogosDaPaz + 1 },
+        }));
         setStateTrackers((st) => ({
           ...st,
           moral: Math.min(100, st.moral + 8),
@@ -2853,6 +2887,7 @@ export default function App() {
           setDiplomacyFeedback("❌ Caixa insuficiente! R$ 4.000 necessários para custear transporte dos irmãos.");
           return;
         }
+        markDiplomacyUsed();
         setBankBalance((b) => b - 4000);
         setAllyBonusMembers(800);
         setHistoryLog((prev) => [
@@ -2867,6 +2902,7 @@ export default function App() {
           setDiplomacyFeedback("❌ Caixa insuficiente! R$ 3.000 necessários para cestas/insumos.");
           return;
         }
+        markDiplomacyUsed();
         setBankBalance((b) => b - 3000);
         setStateTrackers((st) => ({
           ...st,
@@ -3006,11 +3042,16 @@ export default function App() {
     stateEffects?: { moral?: number; risco_mp?: number; relacao_clube?: number };
     deltas: FormattedDelta[];
   }) => {
+    const stepKey = `${season}_${pipelineIndex}`;
+    if (usedClubActionStep === stepKey) {
+      return;
+    }
     if (bankBalance < action.cost) {
       alert("Saldo insuficiente no caixa da torcida!");
       return;
     }
 
+    setUsedClubActionStep(stepKey);
     if (soundEnabled) playStadiumSound("drum");
 
     if (action.cost > 0) {
@@ -4403,7 +4444,7 @@ export default function App() {
           </div>
 
           <p className="text-xs text-zinc-400 leading-relaxed">
-            Metas fixadas pela velha guarda e conselho deliberativo. Conclua os objetivos antes da 13ª etapa para receber bônus de caixa, moral e respeito nacional!
+            Metas fixadas pela velha guarda e conselho deliberativo. Conclua os objetivos antes da 10ª etapa para receber bônus de caixa, moral e respeito nacional!
           </p>
 
           <div className="space-y-2.5 flex-1 overflow-y-auto pr-1">
@@ -4584,7 +4625,7 @@ export default function App() {
               <span className="col-span-2 text-center">SG</span>
             </div>
 
-            {generateLeagueTable(currentTorcida.clube, season, Math.min(38, pipelineIndex * 3 + 12)).map((entry) => (
+            {generateLeagueTable(currentTorcida.clube, season, Math.min(38, Math.round((pipelineIndex + 1) * 3.8))).map((entry) => (
               <div
                 key={entry.position}
                 className={`grid grid-cols-12 items-center p-2 rounded-xl text-xs transition-all ${
@@ -5012,6 +5053,7 @@ export default function App() {
           riscoMp={stateTrackers.risco_mp}
           bankBalance={bankBalance}
           soundEnabled={soundEnabled}
+          hasUsedActionThisStep={usedClubActionStep === `${season}_${pipelineIndex}`}
           onApplyAction={handleApplyClubAction}
         />
       )}
@@ -5154,7 +5196,9 @@ export default function App() {
                   </div>
                   <button
                       onClick={() => {
-                      if (bankBalance < 3000) return;
+                      const stepKey = `${season}_${pipelineIndex}`;
+                      if (usedAllianceMeetingStep === stepKey || bankBalance < 3000) return;
+                      setUsedAllianceMeetingStep(stepKey);
                       setBankBalance((prev) => prev - 3000);
                       setStateTrackers((st) => ({
                         ...st,
@@ -5167,15 +5211,17 @@ export default function App() {
                       ]);
                       if (soundEnabled) playStadiumSound("drum");
                     }}
-                    disabled={bankBalance < 3000}
+                    disabled={bankBalance < 3000 || usedAllianceMeetingStep === `${season}_${pipelineIndex}`}
                     className={`w-full sm:w-auto px-4 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0 ${
-                      bankBalance >= 3000
+                      bankBalance >= 3000 && usedAllianceMeetingStep !== `${season}_${pipelineIndex}`
                         ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg active:scale-95"
                         : "bg-zinc-800 text-zinc-500 opacity-60 cursor-not-allowed"
                     }`}
                   >
                     <HeartHandshake className="w-4 h-4" />
-                    AGENDAR REUNIÃO DIPLOMÁTICA (R$ 3.000)
+                    {usedAllianceMeetingStep === `${season}_${pipelineIndex}`
+                      ? "REUNIÃO JÁ REALIZADA NESTA ETAPA"
+                      : "AGENDAR REUNIÃO DIPLOMÁTICA (R$ 3.000)"}
                   </button>
                 </div>
                 )}
@@ -6421,17 +6467,42 @@ export default function App() {
 
             {/* Relationship Badge */}
             {(() => {
-              const isAlly = selectedTorcidaForDiplomacy.eixo_alianca === currentTorcida.eixo_alianca;
-              const isSameState = selectedTorcidaForDiplomacy.estado === currentTorcida.estado;
+              const isSameClub =
+                selectedTorcidaForDiplomacy.clube.trim().toLowerCase() ===
+                currentTorcida.clube.trim().toLowerCase();
+              const hasPeacePact = getPactTorcidas().some(
+                (p) => normalizeTorcidaKey(p) === normalizeTorcidaKey(selectedTorcidaForDiplomacy.torcida)
+              );
+              const allianceBlock = getAllianceBlockForTorcida(currentTorcida, getHostileTorcidas());
+              const isDirectAlly =
+                Boolean(allianceBlock?.directAlly) &&
+                normalizeTorcidaKey(allianceBlock?.directAlly || "") ===
+                  normalizeTorcidaKey(selectedTorcidaForDiplomacy.torcida);
+              const isSameValidEixo =
+                currentTorcida.eixo_alianca !== "INDEPENDENTE" &&
+                selectedTorcidaForDiplomacy.eixo_alianca === currentTorcida.eixo_alianca &&
+                isValidFriendFor(currentTorcida, selectedTorcidaForDiplomacy, getHostileTorcidas());
+              const isAlly = isSameClub || hasPeacePact || isDirectAlly || isSameValidEixo;
+              const isSameState =
+                !isAlly &&
+                (areTorcidasRivals(currentTorcida, selectedTorcidaForDiplomacy) ||
+                  getHostileTorcidas().some(
+                    (h) => normalizeTorcidaKey(h) === normalizeTorcidaKey(selectedTorcidaForDiplomacy.torcida)
+                  ) ||
+                  selectedTorcidaForDiplomacy.estado === currentTorcida.estado);
               const rec = rivalryRecords[selectedTorcidaForDiplomacy.torcida];
 
               return (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between bg-zinc-950 p-3 rounded-2xl border border-zinc-800">
                     <span className="text-xs font-bold text-zinc-400">Status Geopolítico:</span>
-                    {isAlly ? (
+                    {isSameClub ? (
                       <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-2.5 py-1 rounded-xl text-xs font-black uppercase flex items-center gap-1">
-                        🤝 Torcida Aliada (Eixo {selectedTorcidaForDiplomacy.eixo_alianca})
+                        🏴 Co-Irmã de Bancada ({currentTorcida.clube})
+                      </span>
+                    ) : isAlly ? (
+                      <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-2.5 py-1 rounded-xl text-xs font-black uppercase flex items-center gap-1">
+                        🤝 Torcida Aliada ({hasPeacePact ? "Pacto Selado" : `Eixo ${selectedTorcidaForDiplomacy.eixo_alianca}`})
                       </span>
                     ) : isSameState ? (
                       <span className="bg-red-500/20 text-red-400 border border-red-500/40 px-2.5 py-1 rounded-xl text-xs font-black uppercase flex items-center gap-1">
@@ -6557,7 +6628,7 @@ export default function App() {
                         >
                           <div className="flex items-center justify-between font-black text-xs text-amber-400">
                             <span>🥩 Churrasco de Recepção (-R$ 2.000)</span>
-                            <span className="text-[9px] text-emerald-400">+R$ 6k Lucro</span>
+                            <span className="text-[9px] text-emerald-400">+R$ 4k Lucro Líquido</span>
                           </div>
                           <p className="text-[11px] text-zinc-300 mt-0.5 leading-snug">
                             Recepcionar a torcida neutra com churrasco na sede (+5 Massa, +5 Respeito e lucro com bebidas).
@@ -6745,6 +6816,7 @@ export default function App() {
           rivalTorcidaName={activeMatchDerby?.rivalTorcida || "Rival Principal"}
           stadiumName={activeMatchDerby?.stadium || "Estádio"}
           userBalance={bankBalance}
+          torcidaUnicaCounter={torcidaUnicaState.torcidaUnicaCounter}
           onDismissNews={() => setActiveTorcidaUnicaModalMode(null)}
           onSelectAction={(res: TorcidaUnicaActionResult) => {
             if (res.statEffects) {
