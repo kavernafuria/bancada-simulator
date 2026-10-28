@@ -121,39 +121,63 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
 6. Retorne APENAS um parágrafo corrido de texto puro, sem tópicos ou markdown.`;
 
         const cleanApiKey = apiKey.trim();
-        const candidateEndpoints = [
-          `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent`,
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`,
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent`,
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`,
-        ];
 
-        for (const endpoint of candidateEndpoints) {
-          const urlWithKey = `${endpoint}?key=${encodeURIComponent(cleanApiKey)}`;
-          const geminiRes = await fetch(urlWithKey, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-goog-api-key": cleanApiKey,
-            },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-            }),
-          });
-
-          if (geminiRes.ok) {
-            const data = await geminiRes.json();
-            const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (generatedText) {
-              return NextResponse.json({ chronicle: generatedText.trim(), source: "gemini" });
-            } else {
-              debugReason = "gemini_empty_response";
+        // 1. Discover models available for this specific key
+        let targetModelName = "models/gemini-1.5-flash";
+        try {
+          const listRes = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(cleanApiKey)}`,
+            {
+              headers: {
+                "x-goog-api-key": cleanApiKey,
+              },
             }
+          );
+          const listData = await listRes.json();
+          if (listData.models && Array.isArray(listData.models)) {
+            const compatible = listData.models.find(
+              (m: any) =>
+                m.supportedGenerationMethods?.includes("generateContent") &&
+                (m.name.includes("flash") || m.name.includes("pro"))
+            );
+            if (compatible?.name) {
+              targetModelName = compatible.name;
+            } else if (listData.models[0]?.name) {
+              targetModelName = listData.models[0].name;
+            }
+            debugReason = `discovered_model_${targetModelName}`;
           } else {
-            const errText = await geminiRes.text();
-            console.warn(`Gemini HTTP Error on ${endpoint}:`, geminiRes.status, errText);
-            debugReason = `gemini_http_${geminiRes.status} on ${endpoint}: ${errText.slice(0, 150)}`;
+            debugReason = `models_list_response: ${JSON.stringify(listData).slice(0, 150)}`;
           }
+        } catch (listErr: any) {
+          debugReason = `models_list_error: ${listErr?.message}`;
+        }
+
+        // 2. Execute generateContent with the discovered or default model
+        const endpointUrl = `https://generativelanguage.googleapis.com/v1beta/${targetModelName}:generateContent?key=${encodeURIComponent(cleanApiKey)}`;
+        const geminiRes = await fetch(endpointUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": cleanApiKey,
+          },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+          }),
+        });
+
+        if (geminiRes.ok) {
+          const data = await geminiRes.json();
+          const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (generatedText) {
+            return NextResponse.json({ chronicle: generatedText.trim(), source: "gemini" });
+          } else {
+            debugReason = `gemini_empty_response_on_${targetModelName}`;
+          }
+        } else {
+          const errText = await geminiRes.text();
+          console.warn(`Gemini HTTP Error on ${targetModelName}:`, geminiRes.status, errText);
+          debugReason = `gemini_http_${geminiRes.status} on ${targetModelName}: ${errText.slice(0, 150)}`;
         }
       } catch (geminiErr: any) {
         console.warn("Gemini API fallback to procedural engine:", geminiErr);
