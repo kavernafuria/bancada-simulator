@@ -71,7 +71,13 @@ export async function POST(req: Request) {
       competition,
     } = payload;
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey =
+      process.env.GEMINI_API_KEY ||
+      process.env.NEXT_PUBLIC_GEMINI_API_KEY ||
+      process.env.GOOGLE_AI_KEY ||
+      process.env.GEMINI_KEY;
+
+    let debugReason = apiKey ? "key_present" : "no_api_key_found";
 
     // Try Gemini API if key is configured
     if (apiKey) {
@@ -134,13 +140,17 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
           const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
           if (generatedText) {
             return NextResponse.json({ chronicle: generatedText.trim(), source: "gemini" });
+          } else {
+            debugReason = "gemini_empty_response";
           }
         } else {
           const errText = await geminiRes.text();
           console.warn("Gemini HTTP Error:", geminiRes.status, errText);
+          debugReason = `gemini_http_${geminiRes.status}: ${errText.slice(0, 150)}`;
         }
-      } catch (geminiErr) {
+      } catch (geminiErr: any) {
         console.warn("Gemini API fallback to procedural engine:", geminiErr);
+        debugReason = `gemini_exception: ${geminiErr?.message || geminiErr}`;
       }
     }
 
@@ -183,7 +193,7 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
       const mi = allyMiddles[Math.floor(Math.random() * allyMiddles.length)];
       const cl = allyClosings[Math.floor(Math.random() * allyClosings.length)];
 
-      return NextResponse.json({ chronicle: `${op} ${mi} ${cl}` });
+      return NextResponse.json({ chronicle: `${op} ${mi} ${cl}`, source: "procedural", debugReason });
     }
 
     // Standard Derby Matches (Victory or Defeat Narratives)
@@ -212,7 +222,7 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
         const op = standOpenings[Math.floor(Math.random() * standOpenings.length)];
         const mi = standMiddles[Math.floor(Math.random() * standMiddles.length)];
         const cl = standClosings[Math.floor(Math.random() * standClosings.length)];
-        return NextResponse.json({ chronicle: `${op} ${mi} ${cl}` });
+        return NextResponse.json({ chronicle: `${op} ${mi} ${cl}`, source: "procedural", debugReason });
       } else {
         const standDefeatOpenings = [
           `Jornada desafiadora nas bancadas para a ${torcida} ${homeStr} diante do ${rivalClub} (${rivalTorcida}).`,
@@ -229,7 +239,7 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
         const op = standDefeatOpenings[Math.floor(Math.random() * standDefeatOpenings.length)];
         const mi = standDefeatMiddles[Math.floor(Math.random() * standDefeatMiddles.length)];
         const cl = standDefeatClosings[Math.floor(Math.random() * standDefeatClosings.length)];
-        return NextResponse.json({ chronicle: `${op} ${mi} ${cl}` });
+        return NextResponse.json({ chronicle: `${op} ${mi} ${cl}`, source: "procedural", debugReason });
       }
     }
 
@@ -271,7 +281,7 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
       const mi = vicMiddles[Math.floor(Math.random() * vicMiddles.length)];
       const cl = vicClosings[Math.floor(Math.random() * vicClosings.length)];
 
-      return NextResponse.json({ chronicle: `${op} ${mi} ${cl}` });
+      return NextResponse.json({ chronicle: `${op} ${mi} ${cl}`, source: "procedural", debugReason });
     } else {
       const isPoliceDetention = (statusTitle || "").toLowerCase().includes("polícia") || (statusTitle || "").toLowerCase().includes("detenção") || (statusTitle || "").toLowerCase().includes("fiança") || (statusTitle || "").toLowerCase().includes("crise judicial");
 
@@ -291,7 +301,7 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
         const op = policeOpenings[Math.floor(Math.random() * policeOpenings.length)];
         const mi = policeMiddles[Math.floor(Math.random() * policeMiddles.length)];
         const cl = policeClosings[Math.floor(Math.random() * policeClosings.length)];
-        return NextResponse.json({ chronicle: `${op} ${mi} ${cl}` });
+        return NextResponse.json({ chronicle: `${op} ${mi} ${cl}`, source: "procedural", debugReason });
       }
 
       const defOpenings = [
@@ -331,7 +341,7 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
       const mi = defMiddles[Math.floor(Math.random() * defMiddles.length)];
       const cl = defClosings[Math.floor(Math.random() * defClosings.length)];
 
-      return NextResponse.json({ chronicle: `${op} ${mi} ${cl}` });
+      return NextResponse.json({ chronicle: `${op} ${mi} ${cl}`, source: "procedural", debugReason });
     }
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Erro interno" }, { status: 500 });
