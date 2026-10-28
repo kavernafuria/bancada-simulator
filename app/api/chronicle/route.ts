@@ -133,8 +133,11 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
           const data = await geminiRes.json();
           const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
           if (generatedText) {
-            return NextResponse.json({ chronicle: generatedText.trim() });
+            return NextResponse.json({ chronicle: generatedText.trim(), source: "gemini" });
           }
+        } else {
+          const errText = await geminiRes.text();
+          console.warn("Gemini HTTP Error:", geminiRes.status, errText);
         }
       } catch (geminiErr) {
         console.warn("Gemini API fallback to procedural engine:", geminiErr);
