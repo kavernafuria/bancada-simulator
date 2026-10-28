@@ -1925,6 +1925,8 @@ export default function App() {
       );
 
       setIsGeneratingChronicle(true);
+      setActiveMatchResult(result);
+
       const chronicle = await generateGeminiChronicle({
         season: season,
         clube: currentTorcida.clube,
@@ -1963,6 +1965,7 @@ export default function App() {
         statusTitle: result.statusTitle,
       });
       result.chronicleText = chronicle;
+      setActiveMatchResult({ ...result, chronicleText: chronicle });
       setIsGeneratingChronicle(false);
 
       const cleanChronicle = chronicle.replace(/^\[[^\]]+\]\s*/, "").trim();
@@ -1985,8 +1988,6 @@ export default function App() {
           torcidaReaction = `Clima de cobrança e conversa séria entre as lideranças das sub-sedes após o revés contra a ${activeMatchDerby?.rivalTorcida}. O foco agora é fechar o bonde, ajustar a postura e dar a resposta no próximo jogo.`;
         }
       }
-
-      setActiveMatchResult(result);
 
       if (activeMatchDerby?.rivalTorcida) {
         const rName = activeMatchDerby.rivalTorcida;
@@ -5849,8 +5850,9 @@ export default function App() {
                 <Sparkles className="w-3 h-3" /> Crônica de Arquibancada:
               </span>
               {isGeneratingChronicle ? (
-                <div className="text-amber-400/80 animate-pulse text-xs py-2">
-                  Redigindo crônica visceral dos acontecimentos...
+                <div className="text-amber-400/90 animate-pulse text-xs py-2 font-semibold flex items-center gap-1.5">
+                  <span>⏳</span>
+                  <span>Aguardando crônica da partida, especialista em torcida enviando...</span>
                 </div>
               ) : (
                 activeMatchResult.chronicleText
