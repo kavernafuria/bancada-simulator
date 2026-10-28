@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { trackEvent } from "@/lib/analytics";
 import { ENDGAME_INVESTMENTS, EndGameInvestment, triggerRandomUnforeseenExpense, UnforeseenExpense } from "@/lib/bancada_engine";
 import { AgeGateService } from "@/lib/age_gate_service";
 import { AgeGateModal } from "@/components/AgeGateModal";
@@ -403,6 +404,13 @@ export default function App() {
 
   const handleOpenStoryCard = (cardType: "MATCH_VICTORY" | "SEASON_CLOSING" | "TORCIDA_PROFILE" = "TORCIDA_PROFILE") => {
     if (!currentTorcida) return;
+
+    trackEvent("share_card_click", {
+      torcida: currentTorcida.torcida,
+      clube: currentTorcida.clube,
+      card_type: cardType,
+      season,
+    });
 
     const ranking = simulateNationalRanking(currentTorcida, stats, stateTrackers, season, defeatedRivalsMap);
     const playerRankEntry = ranking.find((r) => r.isPlayer);
@@ -1153,6 +1161,12 @@ export default function App() {
 
       const torcidaWithColors = applyTierElectionCrisis(baseTorcida);
 
+      trackEvent("game_start", {
+        torcida: torcidaWithColors.torcida,
+        clube: torcidaWithColors.clube,
+        mode: "HISTORICA",
+      });
+
       setCurrentTorcida(torcidaWithColors);
       setStats({
         contingente: torcidaWithColors.contingente,
@@ -1236,6 +1250,12 @@ export default function App() {
     );
 
     const torcidaWithCrisis = applyTierElectionCrisis(torcida);
+
+    trackEvent("game_start", {
+      torcida: torcidaWithCrisis.torcida,
+      clube: torcidaWithCrisis.clube,
+      mode: "CUSTOM",
+    });
 
     setCurrentTorcida(torcidaWithCrisis);
     setStats({
@@ -1926,6 +1946,18 @@ export default function App() {
 
       setIsGeneratingChronicle(true);
       setActiveMatchResult(result);
+
+      trackEvent("match_complete", {
+        torcida: currentTorcida.torcida,
+        clube: currentTorcida.clube,
+        rival_torcida: activeMatchDerby.rivalTorcida,
+        is_victory: result.isVictoryPista,
+        score: activeMatchDerby.isHome
+          ? `${result.scorePlayerClub} x ${result.scoreRivalClub}`
+          : `${result.scoreRivalClub} x ${result.scorePlayerClub}`,
+        banner_captured: result.bannerCaptured ?? false,
+        season,
+      });
 
       const chronicle = await generateGeminiChronicle({
         season: season,

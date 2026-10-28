@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import "./globals.css";
 import { ThemeScript } from "@/components/ThemeScript";
 import { BrandHeader } from "@/components/BrandHeader";
@@ -41,6 +42,24 @@ export default function RootLayout({
     <html lang="pt-BR" className="dark">
       <head>
         <ThemeScript />
+        <Script
+          strategy="afterInteractive"
+          src="https://www.googletagmanager.com/gtag/js?id=G-B4760CBEE5"
+        />
+        <Script
+          id="google-analytics"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-B4760CBEE5', {
+                page_path: window.location.pathname,
+              });
+            `,
+          }}
+        />
       </head>
       <body className="antialiased selection:bg-kavers-purple selection:text-white min-h-screen flex flex-col relative">
         <BrandHeader />
