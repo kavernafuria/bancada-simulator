@@ -3884,8 +3884,11 @@ export function getAnnualPipelineWithMatches(
   ];
 }
 
+let lastAiSocialMediaLeak: { headline?: string; snippet?: string } | null = null;
+
 // Server-Side Gemini AI Chronicle Generator with Rich Authentic Torcida Slang Fallback
 export async function generateGeminiChronicle(payload: any): Promise<string> {
+  lastAiSocialMediaLeak = null;
   try {
     const response = await fetch("/api/chronicle", {
       method: "POST",
@@ -3895,6 +3898,12 @@ export async function generateGeminiChronicle(payload: any): Promise<string> {
 
     if (response.ok) {
       const data = await response.json();
+      if (data?.socialHeadline || data?.socialSnippet) {
+        lastAiSocialMediaLeak = {
+          headline: typeof data.socialHeadline === "string" ? data.socialHeadline.trim() : undefined,
+          snippet: typeof data.socialSnippet === "string" ? data.socialSnippet.trim() : undefined,
+        };
+      }
       if (data?.chronicle && typeof data.chronicle === "string" && data.chronicle.trim().length > 20) {
         return data.chronicle.trim();
       }
@@ -5154,6 +5163,31 @@ export function getRandomPostBrawlLeak(): SocialMediaLeak | null {
 }
 
 export function generateDynamicMatchLeak(params: {
+  currentTorcida: OfficialTorcida;
+  derby: DerbyMatchInfo;
+  result: any;
+  tactic?: TacticalBattleChoice | null;
+  police?: PoliceMeetingChoice | null;
+  season?: number;
+  chronicle?: string;
+  aiHeadline?: string;
+  aiSnippet?: string;
+}): SocialMediaLeak {
+  const baseLeak = buildProceduralMatchLeak(params);
+  const customHeadline = params.aiHeadline || lastAiSocialMediaLeak?.headline;
+  const customSnippet = params.aiSnippet || lastAiSocialMediaLeak?.snippet;
+
+  if (customHeadline && customHeadline.length > 5) {
+    baseLeak.headline = customHeadline;
+  }
+  if (customSnippet && customSnippet.length > 15) {
+    baseLeak.snippetText = customSnippet;
+  }
+
+  return baseLeak;
+}
+
+function buildProceduralMatchLeak(params: {
   currentTorcida: OfficialTorcida;
   derby: DerbyMatchInfo;
   result: any;

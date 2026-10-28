@@ -69,6 +69,8 @@ export async function POST(req: Request) {
       moralChange,
       statusTitle,
       competition,
+      bannerCaptured = false,
+      bannerLost = false,
     } = payload;
 
     const apiKey =
@@ -94,8 +96,17 @@ export async function POST(req: Request) {
           ? (isVictoryPista ? "Vitória e Domínio de Rua" : "Derrota em Emboscada de Rua / Cerco Adversário")
           : (isVictoryPista && isVictoryBancada ? "Vitória e Show de Bancada" : "Desempenho Irregular de Bancada");
 
-        const prompt = `Você é um líder histórico e cronista de rua de uma torcida organizada do futebol brasileiro. 
-Escreva uma crônica empolgante, crua e visceral de 1 parágrafo vibrante (4 a 6 frases) sobre o jogo ocorrido.
+        const bannerInfo = bannerCaptured
+          ? `SIM! Nossa torcida TOMOU A FAIXA OFICIAL da ${rivalTorcida}!`
+          : bannerLost
+          ? `SIM! Nossa torcida PERDEU UM MATERIAL/FAIXA para a ${rivalTorcida}!`
+          : "Nenhuma faixa tomada ou perdida.";
+
+        const prompt = `Você é um especialista histórico em cultura de arquibancada e administrador das páginas virais de torcidas organizadas do Brasil (@ritmodetorcida e @ettorcida.oficiall).
+Com base nos dados da partida abaixo, gere um objeto JSON contendo:
+1. "chronicle": Uma crônica empolgante, crua e visceral de 1 parágrafo (4 a 6 frases) narrando os acontecimentos sob a ótica da nossa torcida (${torcida}).
+2. "socialHeadline": Uma manchete curta, viral e impactante em LETRAS MAIÚSCULAS (com 1 emoji no início, estilo página @ettorcida.oficiall ou @ritmodetorcida no Instagram) resumindo o vídeo/áudio vazado ou imagens de drone desse jogo.
+3. "socialSnippet": A legenda da publicação viral (2 a 3 frases curtas e diretas) descrevendo o vídeo, áudio de WhatsApp ou flagra de drone da partida, citando nominalmente as torcidas (${torcida} e ${rivalTorcida}), o estádio (${stadium}), o placar (${score}) e o desfecho real.
 
 DADOS DA PARTIDA:
 - Ano/Temporada: ${season}
@@ -107,6 +118,7 @@ DADOS DA PARTIDA:
 - Tipo de Jogo: ${gameTypeDesc}
 - Placar do Jogo: ${score}
 - Resultado: ${resultTypeDesc}
+- Patrimônio / Faixas: ${bannerInfo}
 - Tática Usada: ${tacticTitle}
 - Postura da PM: ${policeStance}
 - Saldo Moral: ${moralChange >= 0 ? "+" + moralChange : moralChange}
@@ -116,9 +128,10 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
 1. Use gírias autênticas das torcidas brasileiras como: "bonde", "caldeirão", "alçapão", "linha de frente", "bateria", "cortejo", "ruada", "disposição", "panos", "bandeirões", "resenha na sede", "chopp gelado", "comboio de ônibus", "respeito de rua".
 2. Se for JOGO DE ALIANÇA: Exalte o churrasco de costela no fogo de chão, o respeito entre as agremiações, as baterias tocando juntas o mesmo samba e a festa unificada sem divisórias.
 3. Se o jogo for PACÍFICO ou de ARQUIBANCADA (sem briga de pista): NUNCA mencione briga de rua, emboscada, trocação de soco, rojões ou violência. Foque exclusivamente no show de cantos, festa visual, sinalizadores, mosaico, batuque da bateria e apoio incondicional ao clube.
-4. Se for CONFRONTO DE PISTA (briga de rua): Exalte o empenho da massa, a postura da linha de frente e o grito ensurdecedor nas ruas e arquibancadas.
+4. Se for CONFRONTO DE PISTA (briga de rua): Exalte o empenho da massa, a postura da linha de frente e a repercussão nos grupos de WhatsApp das organizadas. Se houve derrota ou perda de faixa, o socialSnippet deve citar vazamento de áudio de cobrança da oposição na sede. Se houve captura de faixa, cite o vídeo da faixa rival estendida de cabeça para baixo.
 5. NUNCA coloque siglas genéricas entre parênteses como (TGF), (FJV), (TJS).
-6. Retorne APENAS um parágrafo corrido de texto puro, sem tópicos ou markdown.`;
+6. Responda EXCLUSIVAMENTE com um JSON válido no formato:
+{"chronicle": "...", "socialHeadline": "...", "socialSnippet": "..."}`;
 
         const cleanApiKey = apiKey.trim();
         const candidateModels = [
@@ -139,6 +152,7 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
               },
               body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { responseMimeType: "application/json" },
               }),
             });
 
@@ -146,11 +160,27 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
               const data = await geminiRes.json();
               const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
               if (generatedText) {
-                return NextResponse.json({
-                  chronicle: generatedText.trim(),
-                  source: "gemini",
-                  model,
-                });
+                const rawTrimmed = generatedText.trim();
+                try {
+                  const cleanedJson = rawTrimmed.replace(/^```json\s*/i, "").replace(/```$/i, "").trim();
+                  const parsed = JSON.parse(cleanedJson);
+                  if (parsed?.chronicle) {
+                    return NextResponse.json({
+                      chronicle: String(parsed.chronicle).trim(),
+                      socialHeadline: parsed.socialHeadline ? String(parsed.socialHeadline).trim() : undefined,
+                      socialSnippet: parsed.socialSnippet ? String(parsed.socialSnippet).trim() : undefined,
+                      source: "gemini",
+                      model,
+                    });
+                  }
+                } catch {
+                  // Fallback caso o modelo retorne texto puro sem JSON
+                  return NextResponse.json({
+                    chronicle: rawTrimmed,
+                    source: "gemini",
+                    model,
+                  });
+                }
               }
             } else {
               const errText = await geminiRes.text();

@@ -1963,6 +1963,8 @@ export default function App() {
         moralChange: result.moralChange,
         mpAdded: result.mpAdded,
         statusTitle: result.statusTitle,
+        bannerCaptured: result.bannerCaptured ?? false,
+        bannerLost: result.bannerLost ?? false,
       });
       result.chronicleText = chronicle;
       setActiveMatchResult({ ...result, chronicleText: chronicle });

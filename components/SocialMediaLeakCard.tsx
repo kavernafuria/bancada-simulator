@@ -59,24 +59,48 @@ export const SocialMediaLeakCard: React.FC<SocialMediaLeakCardProps> = ({ leak, 
 
       {/* Impact Indicators */}
       <div className="flex flex-wrap gap-1.5 pt-1 text-[10px] font-bold">
-        {leak.impactDeltas.poder_pista && (
-          <span className="px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-500/30 text-emerald-400">
-            Poder de Pista: +{leak.impactDeltas.poder_pista}
+        {leak.impactDeltas.poder_pista !== undefined && leak.impactDeltas.poder_pista !== 0 && (
+          <span
+            className={`px-2 py-0.5 rounded border ${
+              leak.impactDeltas.poder_pista > 0
+                ? "bg-emerald-950/80 border-emerald-500/30 text-emerald-400"
+                : "bg-red-950/80 border-red-500/40 text-red-400"
+            }`}
+          >
+            Poder de Pista: {leak.impactDeltas.poder_pista > 0 ? `+${leak.impactDeltas.poder_pista}` : leak.impactDeltas.poder_pista}
           </span>
         )}
-        {leak.impactDeltas.moral && (
-          <span className="px-2 py-0.5 rounded bg-amber-950/80 border border-amber-500/30 text-amber-400">
-            Moral do Bonde: +{leak.impactDeltas.moral}
+        {leak.impactDeltas.moral !== undefined && leak.impactDeltas.moral !== 0 && (
+          <span
+            className={`px-2 py-0.5 rounded border ${
+              leak.impactDeltas.moral > 0
+                ? "bg-amber-950/80 border-amber-500/30 text-amber-400"
+                : "bg-red-950/80 border-red-500/40 text-red-400"
+            }`}
+          >
+            Moral do Bonde: {leak.impactDeltas.moral > 0 ? `+${leak.impactDeltas.moral}` : leak.impactDeltas.moral}
           </span>
         )}
-        {leak.impactDeltas.pressao_bancada && (
-          <span className="px-2 py-0.5 rounded bg-blue-950/80 border border-blue-500/30 text-blue-400">
-            Bancada: +{leak.impactDeltas.pressao_bancada}
+        {leak.impactDeltas.pressao_bancada !== undefined && leak.impactDeltas.pressao_bancada !== 0 && (
+          <span
+            className={`px-2 py-0.5 rounded border ${
+              leak.impactDeltas.pressao_bancada > 0
+                ? "bg-blue-950/80 border-blue-500/30 text-blue-400"
+                : "bg-red-950/80 border-red-500/40 text-red-400"
+            }`}
+          >
+            Bancada: {leak.impactDeltas.pressao_bancada > 0 ? `+${leak.impactDeltas.pressao_bancada}` : leak.impactDeltas.pressao_bancada}
           </span>
         )}
-        {leak.impactDeltas.risco_mp && (
-          <span className="px-2 py-0.5 rounded bg-red-950/80 border border-red-500/40 text-red-400">
-            Risco MP: +{leak.impactDeltas.risco_mp}%
+        {leak.impactDeltas.risco_mp !== undefined && leak.impactDeltas.risco_mp !== 0 && (
+          <span
+            className={`px-2 py-0.5 rounded border ${
+              leak.impactDeltas.risco_mp < 0
+                ? "bg-emerald-950/80 border-emerald-500/30 text-emerald-400"
+                : "bg-red-950/80 border-red-500/40 text-red-400"
+            }`}
+          >
+            Risco MP: {leak.impactDeltas.risco_mp > 0 ? `+${leak.impactDeltas.risco_mp}` : leak.impactDeltas.risco_mp}%
           </span>
         )}
       </div>
