@@ -121,9 +121,16 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
 6. Retorne APENAS um parágrafo corrido de texto puro, sem tópicos ou markdown.`;
 
         const cleanApiKey = apiKey.trim();
-        const geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(cleanApiKey)}`,
-          {
+        const candidateEndpoints = [
+          `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`,
+        ];
+
+        for (const endpoint of candidateEndpoints) {
+          const urlWithKey = `${endpoint}?key=${encodeURIComponent(cleanApiKey)}`;
+          const geminiRes = await fetch(urlWithKey, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -132,21 +139,21 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
             body: JSON.stringify({
               contents: [{ parts: [{ text: prompt }] }],
             }),
-          }
-        );
+          });
 
-        if (geminiRes.ok) {
-          const data = await geminiRes.json();
-          const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (generatedText) {
-            return NextResponse.json({ chronicle: generatedText.trim(), source: "gemini" });
+          if (geminiRes.ok) {
+            const data = await geminiRes.json();
+            const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (generatedText) {
+              return NextResponse.json({ chronicle: generatedText.trim(), source: "gemini" });
+            } else {
+              debugReason = "gemini_empty_response";
+            }
           } else {
-            debugReason = "gemini_empty_response";
+            const errText = await geminiRes.text();
+            console.warn(`Gemini HTTP Error on ${endpoint}:`, geminiRes.status, errText);
+            debugReason = `gemini_http_${geminiRes.status} on ${endpoint}: ${errText.slice(0, 150)}`;
           }
-        } else {
-          const errText = await geminiRes.text();
-          console.warn("Gemini HTTP Error:", geminiRes.status, errText);
-          debugReason = `gemini_http_${geminiRes.status}: ${errText.slice(0, 150)}`;
         }
       } catch (geminiErr: any) {
         console.warn("Gemini API fallback to procedural engine:", geminiErr);
