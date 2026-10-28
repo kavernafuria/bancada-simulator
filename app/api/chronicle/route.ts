@@ -115,7 +115,7 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
 6. Retorne APENAS um parágrafo corrido de texto puro, sem tópicos ou markdown.`;
 
         const geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
