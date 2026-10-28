@@ -114,11 +114,15 @@ REGRAS OBRIGATÓRIAS DE LINGUAGEM & GÍRIAS DE BANCADA:
 5. NUNCA coloque siglas genéricas entre parênteses como (TGF), (FJV), (TJS).
 6. Retorne APENAS um parágrafo corrido de texto puro, sem tópicos ou markdown.`;
 
+        const cleanApiKey = apiKey.trim();
         const geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(cleanApiKey)}`,
           {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              "x-goog-api-key": cleanApiKey,
+            },
             body: JSON.stringify({
               contents: [{ parts: [{ text: prompt }] }],
             }),
