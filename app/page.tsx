@@ -707,12 +707,12 @@ export default function App() {
     // Check Risco MP
     if (stateTrackers.risco_mp >= 60) {
       return {
-        tab: "varzea" as const,
+        tab: "clube" as const,
         badge: "ALERTA MP",
         badgeColor: "bg-rose-500/20 text-rose-400 border border-rose-500/30",
         title: "⚖️ Risco de Torcida Única / Proibição!",
-        message: `O Risco do MP está em ${stateTrackers.risco_mp}%. Visite a Aba Social para organizar Ações Sociais e reduzir a pressão judicial.`,
-        buttonText: "Ir para Social 🏘️",
+        message: `O Risco do MP está em ${stateTrackers.risco_mp}%. Visite a Aba Clube (Reunião de Conciliação) para reduzir a pressão judicial.`,
+        buttonText: "Ir para Clube 🏛️",
       };
     }
 
