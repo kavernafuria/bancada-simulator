@@ -6787,12 +6787,34 @@ export function generateEtapa10CaravanChoices(
   const allyCost = 2500;
   const sameKey = (a: any, b: any) => normalizeTorcidaKey(a) === normalizeTorcidaKey(b);
 
-  // Torcida "amiga" do jogador: co-irmã do mesmo clube, aliada declarada, mesmo eixo (exceto INDEPENDENTE) ou pacto selado.
-  // Amigas NUNCA podem ser sorteadas como adversárias hostis (só aparecem na Caravana da Irmandade).
+  // Helper: identifica se uma torcida candidata est� alinhada com os rivais do jogador
+  // (ex: torcida aliada ao rival direto do jogador, ou membro de um eixo que cont�m rival do jogador)
+  const isAlignedWithPlayerRivals = (t: any): boolean => {
+    if (!t) return false;
+    const playerRivals = [currentTorcida.rival_principal, currentTorcida.rival_secundario].filter(Boolean);
+    for (const pr of playerRivals) {
+      if (refersToTorcida(pr, t)) return true;
+      if (areTorcidasRivals(currentTorcida, t)) return true;
+      if (t.torcida_aliada && refersToTorcida(pr, findTorcidaByRef(t.torcida_aliada) || { torcida: t.torcida_aliada, clube: t.torcida_aliada })) return true;
+      if (t.eixo_alianca && t.eixo_alianca !== "INDEPENDENTE") {
+        const axisMembers: string[] = (alliancesData as any).eixos_nacionais?.[t.eixo_alianca]?.members || [];
+        for (const m of axisMembers) {
+          const memberTorcida = (teamsData as any[]).find((x: any) => x.torcida === m);
+          if (memberTorcida && (refersToTorcida(pr, memberTorcida) || areTorcidasRivals(currentTorcida, memberTorcida))) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  };
+
+  // Torcida "amiga" do jogador: co-irm� do mesmo clube, aliada declarada, mesmo eixo (exceto INDEPENDENTE) ou pacto selado.
+  // Amigas NUNCA podem ser sorteadas como advers�rias hostis (s� aparecem na Caravana da Irmandade).
   const isFriendlyTo = (t: any): boolean => {
     if (!t) return false;
     if (sameKey(t.torcida, currentTorcida.torcida) || sameKey(t.clube, currentTorcida.clube)) return true;
-    if (areTorcidasRivals(currentTorcida, t)) return false; // rival declarada nunca é amiga
+    if (areTorcidasRivals(currentTorcida, t)) return false; // rival declarada nunca � amiga
     if (currentTorcida.torcida_aliada && refersToTorcida(currentTorcida.torcida_aliada, t)) return true;
     if (t.torcida_aliada && refersToTorcida(t.torcida_aliada, currentTorcida)) return true;
     if (currentTorcida.eixo_alianca && currentTorcida.eixo_alianca !== "INDEPENDENTE" && t.eixo_alianca === currentTorcida.eixo_alianca) return true;
@@ -6800,19 +6822,28 @@ export function generateEtapa10CaravanChoices(
     return false;
   };
 
-  // Aliada que pode reforçar o comboio contra o adversário `t`: precisa ser do estado do mandante,
-  // não pode ser da torcida/clube adversário nem rival dele, e precisa ser amiga válida (sem pista hostil).
+  // Verifica se uma potencial aliada 'a' tem amizade/alian�a com o advers�rio 't'
+  const isAllyFriendOfRival = (a: any, t: any): boolean => {
+    if (sameKey(a.clube, t.clube)) return true;
+    if (a.torcida_aliada && refersToTorcida(a.torcida_aliada, t)) return true;
+    if (t.torcida_aliada && refersToTorcida(t.torcida_aliada, a)) return true;
+    if (a.eixo_alianca && a.eixo_alianca !== "INDEPENDENTE" && a.eixo_alianca === t.eixo_alianca) return true;
+    return false;
+  };
+
+  // Aliada que pode refor�ar o comboio contra o advers�rio `t`:
+  // Precisa ser do estado do mandante (`t.estado`), N�O pode ser do clube advers�rio (`!sameKey(a.clube, t.clube)`),
+  // N�O pode ser aliada/amiga do advers�rio (`!isAllyFriendOfRival(a, t)`), e precisa ser amiga v�lida (sem pista hostil).
   const getAllyFor = (t: any): any | null => {
     if (!t) return null;
-    // Contra o MAIOR RIVAL a aliada só entra após 2 derrotas CONSECUTIVAS de pista para ele
+    // Contra o MAIOR RIVAL a aliada s� entra ap�s 2 derrotas CONSECUTIVAS de pista para ele
     if (refersToTorcida(currentTorcida.rival_principal, t) && (lossStreaks[t.torcida] || 0) < 2) return null;
     const okAlly = (a: any) =>
       !!a &&
       a.estado === t.estado &&
       !sameKey(a.clube, t.clube) &&
       !sameKey(a.torcida, t.torcida) &&
-      !refersToTorcida(a.rival_principal, t) &&
-      !refersToTorcida(a.rival_secundario, t) &&
+      !isAllyFriendOfRival(a, t) &&
       isValidFriendFor(currentTorcida, a, hostileTorcidas);
     const candidates: any[] = [];
     if (allyObj) candidates.push(allyObj);
@@ -6831,12 +6862,12 @@ export function generateEtapa10CaravanChoices(
   };
   const allyAppliesTo = (t: any): boolean => !!getAllyFor(t);
 
-  // Poder médio de uma torcida (mesma régua para jogador e adversários)
+  // Poder m�dio de uma torcida (mesma r�gua para jogador e advers�rios)
   const powerOf = (t: any): number =>
     ((t.contingente || 0) + (t.poder_pista || 0) + (t.caravana || 0) + (t.pressao_bancada || 0)) / 4;
   const playerPower = powerOf(currentTorcida);
 
-  // Sorteia entre os adversários mais próximos do poder-alvo (janela de ±8; amplia se houver poucos)
+  // Sorteia entre os advers�rios mais pr�ximos do poder-alvo (janela de �8; amplia se houver poucos)
   const pickBalanced = (pool: any[], targetPower: number): any | null => {
     if (pool.length === 0) return null;
     const sorted = [...pool].sort((a, b) => Math.abs(powerOf(a) - targetPower) - Math.abs(powerOf(b) - targetPower));
@@ -6850,14 +6881,13 @@ export function generateEtapa10CaravanChoices(
     return near[Math.floor(Math.random() * near.length)];
   };
 
-  // Filter out faced torcidas and current torcida itself
+  // Filter out current torcida itself and faced torcidas
   const availableTeams = (teamsData as any[]).filter(
     (t) => t.torcida !== currentTorcida.torcida && !facedOpponents.includes(t.torcida)
   );
 
   // Helper to pick best matching torcida for a given club based on player rank/tier
   const getBestTorcidaForClub = (clubName: string): any => {
-    // Aceita "Clube" ou "Clube (Torcida)"; se a torcida citada estiver disponível, ela é a escolhida
     const exactRef = findTorcidaByRef(clubName, availableTeams);
     if (exactRef && parseTorcidaRef(clubName).torcida !== parseTorcidaRef(clubName).club && normalizeTorcidaKey(exactRef.torcida) === parseTorcidaRef(clubName).torcida) return exactRef;
     const refClub = parseTorcidaRef(clubName).club;
@@ -6873,8 +6903,10 @@ export function generateEtapa10CaravanChoices(
 
   const selectedChoices: Etapa10CaravanChoice[] = [];
   const selectedTorcidaNames = new Set<string>();
+  const selectedClubNames = new Set<string>();
+  selectedClubNames.add(normalizeTorcidaKey(currentTorcida.clube)); // Bloqueia o pr�prio clube em qualquer op��o
 
-  // 1. DÉRBI DE ALTA TENSÃO (Rival Principal/Secundário ou Maior Rival do Estado)
+  // 1. D�RBI DE ALTA TENS�O (Rival Principal/Secund�rio ou Maior Rival do Estado)
   let derbyTeam: any = null;
   if (currentTorcida.rival_principal) {
     derbyTeam = getBestTorcidaForClub(currentTorcida.rival_principal);
@@ -6884,33 +6916,39 @@ export function generateEtapa10CaravanChoices(
   }
   if (!derbyTeam) {
     const playerTier = (currentTorcida.tier || "B").toUpperCase();
-    const hostileLocal = availableTeams.filter((t) => t.estado === currentTorcida.estado && !isFriendlyTo(t));
+    const hostileLocal = availableTeams.filter(
+      (t) => t.estado === currentTorcida.estado && !isFriendlyTo(t) && !selectedClubNames.has(normalizeTorcidaKey(t.clube))
+    );
     derbyTeam =
       hostileLocal.find((t) => (t.tier || "B").toUpperCase() === playerTier) ||
       pickBalanced(hostileLocal, playerPower);
   }
   if (!derbyTeam) {
-    derbyTeam = pickBalanced(availableTeams.filter((t) => !isFriendlyTo(t)), playerPower);
+    derbyTeam = pickBalanced(
+      availableTeams.filter((t) => !isFriendlyTo(t) && !selectedClubNames.has(normalizeTorcidaKey(t.clube))),
+      playerPower
+    );
   }
 
   if (derbyTeam) {
     selectedTorcidaNames.add(derbyTeam.torcida);
+    selectedClubNames.add(normalizeTorcidaKey(derbyTeam.clube));
     const derbyAlly = getAllyFor(derbyTeam);
     const derbySup = derbyAlly ? calculateAllySupportNumbers(derbyAlly) : null;
     const impacts = [
-      { label: "Moral da Torcida", value: "+++ Moral Máxima", isPositive: true },
+      { label: "Moral da Torcida", value: "+++ Moral M�xima", isPositive: true },
       { label: "Respeito Nacional", value: "+15 Respeito", isPositive: true },
-      { label: "Risco Policial", value: "⚠️ Risco Elevado", isPositive: false },
-      { label: "Custo Rodoviário", value: "R$ 4.500", isPositive: false },
+      { label: "Risco Policial", value: "?? Risco Elevado", isPositive: false },
+      { label: "Custo Rodovi�rio", value: "R$ 4.500", isPositive: false },
     ];
     if (derbyAlly && derbySup) {
       impacts.push({
-        label: "🤝 Reforço Aliado",
+        label: "?? Refor�o Aliado",
         value: `+${derbySup.extraMembers} membros (${derbyAlly.torcida})`,
         isPositive: true,
       });
       impacts.push({
-        label: "💰 Gastos Apoio Aliado",
+        label: "?? Gastos Apoio Aliado",
         value: `-R$ ${allyCost.toLocaleString("pt-BR")}`,
         isPositive: false,
       });
@@ -6919,108 +6957,148 @@ export function generateEtapa10CaravanChoices(
     selectedChoices.push({
       id: "DERBY_TENSAO",
       category: "DERBY",
-      badgeTitle: "🔥 DÉRBI DE ALTA TENSÃO",
+      badgeTitle: "?? D�RBI DE ALTA TENS�O",
       badgeColor: "red",
-      title: `Invasão ao Estádio do ${derbyTeam.clube}`,
+      title: `Invas�o ao Est�dio do ${derbyTeam.clube}`,
       clube: derbyTeam.clube,
       rivalTorcida: derbyTeam.torcida,
       estado: derbyTeam.estado,
-      stadium: derbyTeam.stadium || `Estádio do ${derbyTeam.clube}`,
+      stadium: derbyTeam.stadium || `Est�dio do ${derbyTeam.clube}`,
       cityState: `${derbyTeam.clube} - ${derbyTeam.estado}`,
-      description: `Confronto de altíssima rivalidade contra a ${derbyTeam.torcida}. Exige esquema de segurança máximo e transporte blindado.`,
+      description: `Confronto de alt�ssima rivalidade contra a ${derbyTeam.torcida}. Exige esquema de seguran�a m�ximo e transporte blindado.`,
       impacts,
       teamData: derbyTeam,
-      allyTorcidaName: allyAppliesTo(derbyTeam) ? derbyAlly?.torcida : undefined,
-      allyClub: allyAppliesTo(derbyTeam) ? derbyAlly?.clube : undefined,
-      allyCost: allyAppliesTo(derbyTeam) ? allyCost : undefined,
-      allyExtraMembers: allyAppliesTo(derbyTeam) ? derbySup?.extraMembers : undefined,
-      allyPistaBonus: allyAppliesTo(derbyTeam) ? derbySup?.pistaBonus : undefined,
+      allyTorcidaName: derbyAlly?.torcida,
+      allyClub: derbyAlly?.clube,
+      allyCost: derbyAlly ? allyCost : undefined,
+      allyExtraMembers: derbySup?.extraMembers,
+      allyPistaBonus: derbySup?.pistaBonus,
     });
   }
 
-  // 2. CARAVANA DA IRMANDADE (Aliada / Eixo ou Amiga Interestadual)
-  // Irmandade NUNCA pode ser rival declarada, do mesmo clube ou torcida com pista hostil
-  const friendOk = (t: any) => !selectedTorcidaNames.has(t.torcida) && isValidFriendFor(currentTorcida, t, hostileTorcidas);
+  // 2. CARAVANA DA IRMANDADE (Aliada / Eixo ou Amizade de Cortesia Segura)
+  // Irmandade NUNCA pode ser rival declarada, do mesmo clube, de clube j� selecionado, ou alinhada com rivais
+  const friendOk = (t: any) =>
+    !selectedTorcidaNames.has(t.torcida) &&
+    !selectedClubNames.has(normalizeTorcidaKey(t.clube)) &&
+    isValidFriendFor(currentTorcida, t, hostileTorcidas) &&
+    !isAlignedWithPlayerRivals(t);
+
   let allyTeam: any = null;
-  if (allyObj && availableTeams.includes(allyObj) && friendOk(allyObj)) {
+  // 2.1 Aliada direta declarada
+  if (allyObj && friendOk(allyObj)) {
     allyTeam = allyObj;
   }
+  // 2.2 Mesmo eixo de alian�a
   if (!allyTeam && currentTorcida.eixo_alianca && currentTorcida.eixo_alianca !== "INDEPENDENTE") {
     allyTeam = availableTeams.find((t) => friendOk(t) && t.eixo_alianca === currentTorcida.eixo_alianca);
   }
+  // 2.3 Pacto diplom�tico selado
+  if (!allyTeam && pactTorcidas.length > 0) {
+    allyTeam = availableTeams.find((t) => friendOk(t) && pactTorcidas.some((p) => sameKey(p, t.torcida)));
+  }
+  // 2.4 Torcida neutra de outro estado (visita de cortesia), totalmente sem rivalidade ou alinhamento com rivais
   if (!allyTeam) {
-    // Torcida neutra de outro estado (visita de cortesia), sem nenhuma rivalidade
-    allyTeam = availableTeams.find((t) => friendOk(t) && t.estado !== currentTorcida.estado);
+    const neutralsOtherState = availableTeams.filter((t) => friendOk(t) && t.estado !== currentTorcida.estado);
+    allyTeam = pickBalanced(neutralsOtherState, playerPower) || neutralsOtherState[0];
   }
   if (!allyTeam) {
-    allyTeam = availableTeams.find((t) => friendOk(t)) || null;
+    const neutralsAny = availableTeams.filter((t) => friendOk(t));
+    allyTeam = pickBalanced(neutralsAny, playerPower) || neutralsAny[0] || null;
   }
 
   if (allyTeam) {
     selectedTorcidaNames.add(allyTeam.torcida);
+    selectedClubNames.add(normalizeTorcidaKey(allyTeam.clube));
     selectedChoices.push({
       id: "CARAVANA_IRMANDADE",
       category: "IRMANDADE",
-      badgeTitle: "🟢 CARAVANA DA IRMANDADE",
+      badgeTitle: "?? CARAVANA DA IRMANDADE",
       badgeColor: "emerald",
-      title: `Festa da União com a ${allyTeam.torcida}`,
+      title: `Festa da Uni�o com a ${allyTeam.torcida}`,
       clube: allyTeam.clube,
       rivalTorcida: allyTeam.torcida,
       estado: allyTeam.estado,
-      stadium: allyTeam.stadium || `Estádio do ${allyTeam.clube}`,
+      stadium: allyTeam.stadium || `Est�dio do ${allyTeam.clube}`,
       cityState: `${allyTeam.clube} - ${allyTeam.estado}`,
-      description: `Viagem festiva e recepção unificada em clima de amizade de eixo. Churrasco no entorno e zero confronto de pista.`,
+      description: `Viagem festiva e recep��o unificada em clima de amizade de eixo. Churrasco no entorno e zero confronto de pista.`,
       impacts: [
         { label: "Venda de Materiais", value: "+R$ 3.500 Caixa", isPositive: true },
         { label: "Novos Integrantes", value: "+10 Massa", isPositive: true },
-        { label: "Risco Policial", value: "🛡️ Zero Risco", isPositive: true },
-        { label: "Custo Logístico", value: "R$ 1.200", isPositive: true },
+        { label: "Risco Policial", value: "??? Zero Risco", isPositive: true },
+        { label: "Custo Log�stico", value: "R$ 1.200", isPositive: true },
       ],
       teamData: allyTeam,
     });
   }
 
-  // 3. PISTA QUENTE DO INTERIOR / ALÇAPÃO
-  // Adversário hostil de poder equivalente ao do jogador (nunca amiga/aliada/co-irmã)
-  const interiorTeam: any = pickBalanced(
-    availableTeams.filter((t) => !selectedTorcidaNames.has(t.torcida) && !isFriendlyTo(t)),
-    playerPower
+  // 3. PISTA QUENTE DO INTERIOR / AL�AP�O REGIONAL
+  // Advers�rio regional/interior hostil de poder equivalente ao do jogador (nunca amiga/aliada/co-irm� nem clube repetido)
+  const bigClubs = new Set([
+    "corinthians", "palmeiras", "sao paulo", "s�o paulo", "santos",
+    "flamengo", "vasco da gama", "fluminense", "botafogo",
+    "cruzeiro", "atletico mg", "atl�tico mg", "gremio", "gr�mio", "internacional"
+  ]);
+  const isRegionalOrInterior = (t: any): boolean => {
+    if (!t) return false;
+    if (isInteriorSP(t)) return true;
+    if (!bigClubs.has(normalizeTorcidaKey(t.clube))) return true;
+    return false;
+  };
+
+  let interiorPool = availableTeams.filter(
+    (t) =>
+      !selectedTorcidaNames.has(t.torcida) &&
+      !selectedClubNames.has(normalizeTorcidaKey(t.clube)) &&
+      !isFriendlyTo(t) &&
+      isRegionalOrInterior(t)
   );
+  if (interiorPool.length === 0) {
+    interiorPool = availableTeams.filter(
+      (t) =>
+        !selectedTorcidaNames.has(t.torcida) &&
+        !selectedClubNames.has(normalizeTorcidaKey(t.clube)) &&
+        !isFriendlyTo(t)
+    );
+  }
+  const interiorTeam: any = pickBalanced(interiorPool, playerPower);
 
   if (interiorTeam) {
     selectedTorcidaNames.add(interiorTeam.torcida);
+    selectedClubNames.add(normalizeTorcidaKey(interiorTeam.clube));
     const interiorAlly = getAllyFor(interiorTeam);
     const interiorSup = interiorAlly ? calculateAllySupportNumbers(interiorAlly) : null;
     const interiorImpacts = [
       { label: "Poder de Pista", value: "+8 Poder Pista", isPositive: true },
-      { label: "Presença Rodoviária", value: "+5 Caravana", isPositive: true },
-      { label: "Risco Policial", value: "⚡ Risco Moderado", isPositive: false },
-      { label: "Custo Rodoviário", value: "R$ 2.200", isPositive: false },
+      { label: "Presen�a Rodovi�ria", value: "+5 Caravana", isPositive: true },
+      { label: "Risco Policial", value: "? Risco Moderado", isPositive: false },
+      { label: "Custo Rodovi�rio", value: "R$ 2.200", isPositive: false },
     ];
     if (interiorAlly && interiorSup) {
       interiorImpacts.push({
-        label: "🤝 Reforço Aliado",
+        label: "?? Refor�o Aliado",
         value: `+${interiorSup.extraMembers} membros (${interiorAlly.torcida})`,
         isPositive: true,
       });
       interiorImpacts.push({
-        label: "💰 Gastos Apoio Aliado",
+        label: "?? Gastos Apoio Aliado",
         value: `-R$ ${allyCost.toLocaleString("pt-BR")}`,
         isPositive: false,
       });
     }
+
     selectedChoices.push({
       id: "PISTA_INTERIOR",
       category: "INTERIOR",
-      badgeTitle: "🟡 ALÇAPÃO REGIONAL",
+      badgeTitle: "?? AL�AP�O REGIONAL",
       badgeColor: "amber",
-      title: `Comboio para o Alçapão do ${interiorTeam.clube}`,
+      title: `Comboio para o Al�ap�o do ${interiorTeam.clube}`,
       clube: interiorTeam.clube,
       rivalTorcida: interiorTeam.torcida,
       estado: interiorTeam.estado,
-      stadium: interiorTeam.stadium || `Estádio Municipal do ${interiorTeam.clube}`,
+      stadium: interiorTeam.stadium || `Est�dio Municipal do ${interiorTeam.clube}`,
       cityState: `${interiorTeam.clube} - ${interiorTeam.estado}`,
-      description: `Invasão rodoviária em estádio de interior. Torcida mandante de pista forte em terreno acoplado.`,
+      description: `Invas�o rodovi�ria em est�dio de interior. Torcida mandante de pista forte em terreno acoplado.`,
       impacts: interiorImpacts,
       teamData: interiorTeam,
       allyTorcidaName: interiorAlly?.torcida,
@@ -7031,34 +7109,44 @@ export function generateEtapa10CaravanChoices(
     });
   }
 
-  // 4. GRANDE EXCURSÃO DE CAPITAL DISTANTE
-  // Desafio proporcional: outro estado, hostil, ligeiramente acima do poder do jogador (nunca amiga/aliada)
+  // 4. GRANDE EXCURS�O DE CAPITAL DISTANTE
+  // Desafio interestadual proporcional (outro estado, hostil, sem clube repetido)
   let capitalPool = availableTeams.filter(
-    (t) => !selectedTorcidaNames.has(t.torcida) && !isFriendlyTo(t) && t.estado !== currentTorcida.estado
+    (t) =>
+      !selectedTorcidaNames.has(t.torcida) &&
+      !selectedClubNames.has(normalizeTorcidaKey(t.clube)) &&
+      !isFriendlyTo(t) &&
+      t.estado !== currentTorcida.estado
   );
   if (capitalPool.length === 0) {
-    capitalPool = availableTeams.filter((t) => !selectedTorcidaNames.has(t.torcida) && !isFriendlyTo(t));
+    capitalPool = availableTeams.filter(
+      (t) =>
+        !selectedTorcidaNames.has(t.torcida) &&
+        !selectedClubNames.has(normalizeTorcidaKey(t.clube)) &&
+        !isFriendlyTo(t)
+    );
   }
   const capitalTeam: any = pickBalanced(capitalPool, playerPower + 6);
 
   if (capitalTeam) {
     selectedTorcidaNames.add(capitalTeam.torcida);
+    selectedClubNames.add(normalizeTorcidaKey(capitalTeam.clube));
     const capitalAlly = getAllyFor(capitalTeam);
     const capitalSup = capitalAlly ? calculateAllySupportNumbers(capitalAlly) : null;
     const impacts = [
       { label: "Engajamento Social", value: "+12 Contingente", isPositive: true },
-      { label: "Projeção na Mídia", value: "+10 Respeito", isPositive: true },
-      { label: "Logística Completa", value: "R$ 5.000", isPositive: false },
+      { label: "Proje��o na M�dia", value: "+10 Respeito", isPositive: true },
+      { label: "Log�stica Completa", value: "R$ 5.000", isPositive: false },
       { label: "Desgaste da Tropa", value: "Viagem Longa", isPositive: false },
     ];
     if (capitalAlly && capitalSup) {
       impacts.push({
-        label: "🤝 Reforço Aliado",
+        label: "?? Refor�o Aliado",
         value: `+${capitalSup.extraMembers} membros (${capitalAlly.torcida})`,
         isPositive: true,
       });
       impacts.push({
-        label: "💰 Gastos Apoio Aliado",
+        label: "?? Gastos Apoio Aliado",
         value: `-R$ ${allyCost.toLocaleString("pt-BR")}`,
         isPositive: false,
       });
@@ -7067,30 +7155,27 @@ export function generateEtapa10CaravanChoices(
     selectedChoices.push({
       id: "CAPITAL_DISTANTE",
       category: "CAPITAL",
-      badgeTitle: "🟣 GRANDE INVASÃO DE CAPITAL",
+      badgeTitle: "?? GRANDE INVAS�O DE CAPITAL",
       badgeColor: "purple",
-      title: `Viagem Monumental ao Estádio do ${capitalTeam.clube}`,
+      title: `Viagem Monumental ao Est�dio do ${capitalTeam.clube}`,
       clube: capitalTeam.clube,
       rivalTorcida: capitalTeam.torcida,
       estado: capitalTeam.estado,
-      stadium: capitalTeam.stadium || `Estádio do ${capitalTeam.clube}`,
+      stadium: capitalTeam.stadium || `Est�dio do ${capitalTeam.clube}`,
       cityState: `${capitalTeam.clube} - ${capitalTeam.estado}`,
-      description: `Excursão interestadual de longa distância para uma grande capital. Mídia nacional e grande contingente nas ruas.`,
+      description: `Excurs�o interestadual de longa dist�ncia para uma grande capital. M�dia nacional e grande contingente nas ruas.`,
       impacts,
       teamData: capitalTeam,
-      allyTorcidaName: allyAppliesTo(capitalTeam) ? capitalAlly?.torcida : undefined,
-      allyClub: allyAppliesTo(capitalTeam) ? capitalAlly?.clube : undefined,
-      allyCost: allyAppliesTo(capitalTeam) ? allyCost : undefined,
-      allyExtraMembers: allyAppliesTo(capitalTeam) ? capitalSup?.extraMembers : undefined,
-      allyPistaBonus: allyAppliesTo(capitalTeam) ? capitalSup?.pistaBonus : undefined,
+      allyTorcidaName: capitalAlly?.torcida,
+      allyClub: capitalAlly?.clube,
+      allyCost: capitalAlly ? allyCost : undefined,
+      allyExtraMembers: capitalSup?.extraMembers,
+      allyPistaBonus: capitalSup?.pistaBonus,
     });
   }
 
   return selectedChoices;
 }
-
-
-
 
 export interface SeasonVerdictSnapshot {
   contingente: number;
