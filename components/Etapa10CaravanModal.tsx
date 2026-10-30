@@ -84,7 +84,8 @@ export function Etapa10CaravanModal({
                     {choice.title}
                   </h3>
                   <div className="text-xs font-bold text-amber-400/90 mt-0.5 mb-2">
-                    Adversário: <span className="text-zinc-200">{choice.rivalTorcida}</span> ({choice.clube})
+                    {isEmerald ? "Torcida Aliada:" : "Adversário:"}{" "}
+                    <span className="text-zinc-200">{choice.rivalTorcida}</span> ({choice.clube})
                   </div>
 
                   <p className="text-xs text-zinc-400 leading-relaxed mb-3">

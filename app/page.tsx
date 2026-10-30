@@ -966,6 +966,22 @@ export default function App() {
           if (parsed.season >= 15 && parsed.pipelineIndex >= 10) {
             setIsGameOver(true);
           }
+          if (parsed.pipelineIndex === 9 && parsed.currentTorcida) {
+            const loadedStats = parsed.stats || { contingente: 70, pressao_bancada: 70, poder_pista: 70, caravana: 70, autonomia_financeira: 70 };
+            const loadedTrackers = parsed.stateTrackers || { moral: 70, risco_mp: 10, relacao_clube: 50, respeito_nacional: 50 };
+            const loadedRivalry = parsed.rivalryRecords || {};
+            const hostileSaved = Object.entries(loadedRivalry)
+              .filter(([, r]: [string, any]) => !r?.pactoPaz && ((r?.totalConfrontos || 0) > 0 || (r?.faixasTomadas || 0) > 0 || (r?.faixasPerdidas || 0) > 0 || r?.tretaAtiva))
+              .map(([name]) => name);
+            const pactSaved = Object.entries(loadedRivalry)
+              .filter(([, r]: [string, any]) => Boolean(r?.pactoPaz))
+              .map(([name]) => name);
+            const ranking = simulateNationalRanking(parsed.currentTorcida, loadedStats, loadedTrackers, parsed.season || 1);
+            const pRank = ranking.find((r) => r.isPlayer)?.rank || 1;
+            const choices = generateEtapa10CaravanChoices(parsed.currentTorcida, [], pRank, {}, hostileSaved, pactSaved);
+            setEtapa10Choices(choices);
+            setShowEtapa10Modal(true);
+          }
         }
       } catch (e) {
         console.error("Erro ao carregar save:", e);
@@ -2023,7 +2039,7 @@ export default function App() {
         }
       }
 
-      if (activeMatchDerby?.rivalTorcida) {
+      if (activeMatchDerby?.rivalTorcida && !activeMatchDerby.isAllyGame) {
         const rName = activeMatchDerby.rivalTorcida;
         setFacedOpponentsHistory((prev) => [...prev, rName]);
         setPistaHistoryRecord((prev) => {
