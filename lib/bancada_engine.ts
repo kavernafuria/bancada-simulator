@@ -6784,16 +6784,70 @@ export function generateEtapa10CaravanChoices(
   if (!currentTorcida) return [];
 
   const allyObj = findAllyForTorcida(currentTorcida, hostileTorcidas, pactTorcidas);
-  const allySupport = allyObj ? calculateAllySupportNumbers(allyObj) : null;
   const allyCost = 2500;
-  // Aliada só reforça o comboio se o jogo for na região dela (mesmo estado) e ela não for da torcida/clube adversário
-  const allyAppliesTo = (t: any): boolean => {
-    if (!allyObj || !t) return false;
-    if (allyObj.estado !== t.estado || allyObj.clube === t.clube || allyObj.torcida === t.torcida) return false;
+  const sameKey = (a: any, b: any) => normalizeTorcidaKey(a) === normalizeTorcidaKey(b);
+
+  // Torcida "amiga" do jogador: co-irmã do mesmo clube, aliada declarada, mesmo eixo (exceto INDEPENDENTE) ou pacto selado.
+  // Amigas NUNCA podem ser sorteadas como adversárias hostis (só aparecem na Caravana da Irmandade).
+  const isFriendlyTo = (t: any): boolean => {
+    if (!t) return false;
+    if (sameKey(t.torcida, currentTorcida.torcida) || sameKey(t.clube, currentTorcida.clube)) return true;
+    if (areTorcidasRivals(currentTorcida, t)) return false; // rival declarada nunca é amiga
+    if (currentTorcida.torcida_aliada && refersToTorcida(currentTorcida.torcida_aliada, t)) return true;
+    if (t.torcida_aliada && refersToTorcida(t.torcida_aliada, currentTorcida)) return true;
+    if (currentTorcida.eixo_alianca && currentTorcida.eixo_alianca !== "INDEPENDENTE" && t.eixo_alianca === currentTorcida.eixo_alianca) return true;
+    if (pactTorcidas.some((p) => sameKey(p, t.torcida))) return true;
+    return false;
+  };
+
+  // Aliada que pode reforçar o comboio contra o adversário `t`: precisa ser do estado do mandante,
+  // não pode ser da torcida/clube adversário nem rival dele, e precisa ser amiga válida (sem pista hostil).
+  const getAllyFor = (t: any): any | null => {
+    if (!t) return null;
     // Contra o MAIOR RIVAL a aliada só entra após 2 derrotas CONSECUTIVAS de pista para ele
-    const isMainRival = refersToTorcida(currentTorcida.rival_principal, t);
-    if (isMainRival) return (lossStreaks[t.torcida] || 0) >= 2;
-    return true;
+    if (refersToTorcida(currentTorcida.rival_principal, t) && (lossStreaks[t.torcida] || 0) < 2) return null;
+    const okAlly = (a: any) =>
+      !!a &&
+      a.estado === t.estado &&
+      !sameKey(a.clube, t.clube) &&
+      !sameKey(a.torcida, t.torcida) &&
+      !refersToTorcida(a.rival_principal, t) &&
+      !refersToTorcida(a.rival_secundario, t) &&
+      isValidFriendFor(currentTorcida, a, hostileTorcidas);
+    const candidates: any[] = [];
+    if (allyObj) candidates.push(allyObj);
+    if (currentTorcida.torcida_aliada) {
+      const declared = findTorcidaByRef(currentTorcida.torcida_aliada);
+      if (declared) candidates.push(declared);
+    }
+    candidates.push(
+      ...(teamsData as any[]).filter(
+        (a) =>
+          (currentTorcida.eixo_alianca && currentTorcida.eixo_alianca !== "INDEPENDENTE" && a.eixo_alianca === currentTorcida.eixo_alianca) ||
+          pactTorcidas.some((p) => sameKey(p, a.torcida))
+      )
+    );
+    return candidates.find(okAlly) || null;
+  };
+  const allyAppliesTo = (t: any): boolean => !!getAllyFor(t);
+
+  // Poder médio de uma torcida (mesma régua para jogador e adversários)
+  const powerOf = (t: any): number =>
+    ((t.contingente || 0) + (t.poder_pista || 0) + (t.caravana || 0) + (t.pressao_bancada || 0)) / 4;
+  const playerPower = powerOf(currentTorcida);
+
+  // Sorteia entre os adversários mais próximos do poder-alvo (janela de ±8; amplia se houver poucos)
+  const pickBalanced = (pool: any[], targetPower: number): any | null => {
+    if (pool.length === 0) return null;
+    const sorted = [...pool].sort((a, b) => Math.abs(powerOf(a) - targetPower) - Math.abs(powerOf(b) - targetPower));
+    let window = 8;
+    let near = sorted.filter((t) => Math.abs(powerOf(t) - targetPower) <= window);
+    while (near.length < 3 && window < 40) {
+      window += 4;
+      near = sorted.filter((t) => Math.abs(powerOf(t) - targetPower) <= window);
+    }
+    if (near.length === 0) near = sorted.slice(0, 3);
+    return near[Math.floor(Math.random() * near.length)];
   };
 
   // Filter out faced torcidas and current torcida itself
@@ -6830,25 +6884,29 @@ export function generateEtapa10CaravanChoices(
   }
   if (!derbyTeam) {
     const playerTier = (currentTorcida.tier || "B").toUpperCase();
-    derbyTeam = availableTeams.find((t) => t.estado === currentTorcida.estado && (t.tier || "B").toUpperCase() === playerTier) ||
-      availableTeams.find((t) => t.estado === currentTorcida.estado);
+    const hostileLocal = availableTeams.filter((t) => t.estado === currentTorcida.estado && !isFriendlyTo(t));
+    derbyTeam =
+      hostileLocal.find((t) => (t.tier || "B").toUpperCase() === playerTier) ||
+      pickBalanced(hostileLocal, playerPower);
   }
-  if (!derbyTeam && availableTeams.length > 0) {
-    derbyTeam = availableTeams[0];
+  if (!derbyTeam) {
+    derbyTeam = pickBalanced(availableTeams.filter((t) => !isFriendlyTo(t)), playerPower);
   }
 
   if (derbyTeam) {
     selectedTorcidaNames.add(derbyTeam.torcida);
+    const derbyAlly = getAllyFor(derbyTeam);
+    const derbySup = derbyAlly ? calculateAllySupportNumbers(derbyAlly) : null;
     const impacts = [
       { label: "Moral da Torcida", value: "+++ Moral Máxima", isPositive: true },
       { label: "Respeito Nacional", value: "+15 Respeito", isPositive: true },
       { label: "Risco Policial", value: "⚠️ Risco Elevado", isPositive: false },
       { label: "Custo Rodoviário", value: "R$ 4.500", isPositive: false },
     ];
-    if (allyObj && allySupport && allyAppliesTo(derbyTeam)) {
+    if (derbyAlly && derbySup) {
       impacts.push({
         label: "🤝 Reforço Aliado",
-        value: `+${allySupport.extraMembers} membros (${allyObj.torcida})`,
+        value: `+${derbySup.extraMembers} membros (${derbyAlly.torcida})`,
         isPositive: true,
       });
       impacts.push({
@@ -6872,11 +6930,11 @@ export function generateEtapa10CaravanChoices(
       description: `Confronto de altíssima rivalidade contra a ${derbyTeam.torcida}. Exige esquema de segurança máximo e transporte blindado.`,
       impacts,
       teamData: derbyTeam,
-      allyTorcidaName: allyAppliesTo(derbyTeam) ? allyObj?.torcida : undefined,
-      allyClub: allyAppliesTo(derbyTeam) ? allyObj?.clube : undefined,
+      allyTorcidaName: allyAppliesTo(derbyTeam) ? derbyAlly?.torcida : undefined,
+      allyClub: allyAppliesTo(derbyTeam) ? derbyAlly?.clube : undefined,
       allyCost: allyAppliesTo(derbyTeam) ? allyCost : undefined,
-      allyExtraMembers: allyAppliesTo(derbyTeam) ? allySupport?.extraMembers : undefined,
-      allyPistaBonus: allyAppliesTo(derbyTeam) ? allySupport?.pistaBonus : undefined,
+      allyExtraMembers: allyAppliesTo(derbyTeam) ? derbySup?.extraMembers : undefined,
+      allyPistaBonus: allyAppliesTo(derbyTeam) ? derbySup?.pistaBonus : undefined,
     });
   }
 
@@ -6923,15 +6981,34 @@ export function generateEtapa10CaravanChoices(
   }
 
   // 3. PISTA QUENTE DO INTERIOR / ALÇAPÃO
-  let interiorTeam: any = availableTeams.find(
-    (t) => !selectedTorcidaNames.has(t.torcida) && (isInteriorSP(t) || t.tier === "B" || t.tier === "C")
+  // Adversário hostil de poder equivalente ao do jogador (nunca amiga/aliada/co-irmã)
+  const interiorTeam: any = pickBalanced(
+    availableTeams.filter((t) => !selectedTorcidaNames.has(t.torcida) && !isFriendlyTo(t)),
+    playerPower
   );
-  if (!interiorTeam && availableTeams.length > 0) {
-    interiorTeam = availableTeams.find((t) => !selectedTorcidaNames.has(t.torcida)) || availableTeams[0];
-  }
 
   if (interiorTeam) {
     selectedTorcidaNames.add(interiorTeam.torcida);
+    const interiorAlly = getAllyFor(interiorTeam);
+    const interiorSup = interiorAlly ? calculateAllySupportNumbers(interiorAlly) : null;
+    const interiorImpacts = [
+      { label: "Poder de Pista", value: "+8 Poder Pista", isPositive: true },
+      { label: "Presença Rodoviária", value: "+5 Caravana", isPositive: true },
+      { label: "Risco Policial", value: "⚡ Risco Moderado", isPositive: false },
+      { label: "Custo Rodoviário", value: "R$ 2.200", isPositive: false },
+    ];
+    if (interiorAlly && interiorSup) {
+      interiorImpacts.push({
+        label: "🤝 Reforço Aliado",
+        value: `+${interiorSup.extraMembers} membros (${interiorAlly.torcida})`,
+        isPositive: true,
+      });
+      interiorImpacts.push({
+        label: "💰 Gastos Apoio Aliado",
+        value: `-R$ ${allyCost.toLocaleString("pt-BR")}`,
+        isPositive: false,
+      });
+    }
     selectedChoices.push({
       id: "PISTA_INTERIOR",
       category: "INTERIOR",
@@ -6944,36 +7021,40 @@ export function generateEtapa10CaravanChoices(
       stadium: interiorTeam.stadium || `Estádio Municipal do ${interiorTeam.clube}`,
       cityState: `${interiorTeam.clube} - ${interiorTeam.estado}`,
       description: `Invasão rodoviária em estádio de interior. Torcida mandante de pista forte em terreno acoplado.`,
-      impacts: [
-        { label: "Poder de Pista", value: "+8 Poder Pista", isPositive: true },
-        { label: "Presença Rodoviária", value: "+5 Caravana", isPositive: true },
-        { label: "Risco Policial", value: "⚡ Risco Moderado", isPositive: false },
-        { label: "Custo Rodoviário", value: "R$ 2.200", isPositive: false },
-      ],
+      impacts: interiorImpacts,
       teamData: interiorTeam,
+      allyTorcidaName: interiorAlly?.torcida,
+      allyClub: interiorAlly?.clube,
+      allyCost: interiorAlly ? allyCost : undefined,
+      allyExtraMembers: interiorSup?.extraMembers,
+      allyPistaBonus: interiorSup?.pistaBonus,
     });
   }
 
   // 4. GRANDE EXCURSÃO DE CAPITAL DISTANTE
-  let capitalTeam: any = availableTeams.find(
-    (t) => !selectedTorcidaNames.has(t.torcida) && t.estado !== currentTorcida.estado && (t.tier === "S" || t.tier === "A")
+  // Desafio proporcional: outro estado, hostil, ligeiramente acima do poder do jogador (nunca amiga/aliada)
+  let capitalPool = availableTeams.filter(
+    (t) => !selectedTorcidaNames.has(t.torcida) && !isFriendlyTo(t) && t.estado !== currentTorcida.estado
   );
-  if (!capitalTeam && availableTeams.length > 0) {
-    capitalTeam = availableTeams.find((t) => !selectedTorcidaNames.has(t.torcida)) || availableTeams[0];
+  if (capitalPool.length === 0) {
+    capitalPool = availableTeams.filter((t) => !selectedTorcidaNames.has(t.torcida) && !isFriendlyTo(t));
   }
+  const capitalTeam: any = pickBalanced(capitalPool, playerPower + 6);
 
   if (capitalTeam) {
     selectedTorcidaNames.add(capitalTeam.torcida);
+    const capitalAlly = getAllyFor(capitalTeam);
+    const capitalSup = capitalAlly ? calculateAllySupportNumbers(capitalAlly) : null;
     const impacts = [
       { label: "Engajamento Social", value: "+12 Contingente", isPositive: true },
       { label: "Projeção na Mídia", value: "+10 Respeito", isPositive: true },
       { label: "Logística Completa", value: "R$ 5.000", isPositive: false },
       { label: "Desgaste da Tropa", value: "Viagem Longa", isPositive: false },
     ];
-    if (allyObj && allySupport && allyAppliesTo(capitalTeam)) {
+    if (capitalAlly && capitalSup) {
       impacts.push({
         label: "🤝 Reforço Aliado",
-        value: `+${allySupport.extraMembers} membros (${allyObj.torcida})`,
+        value: `+${capitalSup.extraMembers} membros (${capitalAlly.torcida})`,
         isPositive: true,
       });
       impacts.push({
@@ -6997,11 +7078,11 @@ export function generateEtapa10CaravanChoices(
       description: `Excursão interestadual de longa distância para uma grande capital. Mídia nacional e grande contingente nas ruas.`,
       impacts,
       teamData: capitalTeam,
-      allyTorcidaName: allyAppliesTo(capitalTeam) ? allyObj?.torcida : undefined,
-      allyClub: allyAppliesTo(capitalTeam) ? allyObj?.clube : undefined,
+      allyTorcidaName: allyAppliesTo(capitalTeam) ? capitalAlly?.torcida : undefined,
+      allyClub: allyAppliesTo(capitalTeam) ? capitalAlly?.clube : undefined,
       allyCost: allyAppliesTo(capitalTeam) ? allyCost : undefined,
-      allyExtraMembers: allyAppliesTo(capitalTeam) ? allySupport?.extraMembers : undefined,
-      allyPistaBonus: allyAppliesTo(capitalTeam) ? allySupport?.pistaBonus : undefined,
+      allyExtraMembers: allyAppliesTo(capitalTeam) ? capitalSup?.extraMembers : undefined,
+      allyPistaBonus: allyAppliesTo(capitalTeam) ? capitalSup?.pistaBonus : undefined,
     });
   }
 
