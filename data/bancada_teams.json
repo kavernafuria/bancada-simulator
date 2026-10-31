@@ -405,7 +405,7 @@
     "perfil_predominante": "Apoio em Jogos Fora",
     "eixo_alianca": "DPA",
     "rival_principal": "Corinthians (Coringão Chopp)",
-    "rival_secundario": "Palmeiras (Acadêmicos da Savoia)",
+    "rival_secundario": "São Paulo (Dragões da Real)",
     "torcida_aliada": "Vasco da Gama (Força Jovem do Vasco)",
     "primaryColor": "#15803d",
     "secondaryColor": "#f4f4f5"
@@ -727,7 +727,7 @@
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Ponte Preta (Serponte)",
     "rival_secundario": "Ponte Preta (Torcida Jovem Ponte)",
-    "torcida_aliada": "Guarani (Fúria Independente)",
+    "torcida_aliada": "",
     "primaryColor": "#15803d",
     "secondaryColor": "#ffffff"
   },
@@ -745,7 +745,7 @@
     "eixo_alianca": "IRMANDADE",
     "rival_principal": "Guarani (Guerreiros da Tribo)",
     "rival_secundario": "Guarani (Fúria Independente)",
-    "torcida_aliada": "Ponte Preta (Torcida Jovem Ponte)",
+    "torcida_aliada": "",
     "primaryColor": "#09090b",
     "secondaryColor": "#ffffff"
   },
@@ -761,7 +761,7 @@
     "autonomia_financeira": 40,
     "perfil_predominante": "Pressão Rubro-Verde no Benitão & Disposição Regional",
     "eixo_alianca": "INDEPENDENTE",
-    "rival_principal": "Rio Claro FC",
+    "rival_principal": "Inter de Limeira (Torcida Interror)",
     "rival_secundario": "Inter de Limeira (Torcida Interror)",
     "torcida_aliada": "",
     "primaryColor": "#dc2626",
@@ -780,7 +780,7 @@
     "perfil_predominante": "Bancada Raiz da Arena Capivari",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Primavera (Terror Fantasma)",
-    "rival_secundario": "XV de Piracicaba",
+    "rival_secundario": "União Barbarense (Sangue Barbarense)",
     "torcida_aliada": "",
     "primaryColor": "#2563eb",
     "secondaryColor": "#ffffff"
@@ -815,9 +815,9 @@
     "autonomia_financeira": 35,
     "perfil_predominante": "Resistência Alvirrubra no Alfredão",
     "eixo_alianca": "INDEPENDENTE",
-    "rival_principal": "Marília (MAC)",
-    "rival_secundario": "Noroeste (Sangue Rubro)",
-    "torcida_aliada": "XV de Piracicaba (Esquadrão XV)",
+    "rival_principal": "Linense (Camisa 12)",
+    "rival_secundario": "Penapolense (Jovem Penapolense)",
+    "torcida_aliada": "",
     "primaryColor": "#dc2626",
     "secondaryColor": "#ffffff"
   },
@@ -834,7 +834,7 @@
     "perfil_predominante": "Tradicionalismo Bairrista & Festa Romântica na Rua Javari",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Portuguesa (Leões da Fabulosa)",
-    "rival_secundario": "Nacional-SP",
+    "rival_secundario": "Flamengo de Guarulhos (Comando Rubro Negro)",
     "torcida_aliada": "",
     "primaryColor": "#881337",
     "secondaryColor": "#ffffff"
@@ -869,8 +869,8 @@
     "autonomia_financeira": 32,
     "perfil_predominante": "Torcida de Paz & Apoio Familiar no Interior",
     "eixo_alianca": "INDEPENDENTE",
-    "rival_principal": "Bebedouro",
-    "rival_secundario": "Barretos",
+    "rival_principal": "Sertãozinho (Raça Grená)",
+    "rival_secundario": "Novorizontino (Garra do Tigre)",
     "torcida_aliada": "",
     "primaryColor": "#2563eb",
     "secondaryColor": "#ffffff"
@@ -887,7 +887,7 @@
     "autonomia_financeira": 35,
     "perfil_predominante": "Torcida de Paz da Pantera Alvinegra",
     "eixo_alianca": "INDEPENDENTE",
-    "rival_principal": "Fernandópolis",
+    "rival_principal": "Mirassol (Fúria do Leão)",
     "rival_secundario": "Mirassol (Fúria do Leão)",
     "torcida_aliada": "",
     "primaryColor": "#09090b",
@@ -906,7 +906,7 @@
     "perfil_predominante": "Força Jovem da Noroeste Paulista no Tenentão",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Linense (Camisa 12)",
-    "rival_secundario": "Bandeirante de Birigui",
+    "rival_secundario": "Noroeste (Falange Vermelha)",
     "torcida_aliada": "",
     "primaryColor": "#dc2626",
     "secondaryColor": "#ffffff"
@@ -923,8 +923,8 @@
     "autonomia_financeira": 40,
     "perfil_predominante": "Disposição e Vibração Jovem na Região Central",
     "eixo_alianca": "FAMILIA_INTERIOR",
-    "rival_principal": "Ferroviária",
-    "rival_secundario": "Taquaritinga",
+    "rival_principal": "Velo Clube (Geral do Velo)",
+    "rival_secundario": "Botafogo-SP (Fiel Força Tricolor)",
     "torcida_aliada": "",
     "primaryColor": "#2563eb",
     "secondaryColor": "#ffffff"
@@ -1087,7 +1087,7 @@
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Flamengo (Torcida Urubuzada)",
     "rival_secundario": "Botafogo (Loucos pelo Botafogo)",
-    "torcida_aliada": "Paraná Clube (Fúria Independente Paraná)",
+    "torcida_aliada": "Paraná Clube (Fúria Independente PR)",
     "primaryColor": "#881337",
     "secondaryColor": "#15803d"
   },
@@ -1551,7 +1551,7 @@
   {
     "estado": "PR",
     "clube": "Paraná Clube",
-    "torcida": "Fúria Independente",
+    "torcida": "Fúria Independente PR",
     "tier": "B+",
     "contingente": 70,
     "pressao_bancada": 80,
@@ -1579,7 +1579,7 @@
     "perfil_predominante": "Força do Norte Paranaense",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Maringá FC (Força Maringaense)",
-    "rival_secundario": "Paraná Clube (Fúria Independente)",
+    "rival_secundario": "Paraná Clube (Fúria Independente PR)",
     "primaryColor": "#0284c7",
     "secondaryColor": "#f4f4f5"
   },
@@ -1596,7 +1596,7 @@
     "perfil_predominante": "Caldeirão de Ponta Grossa",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Londrina (Falange Azul)",
-    "rival_secundario": "Paraná Clube (Fúria Independente)",
+    "rival_secundario": "Paraná Clube (Fúria Independente PR)",
     "primaryColor": "#09090b",
     "secondaryColor": "#f4f4f5"
   },
@@ -1613,7 +1613,7 @@
     "perfil_predominante": "Força Regional em Ascensão",
     "eixo_alianca": "INDEPENDENTE",
     "rival_principal": "Londrina (Falange Azul)",
-    "rival_secundario": "Paraná Clube (Fúria Independente)",
+    "rival_secundario": "Paraná Clube (Fúria Independente PR)",
     "primaryColor": "#15803d",
     "secondaryColor": "#f4f4f5"
   },
@@ -2269,7 +2269,7 @@
   {
     "estado": "MS",
     "clube": "Comercial-MS",
-    "torcida": "Falange Vermelha",
+    "torcida": "Falange Vermelha MS",
     "tier": "C",
     "contingente": 30,
     "pressao_bancada": 45,
@@ -2415,8 +2415,8 @@
     "autonomia_financeira": 40,
     "perfil_predominante": "Vibração Tricolor Baiana & Eixo PC",
     "eixo_alianca": "PUNHO_COLADO",
-    "rival_principal": "Fluminense de Feira (Torcida Uniformizada)",
-    "rival_secundario": "Vitória (Os Imbatíveis)",
+    "rival_principal": "Vitória (Os Imbatíveis)",
+    "rival_secundario": "Bahia (Torcida Bamor)",
     "torcida_aliada": "Fluminense (Young Flu)",
     "primaryColor": "#dc2626",
     "secondaryColor": "#2563eb"
